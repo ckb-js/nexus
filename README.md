@@ -1,2 +1,3 @@
-# unnamed-wallet
-An UTxO friendly wallet for CKB
+# Nexus
+
+An UTxO friendly wallet extension for CKB
