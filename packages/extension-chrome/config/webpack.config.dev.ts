@@ -2,29 +2,34 @@ import { merge } from 'webpack-merge';
 import common from './webpack.config.common';
 import ReactRefreshPlugin from '@pmmmwh/react-refresh-webpack-plugin';
 import { WebpackConfiguration } from 'webpack-dev-server';
-import { env } from './env';
+import * as env from './env';
+import webpack from 'webpack';
+import { propStr } from './utils';
+
+const { PORT } = env.env;
 
 const config: WebpackConfiguration = merge(common, {
   mode: 'development',
+  entry: {
+    popup: buildHmrEntry(propStr(common.entry, 'popup')),
+  },
   output: {
     chunkFilename: 'static/js/[name].chunk.js',
   },
   devServer: {
-    port: env.PORT,
-    devMiddleware: {
-      writeToDisk: true,
-    },
-    client: {
-      webSocketURL: `ws://127.0.0.1:${env.PORT}/ws`,
-    },
-    webSocketServer: {},
+    port: PORT,
     allowedHosts: 'all',
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-    },
+    hot: false,
+    client: false,
+    devMiddleware: { writeToDisk: true },
+    headers: { 'Access-Control-Allow-Origin': '*' },
   },
   devtool: 'cheap-module-source-map',
-  plugins: [new ReactRefreshPlugin()],
+  plugins: [new webpack.HotModuleReplacementPlugin(), new ReactRefreshPlugin()],
 });
+
+export function buildHmrEntry(entry: string | string[]): string[] {
+  return ['webpack/hot/dev-server', `webpack-dev-server/client?hot=true&hostname=localhost&port=${PORT}`].concat(entry);
+}
 
 export default config;

@@ -5,7 +5,7 @@ import { paths } from './env';
 const config = merge(common, {
   mode: 'production',
   output: {
-    filename: 'js/[name].[contenthash:8].min.js',
+    filename: '[name].js',
     path: paths.resolve('/build'),
   },
   devtool: 'source-map',

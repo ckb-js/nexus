@@ -10,3 +10,5 @@ export const env = {
 export const paths = {
   resolve: (...paths: string[]): string => path.join(__dirname, '../', ...paths),
 };
+
+export const __DEV__ = process.env.NODE_ENV === 'development';

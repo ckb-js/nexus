@@ -17,7 +17,8 @@
     "url": "git+https://github.com/ckb-js/nexus.git"
   },
   "scripts": {
-    "start": "webpack serve --config=config/webpack.config.dev.ts",
+    "start": "cross-env NODE_ENV=development npm run start:webpack",
+    "start:webpack": "webpack serve --config=config/webpack.config.dev.ts",
     "build": "npm run clean && webpack --config=config/webpack.config.prod.ts",
     "clean": "rimraf build/*"
   },
