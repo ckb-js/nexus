@@ -18,7 +18,7 @@
   },
   "scripts": {
     "start": "cross-env NODE_ENV=development npm run start:webpack",
-    "start:webpack": "webpack serve --config=config/webpack.config.dev.ts",
+    "start:webpack": "ts-node ./scripts/start.ts",
     "build": "npm run clean && webpack --config=config/webpack.config.prod.ts",
     "clean": "rimraf build/*"
   },
@@ -35,6 +35,7 @@
   },
   "devDependencies": {
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.10",
+    "@types/rimraf": "^3.0.2",
     "babel-loader": "9.1.0",
     "clean-webpack-plugin": "4.0.0",
     "copy-webpack-plugin": "11.0.0",
@@ -43,13 +44,17 @@
     "fork-ts-checker-webpack-plugin": "7.2.13",
     "html-loader": "4.2.0",
     "html-webpack-plugin": "5.5.0",
+    "rimraf": "^3.0.2",
     "source-map-loader": "4.0.1",
     "style-loader": "3.3.1",
     "terser-webpack-plugin": "5.3.6",
     "ts-loader": "9.4.2",
+    "ts-node": "^10.9.1",
     "webpack": "5.75.0",
     "webpack-cli": "5.0.1",
     "webpack-dev-server": "4.11.1",
-    "webpack-merge": "5.8.0"
+    "webpack-inject-plugin": "^1.5.5",
+    "webpack-merge": "5.8.0",
+    "ws": "^8.11.0"
   }
 }

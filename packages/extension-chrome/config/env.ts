@@ -5,6 +5,7 @@ export const env = {
   NODE_ENV: (process.env.NODE_ENV || 'development') as Configuration['mode'],
   PORT: process.env.PORT || 3000,
   PUBLIC_URL: process.env.PUBLIC_URL || '/',
+  BACKGROUND_RELOAD_PORT: 23333,
 };
 
 export const paths = {
