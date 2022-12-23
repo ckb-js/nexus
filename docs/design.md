@@ -31,7 +31,9 @@ UTxO wallets in the CKB ecosystem already use [BIP-44](https://github.com/bitcoi
 m / 44' / 309' / 0' / 0' / change / index
 ```
 
-![](./design/p2pkh.png)
+<p align="center">
+  <img width="480" src="./design/p2pkh.png" />
+</p>
 
 The fully owned cell means that the unlock rule of a cell can only be done by signing with a private key, which typically means the cell owned by a single user, such as sUDT or NFT asset cell.
 
@@ -41,7 +43,9 @@ In some cases, there are additional rules for cell ownership, such as domain nam
 
 The P2SH transaction in CKB looks like this
 
-![](./design/p2sh.png)
+<p align="center">
+  <img width="480" src="./design/p2sh.png" />
+</p>
 
 To differentiate from the BIP-44 derivation rules, Nexus can use the (https://github.com/bitcoin/bips/blob/master/bip-0049.mediawiki) derivation rules to manage these keys for P2SH
 

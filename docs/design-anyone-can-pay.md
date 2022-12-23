@@ -5,5 +5,5 @@ Anyone-Can-Pay(also known as ACP) wast first proposed as a [lock](https://github
 Here we focus on Omnilock, unlike other locks, Omnilock providers ACP feature as a flag, which means that the user can choose whether or not to enable the ACP feature, and Omnilock's ownership is also optional, Omnilock provides the [P2SH](https://github.com/nervosnetwork/rfcs/blob/master/rfcs/0042-omnilock/0042-omnilock.md#authentication) authentication mode.
 
 <p align="center">
-  <img width="400" src="./design/omnilock-p2sh-acp.png" />
+  <img width="480" src="./design/omnilock-p2sh-acp.png" />
 </p>
