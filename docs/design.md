@@ -25,7 +25,7 @@ Since the key is the key, let's start with key management
 
 ### Full Ownership
 
-UTxO wallets in the CKB ecosystem already use [BIP-44](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki) as a derivation path, such as [Neuron](https://github.dev/nervosnetwork/neuron/blob/b0aa8bfb9c87c625c08609b85a1cf7629e7093ee/packages/neuron-wallet/src/models/keys/key.ts#L53), so Nexus can keep using this BIP-44 derivation rule and [secp256k1_blake160](https://github.com/nervosnetwork/ckb-system-scripts/blob/master/c/secp256k1_blake160_sighash_all.c) lock to manage the most common, fully owned cell.
+UTxO wallets in the CKB ecosystem already use [BIP-44](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki) as a derivation path, such as [Neuron](https://github.com/nervosnetwork/neuron/blob/b0aa8bfb9c87c625c08609b85a1cf7629e7093ee/packages/neuron-wallet/src/models/keys/key.ts#L53), so Nexus can keep using this BIP-44 derivation rule and [secp256k1_blake160](https://github.com/nervosnetwork/ckb-system-scripts/blob/master/c/secp256k1_blake160_sighash_all.c) lock to manage the most common, fully owned cell.
 
 ```
 m / 44' / 309' / 0' / 0' / change / index
@@ -47,7 +47,7 @@ The P2SH transaction in CKB looks like this
   <img width="480" src="./design/p2sh.png" />
 </p>
 
-To differentiate from the BIP-44 derivation rules, Nexus can use the (https://github.com/bitcoin/bips/blob/master/bip-0049.mediawiki) derivation rules to manage these keys for P2SH
+To differentiate from the BIP-44 derivation rules, Nexus can use the [BIP-49](https://github.com/bitcoin/bips/blob/master/bip-0049.mediawiki) derivation rules to manage these keys for P2SH
 
 ```
 m / 49' / 309' / 0' / 0' / change / index
@@ -145,7 +145,7 @@ Some wallets may be able to signing with the TEE and auth by biometric authentic
 
 ### Is There a Problem with BIP-44 as with Neuron?
 
-Users may use their seeds in both Neuron and Nexus, but this is not a problem, Neuron does not consume type scripts or cells with data that is [not empty](https://github.com/nervosnetwork/neuron/blob/b0aa8bfb9c87c625c08609b85a1cf7629e7093ee/packages/neuron-wallet/src/models/keys/key.ts#L53). But this bring up another thought, the dApp may have a bug that causes the user's cell to be consumed incorrectly. So far we have considered using UI/UX to let the user double-check the content when signing.
+Users may use their seeds in both Neuron and Nexus, but this is not a problem, Neuron will only consume cells with [empty](https://github.com/nervosnetwork/neuron/blob/master/packages/neuron-wallet/src/services/cells.ts#L432-L462) data and type when transferring. But this bring up another thought, the dApp may have a bug that causes the user's cell to be consumed incorrectly. So far we have considered using UI/UX to let the user double-check the content when signing.
 
 ### Can You Talk About the Disadvantages of the Design?
 
