@@ -28,7 +28,7 @@ Since the key is the key, let's start with key management
 UTxO wallets in the CKB ecosystem already use [BIP-44](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki) as a derivation path, such as [Neuron](https://github.com/nervosnetwork/neuron/blob/b0aa8bfb9c87c625c08609b85a1cf7629e7093ee/packages/neuron-wallet/src/models/keys/key.ts#L53), so Nexus can keep using this BIP-44 derivation rule and [secp256k1_blake160](https://github.com/nervosnetwork/ckb-system-scripts/blob/master/c/secp256k1_blake160_sighash_all.c) lock to manage the most common, fully owned cell.
 
 ```
-m / 44' / 309' / 0' / 0' / change / index
+m / 44' / 309' / 0' / change / index
 ```
 
 <p align="center">
@@ -50,7 +50,7 @@ The P2SH transaction in CKB looks like this
 To differentiate from the BIP-44 derivation rules, Nexus can use the [BIP-49](https://github.com/bitcoin/bips/blob/master/bip-0049.mediawiki) derivation rules to manage these keys for P2SH
 
 ```
-m / 49' / 309' / 0' / 0' / change / index
+m / 49' / 309' / 0' / change / index
 ```
 
 ## JavaScript Provider
