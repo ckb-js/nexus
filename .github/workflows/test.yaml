@@ -1,0 +1,31 @@
+name: Test
+on: [push, pull_request]
+jobs:
+  unit-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: restore dependencies
+        uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Install project dependencies and build
+        run: npm install
+
+      - name: Build packages
+        run: npm run build
+
+      - name: Run unit test
+        run: npx jest --coverage
+
+      - uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage/clover.xml
+          verbose: true # optional (default = false)

@@ -1,0 +1,29 @@
+{
+  "name": "@nexus-wallet/types",
+  "version": "0.0.1",
+  "description": "",
+  "homepage": "https://github.com/ckb-js/nexus/tree/main/extension-chrome#readme",
+  "license": "MIT",
+  "main": "lib",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ckb-js/nexus.git"
+  },
+  "scripts": {
+    "start": "cross-env NODE_ENV=development npm run start:webpack",
+    "start:webpack": "ts-node ./scripts/start.ts",
+    "test": "jest",
+    "build": "tsc",
+    "clean": "rimraf build/*"
+  },
+  "bugs": {
+    "url": "https://github.com/ckb-js/nexus/issues"
+  }
+}

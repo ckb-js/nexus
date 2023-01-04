@@ -1,4 +1,6 @@
 import { sendMessage } from 'webext-bridge';
+import { listenOnContent } from '../messaging';
+import { JSONRPCClient, JSONRPCRequest, JSONRPCResponse } from 'json-rpc-2.0';
 
 function injectScript(): void {
   const script = document.createElement('script');
@@ -8,11 +10,12 @@ function injectScript(): void {
   (document.head || document.documentElement).appendChild(script);
 }
 
-window.addEventListener('message', (event) => {
-  if (event.data.target === 'NEXUS_INPAGE') {
-    sendMessage('notification', {}, 'background');
-  }
+const client = new JSONRPCClient(async (req) => {
+  const response = await sendMessage('rpc', req, 'background');
+  client.receive(response as unknown as JSONRPCResponse);
 });
+
+listenOnContent((req) => Promise.resolve(client.requestAdvanced(req as JSONRPCRequest)));
 
 if (document.doctype?.name === 'html') {
   injectScript();
