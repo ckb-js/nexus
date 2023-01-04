@@ -1,0 +1,60 @@
+{
+  "name": "@ckb-js/nexus-extension-chrome",
+  "version": "0.0.1",
+  "description": "Nexus Chrome extension",
+  "homepage": "https://github.com/ckb-js/nexus/tree/main/extension-chrome#readme",
+  "license": "MIT",
+  "main": "lib",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ckb-js/nexus.git"
+  },
+  "scripts": {
+    "start": "cross-env NODE_ENV=development npm run start:webpack",
+    "start:webpack": "ts-node ./scripts/start.ts",
+    "build": "npm run clean && webpack --config=config/webpack.config.prod.ts",
+    "clean": "rimraf build/*"
+  },
+  "bugs": {
+    "url": "https://github.com/ckb-js/nexus/issues"
+  },
+  "dependencies": {
+    "@types/chrome": "0.0.204",
+    "@types/react": "18.0.26",
+    "@types/react-dom": "18.0.9",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "sanitize.css": "13.0.0"
+  },
+  "devDependencies": {
+    "@pmmmwh/react-refresh-webpack-plugin": "0.5.10",
+    "@types/rimraf": "3.0.2",
+    "babel-loader": "9.1.0",
+    "clean-webpack-plugin": "4.0.0",
+    "copy-webpack-plugin": "11.0.0",
+    "css-loader": "6.7.2",
+    "file-loader": "6.2.0",
+    "fork-ts-checker-webpack-plugin": "7.2.13",
+    "html-loader": "4.2.0",
+    "html-webpack-plugin": "5.5.0",
+    "rimraf": "3.0.2",
+    "source-map-loader": "4.0.1",
+    "style-loader": "3.3.1",
+    "terser-webpack-plugin": "5.3.6",
+    "ts-loader": "9.4.2",
+    "ts-node": "10.9.1",
+    "webpack": "5.75.0",
+    "webpack-cli": "5.0.1",
+    "webpack-dev-server": "4.11.1",
+    "webpack-inject-plugin": "1.5.5",
+    "webpack-merge": "5.8.0",
+    "ws": "8.11.0"
+  }
+}
