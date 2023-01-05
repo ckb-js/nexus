@@ -80,12 +80,12 @@ interface CkbProvider {
    */
   getNetworkName(): Promise<Network>;
 
-  bip44: Keyring;
-  bip49: Keyring;
+  fullOwnership: Ownership;
+  ruleBasedOwnership: Ownership;
 }
 
-interface Keyring {
-  getUnusedLocks(options?: GetUnusedLocksOptions): Promise<Script>;
+interface Ownership {
+  getUnusedLocks(options?: GetUnusedLocksOptions): Promise<Script[]>;
 
   getUsedLocks(payload?: { cursor?: string }): Promise<Paginate<Script>>;
 
