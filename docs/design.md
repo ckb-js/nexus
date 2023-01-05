@@ -154,3 +154,4 @@ We mentioned the privacy benefits of UTxO before, but this design exposes some o
 ### More
 
 - [Works with Anyone-Can-Pay Like Case](./design-anyone-can-pay.md)
+- [Prototype](https://www.figma.com/file/6il5bkgZDrfJhCBs2c7er4/Nexus-Wallet)
