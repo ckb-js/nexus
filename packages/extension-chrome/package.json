@@ -55,6 +55,6 @@
     "webpack-dev-server": "4.11.1",
     "webpack-inject-plugin": "1.5.5",
     "webpack-merge": "5.8.0",
-    "ws": "8.11.0"
+    "ws": "8.12.0"
   }
 }
