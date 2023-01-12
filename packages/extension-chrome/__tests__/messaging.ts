@@ -1,34 +1,67 @@
 import { EventEmitter } from 'events';
-import { listenOnContent, NEXUS_MESSAGE, sendToContent } from '../src/messaging';
+import { EventPosterAndListener, onMessage, sendMessage } from '../src/messaging/contentAndInjected';
+import { createNexusMessage } from '../src/messaging/internal';
 
-global.window = global.window || {};
+function mockPosterAndListener(): EventPosterAndListener {
+  const ee = new EventEmitter();
+  return {
+    postMessage: (message) => ee.emit('message', { data: message }),
+    addEventListener: (type, listener) => {
+      ee.on(type, listener);
+    },
+  };
+}
 
-const ee = new EventEmitter();
-Object.assign(window, {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  postMessage(data: any) {
-    ee.emit('message', { data });
-  },
-  addEventListener(eventName: string, listener: (event: MessageEvent) => void) {
-    ee.addListener(eventName, listener);
-  },
-});
+it('messaging#contentAndInjected ping pong', async () => {
+  const _window = mockPosterAndListener();
+  // listening message in content script
 
-it('messaging#simulate RPC', async () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  listenOnContent((payload: { method: string; params: any }) => {
-    if (payload.method === 'ping') return 'pong';
-    if (payload.method === 'sum') return payload.params[0] + payload.params[1];
+  const handler = jest.fn((received) => {
+    if (received === 'ping') return 'pong';
   });
 
-  const pingPong = await sendToContent({ method: 'ping' });
-  expect(pingPong).toBe('pong');
+  onMessage('ping-pong', handler, { eventPosterAndListener: _window, getCurrentContext: () => 'content-script' });
 
-  const sum = await sendToContent({ method: 'sum', params: [1, 1] });
-  expect(sum).toBe(1 + 1);
+  // sending message from website to content script
+  const received = sendMessage('ping-pong', 'ping', 'content-script', {
+    getCurrentContext: () => 'website',
+    eventPosterAndListener: _window,
+  });
 
-  window.postMessage(null);
-  window.postMessage(undefined);
-  window.postMessage({ type: 'NOT_NEXUS_MESSAGE' });
-  window.postMessage({ type: NEXUS_MESSAGE, id: '1', data: {}, sender: 'UNIDENTIFIED' });
+  // a non-NexusMessage should not be received
+  _window.postMessage('NoNexusMessage');
+
+  // unknown target message should not be received
+  _window.postMessage(
+    createNexusMessage({
+      data: 'pong',
+      // @ts-ignore
+      target: 'unknown',
+      // @ts-ignore
+      sender: 'unknown',
+      type: 'ping-pong',
+    }),
+  );
+  // an interference message should not be received
+  _window.postMessage(
+    createNexusMessage({
+      data: 'Interference message',
+      type: 'unknown',
+      target: 'website',
+      sender: 'content-script',
+    }),
+  );
+  // a wrong id will not be received by sender
+  _window.postMessage(
+    createNexusMessage({
+      type: 'ping-pong',
+      target: 'website',
+      sender: 'content-script',
+      id: 'wrong-id',
+      data: 'ping',
+    }),
+  );
+
+  expect(await received).toBe('pong');
+  expect(handler.mock.calls).toHaveLength(1);
 });
