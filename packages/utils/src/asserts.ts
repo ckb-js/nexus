@@ -9,3 +9,7 @@ export function nonFalsy(x: unknown): asserts x {
 
   if (!x) throwError('cannot be falsy');
 }
+
+export function asserts(condition: unknown, message?: string): asserts condition {
+  if (!condition) throwError(message || 'Assertion failed');
+}

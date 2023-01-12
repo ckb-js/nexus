@@ -1,20 +1,12 @@
-import { JSONRPCClient } from 'json-rpc-2.0';
-import { sendToContent } from '../messaging';
+import { isJSONRPCResponse, JSONRPCClient } from 'json-rpc-2.0';
+import { sendMessage } from '../messaging';
 import { CkbProvider, InjectedCkb } from '@nexus-wallet/types';
-import { LIB_VERSION } from '@nexus-wallet/utils';
-
-declare global {
-  interface Ckb {
-    version: string;
-  }
-
-  interface Window {
-    ckb: Ckb;
-  }
-}
+import { asserts, LIB_VERSION } from '@nexus-wallet/utils';
 
 const client = new JSONRPCClient(async (req) => {
-  client.receive(await sendToContent(req));
+  const response = await sendMessage('contentAndInjected', req, 'content-script');
+  asserts.asserts(isJSONRPCResponse(response), `Invalid JSON-RPC response: ${response}`);
+  client.receive(response);
 });
 
 const injectedCkb: InjectedCkb = {

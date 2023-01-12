@@ -32,7 +32,14 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["*.hot-update.json", "popup.html", "inpage.js"],
+      "resources": [
+        "*.hot-update.json",
+        "popup.html",
+        "inpage.js",
+        "notification.html",
+        "inpage.js.map",
+        "content.js.map"
+      ],
       "matches": ["<all_urls>"],
       "all_frames": true
     }

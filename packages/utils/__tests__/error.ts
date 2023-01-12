@@ -2,5 +2,5 @@ import { errors } from '../src';
 
 it('utils#error throw', () => {
   expect(() => errors.throwError()).toThrow();
-  expect(() => errors.unimplemented()).toThrow(/unimplemented/);
+  expect(() => errors.unimplemented()).toThrow(/Unimplemented/);
 });

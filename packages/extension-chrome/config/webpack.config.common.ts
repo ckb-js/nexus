@@ -53,6 +53,7 @@ const configExcludeEntry: Configuration = {
 export const pageConfig: Configuration = merge(configExcludeEntry, {
   entry: {
     popup: env.paths.resolve('/src/pages/Popup/index.tsx'),
+    notification: env.paths.resolve('/src/pages/Notification/index.tsx'),
   },
 
   plugins: [
@@ -63,6 +64,12 @@ export const pageConfig: Configuration = merge(configExcludeEntry, {
       filename: 'popup.html',
       chunks: ['popup'],
       template: env.paths.resolve('src/pages/Popup/index.html'),
+      cache: false,
+    }),
+    new HtmlWebpackPlugin({
+      filename: 'notification.html',
+      chunks: ['notification'],
+      template: env.paths.resolve('src/pages/Notification/index.html'),
       cache: false,
     }),
     new ForkTsCheckerWebpackPlugin(),

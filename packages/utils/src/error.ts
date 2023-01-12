@@ -1,9 +1,13 @@
 import { LIB_VERSION } from './version';
 
-export function unimplemented(): never {
-  throwError('unimplemented');
+export function makeError(message = 'Unknown error'): Error {
+  return new Error(`[NexusWallet]: ${message}  (version=${LIB_VERSION})`);
 }
 
-export function throwError(message = 'unknown'): never {
-  throw new Error(`[NexusError]: ${message}\nversion=${LIB_VERSION}`);
+export function throwError(message?: string): never {
+  throw makeError(message);
+}
+
+export function unimplemented(): never {
+  throwError('Unimplemented');
 }
