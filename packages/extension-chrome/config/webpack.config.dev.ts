@@ -16,6 +16,7 @@ export const pageConfig: WebpackConfiguration = merge(common.pageConfig, {
   mode: 'development',
   entry: {
     popup: buildHmrEntry(propStr(common.pageConfig.entry, 'popup')),
+    notification: buildHmrEntry(propStr(common.pageConfig.entry, 'notification')),
   },
   output: {
     chunkFilename: 'static/js/[name].chunk.js',
