@@ -1,5 +1,5 @@
 import type LocalForageDriver from 'localforage';
-export default function createDriver(): LocalForageDriver {
+export function createDriver(): LocalForageDriver {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let db: Record<string, any> = {};
   const storage = {
@@ -9,24 +9,24 @@ export default function createDriver(): LocalForageDriver {
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     get: async (key: string): Promise<any> => {
-      console.log('get key =', key, 'value =', db[key]);
+      console.debug('get key =', key, 'value =', db[key]);
       return Promise.resolve(db[key]);
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     set: async <T>(key: string, value: T): Promise<any> => {
       db[key] = value;
-      console.log('set key =', key, 'value =', value);
+      console.debug('set key =', key, 'value =', value);
       return Promise.resolve(value);
     },
     remove: async (key: string): Promise<void> => {
-      console.log('remove key =', key);
+      console.debug('remove key =', key);
       delete db[key];
       return Promise.resolve();
     },
   };
 
   return {
-    _driver: 'mockDriver',
+    _driver: 'memDriver',
     // eslint-disable-next-line no-underscore-dangle
     _initStorage() {
       return Promise.resolve();
@@ -43,15 +43,18 @@ export default function createDriver(): LocalForageDriver {
     async iterate(iterator, callback) {
       const items = db;
       const keys = Object.keys(items);
-      for (let index = 0; index < keys.length; index++) {
-        const key = keys[index];
-        const currentResult = iterator(items[key], key, index);
-        if (callback) callback(null, currentResult);
-        if (currentResult !== undefined) {
-          return currentResult;
+      let currentResult: ReturnType<typeof iterator> = iterator(items[keys[0]], keys[0], 0);
+      if (keys.length > 1) {
+        for (let index = 1; index < keys.length; index++) {
+          const key = keys[index];
+          currentResult = iterator(items[key], key, index);
+          if (callback) callback(null, currentResult);
+          if (currentResult !== undefined) {
+            return currentResult;
+          }
         }
       }
-      return iterator(items[keys[keys.length - 1]], keys[keys.length - 1], keys.length - 1);
+      return currentResult;
     },
 
     async getItem<T>(key: string, callback: (error: Error | null, result?: T | null) => void): Promise<T | null> {
@@ -86,10 +89,10 @@ export default function createDriver(): LocalForageDriver {
 
     async length(callback) {
       let results = db;
-      const { length } = Object.keys(results);
+      const keys = Object.keys(results);
 
-      if (callback) callback(null, length);
-      return length;
+      if (callback) callback(null, keys.length);
+      return keys.length;
     },
 
     async removeItem(key, callback) {
