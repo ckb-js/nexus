@@ -3,6 +3,7 @@ import browser from 'webextension-polyfill';
 import { errors } from '@nexus-wallet/utils';
 import { RpcMethods, ServerParams } from './types';
 import { JSONRPCServer } from 'json-rpc-2.0';
+import { createServicesFactory } from '../services';
 
 export const server = new JSONRPCServer<ServerParams>();
 
@@ -14,8 +15,10 @@ export function addMethod<K extends keyof RpcMethods>(
 }
 
 export function createRpcServerParams(payload: { endpoint: Endpoint }): ServerParams {
+  let servicesFactory = createServicesFactory();
+
   return {
-    async getRequesterAppInfo() {
+    getRequesterAppInfo: async () => {
       const tab = await browser.tabs.get(payload.endpoint.tabId);
       if (!tab.url || !tab.favIconUrl) {
         errors.throwError(
@@ -24,5 +27,7 @@ export function createRpcServerParams(payload: { endpoint: Endpoint }): ServerPa
       }
       return { url: tab.url, favIconUrl: tab.favIconUrl };
     },
+
+    resolveService: (k) => servicesFactory.get(k),
   };
 }
