@@ -27,7 +27,7 @@ export interface KeystoreService {
 }
 
 interface GetExtendedPublicKeyPayload {
-  path: string;
+  path: HardenedPath | NonHardenedPath;
   password?: PasswordProvider;
 }
 
