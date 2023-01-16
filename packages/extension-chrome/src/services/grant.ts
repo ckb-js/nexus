@@ -18,5 +18,13 @@ export function createGrantService(payload: { storage: Storage<{ grant: string[]
       grantedUrls.push(payload.host);
       await storage.setItem('grant', grantedUrls);
     },
+    async revoke(payload) {
+      const grantedUrls = await storage.getItem('grant');
+
+      if (!grantedUrls) return;
+
+      const revoked = grantedUrls.filter((host) => host === payload.host);
+      await storage.setItem('grant', revoked);
+    },
   };
 }
