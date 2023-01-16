@@ -5,6 +5,9 @@ addMethod('wallet_enable', async (_, { getRequesterAppInfo, resolveService }) =>
   const grantService = await resolveService('grantService');
   const { url } = await getRequesterAppInfo();
 
+  const isGranted = await grantService.getIsGranted({ url });
+  if (isGranted) return;
+
   const granted = await grantService.getIsGranted({ url });
   if (granted) return;
 

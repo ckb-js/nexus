@@ -14,9 +14,9 @@ export function addMethod<K extends keyof RpcMethods>(
   server.addMethod(method, handler);
 }
 
-export function createRpcServerParams(payload: { endpoint: Endpoint }): ServerParams {
-  let servicesFactory = createServicesFactory();
+let servicesFactory = createServicesFactory();
 
+export function createRpcServerParams(payload: { endpoint: Endpoint }): ServerParams {
   return {
     getRequesterAppInfo: async () => {
       const tab = await browser.tabs.get(payload.endpoint.tabId);

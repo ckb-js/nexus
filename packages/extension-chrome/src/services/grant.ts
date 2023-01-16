@@ -16,7 +16,7 @@ export function createGrantService(payload: { storage: Storage<{ grant: string[]
         errors.throwError('Storage is not initialized');
       }
       grantedUrls.push(payload.url);
-      storage.setItem('grant', grantedUrls);
+      await storage.setItem('grant', grantedUrls);
     },
   };
 }
