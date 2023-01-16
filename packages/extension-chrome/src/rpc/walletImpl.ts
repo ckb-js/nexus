@@ -5,10 +5,12 @@ addMethod('wallet_enable', async (_, { getRequesterAppInfo, resolveService }) =>
   const grantService = await resolveService('grantService');
   const { url } = await getRequesterAppInfo();
 
-  const isGranted = await grantService.getIsGranted({ url });
+  const { host } = new URL(url);
+
+  const isGranted = await grantService.getIsGranted({ host });
   if (isGranted) return;
 
-  const granted = await grantService.getIsGranted({ url });
+  const granted = await grantService.getIsGranted({ host });
   if (granted) return;
 
   const notificationService = await resolveService('notificationService');
@@ -18,7 +20,7 @@ addMethod('wallet_enable', async (_, { getRequesterAppInfo, resolveService }) =>
     errors.throwError('User has rejected');
   }
 
-  await grantService.grant({ url });
+  await grantService.grant({ host });
 });
 
 addMethod('wallet_fullOwnership_getUnusedLocks', () => {

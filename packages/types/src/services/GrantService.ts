@@ -5,11 +5,17 @@ export interface GrantService {
    * grant the app to access the wallet
    * @param payload
    */
-  grant(payload: { url: string }): Promisable<void>;
+  grant(payload: { host: string }): Promisable<void>;
 
   /**
    * check if an app has been granted
    * @param payload
    */
-  getIsGranted(payload: { url: string }): Promisable<boolean>;
+  getIsGranted(payload: { host: string }): Promisable<boolean>;
+
+  /**
+   * revoke granted
+   * @param payload
+   */
+  revoke(payload: { host: string }): Promisable<void>;
 }
