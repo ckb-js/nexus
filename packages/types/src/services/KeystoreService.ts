@@ -69,6 +69,12 @@ export interface SignMessagePayload {
   password: PasswordProvider;
 }
 
+/**
+ * checkout BIP-32 learn more about the {@link https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki#extended-keys hardened key}
+ */
 type HardenedPath = string;
+/**
+ * checkout BIP-32 learn more about the {@link https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki#extended-keys non-hardened key}
+ */
 type NonHardenedPath = string;
 type PasswordProvider = Provider<string>;
