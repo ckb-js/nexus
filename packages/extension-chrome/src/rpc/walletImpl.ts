@@ -54,3 +54,7 @@ addMethod('wallet_enable', async (_, { getRequesterAppInfo }) => {
     });
   });
 });
+
+addMethod('wallet_getRandomMnemonic', () => {
+  return ['finite', 'omit', 'doze', 'dog', 'pat', 'team', 'seek', 'pink', 'punch', 'scale', 'clap', 'computer'];
+});

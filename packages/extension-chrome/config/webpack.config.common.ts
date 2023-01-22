@@ -54,6 +54,7 @@ export const pageConfig: Configuration = merge(configExcludeEntry, {
   entry: {
     popup: env.paths.resolve('/src/pages/Popup/index.tsx'),
     notification: env.paths.resolve('/src/pages/Notification/index.tsx'),
+    WalletManager: env.paths.resolve('/src/pages/WalletManager/index.tsx'),
   },
 
   plugins: [
@@ -70,6 +71,12 @@ export const pageConfig: Configuration = merge(configExcludeEntry, {
       filename: 'notification.html',
       chunks: ['notification'],
       template: env.paths.resolve('src/pages/Notification/index.html'),
+      cache: false,
+    }),
+    new HtmlWebpackPlugin({
+      filename: 'walletManager.html',
+      chunks: ['WalletManager'],
+      template: env.paths.resolve('src/pages/WalletManager/index.html'),
       cache: false,
     }),
     new ForkTsCheckerWebpackPlugin(),

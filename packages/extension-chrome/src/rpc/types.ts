@@ -7,6 +7,7 @@ export interface RpcMethods {
   wallet_enable: RpcCall<void, void>;
   wallet_isEnabled: RpcCall<void, boolean>;
   wallet_getNetworkName: RpcCall<void, string>;
+  wallet_getRandomMnemonic: RpcCall<void, string[]>;
 }
 
 /**

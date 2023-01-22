@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import browser from 'webextension-polyfill';
 
-export const Notification: React.FC = () => {
+export const Enable: React.FC = () => {
   const [requesterUrl, setRequesterUrl] = useState<string>();
 
   useEffect(() => {
@@ -31,5 +31,3 @@ export const Notification: React.FC = () => {
     </div>
   );
 };
-
-export default Notification;
