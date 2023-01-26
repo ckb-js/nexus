@@ -33,7 +33,7 @@ interface GetUnusedLocksPayload {
   change?: boolean;
 }
 
-interface GetUsedLocksPayload extends GetUnusedLocksPayload, GetPaginateItemsPayload {}
+export interface GetUsedLocksPayload extends GetUnusedLocksPayload, GetPaginateItemsPayload {}
 
 interface SignTransactionPayload {
   tx: Transaction;
