@@ -2,23 +2,37 @@ import React, { FC } from 'react';
 import { ChakraProvider } from '@chakra-ui/react';
 import { createRoot } from 'react-dom/client';
 import { createHashRouter, RouterProvider, RouteObject } from 'react-router-dom';
+import { WhitelistSites } from './containers/WhitelistSites';
+import { NetworkConfig } from './containers/Network/NetworkConfig';
 
 import { Home } from './containers/Home';
-// import { Sites } from './containers/Sites';
+import siteService from '../../services/site';
+import networkService from '../../services/network';
+import { AddNetwork } from './containers/Network/AddNetwork';
 
 const routeConfig: RouteObject[] = [
   {
     path: '/',
     element: <Home />,
   },
-  // {
-  //   path: 'whitelist',
-  //   element: <Sites />,
-  // },
-  // {
-  //   path: 'network',
-  //   element: <NetworkConfig />,
-  // },
+  {
+    path: 'whitelistSites',
+    element: <WhitelistSites />,
+    loader: () => {
+      return siteService.getWhitelistSites();
+    },
+  },
+  {
+    path: 'network',
+    element: <NetworkConfig />,
+    loader: () => {
+      return networkService.getNetwork();
+    },
+  },
+  {
+    path: 'network/add',
+    element: <AddNetwork />,
+  },
 ];
 
 const container = window.document.querySelector('#root');

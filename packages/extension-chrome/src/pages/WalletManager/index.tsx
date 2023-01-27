@@ -1,12 +1,13 @@
 import React, { FC } from 'react';
 import { ChakraProvider } from '@chakra-ui/react';
 import { createRoot } from 'react-dom/client';
-import { createHashRouter, RouterProvider, RouteObject, redirect } from 'react-router-dom';
+import { createHashRouter, RouterProvider, RouteObject } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Welcome } from './containers/Welcome';
 
 import { CreateMnemonic } from './containers/NewMnemonic';
-import { CollectMnemonic } from './containers/CollectMnemonic';
+import { SharedStateProvider } from './store';
+import { RecoveryWallet } from './containers/RecoveryWallet';
 import { ConfirmMnemonic } from './containers/ConfirmMnemonic';
 import { SetPassword } from './containers/Password';
 import { Success } from './containers/Success';
@@ -22,7 +23,7 @@ const routeConfig: RouteObject[] = [
   },
   {
     path: '/import',
-    element: <CollectMnemonic />,
+    element: <RecoveryWallet />,
   },
   {
     path: '/confirm',
@@ -53,7 +54,9 @@ const App: FC = () => {
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>
         <ChakraProvider>
-          <RouterProvider router={hashRouter} />
+          <SharedStateProvider>
+            <RouterProvider router={hashRouter} />
+          </SharedStateProvider>
         </ChakraProvider>
       </QueryClientProvider>
     </React.StrictMode>

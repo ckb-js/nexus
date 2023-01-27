@@ -26,6 +26,7 @@
     "url": "https://github.com/ckb-js/nexus/issues"
   },
   "dependencies": {
+    "@chakra-ui/icons": "2.0.17",
     "@nexus-wallet/types": "*",
     "@nexus-wallet/utils": "*",
     "@types/chrome": "0.0.207",
@@ -40,7 +41,8 @@
     "react-use": "17.4.0",
     "sanitize.css": "13.0.0",
     "webext-bridge": "5.0.5",
-    "webextension-polyfill": "0.10.0"
+    "webextension-polyfill": "0.10.0",
+    "zustand": "4.3.2"
   },
   "devDependencies": {
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.10",

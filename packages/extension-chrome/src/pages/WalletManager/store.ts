@@ -5,14 +5,17 @@ type State = {
 };
 
 const [useSharedState, SharedStateProvider] = createReducerContext(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (state: State, action: any): State => {
     switch (action.type) {
       case 'SET_MNEMONIC':
         return { ...state, mnemonic: action.payload };
+
       default:
         return state;
     }
   },
+
   {
     mnemonic: [],
   },
