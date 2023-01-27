@@ -15,7 +15,7 @@ addMethod('wallet_enable', async (_, { getRequesterAppInfo }) => {
     left: lastFocused.left! + (lastFocused.width! - 360),
     width: NOTIFICATION_WIDTH,
     height: NOTIFICATION_HEIGHT,
-    url: 'notification.html',
+    url: 'notification.html#/enable',
   });
 
   const notificationTabId = notification.tabs?.[0]?.id;
@@ -53,8 +53,4 @@ addMethod('wallet_enable', async (_, { getRequesterAppInfo }) => {
       }
     });
   });
-});
-
-addMethod('wallet_getRandomMnemonic', () => {
-  return ['finite', 'omit', 'doze', 'dog', 'pat', 'team', 'seek', 'pink', 'punch', 'scale', 'clap', 'computer'];
 });
