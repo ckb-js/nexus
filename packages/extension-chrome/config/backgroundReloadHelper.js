@@ -15,7 +15,9 @@ function tryConnect() {
         const message = JSON.parse(event.data);
         if (message.type === 'update') {
           console.log('Detect extension service worker change, reload extension');
-          chrome.runtime.reload();
+          if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.reload) {
+            chrome.runtime.reload();
+          }
         }
       };
       ws.onclose = () => {
