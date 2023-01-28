@@ -51,7 +51,7 @@
     "fork-ts-checker-webpack-plugin": "7.2.14",
     "html-loader": "4.2.0",
     "html-webpack-plugin": "5.5.0",
-    "rimraf": "3.0.2",
+    "rimraf": "4.1.2",
     "source-map-loader": "4.0.1",
     "style-loader": "3.3.1",
     "terser-webpack-plugin": "5.3.6",
