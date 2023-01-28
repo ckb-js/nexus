@@ -12,7 +12,7 @@ export const Enable: React.FC = () => {
     })();
   }, []);
 
-  // if (!requesterUrl) return <h1>waiting...</h1>;
+  if (!requesterUrl) return <h1>waiting...</h1>;
 
   return (
     <Flex direction="column" h="100%" paddingY="16px" paddingX="32px">

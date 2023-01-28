@@ -33,7 +33,7 @@ export const NetworkConfig: FC = () => {
       <Flex h="100%" w="100%" direction="column" mt="16px" alignItems="center" justifyContent="flex-start">
         <RadioGroup defaultValue={currentNetwork} w="100%" display="flex" flexDirection="column">
           {networks.map((network, index) => (
-            <Flex w="100%" mb="16px" alignItems="center">
+            <Flex key={network.url + network.url} w="100%" mb="16px" alignItems="center">
               <Avatar flexGrow={0} name={network.name} />
               <Radio ml="32px" value={network.url}>
                 {network.name}
