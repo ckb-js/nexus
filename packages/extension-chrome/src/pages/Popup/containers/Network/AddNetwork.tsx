@@ -25,7 +25,7 @@ export const AddNetwork: FC = () => {
           <Input onChange={onChange('name')} name="name" />
         </FormControl>
 
-        <FormControl>
+        <FormControl isRequired>
           <FormLabel>URL</FormLabel>
           <Input name="url" onChange={onChange('url')} />
         </FormControl>

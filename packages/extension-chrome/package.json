@@ -41,8 +41,7 @@
     "react-use": "17.4.0",
     "sanitize.css": "13.0.0",
     "webext-bridge": "5.0.5",
-    "webextension-polyfill": "0.10.0",
-    "zustand": "4.3.2"
+    "webextension-polyfill": "0.10.0"
   },
   "devDependencies": {
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.10",
