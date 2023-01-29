@@ -4,10 +4,9 @@ import { createRoot } from 'react-dom/client';
 import { createHashRouter, RouterProvider, RouteObject } from 'react-router-dom';
 import { WhitelistSites } from './containers/WhitelistSites';
 import { NetworkConfig } from './containers/Network/NetworkConfig';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { Home } from './containers/Home';
-import siteService from '../../services/site';
-import networkService from '../../services/network';
 import { AddNetwork } from './containers/Network/AddNetwork';
 
 const routeConfig: RouteObject[] = [
@@ -18,16 +17,10 @@ const routeConfig: RouteObject[] = [
   {
     path: 'whitelistSites',
     element: <WhitelistSites />,
-    loader: () => {
-      return siteService.getWhitelistSites();
-    },
   },
   {
     path: 'network',
     element: <NetworkConfig />,
-    loader: () => {
-      return networkService.getNetwork();
-    },
   },
   {
     path: 'network/add',
@@ -42,12 +35,15 @@ if (!container)
   );
 
 const hashRouter = createHashRouter(routeConfig);
+const queryClient = new QueryClient();
 
 const App: FC = () => {
   return (
     <React.StrictMode>
       <ChakraProvider>
-        <RouterProvider router={hashRouter} />
+        <QueryClientProvider client={queryClient}>
+          <RouterProvider router={hashRouter} />
+        </QueryClientProvider>
       </ChakraProvider>
     </React.StrictMode>
   );

@@ -2,7 +2,7 @@ import React, { FC } from 'react';
 import { Button, Container, Flex, FormControl, FormLabel, Input, Spacer, FormErrorMessage } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import { useSetState } from 'react-use';
-import { useQuery } from 'react-query';
+import { useMutation } from '@tanstack/react-query';
 import { useWalletManagerStore } from '../store';
 import walletService from '../../../services/wallet';
 
@@ -10,7 +10,6 @@ export const PasswordInputs: FC<{ onChange: (isValid: boolean, value: string) =>
   onChange: externalOnchange,
 }) => {
   const [state, setState] = useSetState({ password: '', confirmPassword: '' });
-
   const isValid = !state.confirmPassword || (state.password === state.confirmPassword && state.password.length >= 8);
 
   const onChange = (field: 'password' | 'confirmPassword') => (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -43,6 +42,7 @@ export const SetPassword: FC = () => {
   const navigate = useNavigate();
   const { mnemonic } = useWalletManagerStore();
   const [state, setState] = useSetState({ isValid: false, value: '' });
+  const password = state.value;
   const onPasswordChange = (isValid: boolean, value: string) => {
     setState({ isValid, value });
     if (isValid) {
@@ -50,18 +50,14 @@ export const SetPassword: FC = () => {
     }
   };
 
-  const { refetch: createWallet } = useQuery(
-    ['createWallet', { mnemonic, password: state.value }] as const,
-    ({ queryKey }) => {
-      const [, { mnemonic, password }] = queryKey;
-      walletService.createNewWallet(mnemonic, password);
-    },
-    { enabled: false },
-  );
+  const createWallet = useMutation({
+    mutationFn: ({ mnemonic, password }: { mnemonic: string[]; password: string }) =>
+      walletService.createNewWallet(mnemonic, password),
+  });
 
   const onCreateWallet = async () => {
     if (state.isValid) {
-      await createWallet();
+      await createWallet.mutateAsync({ mnemonic, password });
       navigate('/success', { replace: true });
     }
   };

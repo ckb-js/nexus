@@ -1,7 +1,7 @@
 import { Button, Container, Flex, Grid, GridItem, Heading, Spacer, Tag, Text, Skeleton } from '@chakra-ui/react';
 import React from 'react';
 import { FC } from 'react';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import walletService from '../../../services/wallet';
 import { useWalletManagerStore } from '../store';
@@ -14,9 +14,13 @@ export const CreateMnemonic: FC = () => {
     isLoading,
     data: mnemonic,
     isError,
-  } = useQuery('randomMnemonic', () => {
-    return walletService.generateRandomMnemonic();
+  } = useQuery({
+    queryKey: ['mnemonic'],
+    queryFn: () => {
+      return walletService.generateRandomMnemonic();
+    },
   });
+
   const gotoConfirmMnemonic = () => {
     store.setMnemonic(mnemonic!);
     navigate('/confirm', { replace: true });

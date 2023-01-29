@@ -5,7 +5,7 @@ import { FC } from 'react';
 import { useList } from 'react-use';
 import { useNavigate } from 'react-router-dom';
 import { ResponsiveContainer } from '../../Components/ResponsiveContainer';
-import { useQuery } from 'react-query';
+import { useMutation } from '@tanstack/react-query';
 import walletService from '../../../services/wallet';
 /**
  * Confirm the mnemonic
@@ -13,15 +13,10 @@ import walletService from '../../../services/wallet';
 export const RecoveryWallet: FC = () => {
   const [mnemonicWords, mnemonicWordAction] = useList(times(12, () => ''));
   const [password, setPassword] = useState('');
-  const { refetch: save, isLoading } = useQuery(
-    [mnemonicWords, password] as const,
-    ({ queryKey }) => {
-      walletService.createNewWallet(queryKey[0], queryKey[1]);
-    },
-    {
-      enabled: false,
-    },
-  );
+  const saveWallet = useMutation({
+    mutationFn: ({ mnemonicWords, password }: { mnemonicWords: string[]; password: string }) =>
+      walletService.createNewWallet(mnemonicWords, password),
+  });
   const navigate = useNavigate();
 
   const inputs = times(12, (index) => (
@@ -37,7 +32,7 @@ export const RecoveryWallet: FC = () => {
   ));
 
   const onRecoveryWallet = async () => {
-    await save();
+    saveWallet.mutateAsync({ mnemonicWords, password });
     navigate('/success', { replace: true });
   };
 
@@ -59,7 +54,13 @@ export const RecoveryWallet: FC = () => {
             }}
           />
         </FormControl>
-        <Button colorScheme="green" w="100%" marginTop="20px" onClick={onRecoveryWallet} isLoading={isLoading}>
+        <Button
+          colorScheme="green"
+          w="100%"
+          marginTop="20px"
+          onClick={onRecoveryWallet}
+          isLoading={saveWallet.isLoading}
+        >
           Recovery
         </Button>
       </Flex>

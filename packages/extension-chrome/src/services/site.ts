@@ -4,21 +4,22 @@ export type Site = {
 };
 
 const siteService = {
+  sites: [
+    {
+      name: 'Google',
+      url: 'https://www.google.com',
+    },
+    {
+      name: 'Github',
+      url: 'https://www.github.com',
+    },
+  ],
   async getWhitelistSites(): Promise<Site[]> {
-    return [
-      {
-        name: 'Google',
-        url: 'https://www.google.com',
-      },
-      {
-        name: 'Github',
-        url: 'https://www.github.com',
-      },
-    ];
+    return this.sites;
   },
 
   async removeSites(_site: Site): Promise<void> {
-    //
+    this.sites = this.sites.filter((site) => site.url !== _site.url);
   },
 };
 

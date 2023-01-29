@@ -23,8 +23,8 @@ const networkService = {
     return this.network;
   },
 
-  async toggleNetwork(): Promise<void> {
-    return;
+  async toggleNetwork(network: NetworkConfig): Promise<void> {
+    this.network = this.network.map((n) => (n.url === network.url ? { ...n, enable: !n.enable } : n));
   },
 
   async addNetwork(network: NetworkConfig): Promise<void> {
