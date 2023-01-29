@@ -86,3 +86,34 @@ it('ownership#get used locks return 1st lock and 6th lock', async () => {
     objects: [locks[0], locks[5]],
   });
 });
+
+it('ownership#sign data with 1st lock', async () => {
+  const keychain = Keychain.fromSeed(shortSeed);
+  const mockCallback = jest.fn().mockReturnValueOnce(Promise.resolve(1)).mockReturnValue(Promise.resolve(0));
+  const mockBackend: Backend = {
+    countTx: mockCallback,
+    nodeUri: '',
+    indexer: new CkbIndexer(''),
+  };
+  const mockAddressStorage = new DefaultAddressStorage(mockBackend, [], [], []);
+  const service = createOwnershipService(keychain, mockBackend, mockAddressStorage);
+  const usedExternalLocks = await service.getUsedLocks({});
+  mockAddressStorage.setUsedExternalAddresses([
+    {
+      path: '',
+      addressIndex: 0,
+      depth: 5,
+      pubkey: '',
+      blake160: '',
+      lock: usedExternalLocks.objects[0],
+    },
+  ]);
+
+  const message = '0x1234';
+  // TODO how to ensure the corresponding privatekey/message/signature is right?
+  const expectedSignature =
+    '0xee6b0c6598e02024f14788618abe7f92b5c60ce4376363f6e1b659993469833420c5dc884ae35675d86f7a6f14978b79844cee2b21ceda0d742070620a96091201';
+
+  const signature = await service.signData({ data: message, lock: locks[0] });
+  expect(signature).toEqual(expectedSignature);
+});
