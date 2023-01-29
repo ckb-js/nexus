@@ -1,10 +1,13 @@
+import { DefaultAddressStorage } from './backend/addressStorage';
 import { Script } from '@ckb-lumos/base';
 import { Keychain } from '@ckb-lumos/hd';
-import { publicKeyToBlake160 } from '@ckb-lumos/hd/lib/key';
-import { OwnershipService, Paginate, GetUsedLocksPayload } from '@nexus-wallet/types';
+import { publicKeyToBlake160, signRecoverable } from '@ckb-lumos/hd/lib/key';
+import { OwnershipService, Paginate } from '@nexus-wallet/types';
+import { GetUsedLocksPayload, SignDataPayload } from '@nexus-wallet/types/lib/services/OwnershipService';
 import { errors } from '@nexus-wallet/utils';
 import { config } from '@ckb-lumos/lumos';
 import { Backend } from './backend';
+import { hexify } from '@ckb-lumos/codec/lib/bytes';
 
 const MAX_ADDRESS_GAP = 20;
 
@@ -56,8 +59,16 @@ export function createOwnershipService(keychain: Keychain, backend: Backend): Ow
     signTransaction: () => {
       errors.unimplemented();
     },
-    signData: () => {
-      errors.unimplemented();
+    signData: (payload: SignDataPayload) => {
+      // TODO addressStorageService should be injected here.
+      const addressStorageService = new DefaultAddressStorage(backend, [], [], []);
+      const addressInfo = addressStorageService.getAddressInfoByLock(payload.lock);
+      if (!addressInfo) {
+        errors.throwError('address not found');
+      }
+      const targetKeychain = keychain.derivePath(addressInfo.path);
+      const signature = signRecoverable(hexify(payload.data), hexify(targetKeychain.privateKey));
+      return Promise.resolve(signature);
     },
   };
 

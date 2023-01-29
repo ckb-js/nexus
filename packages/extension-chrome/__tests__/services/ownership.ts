@@ -22,7 +22,6 @@ for (let index = 0; index < 10; index++) {
 }
 
 it('ownership#get 10 locks', async () => {
-  console.log('10 locks:', locks);
   expect(locks.length).toBe(10);
 });
 
