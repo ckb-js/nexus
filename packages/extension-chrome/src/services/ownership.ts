@@ -1,4 +1,4 @@
-import { DefaultAddressStorage } from './backend/addressStorage';
+import { AddressStorage } from './backend/addressStorage';
 import { Script } from '@ckb-lumos/base';
 import { Keychain } from '@ckb-lumos/hd';
 import { publicKeyToBlake160, signRecoverable } from '@ckb-lumos/hd/lib/key';
@@ -11,7 +11,11 @@ import { hexify } from '@ckb-lumos/codec/lib/bytes';
 
 const MAX_ADDRESS_GAP = 20;
 
-export function createOwnershipService(keychain: Keychain, backend: Backend): OwnershipService {
+export function createOwnershipService(
+  keychain: Keychain,
+  backend: Backend,
+  addressStorageService: AddressStorage,
+): OwnershipService {
   return {
     getLiveCells: () => {
       errors.unimplemented();
@@ -60,8 +64,6 @@ export function createOwnershipService(keychain: Keychain, backend: Backend): Ow
       errors.unimplemented();
     },
     signData: (payload: SignDataPayload) => {
-      // TODO addressStorageService should be injected here.
-      const addressStorageService = new DefaultAddressStorage(backend, [], [], []);
       const addressInfo = addressStorageService.getAddressInfoByLock(payload.lock);
       if (!addressInfo) {
         errors.throwError('address not found');

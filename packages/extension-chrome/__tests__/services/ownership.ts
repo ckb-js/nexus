@@ -3,6 +3,7 @@ import { Keychain } from '@ckb-lumos/hd';
 import { publicKeyToBlake160 } from '@ckb-lumos/hd/lib/key';
 import { config, Script } from '@ckb-lumos/lumos';
 import { Backend } from '../../src/services/backend';
+import { DefaultAddressStorage } from '../../src/services/backend/addressStorage';
 import { createOwnershipService } from '../../src/services/ownership';
 
 // https://en.bitcoin.it/wiki/BIP_0032_TestVectors
@@ -36,7 +37,9 @@ it('ownership#get used locks return empty list', async () => {
     nodeUri: '',
     indexer: new CkbIndexer(''),
   };
-  const service = createOwnershipService(keychain, mockBackend);
+  const mockAddressStorage = new DefaultAddressStorage(mockBackend, [], [], []);
+
+  const service = createOwnershipService(keychain, mockBackend, mockAddressStorage);
   const usedLocks = await service.getUsedLocks({});
   expect(usedLocks).toEqual({ cursor: '', objects: [] });
 });
@@ -49,7 +52,9 @@ it('ownership#get used locks return fisrt lock', async () => {
     nodeUri: '',
     indexer: new CkbIndexer(''),
   };
-  const service = createOwnershipService(keychain, mockBackend);
+  const mockAddressStorage = new DefaultAddressStorage(mockBackend, [], [], []);
+
+  const service = createOwnershipService(keychain, mockBackend, mockAddressStorage);
   const usedLocks = await service.getUsedLocks({});
   expect(usedLocks).toEqual({
     cursor: '',
@@ -73,7 +78,8 @@ it('ownership#get used locks return 1st lock and 6th lock', async () => {
     nodeUri: '',
     indexer: new CkbIndexer(''),
   };
-  const service = createOwnershipService(keychain, mockBackend);
+  const mockAddressStorage = new DefaultAddressStorage(mockBackend, [], [], []);
+  const service = createOwnershipService(keychain, mockBackend, mockAddressStorage);
   const usedLocks = await service.getUsedLocks({});
   expect(usedLocks).toEqual({
     cursor: '',
