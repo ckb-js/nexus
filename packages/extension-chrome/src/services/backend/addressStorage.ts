@@ -1,7 +1,11 @@
 import { Script } from '@ckb-lumos/base';
+import { Keychain } from '@ckb-lumos/hd';
 import { Backend } from './index';
+import { getAddressInfo } from './utils';
 export type AddressInfo = {
   path: string;
+  addressIndex: number;
+  depth: number;
   pubkey: string;
   blake160: string;
   lock: Script;
@@ -13,7 +17,7 @@ export interface AddressStorage {
     changeAddresses: AddressInfo[];
   };
   unusedAddresses: AddressInfo[];
-  updateUnusedAddresses: () => Promise<void>;
+  updateUnusedAddresses: (keychain: Keychain) => Promise<void>;
   getUsedExternalAddresses: () => AddressInfo[];
   getUsedChangeAddresses: () => AddressInfo[];
   getUnusedAddresses: () => Promise<AddressInfo[]>;
@@ -67,7 +71,6 @@ export class DefaultAddressStorage implements AddressStorage {
     this.usedAddresses.changeAddresses = addresses;
   }
   async getUnusedAddresses(): Promise<AddressInfo[]> {
-    await this.updateUnusedAddresses();
     return this.unusedAddresses;
   }
   setUnusedAddresses(addresses: AddressInfo[]): void {
@@ -75,19 +78,27 @@ export class DefaultAddressStorage implements AddressStorage {
   }
 
   // check all unused addresses status and update the used/unused list
-  async updateUnusedAddresses(): Promise<void> {
+  async updateUnusedAddresses(keychain: Keychain): Promise<void> {
     const stillUnused: AddressInfo[] = [];
     const newUsed: AddressInfo[] = [];
+    const newChangeAddressUsed: AddressInfo[] = [];
     for (const address of this.unusedAddresses) {
       const count = await this.backend.countTx(address.lock);
       if (count > 0) {
         newUsed.push(address);
-        // TODO need keychain to detect if change address is used too.
+        // detect if change address is used too.
+        const addressIndex = address.addressIndex;
+        const changePath = `m/44'/309'/0'/1/${addressIndex}`;
+        const changeKeychain = keychain.derivePath(changePath);
+        const changeAddressInfo = getAddressInfo(changeKeychain, changePath);
+        const changeTxcount = await this.backend.countTx(changeAddressInfo.lock);
+        !!changeTxcount && newChangeAddressUsed.push(changeAddressInfo);
       } else {
         stillUnused.push(address);
       }
     }
     this.unusedAddresses = stillUnused;
     this.usedAddresses.externalAddresses.push(...newUsed);
+    this.usedAddresses.changeAddresses.push(...newChangeAddressUsed);
   }
 }

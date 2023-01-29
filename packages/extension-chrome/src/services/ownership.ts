@@ -63,14 +63,15 @@ export function createOwnershipService(
     signTransaction: () => {
       errors.unimplemented();
     },
-    signData: (payload: SignDataPayload) => {
+    signData: async (payload: SignDataPayload) => {
+      await addressStorageService.updateUnusedAddresses(keychain);
       const addressInfo = addressStorageService.getAddressInfoByLock(payload.lock);
       if (!addressInfo) {
         errors.throwError('address not found');
       }
       const targetKeychain = keychain.derivePath(addressInfo.path);
       const signature = signRecoverable(hexify(payload.data), hexify(targetKeychain.privateKey));
-      return Promise.resolve(signature);
+      return signature;
     },
   };
 
