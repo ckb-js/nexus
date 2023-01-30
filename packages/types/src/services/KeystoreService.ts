@@ -9,6 +9,10 @@ export interface KeystoreService {
    */
   hasInitialized(): Promisable<boolean>;
 
+  /**
+   * Only non-hardened path can be used to generate extended public key
+   * @param payload
+   */
   initKeyStore(payload: InitKeyStorePayload): Promisable<void>;
 
   /**
@@ -17,16 +21,21 @@ export interface KeystoreService {
    * the password will be required to derive the extended public key
    * @param payload
    */
-  getExtendedPublicKey(payload: GetExtendedPublicKeyPayload): Promisable<string>;
+  getExtendedPublicKey(payload: GetExtendedPublicKeyPayload): Promisable<HexString>;
 
   /**
    *
    * @param payload {@link SignMessagePayload}
    */
   signMessage(payload: SignMessagePayload): Promisable<HexString>;
+
+  /**
+   * clear all data about the keystore, including the mnemonic, extended public keys, etc.
+   */
+  reset(): Promisable<void>;
 }
 
-interface GetExtendedPublicKeyPayload {
+export interface GetExtendedPublicKeyPayload {
   path: HardenedPath | NonHardenedPath;
   password?: PasswordProvider;
 }
@@ -72,9 +81,9 @@ export interface SignMessagePayload {
 /**
  * checkout BIP-32 learn more about the {@link https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki#extended-keys hardened key}
  */
-type HardenedPath = string;
+export type HardenedPath = string;
 /**
  * checkout BIP-32 learn more about the {@link https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki#extended-keys non-hardened key}
  */
-type NonHardenedPath = string;
-type PasswordProvider = Provider<string>;
+export type NonHardenedPath = string;
+export type PasswordProvider = Provider<string>;
