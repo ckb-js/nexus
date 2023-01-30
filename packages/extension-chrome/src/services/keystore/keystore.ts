@@ -24,8 +24,8 @@ export function createKeyStoreService(config: { storage: Storage<KeystoreData> }
     return keystoreData;
   }
 
-  const keystoreService = {
-    async initKeyStore(payload: InitKeyStorePayload): Promise<void> {
+  const keystoreService: KeystoreService = {
+    initKeyStore: async (payload: InitKeyStorePayload): Promise<void> => {
       const isInitialized = await keystoreService.hasInitialized();
 
       if (isInitialized) errors.throwError('Keystore has been initialized');
@@ -53,7 +53,7 @@ export function createKeyStoreService(config: { storage: Storage<KeystoreData> }
       storage.setItem('keystore', { publicInfos, wss });
     },
 
-    async getExtendedPublicKey(payload: GetExtendedPublicKeyPayload): Promise<string> {
+    getExtendedPublicKey: async (payload: GetExtendedPublicKeyPayload): Promise<string> => {
       const { path } = payload;
 
       assertDerivationPath(path);
@@ -81,9 +81,10 @@ export function createKeyStoreService(config: { storage: Storage<KeystoreData> }
       return bytes.hexify(extendedPublicKey.derivePath(childPath).publicKey);
     },
 
-    hasInitialized(): Promisable<boolean> {
+    hasInitialized: (): Promisable<boolean> => {
       return storage.hasItem('keystore');
     },
+
     signMessage: async (payload: SignMessagePayload): Promise<HexString> => {
       const keystoreData = await resolveKeystoreData();
 
@@ -94,6 +95,10 @@ export function createKeyStoreService(config: { storage: Storage<KeystoreData> }
         bytes.hexify(payload.message),
         extendedPrivateKey.privateKeyInfoByPath(payload.path).privateKey,
       );
+    },
+
+    reset: async () => {
+      await storage.removeItem('keystore');
     },
   };
 

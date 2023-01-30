@@ -110,3 +110,10 @@ describe('signMessage', () => {
     ).rejects.toThrow();
   });
 });
+
+describe('reset', () => {
+  test('normal', async () => {
+    await service.reset();
+    await expect(Promise.resolve(storage.getItem('keystore'))).resolves.toBeFalsy();
+  });
+});
