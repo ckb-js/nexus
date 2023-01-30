@@ -5,6 +5,8 @@ import browser from 'webextension-polyfill';
 const NOTIFICATION_WIDTH = 360;
 const NOTIFICATION_HEIGHT = 600;
 
+// TODO this is a mocked notification service,
+//  just demonstrating how we organize the code
 export function createNotificationService(): NotificationService {
   return {
     async requestGrant({ url }) {
