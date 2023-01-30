@@ -18,7 +18,7 @@ export interface ConfigService {
   getVersion(): Promisable<void>;
 }
 
-interface Config {
+export interface Config {
   /**
    * version of the current app
    */
@@ -32,7 +32,7 @@ interface Config {
   whitelist: string[];
 }
 
-interface NetworkConfig {
+export interface NetworkConfig {
   id: string;
   displayName: string;
   networkName: NetworkName;
