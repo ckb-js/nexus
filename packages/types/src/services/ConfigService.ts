@@ -14,9 +14,15 @@ export interface ConfigService {
 
   appendWhitelistItem(payload: { host: string }): Promisable<void>;
   removeWhitelistItem(payload: { host: string }): Promisable<void>;
+
+  getVersion(): Promisable<void>;
 }
 
 interface Config {
+  /**
+   * version of the current app
+   */
+  version: string;
   nickname: string;
   selectedNetwork: string;
   networks: NetworkConfig[];
