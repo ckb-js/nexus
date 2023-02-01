@@ -15,7 +15,7 @@ addMethod('wallet_enable', async (_, { getRequesterAppInfo }) => {
     left: lastFocused.left! + (lastFocused.width! - 360),
     width: NOTIFICATION_WIDTH,
     height: NOTIFICATION_HEIGHT,
-    url: 'notification.html#/enable',
+    url: 'notification.html#/grant',
   });
 
   const notificationTabId = notification.tabs?.[0]?.id;

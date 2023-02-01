@@ -54,7 +54,7 @@ export const pageConfig: Configuration = merge(configExcludeEntry, {
   entry: {
     popup: env.paths.resolve('/src/pages/Popup/index.tsx'),
     notification: env.paths.resolve('/src/pages/Notification/index.tsx'),
-    WalletManager: env.paths.resolve('/src/pages/WalletManager/index.tsx'),
+    walletManager: env.paths.resolve('/src/pages/WalletManager/index.tsx'),
   },
 
   plugins: [
@@ -75,7 +75,7 @@ export const pageConfig: Configuration = merge(configExcludeEntry, {
     }),
     new HtmlWebpackPlugin({
       filename: 'walletManager.html',
-      chunks: ['WalletManager'],
+      chunks: ['walletManager'],
       template: env.paths.resolve('src/pages/WalletManager/index.html'),
       cache: false,
     }),
