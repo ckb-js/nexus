@@ -83,13 +83,13 @@ export class DefaultAddressStorage implements AddressStorage {
     const newUsed: AddressInfo[] = [];
     const newChangeAddressUsed: AddressInfo[] = [];
     for (const address of this.unusedAddresses) {
-      const count = await this.backend.countTx(address.lock);
-      if (count > 0) {
+      const hasHistory = await this.backend.hasHistory(address.lock);
+      if (hasHistory) {
         newUsed.push(address);
         // detect if change address is used too.
         const addressIndex = address.addressIndex;
         const changeAddressInfo = getAddressInfo(keystoreService, true, addressIndex);
-        const changeTxcount = await this.backend.countTx(changeAddressInfo.lock);
+        const changeTxcount = await this.backend.hasHistory(changeAddressInfo.lock);
         !!changeTxcount && newChangeAddressUsed.push(changeAddressInfo);
       } else {
         stillUnused.push(address);

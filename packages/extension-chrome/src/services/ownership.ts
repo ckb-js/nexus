@@ -33,12 +33,12 @@ export function createOwnershipService(
       let currentGap = 0;
       for (let index = 0; ; index++) {
         const childScript: Script = generateChildScript(keystoreService, false, index);
-        const childScriptTxCount = await backend.countTx(childScript);
+        const childScriptHasHistory = await backend.hasHistory(childScript);
         // detect if there is a corresponding change address used also.
         const changeScript: Script = generateChildScript(keystoreService, true, index);
-        const changeScriptTxCount = await backend.countTx(changeScript);
-        !!changeScriptTxCount && changeScripts.push(changeScript);
-        if (childScriptTxCount > 0) {
+        const changeScriptHasHistory = await backend.hasHistory(changeScript);
+        changeScriptHasHistory && changeScripts.push(changeScript);
+        if (childScriptHasHistory) {
           externalScripts.push(childScript);
           currentGap = 0;
         } else {

@@ -51,7 +51,7 @@ const createMockKeystoreService = (
 
 it('ownership#get used locks return empty list', async () => {
   const mockBackend: Backend = {
-    countTx: async () => 0,
+    hasHistory: async () => false,
     nodeUri: '',
     indexer: new CkbIndexer(''),
   };
@@ -64,9 +64,9 @@ it('ownership#get used locks return empty list', async () => {
 });
 
 it('ownership#get used locks return fisrt lock', async () => {
-  const mockCallback = jest.fn().mockReturnValueOnce(Promise.resolve(1)).mockReturnValue(Promise.resolve(0));
+  const mockCallback = jest.fn().mockReturnValueOnce(Promise.resolve(true)).mockReturnValue(Promise.resolve(false));
   const mockBackend: Backend = {
-    countTx: mockCallback,
+    hasHistory: mockCallback,
     nodeUri: '',
     indexer: new CkbIndexer(''),
   };
@@ -82,14 +82,14 @@ it('ownership#get used locks return fisrt lock', async () => {
 });
 it('ownership#get used locks return 1st lock and 3rd lock', async () => {
   const mockBackend: Backend = {
-    countTx: jest
+    hasHistory: jest
       .fn()
-      .mockReturnValueOnce(Promise.resolve(1)) // m/44'/309'/0'/0/0
-      .mockReturnValueOnce(Promise.resolve(0)) // m/44'/309'/0'/1/0
-      .mockReturnValueOnce(Promise.resolve(0)) // m/44'/309'/0'/0/1
-      .mockReturnValueOnce(Promise.resolve(0)) // m/44'/309'/0'/1/1
-      .mockReturnValueOnce(Promise.resolve(1)) // m/44'/309'/0'/0/2
-      .mockReturnValue(Promise.resolve(0)),
+      .mockReturnValueOnce(Promise.resolve(true)) // m/44'/309'/0'/0/0
+      .mockReturnValueOnce(Promise.resolve(false)) // m/44'/309'/0'/1/0
+      .mockReturnValueOnce(Promise.resolve(false)) // m/44'/309'/0'/0/1
+      .mockReturnValueOnce(Promise.resolve(false)) // m/44'/309'/0'/1/1
+      .mockReturnValueOnce(Promise.resolve(true)) // m/44'/309'/0'/0/2
+      .mockReturnValue(Promise.resolve(false)),
     nodeUri: '',
     indexer: new CkbIndexer(''),
   };
@@ -109,9 +109,9 @@ it('ownership#get used locks return 1st lock and 3rd lock', async () => {
 });
 
 it('ownership#sign data with 1st lock', async () => {
-  const mockCallback = jest.fn().mockReturnValueOnce(Promise.resolve(1)).mockReturnValue(Promise.resolve(0));
+  const mockCallback = jest.fn().mockReturnValueOnce(Promise.resolve(true)).mockReturnValue(Promise.resolve(false));
   const mockBackend: Backend = {
-    countTx: mockCallback,
+    hasHistory: mockCallback,
     nodeUri: '',
     indexer: new CkbIndexer(''),
   };

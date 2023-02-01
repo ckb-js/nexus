@@ -3,7 +3,7 @@ import { Indexer, TransactionCollector } from '@ckb-lumos/ckb-indexer';
 export interface Backend {
   nodeUri: string;
   indexer: Indexer;
-  countTx: (script: Script) => Promise<number>;
+  hasHistory: (script: Script) => Promise<boolean>;
 }
 
 export class BackendProvider {
@@ -13,7 +13,7 @@ export class BackendProvider {
     return {
       nodeUri,
       indexer,
-      countTx: async (script: Script) => {
+      hasHistory: async (script: Script) => {
         const txCollector = new TransactionCollector(
           indexer,
           {
@@ -21,8 +21,12 @@ export class BackendProvider {
           },
           nodeUri,
         );
-        const count = await txCollector.count();
-        return count;
+        let hasRecord = false;
+        for await (const _ of txCollector.collect()) {
+          hasRecord = true;
+          break;
+        }
+        return hasRecord;
       },
     };
   }
