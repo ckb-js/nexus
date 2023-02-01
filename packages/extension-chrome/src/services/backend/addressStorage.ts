@@ -1,11 +1,11 @@
+import { KeystoreService } from '@nexus-wallet/types';
 import { Script } from '@ckb-lumos/base';
-import { Keychain } from '@ckb-lumos/hd';
 import { Backend } from './index';
 import { getAddressInfo } from './utils';
 export type AddressInfo = {
   path: string;
   addressIndex: number;
-  depth: number;
+  depth?: number;
   pubkey: string;
   blake160: string;
   lock: Script;
@@ -17,7 +17,7 @@ export interface AddressStorage {
     changeAddresses: AddressInfo[];
   };
   unusedAddresses: AddressInfo[];
-  updateUnusedAddresses: (keychain: Keychain) => Promise<void>;
+  updateUnusedAddresses: (keystoreService: KeystoreService) => Promise<void>;
   getUsedExternalAddresses: () => AddressInfo[];
   getUsedChangeAddresses: () => AddressInfo[];
   getUnusedAddresses: () => Promise<AddressInfo[]>;
@@ -78,7 +78,7 @@ export class DefaultAddressStorage implements AddressStorage {
   }
 
   // check all unused addresses status and update the used/unused list
-  async updateUnusedAddresses(keychain: Keychain): Promise<void> {
+  async updateUnusedAddresses(keystoreService: KeystoreService): Promise<void> {
     const stillUnused: AddressInfo[] = [];
     const newUsed: AddressInfo[] = [];
     const newChangeAddressUsed: AddressInfo[] = [];
@@ -88,9 +88,7 @@ export class DefaultAddressStorage implements AddressStorage {
         newUsed.push(address);
         // detect if change address is used too.
         const addressIndex = address.addressIndex;
-        const changePath = `m/44'/309'/0'/1/${addressIndex}`;
-        const changeKeychain = keychain.derivePath(changePath);
-        const changeAddressInfo = getAddressInfo(changeKeychain, changePath);
+        const changeAddressInfo = getAddressInfo(keystoreService, true, addressIndex);
         const changeTxcount = await this.backend.countTx(changeAddressInfo.lock);
         !!changeTxcount && newChangeAddressUsed.push(changeAddressInfo);
       } else {

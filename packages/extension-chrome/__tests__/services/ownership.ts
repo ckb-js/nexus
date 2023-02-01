@@ -1,51 +1,69 @@
-import { CkbIndexer } from '@ckb-lumos/ckb-indexer/lib/indexer';
-import { Keychain } from '@ckb-lumos/hd';
 import { publicKeyToBlake160 } from '@ckb-lumos/hd/lib/key';
-import { config, Script } from '@ckb-lumos/lumos';
+import { errors } from '@nexus-wallet/utils';
+import { SignMessagePayload } from '@nexus-wallet/types/lib/services/KeystoreService';
+import { CkbIndexer } from '@ckb-lumos/ckb-indexer/lib/indexer';
 import { Backend } from '../../src/services/backend';
 import { DefaultAddressStorage } from '../../src/services/backend/addressStorage';
 import { createOwnershipService } from '../../src/services/ownership';
+import { NotificationService, Promisable } from '@nexus-wallet/types/lib';
+import { Script } from '@ckb-lumos/base';
 
-// https://en.bitcoin.it/wiki/BIP_0032_TestVectors
-const shortSeed = Buffer.from('000102030405060708090a0b0c0d0e0f', 'hex');
+const mockNotificationService: NotificationService = {
+  requestSignTransaction: function (): Promise<{ password: string }> {
+    errors.unimplemented();
+  },
+  requestSignData: function (): Promise<{ password: string }> {
+    return Promise.resolve({ password: '123456' });
+  },
+  requestGrant: function (): Promise<void> {
+    errors.unimplemented();
+  },
+};
 
-const testKeychain = Keychain.fromSeed(shortSeed);
-
-const locks: Script[] = [];
-for (let index = 0; index < 10; index++) {
-  const currentKeychain = testKeychain.derivePath(`m/44'/309'/0'/0/${index}`);
-  const scriptArgs = publicKeyToBlake160(`0x${currentKeychain.publicKey.toString('hex')}`);
-  locks.push({
-    codeHash: config.getConfig().SCRIPTS!.SECP256K1_BLAKE160!.CODE_HASH,
+const fixtures: { pubkey: string; lock: Script }[] = new Array(50).fill(0).map((_, i) => ({
+  pubkey: `0x${String(i).padStart(2, '0').repeat(33)}`,
+  lock: {
+    args: publicKeyToBlake160(`0x${String(i).padStart(2, '0').repeat(33)}`),
+    codeHash: '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
     hashType: 'type',
-    args: scriptArgs,
-  });
-}
+  },
+}));
 
-it('ownership#get 10 locks', async () => {
-  expect(locks.length).toBe(10);
+const createMockKeystoreService = (
+  getChildPubkey: () => string,
+  mockSignMessage?: (payload: SignMessagePayload) => Promisable<string>,
+) => ({
+  hasInitialized: () => true,
+  initKeyStore: function (): Promisable<void> {
+    errors.unimplemented();
+  },
+  getExtendedPublicKey: function (): Promisable<string> {
+    errors.unimplemented();
+  },
+  signMessage:
+    mockSignMessage ||
+    function (payload: SignMessagePayload): Promisable<string> {
+      console.log('signMessage', payload);
+      return '0x';
+    },
+  getChildPubkey,
 });
 
 it('ownership#get used locks return empty list', async () => {
-  const keychain = Keychain.fromSeed(shortSeed);
-  expect(keychain.privateKey.toString('hex')).toEqual(
-    'e8f32e723decf4051aefac8e2c93c9c5b214313817cdb01a1494b917c8436b35',
-  );
-
   const mockBackend: Backend = {
     countTx: async () => 0,
     nodeUri: '',
     indexer: new CkbIndexer(''),
   };
   const mockAddressStorage = new DefaultAddressStorage(mockBackend, [], [], []);
+  const mockKeystoreService = createMockKeystoreService(() => fixtures[0].pubkey);
 
-  const service = createOwnershipService(keychain, mockBackend, mockAddressStorage);
+  const service = createOwnershipService(mockKeystoreService, mockNotificationService, mockBackend, mockAddressStorage);
   const usedLocks = await service.getUsedLocks({});
   expect(usedLocks).toEqual({ cursor: '', objects: [] });
 });
 
 it('ownership#get used locks return fisrt lock', async () => {
-  const keychain = Keychain.fromSeed(shortSeed);
   const mockCallback = jest.fn().mockReturnValueOnce(Promise.resolve(1)).mockReturnValue(Promise.resolve(0));
   const mockBackend: Backend = {
     countTx: mockCallback,
@@ -53,42 +71,44 @@ it('ownership#get used locks return fisrt lock', async () => {
     indexer: new CkbIndexer(''),
   };
   const mockAddressStorage = new DefaultAddressStorage(mockBackend, [], [], []);
+  const mockKeystoreService = createMockKeystoreService(() => fixtures[0].pubkey);
 
-  const service = createOwnershipService(keychain, mockBackend, mockAddressStorage);
+  const service = createOwnershipService(mockKeystoreService, mockNotificationService, mockBackend, mockAddressStorage);
   const usedLocks = await service.getUsedLocks({});
   expect(usedLocks).toEqual({
     cursor: '',
-    objects: [locks[0]],
+    objects: [fixtures[0].lock],
   });
 });
-it('ownership#get used locks return 1st lock and 6th lock', async () => {
-  const keychain = Keychain.fromSeed(shortSeed);
-  const mockCallback = jest
-    .fn()
-    .mockReturnValueOnce(Promise.resolve(1)) // m/44'/309'/0'/0/0
-    .mockReturnValueOnce(Promise.resolve(0)) // m/44'/309'/0'/1/0
-    .mockReturnValueOnce(Promise.resolve(0)) // m/44'/309'/0'/0/1
-    .mockReturnValueOnce(Promise.resolve(0)) // m/44'/309'/0'/0/2
-    .mockReturnValueOnce(Promise.resolve(0)) // m/44'/309'/0'/0/3
-    .mockReturnValueOnce(Promise.resolve(0)) // m/44'/309'/0'/0/4
-    .mockReturnValueOnce(Promise.resolve(1)) // m/44'/309'/0'/0/5
-    .mockReturnValue(Promise.resolve(0));
+it('ownership#get used locks return 1st lock and 3rd lock', async () => {
   const mockBackend: Backend = {
-    countTx: mockCallback,
+    countTx: jest
+      .fn()
+      .mockReturnValueOnce(Promise.resolve(1)) // m/44'/309'/0'/0/0
+      .mockReturnValueOnce(Promise.resolve(0)) // m/44'/309'/0'/1/0
+      .mockReturnValueOnce(Promise.resolve(0)) // m/44'/309'/0'/0/1
+      .mockReturnValueOnce(Promise.resolve(0)) // m/44'/309'/0'/1/1
+      .mockReturnValueOnce(Promise.resolve(1)) // m/44'/309'/0'/0/2
+      .mockReturnValue(Promise.resolve(0)),
     nodeUri: '',
     indexer: new CkbIndexer(''),
   };
   const mockAddressStorage = new DefaultAddressStorage(mockBackend, [], [], []);
-  const service = createOwnershipService(keychain, mockBackend, mockAddressStorage);
+  const mockKeystoreService = createMockKeystoreService(
+    jest.fn().mockImplementation(({ index }) => {
+      return fixtures[index].pubkey;
+    }),
+  );
+
+  const service = createOwnershipService(mockKeystoreService, mockNotificationService, mockBackend, mockAddressStorage);
   const usedLocks = await service.getUsedLocks({});
   expect(usedLocks).toEqual({
     cursor: '',
-    objects: [locks[0], locks[5]],
+    objects: [fixtures[0].lock, fixtures[2].lock],
   });
 });
 
 it('ownership#sign data with 1st lock', async () => {
-  const keychain = Keychain.fromSeed(shortSeed);
   const mockCallback = jest.fn().mockReturnValueOnce(Promise.resolve(1)).mockReturnValue(Promise.resolve(0));
   const mockBackend: Backend = {
     countTx: mockCallback,
@@ -96,13 +116,15 @@ it('ownership#sign data with 1st lock', async () => {
     indexer: new CkbIndexer(''),
   };
   const mockAddressStorage = new DefaultAddressStorage(mockBackend, [], [], []);
-  const service = createOwnershipService(keychain, mockBackend, mockAddressStorage);
+  const mockSignMessage = jest.fn().mockImplementation(() => Promise.resolve('0x'));
+  const mockKeystoreService = createMockKeystoreService(() => fixtures[0].pubkey, mockSignMessage);
+
+  const service = createOwnershipService(mockKeystoreService, mockNotificationService, mockBackend, mockAddressStorage);
   const usedExternalLocks = await service.getUsedLocks({});
   mockAddressStorage.setUsedExternalAddresses([
     {
-      path: '',
+      path: `m/44'/309'/0'/0/0`,
       addressIndex: 0,
-      depth: 5,
       pubkey: '',
       blake160: '',
       lock: usedExternalLocks.objects[0],
@@ -110,10 +132,6 @@ it('ownership#sign data with 1st lock', async () => {
   ]);
 
   const message = '0x1234';
-  // TODO how to ensure the corresponding privatekey/message/signature is right?
-  const expectedSignature =
-    '0xee6b0c6598e02024f14788618abe7f92b5c60ce4376363f6e1b659993469833420c5dc884ae35675d86f7a6f14978b79844cee2b21ceda0d742070620a96091201';
-
-  const signature = await service.signData({ data: message, lock: locks[0] });
-  expect(signature).toEqual(expectedSignature);
+  await service.signData({ data: message, lock: fixtures[0].lock });
+  expect(mockSignMessage).toBeCalledWith({ message, path: `m/44'/309'/0'/0/0`, password: '123456' });
 });

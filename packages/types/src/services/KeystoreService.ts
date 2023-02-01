@@ -24,6 +24,17 @@ export interface KeystoreService {
    * @param payload {@link SignMessagePayload}
    */
   signMessage(payload: SignMessagePayload): Promisable<HexString>;
+
+  /**
+   * get the public key of a child path,
+   *
+   */
+  getChildPubkey(payload: GetChildPubkeyPayload): string;
+}
+
+export interface GetChildPubkeyPayload {
+  change?: boolean;
+  index: number;
 }
 
 interface GetExtendedPublicKeyPayload {

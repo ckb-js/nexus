@@ -1,18 +1,17 @@
 import { AddressStorage } from './backend/addressStorage';
 import { Script } from '@ckb-lumos/base';
-import { Keychain } from '@ckb-lumos/hd';
-import { publicKeyToBlake160, signRecoverable } from '@ckb-lumos/hd/lib/key';
-import { OwnershipService, Paginate } from '@nexus-wallet/types';
+import { publicKeyToBlake160 } from '@ckb-lumos/hd/lib/key';
+import { OwnershipService, Paginate, KeystoreService, NotificationService } from '@nexus-wallet/types';
 import { GetUsedLocksPayload, SignDataPayload } from '@nexus-wallet/types/lib/services/OwnershipService';
 import { errors } from '@nexus-wallet/utils';
 import { config } from '@ckb-lumos/lumos';
 import { Backend } from './backend';
-import { hexify } from '@ckb-lumos/codec/lib/bytes';
 
 const MAX_ADDRESS_GAP = 20;
 
 export function createOwnershipService(
-  keychain: Keychain,
+  keystoreService: KeystoreService,
+  notificationService: NotificationService,
   backend: Backend,
   addressStorageService: AddressStorage,
 ): OwnershipService {
@@ -29,21 +28,19 @@ export function createOwnershipService(
       // 2. derive the external chain node of this account
       // 3. scan addresses of the external chain; respect the gap limit (20)
 
-      // keychain for path: `m/44'/309'/0'/0`, parent keychain for first address path: `m/44'/309'/0'/0/0`
-      const masterKeyChain = keychain.derivePath(`m/44'/309'/0'/0`);
       const externalScripts: Script[] = [];
       const changeScripts: Script[] = [];
       let currentGap = 0;
       for (let index = 0; ; index++) {
-        const childScript: Script = generateChildScript(masterKeyChain, index);
+        const childScript: Script = generateChildScript(keystoreService, false, index);
         const childScriptTxCount = await backend.countTx(childScript);
+        // detect if there is a corresponding change address used also.
+        const changeScript: Script = generateChildScript(keystoreService, true, index);
+        const changeScriptTxCount = await backend.countTx(changeScript);
+        !!changeScriptTxCount && changeScripts.push(changeScript);
         if (childScriptTxCount > 0) {
           externalScripts.push(childScript);
           currentGap = 0;
-          // if this external address is used, detect if there is a corresponding change address used also.
-          const changeScript: Script = generateChildScript(masterKeyChain, index);
-          const changeScriptTxCount = await backend.countTx(changeScript);
-          !!changeScriptTxCount && changeScripts.push(changeScript);
         } else {
           currentGap++;
           if (currentGap >= MAX_ADDRESS_GAP) {
@@ -64,21 +61,24 @@ export function createOwnershipService(
       errors.unimplemented();
     },
     signData: async (payload: SignDataPayload) => {
-      await addressStorageService.updateUnusedAddresses(keychain);
       const addressInfo = addressStorageService.getAddressInfoByLock(payload.lock);
       if (!addressInfo) {
         errors.throwError('address not found');
       }
-      const targetKeychain = keychain.derivePath(addressInfo.path);
-      const signature = signRecoverable(hexify(payload.data), hexify(targetKeychain.privateKey));
+      const password = (await notificationService.requestSignData({ data: payload.data })).password;
+      const signature = await keystoreService.signMessage({
+        message: payload.data,
+        password,
+        path: addressInfo.path,
+      });
       return signature;
     },
   };
 
-  function generateChildScript(masterKeyChain: Keychain, index: number) {
-    const childKeyChain = masterKeyChain.deriveChild(index, false);
+  function generateChildScript(keystoreService: KeystoreService, change = false, index: number) {
+    const childPubkey = keystoreService.getChildPubkey({ change, index });
     // args for SECP256K1_BLAKE160 script
-    const scriptArgs = publicKeyToBlake160(`0x${childKeyChain.publicKey.toString('hex')}`);
+    const scriptArgs = publicKeyToBlake160(childPubkey);
     const childScript: Script = {
       codeHash: config.getConfig().SCRIPTS!.SECP256K1_BLAKE160!.CODE_HASH,
       hashType: 'type',

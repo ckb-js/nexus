@@ -8,7 +8,7 @@ export interface Backend {
 
 export class BackendProvider {
   public static getDefaultBackend(): Backend {
-    const nodeUri = 'http://127.0.0.1:8118/rpc';
+    const nodeUri = 'https://testnet.ckb.dev';
     const indexer = new Indexer(nodeUri);
     return {
       nodeUri,
