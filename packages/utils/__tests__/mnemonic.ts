@@ -1,4 +1,4 @@
-import { mnemonic } from '../';
+import { mnemonic } from '../src';
 const actualRandom = jest.requireActual('lodash/random');
 
 jest.mock('lodash/random', () => ({
