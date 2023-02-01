@@ -2,14 +2,15 @@ import React, { FC } from 'react';
 import { Button, FormControl, FormLabel, Input, Flex } from '@chakra-ui/react';
 import { ResponsiveContainer } from '../../../Components/ResponsiveContainer';
 import { useNavigate } from 'react-router-dom';
-import networkService from '../../../../services/network';
 import { useSetState } from 'react-use';
+// TODO: use real service
+import configService, { NetworkConfig } from '../../../../mockServices/config';
 
 export const AddNetwork: FC = () => {
   const navigate = useNavigate();
   const [state, setState] = useSetState({ name: '', url: '' });
   const onAddNetwork = () => {
-    networkService.addNetwork({ name: state.name, url: state.url });
+    configService.addNetwork({ displayName: state.name, networkName: state.name, id: '114514' } as NetworkConfig);
     navigate('/network');
   };
 

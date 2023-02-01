@@ -6,7 +6,10 @@ import { useList } from 'react-use';
 import { useNavigate } from 'react-router-dom';
 import { ResponsiveContainer } from '../../Components/ResponsiveContainer';
 import { useMutation } from '@tanstack/react-query';
-import walletService from '../../../services/wallet';
+
+// TODO: use real service
+import walletService from '../../../mockServices/wallet';
+
 /**
  * Confirm the mnemonic
  */

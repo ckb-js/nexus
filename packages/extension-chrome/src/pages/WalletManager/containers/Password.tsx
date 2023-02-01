@@ -4,7 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import { useSetState } from 'react-use';
 import { useMutation } from '@tanstack/react-query';
 import { useWalletManagerStore } from '../store';
-import walletService from '../../../services/wallet';
+
+// TODO: use real service
+import walletService from '../../../mockServices/wallet';
 
 export const PasswordInputs: FC<{ onChange: (isValid: boolean, value: string) => void }> = ({
   onChange: externalOnchange,

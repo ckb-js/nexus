@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Button, Flex, Heading, Spacer, Text } from '@chakra-ui/react';
 import browser from 'webextension-polyfill';
 
-export const Enable: React.FC = () => {
+export const Grant: React.FC = () => {
   const [requesterUrl, setRequesterUrl] = useState<string>();
 
   useEffect(() => {

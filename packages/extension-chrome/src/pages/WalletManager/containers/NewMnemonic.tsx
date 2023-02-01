@@ -3,7 +3,9 @@ import React from 'react';
 import { FC } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import walletService from '../../../services/wallet';
+
+// TODO: use real service
+import walletService from '../../../mockServices/wallet';
 import { useWalletManagerStore } from '../store';
 
 export const CreateMnemonic: FC = () => {

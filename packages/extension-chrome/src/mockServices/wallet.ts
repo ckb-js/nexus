@@ -1,3 +1,4 @@
+// TODO: remove it when the real service is ready
 import { RPCClient as _RPCClient } from '../rpc/client';
 
 const walletService = {

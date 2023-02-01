@@ -1,5 +1,6 @@
 import React, { FC } from 'react';
 
-export const MessageSigning: FC = () => {
+// TODO: implement
+export const SignBinary: FC = () => {
   return <div>Message signing</div>;
 };

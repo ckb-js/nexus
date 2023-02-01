@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "@chakra-ui/icons": "2.0.17",
+    "@chakra-ui/react": "2.4.9",
     "@nexus-wallet/types": "*",
     "@nexus-wallet/utils": "*",
     "@tanstack/react-query": "4.23.0",
@@ -38,6 +39,7 @@
     "nanoid": "3.3.4",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "react-router-dom": "6.8.0",
     "react-use": "17.4.0",
     "sanitize.css": "13.0.0",
     "webext-bridge": "5.0.5",

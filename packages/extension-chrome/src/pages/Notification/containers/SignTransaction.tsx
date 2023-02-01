@@ -1,5 +1,6 @@
 import React, { FC } from 'react';
 
-export const TransactionSigning: FC = () => {
+// TODO: implement
+export const SignTransaction: FC = () => {
   return <div>Transaction signing</div>;
 };
