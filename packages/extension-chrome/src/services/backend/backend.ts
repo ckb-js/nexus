@@ -1,9 +1,11 @@
+import { Cell } from '@ckb-lumos/base';
 import { Script } from '@ckb-lumos/base';
-import { Indexer, TransactionCollector } from '@ckb-lumos/ckb-indexer';
+import { Indexer, TransactionCollector, CellCollector } from '@ckb-lumos/ckb-indexer';
 export interface Backend {
   nodeUri: string;
   indexer: Indexer;
   hasHistory: (payload: { lock: Script }) => Promise<boolean>;
+  getLiveCells: (payload: { locks: Script[] }) => Promise<Cell[]>;
 }
 
 export class DefaultBackend implements Backend {
@@ -13,6 +15,19 @@ export class DefaultBackend implements Backend {
   constructor(payload: { nodeUri: string }) {
     this.nodeUri = payload.nodeUri;
     this.indexer = new Indexer(payload.nodeUri);
+  }
+
+  async getLiveCells(payload: { locks: Script[] }): Promise<Cell[]> {
+    let result: Cell[] = [];
+    for (let index = 0; index < payload.locks.length; index++) {
+      const cellCollector = new CellCollector(this.indexer, {
+        lock: payload.locks[index],
+      });
+      for await (const cell of cellCollector.collect()) {
+        result.push(cell);
+      }
+    }
+    return result;
   }
 
   async hasHistory(payload: { lock: Script }): Promise<boolean> {

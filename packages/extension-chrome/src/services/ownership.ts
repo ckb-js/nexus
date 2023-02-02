@@ -1,3 +1,4 @@
+import { Backend } from './backend/backend';
 import { AddressStorage } from './backend/addressStorage';
 import { Script } from '@ckb-lumos/base';
 import { OwnershipService, Paginate, KeystoreService, NotificationService } from '@nexus-wallet/types';
@@ -12,10 +13,16 @@ export function createOwnershipService(
   keystoreService: KeystoreService,
   notificationService: NotificationService,
   addressStorageService: AddressStorage,
+  backend: Backend,
 ): OwnershipService {
   return {
-    getLiveCells: () => {
-      errors.unimplemented();
+    getLiveCells: async () => {
+      const locks = addressStorageService.getAllUsedAddresses().map((addressInfo) => addressInfo.lock);
+      const cells = await backend.getLiveCells({ locks });
+      return {
+        cursor: '',
+        objects: cells,
+      };
     },
     getUnusedLocks: async (payload: GetUnusedLocksPayload) => {
       const addressInfos = payload.change

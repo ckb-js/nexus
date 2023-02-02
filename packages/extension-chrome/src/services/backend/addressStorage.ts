@@ -22,6 +22,7 @@ export interface AddressStorage {
   updateUnusedAddresses: (payload: { keystoreService: KeystoreService }) => Promise<void>;
   getUsedExternalAddresses: () => AddressInfo[];
   getUsedChangeAddresses: () => AddressInfo[];
+  getAllUsedAddresses: () => AddressInfo[];
   getUnusedAddresses: () => Promise<AddressInfo[]>;
 
   // getMaxAddressIndex: () => number;
@@ -113,6 +114,9 @@ export class DefaultAddressStorage implements AddressStorage {
   }
   setUsedChangeAddresses(addresses: AddressInfo[]): void {
     this.usedAddresses.changeAddresses = addresses;
+  }
+  getAllUsedAddresses(): AddressInfo[] {
+    return [...this.usedAddresses.externalAddresses, ...this.usedAddresses.changeAddresses];
   }
   async getUnusedAddresses(): Promise<AddressInfo[]> {
     return this.unusedAddresses;
