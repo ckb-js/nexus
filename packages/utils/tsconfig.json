@@ -6,9 +6,5 @@
     "declarationMap": true,
     "outDir": "lib"
   },
-  "include": [
-    "src",
-    "../extension-chrome/src/pages/WalletManager/utils/mnemonic.ts",
-    "../extension-chrome/src/pages/WalletManager/utils/mnemonic.ts"
-  ]
+  "include": ["src"]
 }

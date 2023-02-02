@@ -5,5 +5,5 @@
     "declaration": false,
     "declarationMap": false
   },
-  "include": ["src", "../utils/src/utils.ts", "../utils/src/utils.ts"]
+  "include": ["src"]
 }
