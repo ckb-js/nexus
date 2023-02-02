@@ -5,7 +5,7 @@ import { Backend } from '../../src/services/backend/backend';
 import { DefaultAddressStorage } from '../../src/services/backend/addressStorage';
 import { createOwnershipService } from '../../src/services/ownership';
 import { NotificationService } from '@nexus-wallet/types/lib';
-import { Script } from '@ckb-lumos/base';
+import { Cell, Script } from '@ckb-lumos/base';
 
 const mockNotificationService: NotificationService = {
   requestSignTransaction: function (): Promise<{ password: string }> {
@@ -98,4 +98,41 @@ it('ownership#sign data with 1st lock', async () => {
   const message = '0x1234';
   await service.signData({ data: message, lock: fixtures[0].lock });
   expect(mockSignMessage).toBeCalledWith({ message, path: `m/44'/309'/0'/0/0`, password: '123456' });
+});
+
+it('ownership#get live cells', async () => {
+  const presetCells: Cell[] = [
+    {
+      cellOutput: {
+        capacity: '0x1234',
+        lock: fixtures[0].lock,
+      },
+      data: '0x',
+    },
+  ];
+  const mockCallback = jest.fn().mockReturnValueOnce(Promise.resolve(true)).mockReturnValue(Promise.resolve(false));
+  const mockBackend: Backend = createMockBackend({
+    hasHistory: mockCallback,
+    getLiveCells: jest.fn().mockReturnValue(Promise.resolve([presetCells[0]])),
+  });
+  const mockKeystoreService = createMockKeystoreService(() => fixtures[0].pubkey);
+  const mockAddressStorage = new DefaultAddressStorage(mockBackend, mockKeystoreService);
+
+  const service = createOwnershipService(mockKeystoreService, mockNotificationService, mockAddressStorage, mockBackend);
+  const usedExternalLocks = await service.getUsedLocks({});
+  mockAddressStorage.setUsedExternalAddresses([
+    {
+      path: `m/44'/309'/0'/0/0`,
+      addressIndex: 0,
+      pubkey: '',
+      blake160: '',
+      lock: usedExternalLocks.objects[0],
+    },
+  ]);
+
+  const getLiveCellsResult = await service.getLiveCells();
+  expect(getLiveCellsResult).toEqual({
+    cursor: '',
+    objects: [presetCells[0]],
+  });
 });
