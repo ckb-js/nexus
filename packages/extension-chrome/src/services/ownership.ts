@@ -1,3 +1,4 @@
+import { SignTransactionPayload } from '@nexus-wallet/types/src/services/OwnershipService';
 import { Backend } from './backend/backend';
 import { AddressStorage } from './backend/addressStorage';
 import { Script } from '@ckb-lumos/base';
@@ -6,8 +7,10 @@ import {
   GetUsedLocksPayload,
   SignDataPayload,
   GetUnusedLocksPayload,
+  GroupedSignature,
 } from '@nexus-wallet/types/lib/services/OwnershipService';
-import { errors } from '@nexus-wallet/utils';
+import { asserts } from '@nexus-wallet/utils';
+import { getGroupedHash } from './backend/utils';
 
 export function createOwnershipService(
   keystoreService: KeystoreService,
@@ -45,14 +48,35 @@ export function createOwnershipService(
             objects: externalScripts,
           };
     },
-    signTransaction: () => {
-      errors.unimplemented();
+    signTransaction: async (payload: SignTransactionPayload) => {
+      const inputOutpoints = payload.tx.inputs.map((input) => input.previousOutput);
+      const inputLocks = (await backend.getTxOutputByOutPoints({ outPoints: inputOutpoints })).map(
+        (txOutput) => txOutput.lock,
+      );
+      const addressInfos = inputLocks.map((lock) => {
+        const addressInfo = addressStorageService.getAddressInfoByLock({ lock });
+        asserts.nonEmpty(addressInfo);
+        return addressInfo;
+      });
+      const password = (await notificationService.requestSignTransaction({ tx: payload.tx })).password;
+      const groupedMessages = getGroupedHash(payload.tx, addressInfos);
+
+      const result: GroupedSignature = [];
+      for (let index = 0; index < groupedMessages.length; index++) {
+        const messageGroup = groupedMessages[index];
+        const addressInfo = messageGroup[0];
+        const signature = await keystoreService.signMessage({
+          message: messageGroup[1],
+          password,
+          path: addressInfo.path,
+        });
+        result.push([addressInfo.lock, signature]);
+      }
+      return result;
     },
     signData: async (payload: SignDataPayload) => {
       const addressInfo = addressStorageService.getAddressInfoByLock({ lock: payload.lock });
-      if (!addressInfo) {
-        errors.throwError('address not found');
-      }
+      asserts.nonEmpty(addressInfo);
       const password = (await notificationService.requestSignData({ data: payload.data })).password;
       const signature = await keystoreService.signMessage({
         message: payload.data,

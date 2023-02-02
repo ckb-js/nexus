@@ -1,3 +1,4 @@
+import { Output } from '@ckb-lumos/base';
 import { Cell } from '@ckb-lumos/base';
 import { CkbIndexer } from '@ckb-lumos/ckb-indexer/lib/indexer';
 import { Promisable } from '@nexus-wallet/types/lib';
@@ -15,6 +16,11 @@ export const createMockBackend = (payload: Partial<Backend>): Backend => {
     getLiveCells: payload.getLiveCells
       ? payload.getLiveCells
       : function (): Promise<Cell[]> {
+          return Promise.resolve([]);
+        },
+    getTxOutputByOutPoints: payload.getTxOutputByOutPoints
+      ? payload.getTxOutputByOutPoints
+      : function (): Promise<Output[]> {
           return Promise.resolve([]);
         },
   };
