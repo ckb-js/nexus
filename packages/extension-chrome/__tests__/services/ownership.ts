@@ -2,7 +2,7 @@ import { publicKeyToBlake160 } from '@ckb-lumos/hd/lib/key';
 import { errors } from '@nexus-wallet/utils';
 import { SignMessagePayload } from '@nexus-wallet/types/lib/services/KeystoreService';
 import { CkbIndexer } from '@ckb-lumos/ckb-indexer/lib/indexer';
-import { Backend } from '../../src/services/backend';
+import { Backend } from '../../src/services/backend/backend';
 import { DefaultAddressStorage } from '../../src/services/backend/addressStorage';
 import { createOwnershipService } from '../../src/services/ownership';
 import { NotificationService, Promisable } from '@nexus-wallet/types/lib';

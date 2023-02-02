@@ -1,6 +1,6 @@
 import { KeystoreService } from '@nexus-wallet/types';
 import { Script } from '@ckb-lumos/base';
-import { Backend } from './index';
+import { Backend } from './backend';
 import { getAddressInfo, toScript } from './utils';
 
 const MAX_ADDRESS_GAP = 20;
