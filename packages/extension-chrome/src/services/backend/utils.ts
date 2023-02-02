@@ -1,6 +1,6 @@
 import { KeystoreService } from '@nexus-wallet/types';
 import { AddressInfo } from './addressStorage';
-import { Script } from '@ckb-lumos/base';
+import { HexString, Script } from '@ckb-lumos/base';
 import { publicKeyToBlake160 } from '@ckb-lumos/hd/lib/key';
 import { config } from '@ckb-lumos/lumos';
 
@@ -25,4 +25,15 @@ export function getAddressInfo(keystoreService: KeystoreService, change = false,
     blake160: scriptArgs,
     lock,
   };
+}
+
+export function toScript(pubkey: HexString): Script {
+  // args for SECP256K1_BLAKE160 script
+  const scriptArgs = publicKeyToBlake160(pubkey);
+  const script: Script = {
+    codeHash: config.getConfig().SCRIPTS!.SECP256K1_BLAKE160!.CODE_HASH,
+    hashType: 'type',
+    args: scriptArgs,
+  };
+  return script;
 }

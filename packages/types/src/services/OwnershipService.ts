@@ -25,17 +25,17 @@ export interface OwnershipService {
   signData(payload: SignDataPayload): Promise<Signature>;
 }
 
-interface GetPaginateItemsPayload {
+export interface GetPaginateItemsPayload {
   cursor?: string;
 }
 
-interface GetUnusedLocksPayload {
+export interface GetUnusedLocksPayload {
   change?: boolean;
 }
 
 export interface GetUsedLocksPayload extends GetUnusedLocksPayload, GetPaginateItemsPayload {}
 
-interface SignTransactionPayload {
+export interface SignTransactionPayload {
   tx: Transaction;
 }
 

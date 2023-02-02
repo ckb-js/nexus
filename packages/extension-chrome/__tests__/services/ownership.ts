@@ -55,10 +55,10 @@ it('ownership#get used locks return empty list', async () => {
     nodeUri: '',
     indexer: new CkbIndexer(''),
   };
-  const mockAddressStorage = new DefaultAddressStorage(mockBackend, [], [], []);
   const mockKeystoreService = createMockKeystoreService(() => fixtures[0].pubkey);
+  const mockAddressStorage = new DefaultAddressStorage(mockBackend, mockKeystoreService);
 
-  const service = createOwnershipService(mockKeystoreService, mockNotificationService, mockBackend, mockAddressStorage);
+  const service = createOwnershipService(mockKeystoreService, mockNotificationService, mockAddressStorage);
   const usedLocks = await service.getUsedLocks({});
   expect(usedLocks).toEqual({ cursor: '', objects: [] });
 });
@@ -70,10 +70,10 @@ it('ownership#get used locks return fisrt lock', async () => {
     nodeUri: '',
     indexer: new CkbIndexer(''),
   };
-  const mockAddressStorage = new DefaultAddressStorage(mockBackend, [], [], []);
   const mockKeystoreService = createMockKeystoreService(() => fixtures[0].pubkey);
+  const mockAddressStorage = new DefaultAddressStorage(mockBackend, mockKeystoreService);
 
-  const service = createOwnershipService(mockKeystoreService, mockNotificationService, mockBackend, mockAddressStorage);
+  const service = createOwnershipService(mockKeystoreService, mockNotificationService, mockAddressStorage);
   const usedLocks = await service.getUsedLocks({});
   expect(usedLocks).toEqual({
     cursor: '',
@@ -85,23 +85,22 @@ it('ownership#get used locks return 1st lock and 3rd lock', async () => {
     hasHistory: jest
       .fn()
       .mockReturnValueOnce(Promise.resolve(true)) // m/44'/309'/0'/0/0
-      .mockReturnValueOnce(Promise.resolve(false)) // m/44'/309'/0'/1/0
       .mockReturnValueOnce(Promise.resolve(false)) // m/44'/309'/0'/0/1
-      .mockReturnValueOnce(Promise.resolve(false)) // m/44'/309'/0'/1/1
       .mockReturnValueOnce(Promise.resolve(true)) // m/44'/309'/0'/0/2
       .mockReturnValue(Promise.resolve(false)),
     nodeUri: '',
     indexer: new CkbIndexer(''),
   };
-  const mockAddressStorage = new DefaultAddressStorage(mockBackend, [], [], []);
   const mockKeystoreService = createMockKeystoreService(
     jest.fn().mockImplementation(({ index }) => {
       return fixtures[index].pubkey;
     }),
   );
+  const mockAddressStorage = new DefaultAddressStorage(mockBackend, mockKeystoreService);
 
-  const service = createOwnershipService(mockKeystoreService, mockNotificationService, mockBackend, mockAddressStorage);
+  const service = createOwnershipService(mockKeystoreService, mockNotificationService, mockAddressStorage);
   const usedLocks = await service.getUsedLocks({});
+
   expect(usedLocks).toEqual({
     cursor: '',
     objects: [fixtures[0].lock, fixtures[2].lock],
@@ -115,11 +114,11 @@ it('ownership#sign data with 1st lock', async () => {
     nodeUri: '',
     indexer: new CkbIndexer(''),
   };
-  const mockAddressStorage = new DefaultAddressStorage(mockBackend, [], [], []);
   const mockSignMessage = jest.fn().mockImplementation(() => Promise.resolve('0x'));
   const mockKeystoreService = createMockKeystoreService(() => fixtures[0].pubkey, mockSignMessage);
+  const mockAddressStorage = new DefaultAddressStorage(mockBackend, mockKeystoreService);
 
-  const service = createOwnershipService(mockKeystoreService, mockNotificationService, mockBackend, mockAddressStorage);
+  const service = createOwnershipService(mockKeystoreService, mockNotificationService, mockAddressStorage);
   const usedExternalLocks = await service.getUsedLocks({});
   mockAddressStorage.setUsedExternalAddresses([
     {
