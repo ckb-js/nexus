@@ -1,12 +1,11 @@
+import { createMockBackend, createMockKeystoreService } from './utils';
 import { publicKeyToBlake160 } from '@ckb-lumos/hd/lib/key';
 import { errors } from '@nexus-wallet/utils';
-import { SignMessagePayload } from '@nexus-wallet/types/lib/services/KeystoreService';
-import { CkbIndexer } from '@ckb-lumos/ckb-indexer/lib/indexer';
 import { Backend } from '../../src/services/backend/backend';
 import { DefaultAddressStorage } from '../../src/services/backend/addressStorage';
 import { createOwnershipService } from '../../src/services/ownership';
-import { NotificationService, Promisable } from '@nexus-wallet/types/lib';
-import { Cell, Script } from '@ckb-lumos/base';
+import { NotificationService } from '@nexus-wallet/types/lib';
+import { Script } from '@ckb-lumos/base';
 
 const mockNotificationService: NotificationService = {
   requestSignTransaction: function (): Promise<{ password: string }> {
@@ -29,35 +28,8 @@ const fixtures: { pubkey: string; lock: Script }[] = new Array(50).fill(0).map((
   },
 }));
 
-const createMockKeystoreService = (
-  getChildPubkey: () => string,
-  mockSignMessage?: (payload: SignMessagePayload) => Promisable<string>,
-) => ({
-  hasInitialized: () => true,
-  initKeyStore: function (): Promisable<void> {
-    errors.unimplemented();
-  },
-  getExtendedPublicKey: function (): Promisable<string> {
-    errors.unimplemented();
-  },
-  signMessage:
-    mockSignMessage ||
-    function (payload: SignMessagePayload): Promisable<string> {
-      console.log('signMessage', payload);
-      return '0x';
-    },
-  getChildPubkey,
-});
-
 it('ownership#get used locks return empty list', async () => {
-  const mockBackend: Backend = {
-    hasHistory: async () => false,
-    nodeUri: '',
-    indexer: new CkbIndexer(''),
-    getLiveCells: function (): Promise<Cell[]> {
-      errors.unimplemented();
-    },
-  };
+  const mockBackend: Backend = createMockBackend({});
   const mockKeystoreService = createMockKeystoreService(() => fixtures[0].pubkey);
   const mockAddressStorage = new DefaultAddressStorage(mockBackend, mockKeystoreService);
 
@@ -68,14 +40,7 @@ it('ownership#get used locks return empty list', async () => {
 
 it('ownership#get used locks return fisrt lock', async () => {
   const mockCallback = jest.fn().mockReturnValueOnce(Promise.resolve(true)).mockReturnValue(Promise.resolve(false));
-  const mockBackend: Backend = {
-    hasHistory: mockCallback,
-    nodeUri: '',
-    indexer: new CkbIndexer(''),
-    getLiveCells: function (): Promise<Cell[]> {
-      errors.unimplemented();
-    },
-  };
+  const mockBackend: Backend = createMockBackend({ hasHistory: mockCallback });
   const mockKeystoreService = createMockKeystoreService(() => fixtures[0].pubkey);
   const mockAddressStorage = new DefaultAddressStorage(mockBackend, mockKeystoreService);
 
@@ -87,19 +52,14 @@ it('ownership#get used locks return fisrt lock', async () => {
   });
 });
 it('ownership#get used locks return 1st lock and 3rd lock', async () => {
-  const mockBackend: Backend = {
+  const mockBackend: Backend = createMockBackend({
     hasHistory: jest
       .fn()
       .mockReturnValueOnce(Promise.resolve(true)) // m/44'/309'/0'/0/0
       .mockReturnValueOnce(Promise.resolve(false)) // m/44'/309'/0'/0/1
       .mockReturnValueOnce(Promise.resolve(true)) // m/44'/309'/0'/0/2
       .mockReturnValue(Promise.resolve(false)),
-    nodeUri: '',
-    indexer: new CkbIndexer(''),
-    getLiveCells: function (): Promise<Cell[]> {
-      errors.unimplemented();
-    },
-  };
+  });
   const mockKeystoreService = createMockKeystoreService(
     jest.fn().mockImplementation(({ index }) => {
       return fixtures[index].pubkey;
@@ -118,14 +78,7 @@ it('ownership#get used locks return 1st lock and 3rd lock', async () => {
 
 it('ownership#sign data with 1st lock', async () => {
   const mockCallback = jest.fn().mockReturnValueOnce(Promise.resolve(true)).mockReturnValue(Promise.resolve(false));
-  const mockBackend: Backend = {
-    hasHistory: mockCallback,
-    nodeUri: '',
-    indexer: new CkbIndexer(''),
-    getLiveCells: function (): Promise<Cell[]> {
-      errors.unimplemented();
-    },
-  };
+  const mockBackend: Backend = createMockBackend({ hasHistory: mockCallback });
   const mockSignMessage = jest.fn().mockImplementation(() => Promise.resolve('0x'));
   const mockKeystoreService = createMockKeystoreService(() => fixtures[0].pubkey, mockSignMessage);
   const mockAddressStorage = new DefaultAddressStorage(mockBackend, mockKeystoreService);
