@@ -16,13 +16,13 @@ import React, { FC, ReactElement, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useList } from 'react-use';
 import { useWalletManagerStore } from '../store';
-import { mnemonic as mnemonicUtils } from '@nexus-wallet/utils';
+import { randomPickMnemonicPositions } from '../utils/mnemonic';
 
 export const ConfirmMnemonic: FC = () => {
   const navigate = useNavigate();
   const { mnemonic } = useWalletManagerStore();
 
-  const confirmPositions = useMemo(() => mnemonicUtils.randomPickMnemonicPositions(mnemonic, 5), [mnemonic]);
+  const confirmPositions = useMemo(() => randomPickMnemonicPositions(mnemonic, 5), [mnemonic]);
 
   const word4Choose = Array.from(confirmPositions).map((index) => mnemonic?.[index]);
 

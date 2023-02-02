@@ -3,7 +3,7 @@ import { ChakraProvider } from '@chakra-ui/react';
 import { createRoot } from 'react-dom/client';
 import { Grant } from './containers/Grant';
 import { RouteObject, RouterProvider, createHashRouter } from 'react-router-dom';
-import { SignBinary } from './containers/SignBinary';
+import { SignData } from './containers/SignData';
 import { SignTransaction } from './containers/SignTransaction';
 
 const container = window.document.querySelector('#root');
@@ -15,8 +15,8 @@ const routes: RouteObject[] = [
     element: <Grant />,
   },
   {
-    path: '/signBinary',
-    element: <SignBinary />,
+    path: '/signData',
+    element: <SignData />,
   },
   {
     path: '/signTransaction',
