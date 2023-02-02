@@ -69,7 +69,6 @@ export function getGroupedHash(tx: Transaction, addressInfos: AddressInfo[]): [A
   const txHash = ckbHash(blockchain.RawTransaction.pack(tx));
   let group = inputGroups.next();
   while (!group.done) {
-    console.log(group);
     // group.value[0] is lockHash, group.value[1] is groupInfo
     const indexes = group.value[1];
     const groupIndex = indexes[0];

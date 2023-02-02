@@ -1,7 +1,7 @@
 import { KeystoreService } from '@nexus-wallet/types';
 import { Script } from '@ckb-lumos/base';
 import { Backend } from './backend';
-import { getAddressInfo, toScript } from './utils';
+import { toScript } from './utils';
 
 const MAX_ADDRESS_GAP = 20;
 
@@ -19,7 +19,7 @@ export interface AddressStorage {
     changeAddresses: AddressInfo[];
   };
   unusedAddresses: AddressInfo[];
-  updateUnusedAddresses: (payload: { keystoreService: KeystoreService }) => Promise<void>;
+  // updateUnusedAddresses: (payload: { keystoreService: KeystoreService }) => Promise<void>;
   getUsedExternalAddresses: () => AddressInfo[];
   getUsedChangeAddresses: () => AddressInfo[];
   getAllUsedAddresses: () => AddressInfo[];
@@ -123,29 +123,5 @@ export class DefaultAddressStorage implements AddressStorage {
   }
   setUnusedAddresses(addresses: AddressInfo[]): void {
     this.unusedAddresses = addresses;
-  }
-
-  // check all unused addresses status and update the used/unused list
-  async updateUnusedAddresses(payload: { keystoreService: KeystoreService }): Promise<void> {
-    const keystoreService = payload.keystoreService;
-    const stillUnused: AddressInfo[] = [];
-    const newUsed: AddressInfo[] = [];
-    const newChangeAddressUsed: AddressInfo[] = [];
-    for (const address of this.unusedAddresses) {
-      const hasHistory = await this.backend.hasHistory({ lock: address.lock });
-      if (hasHistory) {
-        newUsed.push(address);
-        // detect if change address is used too.
-        const addressIndex = address.addressIndex;
-        const changeAddressInfo = getAddressInfo(keystoreService, true, addressIndex);
-        const changeTxcount = await this.backend.hasHistory({ lock: changeAddressInfo.lock });
-        !!changeTxcount && newChangeAddressUsed.push(changeAddressInfo);
-      } else {
-        stillUnused.push(address);
-      }
-    }
-    this.unusedAddresses = stillUnused;
-    this.usedAddresses.externalAddresses.push(...newUsed);
-    this.usedAddresses.changeAddresses.push(...newChangeAddressUsed);
   }
 }
