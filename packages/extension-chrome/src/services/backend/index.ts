@@ -3,7 +3,7 @@ import { Indexer, TransactionCollector } from '@ckb-lumos/ckb-indexer';
 export interface Backend {
   nodeUri: string;
   indexer: Indexer;
-  hasHistory: (script: Script) => Promise<boolean>;
+  hasHistory: (payload: { lock: Script }) => Promise<boolean>;
 }
 
 export class BackendProvider {
@@ -13,11 +13,11 @@ export class BackendProvider {
     return {
       nodeUri,
       indexer,
-      hasHistory: async (script: Script) => {
+      hasHistory: async (payload: { lock: Script }) => {
         const txCollector = new TransactionCollector(
           indexer,
           {
-            lock: script,
+            lock: payload.lock,
           },
           nodeUri,
         );

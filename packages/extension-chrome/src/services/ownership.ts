@@ -33,10 +33,10 @@ export function createOwnershipService(
       let currentGap = 0;
       for (let index = 0; ; index++) {
         const childScript: Script = generateChildScript(keystoreService, false, index);
-        const childScriptHasHistory = await backend.hasHistory(childScript);
+        const childScriptHasHistory = await backend.hasHistory({ lock: childScript });
         // detect if there is a corresponding change address used also.
         const changeScript: Script = generateChildScript(keystoreService, true, index);
-        const changeScriptHasHistory = await backend.hasHistory(changeScript);
+        const changeScriptHasHistory = await backend.hasHistory({ lock: changeScript });
         changeScriptHasHistory && changeScripts.push(changeScript);
         if (childScriptHasHistory) {
           externalScripts.push(childScript);
@@ -61,7 +61,7 @@ export function createOwnershipService(
       errors.unimplemented();
     },
     signData: async (payload: SignDataPayload) => {
-      const addressInfo = addressStorageService.getAddressInfoByLock(payload.lock);
+      const addressInfo = addressStorageService.getAddressInfoByLock({ lock: payload.lock });
       if (!addressInfo) {
         errors.throwError('address not found');
       }
