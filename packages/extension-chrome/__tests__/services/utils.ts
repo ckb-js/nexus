@@ -26,10 +26,10 @@ export const createMockBackend = (payload: Partial<Backend>): Backend => {
   };
 };
 
-export const createMockKeystoreService = (
-  getChildPubkey: () => string,
-  mockSignMessage?: (payload: SignMessagePayload) => Promisable<string>,
-): KeystoreService => ({
+export const createMockKeystoreService = (payload: {
+  getChildPubkey: () => string;
+  mockSignMessage?: (payload: SignMessagePayload) => Promisable<string>;
+}): KeystoreService => ({
   hasInitialized: () => true,
   initKeyStore: function (): Promisable<void> {
     errors.unimplemented();
@@ -38,10 +38,9 @@ export const createMockKeystoreService = (
     errors.unimplemented();
   },
   signMessage:
-    mockSignMessage ||
-    function (payload: SignMessagePayload): Promisable<string> {
-      console.log('signMessage', payload);
+    payload.mockSignMessage ||
+    function (_: SignMessagePayload): Promisable<string> {
       return '0x';
     },
-  getChildPubkey,
+  getChildPubkey: payload.getChildPubkey,
 });
