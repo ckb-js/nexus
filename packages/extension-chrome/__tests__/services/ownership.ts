@@ -51,7 +51,8 @@ it('ownership#get used locks return 1st lock and 3rd lock', async () => {
       .mockReturnValue(Promise.resolve(false)),
   });
   const mockKeystoreService = createMockKeystoreService({
-    getChildPubkey: jest.fn().mockImplementation(({ index }) => {
+    getChildPubkey: jest.fn().mockImplementation(({ path }) => {
+      const index = parseInt(path.split('/').pop() as string, 10);
       return mockAddressInfos[index].pubkey;
     }),
   });

@@ -23,6 +23,7 @@ export function createOwnershipService(
       const locks = addressStorageService.getAllUsedAddresses().map((addressInfo) => addressInfo.lock);
       const cells = await backend.getLiveCells({ locks });
       return {
+        // TODO implement the cursor here
         cursor: '',
         objects: cells,
       };
@@ -40,10 +41,12 @@ export function createOwnershipService(
       const externalScripts = addressStorageService.getUsedExternalAddresses().map((addressInfo) => addressInfo.lock);
       return payload.change
         ? {
+            // TODO implement the cursor here
             cursor: '',
             objects: changeScripts,
           }
         : {
+            // TODO implement the cursor here
             cursor: '',
             objects: externalScripts,
           };

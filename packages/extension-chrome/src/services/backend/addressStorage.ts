@@ -69,13 +69,15 @@ export class DefaultAddressStorage implements AddressStorage {
 
     const addressInfos: AddressInfo[] = [];
     let currentGap = 0;
+    // TODO: use sampling to improve performance
     for (let index = 0; ; index++) {
-      const pubkey = this.keystoreService.getChildPubkey({ change: false, index });
+      const path = `m/44'/309'/0'/0/${index}`;
+      const pubkey = this.keystoreService.getChildPubkey({ path });
       const childScript: Script = toScript(pubkey);
       const childScriptHasHistory = await this.backend.hasHistory({ lock: childScript });
       if (childScriptHasHistory) {
         addressInfos.push({
-          path: `m/44'/309'/0'/0/${index}`,
+          path,
           addressIndex: index,
           pubkey,
           blake160: childScript.args,

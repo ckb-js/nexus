@@ -29,12 +29,11 @@ export interface KeystoreService {
    * get the public key of a child path,
    *
    */
-  getChildPubkey(payload: GetChildPubkeyPayload): string;
+  getChildPubkey(payload: GetPubkeyPayload): string;
 }
 
-export interface GetChildPubkeyPayload {
-  change?: boolean;
-  index: number;
+export interface GetPubkeyPayload {
+  path: string;
 }
 
 interface GetExtendedPublicKeyPayload {
