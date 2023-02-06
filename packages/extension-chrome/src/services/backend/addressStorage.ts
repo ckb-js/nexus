@@ -1,3 +1,4 @@
+import { bytes } from '@ckb-lumos/codec';
 import { KeystoreService } from '@nexus-wallet/types';
 import { Script } from '@ckb-lumos/base';
 import { Backend } from './backend';
@@ -97,12 +98,14 @@ export class DefaultAddressStorage implements AddressStorage {
     const lock = payload.lock;
     return (
       this.usedAddresses.externalAddresses.find(
-        (address) => address.lock.codeHash === lock.codeHash && address.lock.args === lock.args,
+        (address) => bytes.equal(lock.codeHash, address.lock.codeHash) && bytes.equal(lock.args, address.lock.args),
       ) ||
       this.usedAddresses.changeAddresses.find(
-        (address) => address.lock.codeHash === lock.codeHash && address.lock.args === lock.args,
+        (address) => bytes.equal(lock.codeHash, address.lock.codeHash) && bytes.equal(lock.args, address.lock.args),
       ) ||
-      this.unusedAddresses.find((address) => address.lock.codeHash === lock.codeHash && address.lock.args === lock.args)
+      this.unusedAddresses.find(
+        (address) => bytes.equal(lock.codeHash, address.lock.codeHash) && bytes.equal(lock.args, address.lock.args),
+      )
     );
   }
   getUsedExternalAddresses(): AddressInfo[] {
