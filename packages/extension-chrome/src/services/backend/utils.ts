@@ -14,9 +14,13 @@ import { ckbHash, CKBHasher } from '@ckb-lumos/base/lib/utils';
  * @param path
  * @returns
  */
-export function getAddressInfo(keystoreService: KeystoreService, change = false, index: number): AddressInfo {
+export async function getAddressInfo(
+  keystoreService: KeystoreService,
+  change = false,
+  index: number,
+): Promise<AddressInfo> {
   const path = `m/44'/309'/0'/${change ? 1 : 0}/${index}`;
-  const pubkey = keystoreService.getChildPubkey({ path });
+  const pubkey = await keystoreService.getPublicKeyByPath({ path });
   const scriptArgs = publicKeyToBlake160(pubkey);
   const lock: Script = {
     codeHash: config.getConfig().SCRIPTS!.SECP256K1_BLAKE160!.CODE_HASH,

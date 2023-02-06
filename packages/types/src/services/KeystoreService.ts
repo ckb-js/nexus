@@ -12,31 +12,21 @@ export interface KeystoreService {
   initKeyStore(payload: InitKeyStorePayload): Promisable<void>;
 
   /**
-   * get an extended public key by a derivation path,
+   * get a public key by a derivation path,
    * if the corresponding extended public is not found in store or cache,
    * the password will be required to derive the extended public key
    * @param payload
    */
-  getExtendedPublicKey(payload: GetExtendedPublicKeyPayload): Promisable<string>;
+  getPublicKeyByPath(payload: GetPublicKeyPayload): Promisable<string>;
 
   /**
    *
    * @param payload {@link SignMessagePayload}
    */
   signMessage(payload: SignMessagePayload): Promisable<HexString>;
-
-  /**
-   * get the public key of a child path,
-   *
-   */
-  getChildPubkey(payload: GetPubkeyPayload): string;
 }
 
-export interface GetPubkeyPayload {
-  path: string;
-}
-
-interface GetExtendedPublicKeyPayload {
+interface GetPublicKeyPayload {
   path: HardenedPath | NonHardenedPath;
   password?: PasswordProvider;
 }

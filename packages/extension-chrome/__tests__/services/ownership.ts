@@ -20,7 +20,7 @@ const mockNotificationService: NotificationService = {
 
 it('ownership#get used locks return empty list', async () => {
   const mockBackend: Backend = createMockBackend({});
-  const mockKeystoreService = createMockKeystoreService({ getChildPubkey: () => mockAddressInfos[0].pubkey });
+  const mockKeystoreService = createMockKeystoreService({ getPublicKeyByPath: () => mockAddressInfos[0].pubkey });
   const mockAddressStorage = new DefaultAddressStorage(mockBackend, mockKeystoreService);
 
   const service = createOwnershipService(mockKeystoreService, mockNotificationService, mockAddressStorage, mockBackend);
@@ -31,7 +31,7 @@ it('ownership#get used locks return empty list', async () => {
 it('ownership#get used locks return fisrt lock', async () => {
   const mockCallback = jest.fn().mockReturnValueOnce(Promise.resolve(true)).mockReturnValue(Promise.resolve(false));
   const mockBackend: Backend = createMockBackend({ hasHistory: mockCallback });
-  const mockKeystoreService = createMockKeystoreService({ getChildPubkey: () => mockAddressInfos[0].pubkey });
+  const mockKeystoreService = createMockKeystoreService({ getPublicKeyByPath: () => mockAddressInfos[0].pubkey });
   const mockAddressStorage = new DefaultAddressStorage(mockBackend, mockKeystoreService);
 
   const service = createOwnershipService(mockKeystoreService, mockNotificationService, mockAddressStorage, mockBackend);
@@ -51,7 +51,7 @@ it('ownership#get used locks return 1st lock and 3rd lock', async () => {
       .mockReturnValue(Promise.resolve(false)),
   });
   const mockKeystoreService = createMockKeystoreService({
-    getChildPubkey: jest.fn().mockImplementation(({ path }) => {
+    getPublicKeyByPath: jest.fn().mockImplementation(({ path }) => {
       const index = parseInt(path.split('/').pop() as string, 10);
       return mockAddressInfos[index].pubkey;
     }),
@@ -72,7 +72,7 @@ it('ownership#sign data with 1st lock', async () => {
   const mockBackend: Backend = createMockBackend({ hasHistory: mockCallback });
   const mockSignMessage = jest.fn().mockImplementation(() => Promise.resolve('0x'));
   const mockKeystoreService = createMockKeystoreService({
-    getChildPubkey: () => mockAddressInfos[0].pubkey,
+    getPublicKeyByPath: () => mockAddressInfos[0].pubkey,
     mockSignMessage,
   });
   const mockAddressStorage = new DefaultAddressStorage(mockBackend, mockKeystoreService);
@@ -109,7 +109,7 @@ it('ownership#get live cells', async () => {
     hasHistory: mockCallback,
     getLiveCells: jest.fn().mockReturnValue(Promise.resolve([mockCells[0]])),
   });
-  const mockKeystoreService = createMockKeystoreService({ getChildPubkey: () => mockAddressInfos[0].pubkey });
+  const mockKeystoreService = createMockKeystoreService({ getPublicKeyByPath: () => mockAddressInfos[0].pubkey });
   const mockAddressStorage = new DefaultAddressStorage(mockBackend, mockKeystoreService);
 
   const service = createOwnershipService(mockKeystoreService, mockNotificationService, mockAddressStorage, mockBackend);
@@ -219,7 +219,7 @@ it('ownership#sign tx', async () => {
   });
   const mockSignatures = ['0x01', '0x02'];
   const mockKeystoreService = createMockKeystoreService({
-    getChildPubkey: () => mockAddressInfos[0].pubkey,
+    getPublicKeyByPath: () => mockAddressInfos[0].pubkey,
     mockSignMessage: jest
       .fn()
       .mockReturnValueOnce(mockSignatures[0]) // first signature

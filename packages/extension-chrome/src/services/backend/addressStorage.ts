@@ -73,7 +73,7 @@ export class DefaultAddressStorage implements AddressStorage {
     // TODO: use sampling to improve performance
     for (let index = 0; ; index++) {
       const path = `m/44'/309'/0'/0/${index}`;
-      const pubkey = this.keystoreService.getChildPubkey({ path });
+      const pubkey = await this.keystoreService.getPublicKeyByPath({ path });
       const childScript: Script = toScript(pubkey);
       const childScriptHasHistory = await this.backend.hasHistory({ lock: childScript });
       if (childScriptHasHistory) {

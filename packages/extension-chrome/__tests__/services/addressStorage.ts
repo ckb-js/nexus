@@ -4,7 +4,7 @@ import { createMockBackend, createMockKeystoreService, mockAddressInfos } from '
 
 it('addressStorage#set and get unused addresses', async () => {
   const mockBackend: Backend = createMockBackend({});
-  const mockKeystoreService = createMockKeystoreService({ getChildPubkey: () => mockAddressInfos[0].pubkey });
+  const mockKeystoreService = createMockKeystoreService({ getPublicKeyByPath: () => mockAddressInfos[0].pubkey });
   const mockAddressStorage = new DefaultAddressStorage(mockBackend, mockKeystoreService);
 
   expect(await mockAddressStorage.getUnusedAddresses()).toEqual([]);

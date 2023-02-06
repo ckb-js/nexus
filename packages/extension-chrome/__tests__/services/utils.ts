@@ -29,14 +29,11 @@ export const createMockBackend = (payload: Partial<Backend>): Backend => {
 };
 
 export const createMockKeystoreService = (payload: {
-  getChildPubkey: () => string;
+  getPublicKeyByPath: () => string;
   mockSignMessage?: (payload: SignMessagePayload) => Promisable<string>;
 }): KeystoreService => ({
   hasInitialized: () => true,
   initKeyStore: function (): Promisable<void> {
-    errors.unimplemented();
-  },
-  getExtendedPublicKey: function (): Promisable<string> {
     errors.unimplemented();
   },
   signMessage:
@@ -44,7 +41,7 @@ export const createMockKeystoreService = (payload: {
     function (_: SignMessagePayload): Promisable<string> {
       return '0x';
     },
-  getChildPubkey: payload.getChildPubkey,
+  getPublicKeyByPath: payload.getPublicKeyByPath,
 });
 
 export const mockAddressInfos: AddressInfo[] = new Array(50).fill(0).map((_, i) => ({
