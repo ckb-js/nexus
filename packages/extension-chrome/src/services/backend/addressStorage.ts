@@ -28,7 +28,7 @@ export interface AddressStorage {
 
   // getMaxAddressIndex: () => number;
   getAddressInfoByLock: (payload: { lock: Script }) => AddressInfo | undefined;
-  syncUsedAddressInfo: (payload: { change?: boolean }) => Promise<void>;
+  syncAddressInfo: (payload: { change?: boolean }) => Promise<void>;
   syncAllAddressInfo: () => Promise<void>;
 }
 
@@ -58,11 +58,11 @@ export class DefaultAddressStorage implements AddressStorage {
   }
   async syncAllAddressInfo(): Promise<void> {
     // sync used external addresses
-    await this.syncUsedAddressInfo({});
+    await this.syncAddressInfo({});
     // sync used change addresses
-    await this.syncUsedAddressInfo({ change: true });
+    await this.syncAddressInfo({ change: true });
   }
-  async syncUsedAddressInfo(payload: { change?: boolean }): Promise<void> {
+  async syncAddressInfo(payload: { change?: boolean }): Promise<void> {
     // refer to bip-44-account-discovery https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki#account-discovery
     // 1. derive the first account's node (index = 0)
     // 2. derive the external chain node of this account
@@ -72,7 +72,7 @@ export class DefaultAddressStorage implements AddressStorage {
     let currentGap = 0;
     // TODO: use sampling to improve performance
     for (let index = 0; ; index++) {
-      const path = `m/44'/309'/0'/0/${index}`;
+      const path = `m/44'/309'/0'/${payload.change ? 1 : 0}/${index}`;
       const pubkey = await this.keystoreService.getPublicKeyByPath({ path });
       const childScript: Script = toScript(pubkey);
       const childScriptHasHistory = await this.backend.hasHistory({ lock: childScript });
@@ -92,6 +92,10 @@ export class DefaultAddressStorage implements AddressStorage {
         }
       }
     }
+    // update unused addresses, remove all used addresses
+    this.unusedAddresses = this.unusedAddresses.filter(
+      (address) => !addressInfos.find((usedAddress) => usedAddress.path === address.path),
+    );
     payload.change ? this.setUsedChangeAddresses(addressInfos) : this.setUsedExternalAddresses(addressInfos);
   }
   getAddressInfoByLock(payload: { lock: Script }): AddressInfo | undefined {
@@ -124,6 +128,7 @@ export class DefaultAddressStorage implements AddressStorage {
     return [...this.usedAddresses.externalAddresses, ...this.usedAddresses.changeAddresses];
   }
   async getUnusedAddresses(): Promise<AddressInfo[]> {
+    await this.syncAllAddressInfo();
     return this.unusedAddresses;
   }
   setUnusedAddresses(addresses: AddressInfo[]): void {
