@@ -10,7 +10,8 @@ import {
   GroupedSignature,
 } from '@nexus-wallet/types/lib/services/OwnershipService';
 import { asserts } from '@nexus-wallet/utils';
-import { getGroupedHash } from './backend/utils';
+import { createTransactionSkeleton } from '@ckb-lumos/helpers';
+import { prepareSigningEntries } from '@ckb-lumos/common-scripts/lib/secp256k1_blake160';
 
 export function createOwnershipService(
   keystoreService: KeystoreService,
@@ -52,24 +53,26 @@ export function createOwnershipService(
           };
     },
     signTransaction: async (payload: SignTransactionPayload) => {
-      const inputOutpoints = payload.tx.inputs.map((input) => input.previousOutput);
-      const inputLocks = (await backend.getTxOutputByOutPoints({ outPoints: inputOutpoints })).map(
-        (txOutput) => txOutput.lock,
-      );
+      const cellFetcher = backend.getLiveCellFetcher();
+      let txSkeleton = await createTransactionSkeleton(payload.tx, cellFetcher);
+      txSkeleton = prepareSigningEntries(txSkeleton);
+      const inputLocks = txSkeleton
+        .get('inputs')
+        .map((input) => input.cellOutput.lock)
+        .toArray();
       const addressInfos = inputLocks.map((lock) => {
         const addressInfo = addressStorageService.getAddressInfoByLock({ lock });
         asserts.nonEmpty(addressInfo);
         return addressInfo;
       });
+      const signingEntries = txSkeleton.get('signingEntries').toArray();
       const password = (await notificationService.requestSignTransaction({ tx: payload.tx })).password;
-      const groupedMessages = getGroupedHash(payload.tx, addressInfos);
-
       const result: GroupedSignature = [];
-      for (let index = 0; index < groupedMessages.length; index++) {
-        const messageGroup = groupedMessages[index];
-        const addressInfo = messageGroup[0];
+      for (let index = 0; index < signingEntries.length; index++) {
+        const signingEntry = signingEntries[index];
+        const addressInfo = addressInfos[signingEntry.index];
         const signature = await keystoreService.signMessage({
-          message: messageGroup[1],
+          message: signingEntry.message,
           password,
           path: addressInfo.path,
         });

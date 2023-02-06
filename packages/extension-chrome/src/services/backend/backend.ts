@@ -1,15 +1,16 @@
-import { OutPoint, Output } from '@ckb-lumos/base';
+import { OutPoint } from '@ckb-lumos/base';
 import { Cell } from '@ckb-lumos/base';
 import { Script } from '@ckb-lumos/base';
 import { Indexer, TransactionCollector, CellCollector } from '@ckb-lumos/ckb-indexer';
 import { RPC } from '@ckb-lumos/rpc';
-import { asserts } from '@nexus-wallet/utils/lib';
 export interface Backend {
   nodeUri: string;
   indexer: Indexer;
+  rpc: RPC;
+
   hasHistory: (payload: { lock: Script }) => Promise<boolean>;
   getLiveCells: (payload: { locks: Script[] }) => Promise<Cell[]>;
-  getTxOutputByOutPoints: (payload: { outPoints: OutPoint[] }) => Promise<Output[]>;
+  getLiveCellFetcher: () => (outPoint: OutPoint) => Promise<Cell>;
 }
 
 export class DefaultBackend implements Backend {
@@ -23,16 +24,14 @@ export class DefaultBackend implements Backend {
     this.rpc = new RPC(payload.nodeUri);
   }
 
-  async getTxOutputByOutPoints(payload: { outPoints: OutPoint[] }): Promise<Output[]> {
-    const result: Output[] = [];
-    for (let index = 0; index < payload.outPoints.length; index++) {
-      const tx = await this.rpc.getTransaction(payload.outPoints[index].txHash);
-      const outputIndex = Number(payload.outPoints[index].index);
-      const cell = tx.transaction.outputs[outputIndex];
-      asserts.nonEmpty(cell);
-      result.push(cell);
-    }
-    return result;
+  getLiveCellFetcher() {
+    return async (outPoint: OutPoint): Promise<Cell> => {
+      const txOutput = await this.rpc.getLiveCell(outPoint, false);
+      return {
+        cellOutput: txOutput.cell.output,
+        data: txOutput.cell.data.content,
+      };
+    };
   }
 
   async getLiveCells(payload: { locks: Script[] }): Promise<Cell[]> {

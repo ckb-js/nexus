@@ -1,4 +1,4 @@
-import { Output } from '@ckb-lumos/base';
+import { RPC } from '@ckb-lumos/rpc';
 import { Cell } from '@ckb-lumos/base';
 import { CkbIndexer } from '@ckb-lumos/ckb-indexer/lib/indexer';
 import { publicKeyToBlake160 } from '@ckb-lumos/hd/lib/key';
@@ -15,16 +15,18 @@ export const createMockBackend = (payload: Partial<Backend>): Backend => {
     hasHistory: payload.hasHistory ? payload.hasHistory : async () => false,
     nodeUri: payload.nodeUri ? payload.nodeUri : '',
     indexer: payload.indexer ? payload.indexer : new CkbIndexer(''),
+    rpc: payload.rpc ? payload.rpc : new RPC(''),
     getLiveCells: payload.getLiveCells
       ? payload.getLiveCells
       : function (): Promise<Cell[]> {
           return Promise.resolve([]);
         },
-    getTxOutputByOutPoints: payload.getTxOutputByOutPoints
-      ? payload.getTxOutputByOutPoints
-      : function (): Promise<Output[]> {
-          return Promise.resolve([]);
-        },
+    getLiveCellFetcher: payload.getLiveCellFetcher
+      ? payload.getLiveCellFetcher
+      : () =>
+          function (): Promise<Cell> {
+            return Promise.resolve({} as Cell);
+          },
   };
 };
 

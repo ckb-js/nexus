@@ -4,7 +4,7 @@ import { Backend } from '../../src/services/backend/backend';
 import { DefaultAddressStorage } from '../../src/services/backend/addressStorage';
 import { createOwnershipService } from '../../src/services/ownership';
 import { NotificationService } from '@nexus-wallet/types/lib';
-import { Cell, Output, Transaction } from '@ckb-lumos/base';
+import { Cell, Transaction } from '@ckb-lumos/base';
 
 const mockNotificationService: NotificationService = {
   requestSignTransaction: function (): Promise<{ password: string }> {
@@ -148,14 +148,28 @@ it('ownership#sign tx', async () => {
       data: '0x',
     },
   ];
-  const mockInputCells: Output[] = [
+  const mockInputCells: Cell[] = [
     {
-      capacity: '0x1234',
-      lock: mockAddressInfos[0].lock,
+      outPoint: {
+        index: '0x0',
+        txHash: '0x45def2fa2371895941e9e0b26ef9c27dca3ab446238548a472fed3b8ccc799f6',
+      },
+      cellOutput: {
+        capacity: '0x1234',
+        lock: mockAddressInfos[0].lock,
+      },
+      data: '0x',
     },
     {
-      capacity: '0x5678',
-      lock: mockAddressInfos[1].lock,
+      outPoint: {
+        index: '0x0',
+        txHash: '0x9fb88345432208ea1182987ff62b7911de877e74c8016cf4af5168815ce30480',
+      },
+      cellOutput: {
+        capacity: '0x5678',
+        lock: mockAddressInfos[1].lock,
+      },
+      data: '0x',
     },
   ];
   const mockTx: Transaction = {
@@ -164,17 +178,11 @@ it('ownership#sign tx', async () => {
     version: '0x01',
     inputs: [
       {
-        previousOutput: {
-          index: '0x0',
-          txHash: '0x45def2fa2371895941e9e0b26ef9c27dca3ab446238548a472fed3b8ccc799f6',
-        },
+        previousOutput: mockInputCells[0].outPoint!,
         since: '0x0',
       },
       {
-        previousOutput: {
-          index: '0x0',
-          txHash: '0x9fb88345432208ea1182987ff62b7911de877e74c8016cf4af5168815ce30480',
-        },
+        previousOutput: mockInputCells[1].outPoint!,
         since: '0x0',
       },
     ],
@@ -215,7 +223,11 @@ it('ownership#sign tx', async () => {
   const mockBackend: Backend = createMockBackend({
     hasHistory: mockCallback,
     getLiveCells: jest.fn().mockReturnValue(Promise.resolve([mockCells[0], mockCells[1]])),
-    getTxOutputByOutPoints: jest.fn().mockReturnValue(Promise.resolve([mockInputCells[0], mockInputCells[1]])),
+    getLiveCellFetcher: () =>
+      jest
+        .fn()
+        .mockReturnValueOnce(Promise.resolve(mockInputCells[0]))
+        .mockReturnValueOnce(Promise.resolve(mockInputCells[1])),
   });
   const mockSignatures = ['0x01', '0x02'];
   const mockKeystoreService = createMockKeystoreService({

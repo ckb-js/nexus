@@ -26,6 +26,9 @@ export interface AddressStorage {
   getAllUsedAddresses: () => AddressInfo[];
   getUnusedAddresses: () => Promise<AddressInfo[]>;
 
+  // TODO: update addresses list when a new tx is on chain.
+  // markAddressAsUsed: (payload: {addressInfo: AddressInfo}) => Promisable<void>;
+
   // getMaxAddressIndex: () => number;
   getAddressInfoByLock: (payload: { lock: Script }) => AddressInfo | undefined;
   syncAddressInfo: (payload: { change?: boolean }) => Promise<void>;
