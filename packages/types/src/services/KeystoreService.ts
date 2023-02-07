@@ -10,7 +10,7 @@ export interface KeystoreService {
   hasInitialized(): Promisable<boolean>;
 
   /**
-   * Only non-hardened path can be used to generate extended public key
+   * initialize the keystore
    * @param payload
    */
   initKeystore(payload: InitKeystorePayload): Promisable<void>;
@@ -55,10 +55,18 @@ export interface InitKeystorePayload {
   mnemonic: string;
 
   /**
-   * non-hardened derivation path,
-   * the corresponding public key will be stored in plain text,
-   * for example, the BIP-44 path `m / 44'/ 309'/ 0'/ 0 / 0` will store the public key of
-   * `m / 44' / 309' / 0' / 0` (external) and `m/44'/ 309'/ 0'/ 1` (internal) in plain text
+   * must be an array of non-hardened derivation path, it is used to derive the extended keys.
+   * @example
+   * ```
+   * // the BIP44 path is `m / purpose' / coin_type' / account' / change / address_index`
+   * // to initialize a BIP44 keystore, we need to provide two paths end with `change`,
+   * // they also act as the parent paths. Once the parent paths are provided, the keystore
+   * // will be able to derive associated child keys
+   * const bip44ParentPaths = [
+   *   `m/44'/309'/0'/0`, // to derive external(change: 0) addresses
+   *   `m/44'/309'/0'/1`, // to derive internal(change: 1) addresses
+   * ];
+   * ```
    */
   paths: NonHardenedPath[];
 }
