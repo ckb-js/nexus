@@ -8,6 +8,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { Home } from './containers/Home';
 import { AddNetwork } from './containers/Network/AddNetwork';
+import { theme } from '../theme';
 
 const routeConfig: RouteObject[] = [
   {
@@ -40,7 +41,7 @@ const queryClient = new QueryClient();
 const App: FC = () => {
   return (
     <React.StrictMode>
-      <ChakraProvider>
+      <ChakraProvider theme={theme}>
         <QueryClientProvider client={queryClient}>
           <RouterProvider router={hashRouter} />
         </QueryClientProvider>

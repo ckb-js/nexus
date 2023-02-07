@@ -5,6 +5,7 @@ import { Grant } from './containers/Grant';
 import { RouteObject, RouterProvider, createHashRouter } from 'react-router-dom';
 import { SignData } from './containers/SignData';
 import { SignTransaction } from './containers/SignTransaction';
+import { theme } from '../theme';
 
 const container = window.document.querySelector('#root');
 if (!container) throw new Error('Impossible');
@@ -28,7 +29,7 @@ const router = createHashRouter(routes);
 
 const App = () => {
   return (
-    <ChakraProvider>
+    <ChakraProvider theme={theme}>
       <RouterProvider router={router} />
     </ChakraProvider>
   );

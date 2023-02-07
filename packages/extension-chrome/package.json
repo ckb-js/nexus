@@ -47,6 +47,7 @@
   },
   "devDependencies": {
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.10",
+    "@svgr/webpack": "6.5.1",
     "@types/rimraf": "3.0.2",
     "babel-loader": "9.1.2",
     "clean-webpack-plugin": "4.0.0",

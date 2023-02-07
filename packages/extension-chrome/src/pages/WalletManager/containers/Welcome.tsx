@@ -1,6 +1,9 @@
 import React, { FC } from 'react';
+import { Icon } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
-import { Flex, Text, Container, Card, CardHeader, Heading, CardBody, Button, Center, Spacer } from '@chakra-ui/react';
+import HardDrive from '../../Components/icons/HardDrive.svg';
+import { PlusSquareIcon } from '@chakra-ui/icons';
+import { Flex, Text, Container, Card, Heading, Button, Spacer } from '@chakra-ui/react';
 
 export const Welcome: FC = () => {
   const navigate = useNavigate();
@@ -17,12 +20,16 @@ export const Welcome: FC = () => {
       heading: 'No, I already have a wallet',
       desc: 'Import your existing wallet using the Seed',
       actionText: 'Import wallet',
+      paddingX: '68px',
+      icon: <Icon w="40px" h="40px" viewBox="0 0 40 40" as={HardDrive} />,
       action: navigateToMnemonic(false),
     },
     {
       heading: 'Yes, I want to create a new wallet',
       desc: "Yes, let's get set up!",
       actionText: 'Create a new wallet',
+      paddingX: '16px',
+      icon: <PlusSquareIcon color="purple.300" w="40px" h="40px" />,
       action: navigateToMnemonic(true),
     },
   ];
@@ -30,30 +37,28 @@ export const Welcome: FC = () => {
   return (
     <Container maxW="6xl" height="100%" centerContent>
       <Spacer />
-      <Heading marginBottom="240px">New to Nexus?</Heading>
+      <Heading marginBottom="48px">New to Nexus?</Heading>
 
       <Flex flex="1">
-        {cards.map(({ heading, desc, action, actionText }) => (
+        {cards.map(({ heading, desc, action, actionText, paddingX, icon }) => (
           <Card
             mx="12px"
             key={heading}
             direction="column"
-            height="250px"
-            width="500px"
             alignItems="center"
-            borderRadius="16px"
+            justifyContent="center"
+            height="294px"
+            paddingY="48px"
+            paddingX={paddingX}
           >
-            <CardHeader>
-              <Heading fontSize="2xl">{heading}</Heading>
-            </CardHeader>
-            <CardBody display="flex" flexDirection="column">
-              <Text fontSize="md">{desc}</Text>
-              <Center flex="1">
-                <Button colorScheme="green" onClick={action}>
-                  {actionText}
-                </Button>
-              </Center>
-            </CardBody>
+            {icon}
+            <Text marginTop="16px" fontSize="20px" fontWeight="700">
+              {heading}
+            </Text>
+            <Text fontSize="16px">{desc}</Text>
+            <Button marginTop="32px" onClick={action}>
+              {actionText}
+            </Button>
           </Card>
         ))}
       </Flex>

@@ -11,6 +11,7 @@ import { RecoveryWallet } from './containers/RecoveryWallet';
 import { ConfirmMnemonic } from './containers/ConfirmMnemonic';
 import { SetPassword } from './containers/Password';
 import { Success } from './containers/Success';
+import { theme } from '../theme';
 
 const routeConfig: RouteObject[] = [
   {
@@ -53,7 +54,7 @@ const App: FC = () => {
   return (
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>
-        <ChakraProvider>
+        <ChakraProvider theme={theme}>
           <SharedStateProvider>
             <RouterProvider router={hashRouter} />
           </SharedStateProvider>
