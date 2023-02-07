@@ -38,7 +38,8 @@
         "inpage.js",
         "notification.html",
         "inpage.js.map",
-        "content.js.map"
+        "content.js.map",
+        "walletManager.html"
       ],
       "matches": ["<all_urls>"],
       "all_frames": true
