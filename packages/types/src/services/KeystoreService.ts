@@ -13,7 +13,7 @@ export interface KeystoreService {
    * Only non-hardened path can be used to generate extended public key
    * @param payload
    */
-  initKeyStore(payload: InitKeyStorePayload): Promisable<void>;
+  initKeystore(payload: InitKeystorePayload): Promisable<void>;
 
   /**
    * get an extended public key by a derivation path,
@@ -44,7 +44,7 @@ export interface GetExtendedPublicKeyPayload {
  * A {@link https://ethereum.org/en/developers/docs/data-structures-and-encoding/web3-secret-storage/ Web3 secret storage} wrapper,
  * to interact with the keystore
  */
-export interface InitKeyStorePayload {
+export interface InitKeystorePayload {
   /**
    * password to encrypt the keystore
    */

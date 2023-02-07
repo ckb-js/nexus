@@ -2,7 +2,7 @@ import type { HexString } from '@ckb-lumos/lumos';
 import type { KeystoreService, Promisable, Storage } from '@nexus-wallet/types';
 import type {
   GetExtendedPublicKeyPayload,
-  InitKeyStorePayload,
+  InitKeystorePayload,
   SignMessagePayload,
   NonHardenedPath,
 } from '@nexus-wallet/types/lib/services/KeystoreService';
@@ -11,7 +11,7 @@ import { hd } from '@ckb-lumos/lumos';
 import { bytes } from '@ckb-lumos/codec';
 import { key, Keystore } from '@ckb-lumos/hd';
 
-export function createKeyStoreService(config: { storage: Storage<KeystoreData> }): KeystoreService {
+export function createKeystoreService(config: { storage: Storage<KeystoreData> }): KeystoreService {
   const { storage } = config;
 
   async function resolveKeystoreData(): Promise<KeystoreData['keystore']> {
@@ -25,7 +25,7 @@ export function createKeyStoreService(config: { storage: Storage<KeystoreData> }
   }
 
   const keystoreService: KeystoreService = {
-    initKeyStore: async (payload: InitKeyStorePayload): Promise<void> => {
+    initKeystore: async (payload: InitKeystorePayload): Promise<void> => {
       const isInitialized = await keystoreService.hasInitialized();
 
       if (isInitialized) errors.throwError('Keystore has been initialized');

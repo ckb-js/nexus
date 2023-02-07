@@ -1,6 +1,6 @@
 import type { KeystoreService, Storage } from '@nexus-wallet/types';
 import { createInMemoryStorage } from '../../src/services/storage';
-import { assertDerivationPath, createKeyStoreService } from '../../src/services/keystore';
+import { assertDerivationPath, createKeystoreService } from '../../src/services/keystore';
 import hd from '@ckb-lumos/hd';
 
 describe('assertDerivationPath', () => {
@@ -55,10 +55,10 @@ let service: KeystoreService;
 
 beforeEach(async () => {
   storage = createInMemoryStorage();
-  service = createKeyStoreService({ storage });
+  service = createKeystoreService({ storage });
 
   const parent = fixture.derived[0];
-  await service.initKeyStore({
+  await service.initKeystore({
     mnemonic: fixture.mnemonic,
     // parent path
     paths: [parent.path],
@@ -72,7 +72,7 @@ afterEach(() => {
 
 test('re-initialize should throw error', async () => {
   await expect(
-    service.initKeyStore({
+    service.initKeystore({
       mnemonic: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
       paths: [`m/44'/309'/0'/0`],
       password: '123456',

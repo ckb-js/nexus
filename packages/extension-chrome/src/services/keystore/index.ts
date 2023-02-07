@@ -1,1 +1,1 @@
-export { createKeyStoreService, assertDerivationPath } from './keystore';
+export { createKeystoreService, assertDerivationPath } from './keystore';
