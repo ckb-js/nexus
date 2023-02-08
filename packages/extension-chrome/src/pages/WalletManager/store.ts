@@ -1,34 +1,35 @@
-import { createReducerContext } from 'react-use';
+import { create } from 'zustand';
 
 type State = {
-  mnemonic: string[];
+  seed: string[];
+  password: string;
+  userName: string;
+
+  /**
+   * If it is true, the next step can be access via clicking Next button.
+   */
+  dischargeNext: boolean;
 };
 
-const [useSharedState, SharedStateProvider] = createReducerContext(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (state: State, action: any): State => {
-    switch (action.type) {
-      case 'SET_MNEMONIC':
-        return { ...state, mnemonic: action.payload };
+type Actions = {
+  set: (state: Partial<State>) => void;
+  createWallet: () => Promise<void>;
+};
 
-      default:
-        return state;
-    }
+export const useWalletCreationStore = create<State & Actions>((setState) => ({
+  seed: [],
+  password: '',
+  userName: '',
+  dischargeNext: false,
+  set: (state) => {
+    setState(state);
   },
 
-  {
-    mnemonic: [],
+  createWallet: () => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, 2000);
+    });
   },
-);
-
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export function useWalletManagerStore() {
-  const [state, dispatch] = useSharedState();
-
-  return {
-    ...state,
-    setMnemonic: (mnemonic: string[]) => dispatch({ type: 'SET_MNEMONIC', payload: mnemonic }),
-  };
-}
-
-export { SharedStateProvider };
+}));

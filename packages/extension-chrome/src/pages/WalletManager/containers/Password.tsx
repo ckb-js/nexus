@@ -1,94 +1,88 @@
 import React, { FC } from 'react';
-import { Button, Container, Flex, FormControl, FormLabel, Input, Spacer, FormErrorMessage } from '@chakra-ui/react';
-import { useNavigate } from 'react-router-dom';
-import { useSetState } from 'react-use';
-import { useMutation } from '@tanstack/react-query';
-import { useWalletManagerStore } from '../store';
+import { Box, Flex, FlexProps, FormControl, FormLabel, Input, Link, Checkbox, Heading } from '@chakra-ui/react';
+import { Formik, Form, Field } from 'formik';
 
-// TODO: use real service
-import walletService from '../../../mockServices/wallet';
+import { useWalletCreationStore } from '../store';
 
-export const PasswordInputs: FC<{ onChange: (isValid: boolean, value: string) => void }> = ({
-  onChange: externalOnchange,
-}) => {
-  const [state, setState] = useSetState({ password: '', confirmPassword: '' });
-  const isValid = !state.confirmPassword || (state.password === state.confirmPassword && state.password.length >= 8);
+type FormValues = {
+  password: string;
+  confirmPassword: string;
+  agreeTerms: boolean;
+};
 
-  const onChange = (field: 'password' | 'confirmPassword') => (e: React.ChangeEvent<HTMLInputElement>) => {
-    setState({ [field]: e.target.value });
-    externalOnchange(isValid, state.password);
-  };
+type FormFieldProps = { field: {} };
 
+export const PasswordInputs: FC<FlexProps> = (props) => {
   return (
-    <Flex direction="column" width="100%">
+    <Flex direction="column" width="100%" {...props}>
       <FormControl>
-        <FormLabel>New password(8 character min)</FormLabel>
-        <Input value={state.password} onChange={onChange('password')} size="lg" type="password" name="password" />
+        <FormLabel fontSize="sm">New password (8 characters minimum)</FormLabel>
+        <Field name="password">{({ field }: FormFieldProps) => <Input size="lg" type="password" {...field} />}</Field>
       </FormControl>
-      <FormControl minH="108px" isInvalid={!isValid}>
-        <FormLabel>Confirm password</FormLabel>
-        <Input
-          onChange={onChange('confirmPassword')}
-          value={state.confirmPassword}
-          size="lg"
-          type="password"
-          name="confirmPassword"
-        />
-        <FormErrorMessage>Password are not correspond</FormErrorMessage>
+      <FormControl>
+        <FormLabel fontSize="sm">Confirm password</FormLabel>
+        <Field name="confirmPassword">
+          {({ field }: FormFieldProps) => <Input size="lg" type="password" {...field} />}
+        </Field>
       </FormControl>
     </Flex>
   );
 };
 
 export const SetPassword: FC = () => {
-  const navigate = useNavigate();
-  const { mnemonic } = useWalletManagerStore();
-  const [state, setState] = useSetState({ isValid: false, value: '' });
-  const password = state.value;
-  const onPasswordChange = (isValid: boolean, value: string) => {
-    setState({ isValid, value });
-    if (isValid) {
-      setState({ value });
-    }
-  };
+  const store = useWalletCreationStore();
 
-  const createWallet = useMutation({
-    mutationFn: ({ mnemonic, password }: { mnemonic: string[]; password: string }) =>
-      walletService.createNewWallet(mnemonic, password),
-  });
-
-  const onCreateWallet = async () => {
-    if (state.isValid) {
-      await createWallet.mutateAsync({ mnemonic, password });
-      navigate('/success', { replace: true });
+  const onValidateForm = ({ password, confirmPassword, agreeTerms }: FormValues) => {
+    if (password.length < 8) {
+      return {
+        password: 'Password must be at least 8 characters',
+      };
     }
+
+    if (password !== confirmPassword) {
+      return {
+        confirmPassword: 'Passwords do not match',
+      };
+    }
+
+    if (!agreeTerms) {
+      return {
+        agreeTerms: 'You must agree to the terms',
+      };
+    }
+
+    store.set({ password, dischargeNext: true });
   };
 
   return (
-    <Container centerContent maxW="6xl" height="100%">
-      <Spacer />
+    <>
       <Flex direction="column" w="100%" maxW="400px">
-        <PasswordInputs onChange={onPasswordChange} />
-      </Flex>
-      <Flex direction="column">
-        <Button onClick={onCreateWallet} size="lg" mt="24px" w="300px" borderRadius="48px" colorScheme="green">
-          Create
-        </Button>
-        <Button
-          onClick={() => {
-            navigate('/create', { replace: true });
+        <Heading mb="48px">Create password</Heading>
+        <Formik
+          initialValues={{
+            password: '',
+            confirmPassword: '',
+            agreeTerms: false,
           }}
-          size="lg"
-          mt="12px"
-          w="300px"
-          borderRadius="48px"
-          colorScheme="green"
-          variant="outline"
+          validate={onValidateForm}
+          validateOnChange
+          onSubmit={() => {}}
         >
-          Back
-        </Button>
+          {(props) => (
+            <Box as={Form}>
+              <PasswordInputs w="311px" pr="52px" mb="12px" />
+              <FormControl>
+                <Checkbox name="agreeTerms" isChecked={props.values.agreeTerms} onChange={props.handleChange}>
+                  I have read and agree to the{' '}
+                  <Link color="purple.500" fontWeight="bold">
+                    Terms of use
+                  </Link>
+                </Checkbox>
+              </FormControl>
+            </Box>
+          )}
+        </Formik>
       </Flex>
-      <Spacer />
-    </Container>
+    </>
   );
 };

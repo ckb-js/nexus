@@ -6,33 +6,65 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Welcome } from './containers/Welcome';
 
 import { CreateMnemonic } from './containers/NewMnemonic';
-import { SharedStateProvider } from './store';
 import { RecoveryWallet } from './containers/RecoveryWallet';
 import { ConfirmMnemonic } from './containers/ConfirmMnemonic';
 import { SetPassword } from './containers/Password';
 import { Success } from './containers/Success';
 import { theme } from '../theme';
+import { OutsideCreateFrame } from './containers/OutsideCreateFrame';
+import { CreateProcessFrame } from './containers/CreateProcessFrame';
+import { BeforeStart } from './containers/BeforeStart';
+import { CreateAccount } from './containers/CreateAccount';
+import { CreateFlowRouteConfig } from './types';
 
 const routeConfig: RouteObject[] = [
   {
-    path: '/',
-    element: <Welcome />,
+    element: <OutsideCreateFrame />,
+    children: [
+      {
+        path: '/beforeStart',
+        element: <BeforeStart />,
+      },
+      {
+        path: '/',
+        element: <Welcome />,
+      },
+    ],
   },
   {
-    path: '/create',
-    element: <CreateMnemonic />,
+    element: <CreateProcessFrame />,
+    loader: () => {
+      return {
+        flow: ['/createAccount', '/createPassword', '/generateSeed', '/confirmSeed'],
+        entry: '/',
+        exit: '/success',
+        disableBackOnExit: true,
+        exitButtonText: 'Confirm',
+      } as CreateFlowRouteConfig;
+    },
+    children: [
+      {
+        path: '/createAccount',
+        element: <CreateAccount />,
+      },
+      {
+        path: '/createPassword',
+        element: <SetPassword />,
+      },
+      {
+        path: '/generateSeed',
+        element: <CreateMnemonic />,
+      },
+      {
+        path: '/confirmSeed',
+        element: <ConfirmMnemonic />,
+      },
+    ],
   },
+
   {
     path: '/import',
     element: <RecoveryWallet />,
-  },
-  {
-    path: '/confirm',
-    element: <ConfirmMnemonic />,
-  },
-  {
-    path: '/password',
-    element: <SetPassword />,
   },
   {
     path: '/success',
@@ -55,9 +87,7 @@ const App: FC = () => {
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>
         <ChakraProvider theme={theme}>
-          <SharedStateProvider>
-            <RouterProvider router={hashRouter} />
-          </SharedStateProvider>
+          <RouterProvider router={hashRouter} />
         </ChakraProvider>
       </QueryClientProvider>
     </React.StrictMode>

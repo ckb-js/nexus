@@ -3,13 +3,13 @@ import { Icon } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import HardDrive from '../../Components/icons/HardDrive.svg';
 import { PlusSquareIcon } from '@chakra-ui/icons';
-import { Flex, Text, Container, Card, Heading, Button, Spacer } from '@chakra-ui/react';
+import { Flex, Text, Card, Heading, Button, Spacer } from '@chakra-ui/react';
 
 export const Welcome: FC = () => {
   const navigate = useNavigate();
   const navigateToMnemonic = (createNew: boolean) => () => {
     if (createNew) {
-      navigate('/create');
+      navigate('/createAccount');
     } else {
       navigate('/import');
     }
@@ -35,7 +35,7 @@ export const Welcome: FC = () => {
   ];
 
   return (
-    <Container maxW="6xl" height="100%" centerContent>
+    <>
       <Spacer />
       <Heading marginBottom="48px">New to Nexus?</Heading>
 
@@ -63,6 +63,6 @@ export const Welcome: FC = () => {
         ))}
       </Flex>
       <Spacer />
-    </Container>
+    </>
   );
 };
