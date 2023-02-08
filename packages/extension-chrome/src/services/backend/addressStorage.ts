@@ -15,11 +15,14 @@ export type AddressInfo = {
   lock: Script;
 };
 export interface AddressStorage {
+  ownershipType: 'FULL' | 'RULE_BASED';
   usedAddresses: {
     externalAddresses: AddressInfo[];
     changeAddresses: AddressInfo[];
   };
   unusedAddresses: AddressInfo[];
+
+  getHardendedPathPrefix: () => string; // m/44'/309'/0' for full ownership, m/49'/309'/0'/0 for rule based ownership
   // updateUnusedAddresses: (payload: { keystoreService: KeystoreService }) => Promise<void>;
   getUsedExternalAddresses: () => AddressInfo[];
   getUsedChangeAddresses: () => AddressInfo[];
@@ -35,7 +38,7 @@ export interface AddressStorage {
   syncAllAddressInfo: () => Promise<void>;
 }
 
-export class DefaultAddressStorage implements AddressStorage {
+export abstract class AbstractAddressStorage implements AddressStorage {
   backend: Backend;
   keystoreService: KeystoreService;
   usedAddresses: {
@@ -59,6 +62,8 @@ export class DefaultAddressStorage implements AddressStorage {
     };
     this.unusedAddresses = unusedAddresses;
   }
+  abstract ownershipType: 'FULL' | 'RULE_BASED';
+  abstract getHardendedPathPrefix(): string;
   async syncAllAddressInfo(): Promise<void> {
     // sync used external addresses
     await this.syncAddressInfo({});
@@ -75,7 +80,7 @@ export class DefaultAddressStorage implements AddressStorage {
     let currentGap = 0;
     // TODO: use sampling to improve performance
     for (let index = 0; ; index++) {
-      const path = `m/44'/309'/0'/${payload.change ? 1 : 0}/${index}`;
+      const path = `${this.getHardendedPathPrefix()}/${payload.change ? 1 : 0}/${index}`;
       const pubkey = await this.keystoreService.getPublicKeyByPath({ path });
       const childScript: Script = toScript(pubkey);
       const childScriptHasHistory = await this.backend.hasHistory({ lock: childScript });
@@ -136,5 +141,18 @@ export class DefaultAddressStorage implements AddressStorage {
   }
   setUnusedAddresses(addresses: AddressInfo[]): void {
     this.unusedAddresses = addresses;
+  }
+}
+
+export class FullOwnershipAddressStorage extends AbstractAddressStorage {
+  ownershipType = 'FULL' as const;
+  getHardendedPathPrefix(): string {
+    return "m/44'/309'/0'";
+  }
+}
+export class RuleBasedAddressStorage extends AbstractAddressStorage {
+  ownershipType = 'RULE_BASED' as const;
+  getHardendedPathPrefix(): string {
+    return "m/49'/309'/0'";
   }
 }

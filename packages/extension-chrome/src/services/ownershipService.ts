@@ -13,7 +13,7 @@ import { asserts } from '@nexus-wallet/utils';
 import { createTransactionSkeleton } from '@ckb-lumos/helpers';
 import { prepareSigningEntries } from '@ckb-lumos/common-scripts/lib/secp256k1_blake160';
 
-export function createFullOwnershipService(config: {
+export function createOwnershipService(config: {
   keystoreService: KeystoreService;
   notificationService: NotificationService;
   addressStorageService: AddressStorage;
