@@ -26,6 +26,10 @@ const routeConfig: RouteObject[] = [
         element: <BeforeStart />,
       },
       {
+        path: '/success',
+        element: <Success />,
+      },
+      {
         path: '/',
         element: <Welcome />,
       },
@@ -33,9 +37,10 @@ const routeConfig: RouteObject[] = [
   },
   {
     element: <CreateProcessFrame />,
+    path: '/create',
     loader: () => {
       return {
-        flow: ['/createAccount', '/createPassword', '/generateSeed', '/confirmSeed'],
+        flow: ['account', 'password', 'seed', 'confirm'],
         entry: '/',
         exit: '/success',
         disableBackOnExit: true,
@@ -44,20 +49,46 @@ const routeConfig: RouteObject[] = [
     },
     children: [
       {
-        path: '/createAccount',
+        path: 'account',
         element: <CreateAccount />,
       },
       {
-        path: '/createPassword',
+        path: 'password',
         element: <SetPassword />,
       },
       {
-        path: '/generateSeed',
+        path: 'seed',
         element: <CreateMnemonic />,
       },
       {
-        path: '/confirmSeed',
+        path: 'confirm',
         element: <ConfirmMnemonic />,
+      },
+    ],
+  },
+  {
+    element: <CreateProcessFrame />,
+    path: '/import',
+    loader: () => {
+      return {
+        flow: ['seed', 'password', 'account'],
+        entry: '/',
+        exit: '/success',
+      } as CreateFlowRouteConfig;
+    },
+
+    children: [
+      {
+        path: 'seed',
+        element: <RecoveryWallet />,
+      },
+      {
+        path: 'password',
+        element: <SetPassword />,
+      },
+      {
+        path: 'account',
+        element: <CreateAccount />,
       },
     ],
   },
@@ -65,10 +96,6 @@ const routeConfig: RouteObject[] = [
   {
     path: '/import',
     element: <RecoveryWallet />,
-  },
-  {
-    path: '/success',
-    element: <Success />,
   },
 ];
 

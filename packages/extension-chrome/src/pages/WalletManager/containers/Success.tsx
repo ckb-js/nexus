@@ -1,18 +1,16 @@
-import { Container, Heading, Spacer, Text } from '@chakra-ui/react';
+import { Box, Button, Heading } from '@chakra-ui/react';
+import Particle from '../../assets/Particle.svg';
 import React, { FC } from 'react';
 
 export const Success: FC = () => {
   return (
-    <Container h="100%" maxW="6xl" centerContent>
-      <Spacer />
-      <Heading>🎉Congratulations!🎉</Heading>
-      <Text mt="40px" fontSize="2xl">
-        Your wallet is ready. Welcome to the world of CKB
-      </Text>
-      <Text mt="40px" fontSize="lg">
-        Now you can close this page and go back to the extension
-      </Text>
-      <Spacer />
-    </Container>
+    <>
+      <Box as={Particle} mb="48px" />
+      <Heading mb="48px">Congratulations!</Heading>
+      <Box mb="68px" fontSize="md">
+        You are all set! Keep your Seed safe – it’s your responsibility!
+      </Box>
+      <Button onClick={() => window.close()}>All Done</Button>
+    </>
   );
 };

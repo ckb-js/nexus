@@ -19,10 +19,11 @@ import FileCopyIcon from '../../Components/icons/FileCopy.svg';
 
 // TODO: use real service
 import walletService from '../../../mockServices/wallet';
+import { useWalletCreationStore } from '../store';
 
 export const CreateMnemonic: FC = () => {
   const toast = useToast();
-
+  const setWalletStore = useWalletCreationStore((actions) => actions.set);
   const { data: mnemonic } = useQuery({
     queryKey: ['mnemonic'],
     queryFn: () => {
@@ -41,8 +42,11 @@ export const CreateMnemonic: FC = () => {
   };
 
   useEffect(() => {
-    mnemonic && clipboard.setValue(mnemonic.join(' '));
-  }, [mnemonic, clipboard]);
+    if (mnemonic) {
+      clipboard.setValue(mnemonic.join(' '));
+      setWalletStore({ seed: mnemonic, dischargeNext: true });
+    }
+  }, [mnemonic, clipboard, setWalletStore]);
 
   return (
     <>

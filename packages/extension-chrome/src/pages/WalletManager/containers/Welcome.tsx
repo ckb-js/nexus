@@ -9,9 +9,9 @@ export const Welcome: FC = () => {
   const navigate = useNavigate();
   const navigateToMnemonic = (createNew: boolean) => () => {
     if (createNew) {
-      navigate('/createAccount');
+      navigate('/beforeStart');
     } else {
-      navigate('/import');
+      navigate('/import/seed');
     }
   };
 

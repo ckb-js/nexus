@@ -34,7 +34,7 @@ export const BeforeStart: FC = () => {
 
       <Button
         onClick={() => {
-          navigate('/create');
+          navigate('/create/account');
         }}
         size="lg"
         w="148px"

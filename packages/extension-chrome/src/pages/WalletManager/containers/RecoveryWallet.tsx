@@ -1,14 +1,44 @@
-import { FormControl, Input, FormLabel, Flex, Grid, Text, Button } from '@chakra-ui/react';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import {
+  FormControl,
+  Input,
+  FormLabel,
+  Flex,
+  Grid,
+  Text,
+  Button,
+  Heading,
+  SimpleGrid,
+  Box,
+  InputProps,
+  Alert,
+  AlertIcon,
+  AlertDescription,
+} from '@chakra-ui/react';
 import times from 'lodash.times';
 import React, { useState } from 'react';
 import { FC } from 'react';
-import { useList } from 'react-use';
+import { useList, useToggle } from 'react-use';
 import { useNavigate } from 'react-router-dom';
-import { ResponsiveContainer } from '../../Components/ResponsiveContainer';
 import { useMutation } from '@tanstack/react-query';
 
 // TODO: use real service
 import walletService from '../../../mockServices/wallet';
+import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
+
+const PasswordInput: FC<{ index: number }> = ({ index }) => {
+  const [passwordVisible, togglePasswordVisible] = useToggle(false);
+
+  const Eye = passwordVisible ? ViewIcon : ViewOffIcon;
+
+  return (
+    <FormControl as={Flex} alignItems="center">
+      <FormLabel>{index}</FormLabel>
+      <Input mr="8px" type={passwordVisible ? 'text' : 'password'} w="152px" />
+      <Eye fontSize="lg" onClick={togglePasswordVisible} cursor="pointer" />
+    </FormControl>
+  );
+};
 
 /**
  * Confirm the mnemonic
@@ -22,17 +52,7 @@ export const RecoveryWallet: FC = () => {
   });
   const navigate = useNavigate();
 
-  const inputs = times(12, (index) => (
-    <FormControl key={index}>
-      <FormLabel>Word {index + 1}</FormLabel>
-      <Input
-        value={mnemonicWords[index]}
-        onChange={(e) => {
-          mnemonicWordAction.updateAt(index, e.target.value);
-        }}
-      />
-    </FormControl>
-  ));
+  const inputs = times(12, (index) => <PasswordInput index={index} key={index} />);
 
   const onRecoveryWallet = async () => {
     saveWallet.mutateAsync({ mnemonicWords, password });
@@ -40,33 +60,21 @@ export const RecoveryWallet: FC = () => {
   };
 
   return (
-    <ResponsiveContainer centerContent h="100%">
-      <Flex direction="column" alignItems="center" h="100%" justifyContent="center">
-        <Text fontSize="2xl" mb="40px">
-          Please input your recovery mnemonic
-        </Text>
-        <Grid gridGap="16px" gridTemplate="repeat(5, auto) / repeat(3, 1fr)">
+    <>
+      <Heading mb="48px">Access Wallet With Your Seed</Heading>
+      <Text fontSize="md" mb="16px" w="672px">
+        Nexus cannot recover your password. We will use your Seed to validate your ownership, restore your wallet and
+        set up a new password. First, enter the Seed that you were given when you created your wallet.
+      </Text>
+      <Alert mb="16px" status="info">
+        <AlertIcon />
+        <AlertDescription fontSize="md">You can paste your entire Seed into any field</AlertDescription>
+      </Alert>
+      <Box display="grid">
+        <Grid w="672px" templateColumns="repeat(3, 1fr)" column={3} gap="12px">
           {inputs}
         </Grid>
-        <FormControl>
-          <FormLabel>Password</FormLabel>
-          <Input
-            type="password"
-            onChange={(e) => {
-              setPassword(e.target.value);
-            }}
-          />
-        </FormControl>
-        <Button
-          colorScheme="green"
-          w="100%"
-          marginTop="20px"
-          onClick={onRecoveryWallet}
-          isLoading={saveWallet.isLoading}
-        >
-          Recovery
-        </Button>
-      </Flex>
-    </ResponsiveContainer>
+      </Box>
+    </>
   );
 };

@@ -9,7 +9,7 @@ import { useWalletCreationStore } from '../store';
 
 const ProcessIndicator: FC<{ total: number; current: number } & FlexProps> = ({ total, current }) => {
   return (
-    <HStack w="320px" spacing="12px" paddingY="4px" mb="48px">
+    <HStack spacing="12px" paddingY="4px" mb="48px">
       {range(0, total).map((index) => (
         <Box
           key={index}
@@ -31,7 +31,10 @@ export const CreateProcessFrame: FC = () => {
   const flowPaths = flowConfig.flow;
   const navigate = useNavigate();
 
-  const currentPathIndex = useMemo(() => flowPaths.findIndex((path) => path === currentPath), [flowPaths, currentPath]);
+  const currentPathIndex = useMemo(
+    () => flowPaths.findIndex((path) => currentPath.endsWith(path)),
+    [flowPaths, currentPath],
+  );
   const isLastStep = currentPathIndex === flowPaths.length - 1;
   const goNext = () => {
     setStoreState({ dischargeNext: false });
@@ -66,7 +69,7 @@ export const CreateProcessFrame: FC = () => {
             onClick={goNext}
             rightIcon={<ChevronRightIcon />}
           >
-            Next
+            {isLastStep && flowConfig.exitButtonText ? flowConfig.exitButtonText : 'Next'}
           </Button>
         </HStack>
 

@@ -17,7 +17,7 @@ type Actions = {
 };
 
 export const useWalletCreationStore = create<State & Actions>((setState) => ({
-  seed: [],
+  seed: ['finite', 'omit', 'doze', 'dog', 'pat', 'team', 'seek', 'pink', 'punch', 'scale', 'clap', 'computer'],
   password: '',
   userName: '',
   dischargeNext: false,
