@@ -161,7 +161,7 @@ export class RuleBasedAddressStorage extends AbstractAddressStorage {
   }
   async syncAddressInfo(payload: { change?: boolean }): Promise<void> {
     if (payload.change) {
-      errors.makeError('RuleBasedAddressStorage only support sync external addresses');
+      errors.throwError('RuleBasedAddressStorage only support sync external addresses');
     }
     // only sync external addresses
     const addressInfos: AddressInfo[] = [];
@@ -170,7 +170,7 @@ export class RuleBasedAddressStorage extends AbstractAddressStorage {
     for (let index = 0; ; index++) {
       const currentAddressInfo = await getAddressInfoByPath(
         this.keystoreService,
-        `${this.getHardendedPathPrefix()}/${payload.change ? 1 : 0}`,
+        `${this.getHardendedPathPrefix()}/0`,
         index,
       );
       const childScriptHasHistory = await this.backend.hasHistory({ lock: currentAddressInfo.lock });

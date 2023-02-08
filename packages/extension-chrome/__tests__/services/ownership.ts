@@ -1,4 +1,4 @@
-import { createMockBackend, createMockKeystoreService, mockAddressInfos } from './utils';
+import { createMockBackend, createMockKeystoreService, mockFullOwnershipAddressInfos } from './utils';
 import { errors } from '@nexus-wallet/utils';
 import { Backend } from '../../src/services/backend/backend';
 import { FullOwnershipAddressStorage } from '../../src/services/backend/addressStorage';
@@ -21,7 +21,9 @@ const mockNotificationService: NotificationService = {
 describe('usedLocks and unusedLocks in ownership', () => {
   it('should return an empty list if no tx record', async () => {
     const mockBackend: Backend = createMockBackend({});
-    const mockKeystoreService = createMockKeystoreService({ getPublicKeyByPath: () => mockAddressInfos[0].pubkey });
+    const mockKeystoreService = createMockKeystoreService({
+      getPublicKeyByPath: () => mockFullOwnershipAddressInfos[0].pubkey,
+    });
     const mockAddressStorage = new FullOwnershipAddressStorage(mockBackend, mockKeystoreService);
 
     const service = createFullOwnershipService({
@@ -36,7 +38,9 @@ describe('usedLocks and unusedLocks in ownership', () => {
   it('should return a list with a lock if there is one history', async () => {
     const mockCallback = jest.fn().mockReturnValueOnce(Promise.resolve(true)).mockReturnValue(Promise.resolve(false));
     const mockBackend: Backend = createMockBackend({ hasHistory: mockCallback });
-    const mockKeystoreService = createMockKeystoreService({ getPublicKeyByPath: () => mockAddressInfos[0].pubkey });
+    const mockKeystoreService = createMockKeystoreService({
+      getPublicKeyByPath: () => mockFullOwnershipAddressInfos[0].pubkey,
+    });
     const mockAddressStorage = new FullOwnershipAddressStorage(mockBackend, mockKeystoreService);
 
     const service = createFullOwnershipService({
@@ -48,22 +52,22 @@ describe('usedLocks and unusedLocks in ownership', () => {
     const usedLocks = await service.getUsedLocks({});
     expect(usedLocks).toEqual({
       cursor: '',
-      objects: [mockAddressInfos[0].lock],
+      objects: [mockFullOwnershipAddressInfos[0].lock],
     });
   });
   it('should return a list with 1st lock and 3rd lock if there is corresponding history', async () => {
     const mockBackend: Backend = createMockBackend({
       hasHistory: jest.fn(({ lock }) => {
-        if (lock.args === mockAddressInfos[0].lock.args) return Promise.resolve(true); // m/44'/309'/0'/0/0
-        if (lock.args === mockAddressInfos[1].lock.args) return Promise.resolve(false); // m/44'/309'/0'/0/1
-        if (lock.args === mockAddressInfos[2].lock.args) return Promise.resolve(true); // m/44'/309'/0'/0/2
+        if (lock.args === mockFullOwnershipAddressInfos[0].lock.args) return Promise.resolve(true); // m/44'/309'/0'/0/0
+        if (lock.args === mockFullOwnershipAddressInfos[1].lock.args) return Promise.resolve(false); // m/44'/309'/0'/0/1
+        if (lock.args === mockFullOwnershipAddressInfos[2].lock.args) return Promise.resolve(true); // m/44'/309'/0'/0/2
         return Promise.resolve(false);
       }),
     });
     const mockKeystoreService = createMockKeystoreService({
       getPublicKeyByPath: jest.fn().mockImplementation(({ path }) => {
         const index = parseInt(path.split('/').pop() as string, 10);
-        return mockAddressInfos[index].pubkey;
+        return mockFullOwnershipAddressInfos[index].pubkey;
       }),
     });
     const mockAddressStorage = new FullOwnershipAddressStorage(mockBackend, mockKeystoreService);
@@ -78,7 +82,7 @@ describe('usedLocks and unusedLocks in ownership', () => {
 
     expect(usedLocks).toEqual({
       cursor: '',
-      objects: [mockAddressInfos[0].lock, mockAddressInfos[2].lock],
+      objects: [mockFullOwnershipAddressInfos[0].lock, mockFullOwnershipAddressInfos[2].lock],
     });
   });
 });
@@ -87,8 +91,8 @@ it('ownership#sign data with 1st lock', async () => {
   const mockBackend: Backend = createMockBackend({ hasHistory: mockCallback });
   const mockSignMessage = jest.fn().mockImplementation(() => Promise.resolve('0x'));
   const mockKeystoreService = createMockKeystoreService({
-    getPublicKeyByPath: () => mockAddressInfos[0].pubkey,
-    mockSignMessage,
+    getPublicKeyByPath: () => mockFullOwnershipAddressInfos[0].pubkey,
+    signMessage: mockSignMessage,
   });
   const mockAddressStorage = new FullOwnershipAddressStorage(mockBackend, mockKeystoreService);
 
@@ -110,7 +114,7 @@ it('ownership#sign data with 1st lock', async () => {
   ]);
 
   const message = '0x1234';
-  await service.signData({ data: message, lock: mockAddressInfos[0].lock });
+  await service.signData({ data: message, lock: mockFullOwnershipAddressInfos[0].lock });
   expect(mockSignMessage).toBeCalledWith({ message, path: `m/44'/309'/0'/0/0`, password: '123456' });
 });
 
@@ -119,7 +123,7 @@ it('ownership#get live cells', async () => {
     {
       cellOutput: {
         capacity: '0x1234',
-        lock: mockAddressInfos[0].lock,
+        lock: mockFullOwnershipAddressInfos[0].lock,
       },
       data: '0x',
     },
@@ -129,7 +133,9 @@ it('ownership#get live cells', async () => {
     hasHistory: mockCallback,
     getLiveCells: jest.fn().mockReturnValue(Promise.resolve([mockCells[0]])),
   });
-  const mockKeystoreService = createMockKeystoreService({ getPublicKeyByPath: () => mockAddressInfos[0].pubkey });
+  const mockKeystoreService = createMockKeystoreService({
+    getPublicKeyByPath: () => mockFullOwnershipAddressInfos[0].pubkey,
+  });
   const mockAddressStorage = new FullOwnershipAddressStorage(mockBackend, mockKeystoreService);
 
   const service = createFullOwnershipService({
@@ -161,14 +167,14 @@ it('ownership#sign tx', async () => {
     {
       cellOutput: {
         capacity: '0x1234',
-        lock: mockAddressInfos[0].lock,
+        lock: mockFullOwnershipAddressInfos[0].lock,
       },
       data: '0x',
     },
     {
       cellOutput: {
         capacity: '0x5678',
-        lock: mockAddressInfos[1].lock,
+        lock: mockFullOwnershipAddressInfos[1].lock,
       },
       data: '0x',
     },
@@ -181,7 +187,7 @@ it('ownership#sign tx', async () => {
       },
       cellOutput: {
         capacity: '0x1234',
-        lock: mockAddressInfos[0].lock,
+        lock: mockFullOwnershipAddressInfos[0].lock,
       },
       data: '0x',
     },
@@ -192,7 +198,7 @@ it('ownership#sign tx', async () => {
       },
       cellOutput: {
         capacity: '0x5678',
-        lock: mockAddressInfos[1].lock,
+        lock: mockFullOwnershipAddressInfos[1].lock,
       },
       data: '0x',
     },
@@ -256,8 +262,8 @@ it('ownership#sign tx', async () => {
   });
   const mockSignatures = ['0x01', '0x02'];
   const mockKeystoreService = createMockKeystoreService({
-    getPublicKeyByPath: () => mockAddressInfos[0].pubkey,
-    mockSignMessage: jest
+    getPublicKeyByPath: () => mockFullOwnershipAddressInfos[0].pubkey,
+    signMessage: jest
       .fn()
       .mockReturnValueOnce(mockSignatures[0]) // first signature
       .mockReturnValueOnce(mockSignatures[1]), // second signature
@@ -269,14 +275,14 @@ it('ownership#sign tx', async () => {
       addressIndex: 0,
       pubkey: '',
       blake160: '',
-      lock: mockAddressInfos[0].lock,
+      lock: mockFullOwnershipAddressInfos[0].lock,
     },
     {
       path: `m/44'/309'/0'/0/1`,
       addressIndex: 0,
       pubkey: '',
       blake160: '',
-      lock: mockAddressInfos[1].lock,
+      lock: mockFullOwnershipAddressInfos[1].lock,
     },
   ]);
 
@@ -290,7 +296,7 @@ it('ownership#sign tx', async () => {
   const result = await service.signTransaction({ tx: mockTx });
 
   expect(result).toEqual([
-    [mockAddressInfos[0].lock, mockSignatures[0]],
-    [mockAddressInfos[1].lock, mockSignatures[1]],
+    [mockFullOwnershipAddressInfos[0].lock, mockSignatures[0]],
+    [mockFullOwnershipAddressInfos[1].lock, mockSignatures[1]],
   ]);
 });

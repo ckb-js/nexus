@@ -30,24 +30,54 @@ export const createMockBackend = (payload: Partial<Backend>): Backend => {
   };
 };
 
-export const createMockKeystoreService = (payload: {
-  getPublicKeyByPath: () => string;
-  mockSignMessage?: (payload: SignMessagePayload) => Promisable<string>;
-}): KeystoreService => ({
+export const createMockKeystoreService = (payload: Partial<KeystoreService>): KeystoreService => ({
   hasInitialized: () => true,
   initKeyStore: function (): Promisable<void> {
     errors.unimplemented();
   },
   signMessage:
-    payload.mockSignMessage ||
+    payload.signMessage ||
     function (_: SignMessagePayload): Promisable<string> {
       return '0x';
     },
-  getPublicKeyByPath: payload.getPublicKeyByPath,
+  getPublicKeyByPath: payload.getPublicKeyByPath
+    ? payload.getPublicKeyByPath
+    : function (): Promise<string> {
+        return Promise.resolve('');
+      },
 });
 
-export const mockAddressInfos: AddressInfo[] = new Array(50).fill(0).map((_, i) => ({
+const mockFullOwnershipAddressInfosExternal: AddressInfo[] = new Array(50).fill(0).flatMap((_, i) => ({
   path: `m/44'/309'/0'/0/${i}`,
+  addressIndex: i,
+  lock: {
+    args: publicKeyToBlake160(`0x${String(i).padStart(2, '0').repeat(33)}`),
+    codeHash: '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
+    hashType: 'type',
+  },
+  blake160: publicKeyToBlake160(`0x${String(i).padStart(2, '0').repeat(33)}`),
+  pubkey: `0x${String(i).padStart(2, '0').repeat(33)}`,
+}));
+
+const mockFullOwnershipAddressInfosChange: AddressInfo[] = new Array(50).fill(0).flatMap((_, i) => ({
+  path: `m/44'/309'/0'/1/${i}`,
+  addressIndex: i,
+  lock: {
+    args: publicKeyToBlake160(`0x${String(i).padStart(2, '0').repeat(33)}`),
+    codeHash: '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
+    hashType: 'type',
+  },
+  blake160: publicKeyToBlake160(`0x${String(i).padStart(2, '0').repeat(33)}`),
+  pubkey: `0x${String(i).padStart(2, '0').repeat(33)}`,
+}));
+
+export const mockFullOwnershipAddressInfos = [
+  ...mockFullOwnershipAddressInfosExternal,
+  ...mockFullOwnershipAddressInfosChange,
+];
+
+export const mockRuleBasedOwnershipAddressInfos: AddressInfo[] = new Array(50).fill(0).map((_, i) => ({
+  path: `m/49'/309'/0'/0/${i}`,
   addressIndex: i,
   lock: {
     args: publicKeyToBlake160(`0x${String(i).padStart(2, '0').repeat(33)}`),
