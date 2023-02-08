@@ -2,7 +2,7 @@ import { createMockBackend, createMockKeystoreService, mockAddressInfos } from '
 import { errors } from '@nexus-wallet/utils';
 import { Backend } from '../../src/services/backend/backend';
 import { DefaultAddressStorage } from '../../src/services/backend/addressStorage';
-import { createOwnershipService } from '../../src/services/ownership';
+import { createFullOwnershipService } from '../../src/services/fullOwnership';
 import { NotificationService } from '@nexus-wallet/types/lib';
 import { Cell, Transaction } from '@ckb-lumos/base';
 
@@ -23,7 +23,12 @@ it('ownership#get used locks return empty list', async () => {
   const mockKeystoreService = createMockKeystoreService({ getPublicKeyByPath: () => mockAddressInfos[0].pubkey });
   const mockAddressStorage = new DefaultAddressStorage(mockBackend, mockKeystoreService);
 
-  const service = createOwnershipService(mockKeystoreService, mockNotificationService, mockAddressStorage, mockBackend);
+  const service = createFullOwnershipService({
+    keystoreService: mockKeystoreService,
+    notificationService: mockNotificationService,
+    addressStorageService: mockAddressStorage,
+    backend: mockBackend,
+  });
   const usedLocks = await service.getUsedLocks({});
   expect(usedLocks).toEqual({ cursor: '', objects: [] });
 });
@@ -34,7 +39,12 @@ it('ownership#get used locks return fisrt lock', async () => {
   const mockKeystoreService = createMockKeystoreService({ getPublicKeyByPath: () => mockAddressInfos[0].pubkey });
   const mockAddressStorage = new DefaultAddressStorage(mockBackend, mockKeystoreService);
 
-  const service = createOwnershipService(mockKeystoreService, mockNotificationService, mockAddressStorage, mockBackend);
+  const service = createFullOwnershipService({
+    keystoreService: mockKeystoreService,
+    notificationService: mockNotificationService,
+    addressStorageService: mockAddressStorage,
+    backend: mockBackend,
+  });
   const usedLocks = await service.getUsedLocks({});
   expect(usedLocks).toEqual({
     cursor: '',
@@ -58,7 +68,12 @@ it('ownership#get used locks return 1st lock and 3rd lock', async () => {
   });
   const mockAddressStorage = new DefaultAddressStorage(mockBackend, mockKeystoreService);
 
-  const service = createOwnershipService(mockKeystoreService, mockNotificationService, mockAddressStorage, mockBackend);
+  const service = createFullOwnershipService({
+    keystoreService: mockKeystoreService,
+    notificationService: mockNotificationService,
+    addressStorageService: mockAddressStorage,
+    backend: mockBackend,
+  });
   const usedLocks = await service.getUsedLocks({});
 
   expect(usedLocks).toEqual({
@@ -77,7 +92,12 @@ it('ownership#sign data with 1st lock', async () => {
   });
   const mockAddressStorage = new DefaultAddressStorage(mockBackend, mockKeystoreService);
 
-  const service = createOwnershipService(mockKeystoreService, mockNotificationService, mockAddressStorage, mockBackend);
+  const service = createFullOwnershipService({
+    keystoreService: mockKeystoreService,
+    notificationService: mockNotificationService,
+    addressStorageService: mockAddressStorage,
+    backend: mockBackend,
+  });
   const usedExternalLocks = await service.getUsedLocks({});
   mockAddressStorage.setUsedExternalAddresses([
     {
@@ -112,7 +132,12 @@ it('ownership#get live cells', async () => {
   const mockKeystoreService = createMockKeystoreService({ getPublicKeyByPath: () => mockAddressInfos[0].pubkey });
   const mockAddressStorage = new DefaultAddressStorage(mockBackend, mockKeystoreService);
 
-  const service = createOwnershipService(mockKeystoreService, mockNotificationService, mockAddressStorage, mockBackend);
+  const service = createFullOwnershipService({
+    keystoreService: mockKeystoreService,
+    notificationService: mockNotificationService,
+    addressStorageService: mockAddressStorage,
+    backend: mockBackend,
+  });
   const usedExternalLocks = await service.getUsedLocks({});
   mockAddressStorage.setUsedExternalAddresses([
     {
@@ -255,7 +280,12 @@ it('ownership#sign tx', async () => {
     },
   ]);
 
-  const service = createOwnershipService(mockKeystoreService, mockNotificationService, mockAddressStorage, mockBackend);
+  const service = createFullOwnershipService({
+    keystoreService: mockKeystoreService,
+    notificationService: mockNotificationService,
+    addressStorageService: mockAddressStorage,
+    backend: mockBackend,
+  });
 
   const result = await service.signTransaction({ tx: mockTx });
 

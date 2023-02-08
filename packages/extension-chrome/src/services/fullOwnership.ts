@@ -13,16 +13,16 @@ import { asserts } from '@nexus-wallet/utils';
 import { createTransactionSkeleton } from '@ckb-lumos/helpers';
 import { prepareSigningEntries } from '@ckb-lumos/common-scripts/lib/secp256k1_blake160';
 
-export function createOwnershipService(
-  keystoreService: KeystoreService,
-  notificationService: NotificationService,
-  addressStorageService: AddressStorage,
-  backend: Backend,
-): OwnershipService {
+export function createFullOwnershipService(config: {
+  keystoreService: KeystoreService;
+  notificationService: NotificationService;
+  addressStorageService: AddressStorage;
+  backend: Backend;
+}): OwnershipService {
   return {
     getLiveCells: async () => {
-      const locks = addressStorageService.getAllUsedAddresses().map((addressInfo) => addressInfo.lock);
-      const cells = await backend.getLiveCells({ locks });
+      const locks = config.addressStorageService.getAllUsedAddresses().map((addressInfo) => addressInfo.lock);
+      const cells = await config.backend.getLiveCells({ locks });
       return {
         // TODO implement the cursor here
         cursor: '',
@@ -31,15 +31,19 @@ export function createOwnershipService(
     },
     getUnusedLocks: async (payload: GetUnusedLocksPayload) => {
       const addressInfos = payload.change
-        ? addressStorageService.getUsedChangeAddresses()
-        : addressStorageService.getUsedExternalAddresses();
+        ? config.addressStorageService.getUsedChangeAddresses()
+        : config.addressStorageService.getUsedExternalAddresses();
       const locks = addressInfos.map((addressInfo) => addressInfo.lock);
       return locks;
     },
     getUsedLocks: async (payload: GetUsedLocksPayload): Promise<Paginate<Script>> => {
-      await addressStorageService.syncAllAddressInfo();
-      const changeScripts = addressStorageService.getUsedChangeAddresses().map((addressInfo) => addressInfo.lock);
-      const externalScripts = addressStorageService.getUsedExternalAddresses().map((addressInfo) => addressInfo.lock);
+      await config.addressStorageService.syncAllAddressInfo();
+      const changeScripts = config.addressStorageService
+        .getUsedChangeAddresses()
+        .map((addressInfo) => addressInfo.lock);
+      const externalScripts = config.addressStorageService
+        .getUsedExternalAddresses()
+        .map((addressInfo) => addressInfo.lock);
       return payload.change
         ? {
             // TODO implement the cursor here
@@ -53,7 +57,7 @@ export function createOwnershipService(
           };
     },
     signTransaction: async (payload: SignTransactionPayload) => {
-      const cellFetcher = backend.getLiveCellFetcher();
+      const cellFetcher = config.backend.getLiveCellFetcher();
       let txSkeleton = await createTransactionSkeleton(payload.tx, cellFetcher);
       txSkeleton = prepareSigningEntries(txSkeleton);
       const inputLocks = txSkeleton
@@ -61,17 +65,17 @@ export function createOwnershipService(
         .map((input) => input.cellOutput.lock)
         .toArray();
       const addressInfos = inputLocks.map((lock) => {
-        const addressInfo = addressStorageService.getAddressInfoByLock({ lock });
+        const addressInfo = config.addressStorageService.getAddressInfoByLock({ lock });
         asserts.nonEmpty(addressInfo);
         return addressInfo;
       });
       const signingEntries = txSkeleton.get('signingEntries').toArray();
-      const password = (await notificationService.requestSignTransaction({ tx: payload.tx })).password;
+      const password = (await config.notificationService.requestSignTransaction({ tx: payload.tx })).password;
       const result: GroupedSignature = [];
       for (let index = 0; index < signingEntries.length; index++) {
         const signingEntry = signingEntries[index];
         const addressInfo = addressInfos[signingEntry.index];
-        const signature = await keystoreService.signMessage({
+        const signature = await config.keystoreService.signMessage({
           message: signingEntry.message,
           password,
           path: addressInfo.path,
@@ -81,10 +85,10 @@ export function createOwnershipService(
       return result;
     },
     signData: async (payload: SignDataPayload) => {
-      const addressInfo = addressStorageService.getAddressInfoByLock({ lock: payload.lock });
+      const addressInfo = config.addressStorageService.getAddressInfoByLock({ lock: payload.lock });
       asserts.nonEmpty(addressInfo);
-      const password = (await notificationService.requestSignData({ data: payload.data })).password;
-      const signature = await keystoreService.signMessage({
+      const password = (await config.notificationService.requestSignData({ data: payload.data })).password;
+      const signature = await config.keystoreService.signMessage({
         message: payload.data,
         password,
         path: addressInfo.path,
