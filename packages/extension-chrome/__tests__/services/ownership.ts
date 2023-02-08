@@ -18,70 +18,70 @@ const mockNotificationService: NotificationService = {
   },
 };
 
-it('ownership#get used locks return empty list', async () => {
-  const mockBackend: Backend = createMockBackend({});
-  const mockKeystoreService = createMockKeystoreService({ getPublicKeyByPath: () => mockAddressInfos[0].pubkey });
-  const mockAddressStorage = new DefaultAddressStorage(mockBackend, mockKeystoreService);
+describe('usedLocks and unusedLocks in ownership', () => {
+  it('should return an empty list if no tx record', async () => {
+    const mockBackend: Backend = createMockBackend({});
+    const mockKeystoreService = createMockKeystoreService({ getPublicKeyByPath: () => mockAddressInfos[0].pubkey });
+    const mockAddressStorage = new DefaultAddressStorage(mockBackend, mockKeystoreService);
 
-  const service = createFullOwnershipService({
-    keystoreService: mockKeystoreService,
-    notificationService: mockNotificationService,
-    addressStorageService: mockAddressStorage,
-    backend: mockBackend,
+    const service = createFullOwnershipService({
+      keystoreService: mockKeystoreService,
+      notificationService: mockNotificationService,
+      addressStorageService: mockAddressStorage,
+      backend: mockBackend,
+    });
+    const usedLocks = await service.getUsedLocks({});
+    expect(usedLocks).toEqual({ cursor: '', objects: [] });
   });
-  const usedLocks = await service.getUsedLocks({});
-  expect(usedLocks).toEqual({ cursor: '', objects: [] });
+  it('should return a list with a lock if there is one history', async () => {
+    const mockCallback = jest.fn().mockReturnValueOnce(Promise.resolve(true)).mockReturnValue(Promise.resolve(false));
+    const mockBackend: Backend = createMockBackend({ hasHistory: mockCallback });
+    const mockKeystoreService = createMockKeystoreService({ getPublicKeyByPath: () => mockAddressInfos[0].pubkey });
+    const mockAddressStorage = new DefaultAddressStorage(mockBackend, mockKeystoreService);
+
+    const service = createFullOwnershipService({
+      keystoreService: mockKeystoreService,
+      notificationService: mockNotificationService,
+      addressStorageService: mockAddressStorage,
+      backend: mockBackend,
+    });
+    const usedLocks = await service.getUsedLocks({});
+    expect(usedLocks).toEqual({
+      cursor: '',
+      objects: [mockAddressInfos[0].lock],
+    });
+  });
+  it('should return a list with 1st lock and 3rd lock if there is corresponding history', async () => {
+    const mockBackend: Backend = createMockBackend({
+      hasHistory: jest.fn(({ lock }) => {
+        if (lock.args === mockAddressInfos[0].lock.args) return Promise.resolve(true); // m/44'/309'/0'/0/0
+        if (lock.args === mockAddressInfos[1].lock.args) return Promise.resolve(false); // m/44'/309'/0'/0/1
+        if (lock.args === mockAddressInfos[2].lock.args) return Promise.resolve(true); // m/44'/309'/0'/0/2
+        return Promise.resolve(false);
+      }),
+    });
+    const mockKeystoreService = createMockKeystoreService({
+      getPublicKeyByPath: jest.fn().mockImplementation(({ path }) => {
+        const index = parseInt(path.split('/').pop() as string, 10);
+        return mockAddressInfos[index].pubkey;
+      }),
+    });
+    const mockAddressStorage = new DefaultAddressStorage(mockBackend, mockKeystoreService);
+
+    const service = createFullOwnershipService({
+      keystoreService: mockKeystoreService,
+      notificationService: mockNotificationService,
+      addressStorageService: mockAddressStorage,
+      backend: mockBackend,
+    });
+    const usedLocks = await service.getUsedLocks({});
+
+    expect(usedLocks).toEqual({
+      cursor: '',
+      objects: [mockAddressInfos[0].lock, mockAddressInfos[2].lock],
+    });
+  });
 });
-
-it('ownership#get used locks return fisrt lock', async () => {
-  const mockCallback = jest.fn().mockReturnValueOnce(Promise.resolve(true)).mockReturnValue(Promise.resolve(false));
-  const mockBackend: Backend = createMockBackend({ hasHistory: mockCallback });
-  const mockKeystoreService = createMockKeystoreService({ getPublicKeyByPath: () => mockAddressInfos[0].pubkey });
-  const mockAddressStorage = new DefaultAddressStorage(mockBackend, mockKeystoreService);
-
-  const service = createFullOwnershipService({
-    keystoreService: mockKeystoreService,
-    notificationService: mockNotificationService,
-    addressStorageService: mockAddressStorage,
-    backend: mockBackend,
-  });
-  const usedLocks = await service.getUsedLocks({});
-  expect(usedLocks).toEqual({
-    cursor: '',
-    objects: [mockAddressInfos[0].lock],
-  });
-});
-it('ownership#get used locks return 1st lock and 3rd lock', async () => {
-  const mockBackend: Backend = createMockBackend({
-    hasHistory: jest
-      .fn()
-      .mockReturnValueOnce(Promise.resolve(true)) // m/44'/309'/0'/0/0
-      .mockReturnValueOnce(Promise.resolve(false)) // m/44'/309'/0'/0/1
-      .mockReturnValueOnce(Promise.resolve(true)) // m/44'/309'/0'/0/2
-      .mockReturnValue(Promise.resolve(false)),
-  });
-  const mockKeystoreService = createMockKeystoreService({
-    getPublicKeyByPath: jest.fn().mockImplementation(({ path }) => {
-      const index = parseInt(path.split('/').pop() as string, 10);
-      return mockAddressInfos[index].pubkey;
-    }),
-  });
-  const mockAddressStorage = new DefaultAddressStorage(mockBackend, mockKeystoreService);
-
-  const service = createFullOwnershipService({
-    keystoreService: mockKeystoreService,
-    notificationService: mockNotificationService,
-    addressStorageService: mockAddressStorage,
-    backend: mockBackend,
-  });
-  const usedLocks = await service.getUsedLocks({});
-
-  expect(usedLocks).toEqual({
-    cursor: '',
-    objects: [mockAddressInfos[0].lock, mockAddressInfos[2].lock],
-  });
-});
-
 it('ownership#sign data with 1st lock', async () => {
   const mockCallback = jest.fn().mockReturnValueOnce(Promise.resolve(true)).mockReturnValue(Promise.resolve(false));
   const mockBackend: Backend = createMockBackend({ hasHistory: mockCallback });
