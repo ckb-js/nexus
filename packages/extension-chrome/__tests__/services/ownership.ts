@@ -2,7 +2,7 @@ import { createMockBackend, createMockKeystoreService, mockAddressInfos } from '
 import { errors } from '@nexus-wallet/utils';
 import { Backend } from '../../src/services/backend/backend';
 import { FullOwnershipAddressStorage } from '../../src/services/backend/addressStorage';
-import { createOwnershipService } from '../../src/services/ownershipService';
+import { createFullOwnershipService } from '../../src/services/ownershipService';
 import { NotificationService } from '@nexus-wallet/types/lib';
 import { Cell, Transaction } from '@ckb-lumos/base';
 
@@ -24,7 +24,7 @@ describe('usedLocks and unusedLocks in ownership', () => {
     const mockKeystoreService = createMockKeystoreService({ getPublicKeyByPath: () => mockAddressInfos[0].pubkey });
     const mockAddressStorage = new FullOwnershipAddressStorage(mockBackend, mockKeystoreService);
 
-    const service = createOwnershipService({
+    const service = createFullOwnershipService({
       keystoreService: mockKeystoreService,
       notificationService: mockNotificationService,
       addressStorageService: mockAddressStorage,
@@ -39,7 +39,7 @@ describe('usedLocks and unusedLocks in ownership', () => {
     const mockKeystoreService = createMockKeystoreService({ getPublicKeyByPath: () => mockAddressInfos[0].pubkey });
     const mockAddressStorage = new FullOwnershipAddressStorage(mockBackend, mockKeystoreService);
 
-    const service = createOwnershipService({
+    const service = createFullOwnershipService({
       keystoreService: mockKeystoreService,
       notificationService: mockNotificationService,
       addressStorageService: mockAddressStorage,
@@ -68,7 +68,7 @@ describe('usedLocks and unusedLocks in ownership', () => {
     });
     const mockAddressStorage = new FullOwnershipAddressStorage(mockBackend, mockKeystoreService);
 
-    const service = createOwnershipService({
+    const service = createFullOwnershipService({
       keystoreService: mockKeystoreService,
       notificationService: mockNotificationService,
       addressStorageService: mockAddressStorage,
@@ -92,7 +92,7 @@ it('ownership#sign data with 1st lock', async () => {
   });
   const mockAddressStorage = new FullOwnershipAddressStorage(mockBackend, mockKeystoreService);
 
-  const service = createOwnershipService({
+  const service = createFullOwnershipService({
     keystoreService: mockKeystoreService,
     notificationService: mockNotificationService,
     addressStorageService: mockAddressStorage,
@@ -132,7 +132,7 @@ it('ownership#get live cells', async () => {
   const mockKeystoreService = createMockKeystoreService({ getPublicKeyByPath: () => mockAddressInfos[0].pubkey });
   const mockAddressStorage = new FullOwnershipAddressStorage(mockBackend, mockKeystoreService);
 
-  const service = createOwnershipService({
+  const service = createFullOwnershipService({
     keystoreService: mockKeystoreService,
     notificationService: mockNotificationService,
     addressStorageService: mockAddressStorage,
@@ -280,7 +280,7 @@ it('ownership#sign tx', async () => {
     },
   ]);
 
-  const service = createOwnershipService({
+  const service = createFullOwnershipService({
     keystoreService: mockKeystoreService,
     notificationService: mockNotificationService,
     addressStorageService: mockAddressStorage,

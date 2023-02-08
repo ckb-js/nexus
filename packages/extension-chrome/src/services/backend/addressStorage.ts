@@ -1,3 +1,4 @@
+import { errors } from '@nexus-wallet/utils';
 import { bytes } from '@ckb-lumos/codec';
 import { KeystoreService } from '@nexus-wallet/types';
 import { Script } from '@ckb-lumos/base';
@@ -62,50 +63,11 @@ export abstract class AbstractAddressStorage implements AddressStorage {
     };
     this.unusedAddresses = unusedAddresses;
   }
+  abstract syncAddressInfo(payload: { change?: boolean | undefined }): Promise<void>;
+  abstract syncAllAddressInfo(): Promise<void>;
   abstract ownershipType: 'FULL' | 'RULE_BASED';
   abstract getHardendedPathPrefix(): string;
-  async syncAllAddressInfo(): Promise<void> {
-    // sync used external addresses
-    await this.syncAddressInfo({});
-    // sync used change addresses
-    await this.syncAddressInfo({ change: true });
-  }
-  async syncAddressInfo(payload: { change?: boolean }): Promise<void> {
-    // refer to bip-44-account-discovery https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki#account-discovery
-    // 1. derive the first account's node (index = 0)
-    // 2. derive the external chain node of this account
-    // 3. scan addresses of the external chain; respect the gap limit (20)
 
-    const addressInfos: AddressInfo[] = [];
-    let currentGap = 0;
-    // TODO: use sampling to improve performance
-    for (let index = 0; ; index++) {
-      const path = `${this.getHardendedPathPrefix()}/${payload.change ? 1 : 0}/${index}`;
-      const pubkey = await this.keystoreService.getPublicKeyByPath({ path });
-      const childScript: Script = toScript(pubkey);
-      const childScriptHasHistory = await this.backend.hasHistory({ lock: childScript });
-      if (childScriptHasHistory) {
-        addressInfos.push({
-          path,
-          addressIndex: index,
-          pubkey,
-          blake160: childScript.args,
-          lock: childScript,
-        });
-        currentGap = 0;
-      } else {
-        currentGap++;
-        if (currentGap >= MAX_ADDRESS_GAP) {
-          break;
-        }
-      }
-    }
-    // update unused addresses, remove all used addresses
-    this.unusedAddresses = this.unusedAddresses.filter(
-      (address) => !addressInfos.find((usedAddress) => usedAddress.path === address.path),
-    );
-    payload.change ? this.setUsedChangeAddresses(addressInfos) : this.setUsedExternalAddresses(addressInfos);
-  }
   getAddressInfoByLock(payload: { lock: Script }): AddressInfo | undefined {
     const lock = payload.lock;
     return (
@@ -149,10 +111,103 @@ export class FullOwnershipAddressStorage extends AbstractAddressStorage {
   getHardendedPathPrefix(): string {
     return "m/44'/309'/0'";
   }
+  async syncAllAddressInfo(): Promise<void> {
+    // sync used external addresses
+    await this.syncAddressInfo({});
+    // sync used change addresses
+    await this.syncAddressInfo({ change: true });
+  }
+  async syncAddressInfo(payload: { change?: boolean }): Promise<void> {
+    // refer to bip-44-account-discovery https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki#account-discovery
+    // 1. derive the first account's node (index = 0)
+    // 2. derive the external chain node of this account
+    // 3. scan addresses of the external chain; respect the gap limit (20)
+
+    const addressInfos: AddressInfo[] = [];
+    let currentGap = 0;
+    // TODO: use sampling to improve performance
+    for (let index = 0; ; index++) {
+      const currentAddressInfo = await getAddressInfoByPath(
+        this.keystoreService,
+        `${this.getHardendedPathPrefix()}/${payload.change ? 1 : 0}`,
+        index,
+      );
+      const childScriptHasHistory = await this.backend.hasHistory({ lock: currentAddressInfo.lock });
+      if (childScriptHasHistory) {
+        addressInfos.push(currentAddressInfo);
+        currentGap = 0;
+      } else {
+        currentGap++;
+        if (currentGap >= MAX_ADDRESS_GAP) {
+          break;
+        }
+      }
+    }
+    // update unused addresses, remove all used addresses
+    this.unusedAddresses = this.unusedAddresses.filter(
+      (address) => !addressInfos.find((usedAddress) => usedAddress.path === address.path),
+    );
+    payload.change ? this.setUsedChangeAddresses(addressInfos) : this.setUsedExternalAddresses(addressInfos);
+  }
 }
 export class RuleBasedAddressStorage extends AbstractAddressStorage {
   ownershipType = 'RULE_BASED' as const;
   getHardendedPathPrefix(): string {
     return "m/49'/309'/0'";
   }
+  async syncAllAddressInfo(): Promise<void> {
+    // sync used external addresses
+    await this.syncAddressInfo({});
+  }
+  async syncAddressInfo(payload: { change?: boolean }): Promise<void> {
+    if (payload.change) {
+      errors.makeError('RuleBasedAddressStorage only support sync external addresses');
+    }
+    // only sync external addresses
+    const addressInfos: AddressInfo[] = [];
+    let currentGap = 0;
+    // TODO: use sampling to improve performance
+    for (let index = 0; ; index++) {
+      const currentAddressInfo = await getAddressInfoByPath(
+        this.keystoreService,
+        `${this.getHardendedPathPrefix()}/${payload.change ? 1 : 0}`,
+        index,
+      );
+      const childScriptHasHistory = await this.backend.hasHistory({ lock: currentAddressInfo.lock });
+      if (childScriptHasHistory) {
+        addressInfos.push(currentAddressInfo);
+        currentGap = 0;
+      } else {
+        currentGap++;
+        if (currentGap >= MAX_ADDRESS_GAP) {
+          break;
+        }
+      }
+    }
+    // update unused addresses, remove all used addresses
+    this.unusedAddresses = this.unusedAddresses.filter(
+      (address) => !addressInfos.find((usedAddress) => usedAddress.path === address.path),
+    );
+    this.setUsedExternalAddresses(addressInfos);
+  }
+}
+
+/**
+ * @param keystoreService
+ * @param pathPrefix eg: m/44'/309'/0'/0
+ * @param index eg: 0
+ * @returns
+ */
+async function getAddressInfoByPath(keystoreService: KeystoreService, pathPrefix: string, index: number) {
+  const path = `${pathPrefix}/${index}`;
+  const pubkey = await keystoreService.getPublicKeyByPath({ path });
+  const childScript: Script = toScript(pubkey);
+  const currentAddressInfo = {
+    path,
+    addressIndex: index,
+    pubkey,
+    blake160: childScript.args,
+    lock: childScript,
+  };
+  return currentAddressInfo;
 }

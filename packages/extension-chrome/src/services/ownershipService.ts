@@ -1,6 +1,6 @@
 import { SignTransactionPayload } from '@nexus-wallet/types/src/services/OwnershipService';
 import { Backend } from './backend/backend';
-import { AddressStorage } from './backend/addressStorage';
+import { AddressStorage, FullOwnershipAddressStorage, RuleBasedAddressStorage } from './backend/addressStorage';
 import { Script } from '@ckb-lumos/base';
 import { OwnershipService, Paginate, KeystoreService, NotificationService } from '@nexus-wallet/types';
 import {
@@ -13,7 +13,7 @@ import { asserts } from '@nexus-wallet/utils';
 import { createTransactionSkeleton } from '@ckb-lumos/helpers';
 import { prepareSigningEntries } from '@ckb-lumos/common-scripts/lib/secp256k1_blake160';
 
-export function createOwnershipService(config: {
+function createOwnershipService(config: {
   keystoreService: KeystoreService;
   notificationService: NotificationService;
   addressStorageService: AddressStorage;
@@ -96,4 +96,22 @@ export function createOwnershipService(config: {
       return signature;
     },
   };
+}
+
+export function createFullOwnershipService(config: {
+  keystoreService: KeystoreService;
+  notificationService: NotificationService;
+  addressStorageService: FullOwnershipAddressStorage;
+  backend: Backend;
+}): OwnershipService {
+  return createOwnershipService(config);
+}
+
+export function createRuleBasedOwnershipService(config: {
+  keystoreService: KeystoreService;
+  notificationService: NotificationService;
+  addressStorageService: RuleBasedAddressStorage;
+  backend: Backend;
+}): OwnershipService {
+  return createOwnershipService(config);
 }
