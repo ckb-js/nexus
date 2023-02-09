@@ -1,6 +1,6 @@
-import type { BytesLike } from '@ckb-lumos/codec';
-import type { Cell, Script, Transaction } from '@ckb-lumos/lumos';
 import type { Bytes, Paginate } from '../base';
+import type { Cell, Script, Transaction } from '@ckb-lumos/lumos';
+import type { BytesLike } from '@ckb-lumos/codec';
 
 export interface OwnershipService {
   getLiveCells(payload?: GetPaginateItemsPayload): Promise<Paginate<Cell>>;
