@@ -1,4 +1,3 @@
-import { errors } from '@nexus-wallet/utils';
 import { bytes } from '@ckb-lumos/codec';
 import { KeystoreService } from '@nexus-wallet/types';
 import { Script } from '@ckb-lumos/base';
@@ -23,7 +22,10 @@ export interface AddressStorage {
     externalAddresses: AddressInfo[];
     changeAddresses: AddressInfo[];
   };
-  offChainAddresses: AddressInfo[];
+  offChainAddresses: {
+    externalAddresses: AddressInfo[];
+    changeAddresses: AddressInfo[];
+  };
 
   getHardendedPathPrefix: () => string; // m/44'/309'/0' for full ownership, m/4410179'/0' for rule based ownership
   // updateUnusedAddresses: (payload: { keystoreService: KeystoreService }) => Promise<void>;
@@ -32,8 +34,12 @@ export interface AddressStorage {
   getOnChainChangeAddresses: () => AddressInfo[];
   setOnChainChangeAddresses: (addresses: AddressInfo[]) => void;
   getAllOnChainAddresses: () => AddressInfo[];
-  getOffChainAddresses: () => Promise<AddressInfo[]>;
-  setOffChainAddresses: (addresses: AddressInfo[]) => void;
+
+  getOffChainExternalAddresses: () => AddressInfo[];
+  setOffChainExternalAddresses: (addresses: AddressInfo[]) => void;
+  getOffChainChangeAddresses: () => AddressInfo[];
+  setOffChainChangeAddresses: (addresses: AddressInfo[]) => void;
+  getAllOffChainAddresses: () => AddressInfo[];
 
   // TODO: update addresses list when a new tx is on chain.
   // markAddressAsUsed: (payload: {addressInfo: AddressInfo}) => Promisable<void>;
@@ -51,14 +57,17 @@ export abstract class AbstractAddressStorage implements AddressStorage {
     externalAddresses: AddressInfo[];
     changeAddresses: AddressInfo[];
   };
-  offChainAddresses: AddressInfo[];
-
+  offChainAddresses: {
+    externalAddresses: AddressInfo[];
+    changeAddresses: AddressInfo[];
+  };
   constructor(
     backend: Backend,
     keystoreService: KeystoreService,
     onChainExternalAddresses: AddressInfo[] = [],
     onChainChangeAddresses: AddressInfo[] = [],
-    offChainAddresses: AddressInfo[] = [],
+    offChainExternalAddresses: AddressInfo[] = [],
+    offChainChangeAddresses: AddressInfo[] = [],
   ) {
     this.backend = backend;
     this.keystoreService = keystoreService;
@@ -66,7 +75,10 @@ export abstract class AbstractAddressStorage implements AddressStorage {
       externalAddresses: onChainExternalAddresses,
       changeAddresses: onChainChangeAddresses,
     };
-    this.offChainAddresses = offChainAddresses;
+    this.offChainAddresses = {
+      externalAddresses: offChainExternalAddresses,
+      changeAddresses: offChainChangeAddresses,
+    };
   }
   abstract syncAddressInfo(payload: { change?: boolean | undefined }): Promise<void>;
   abstract syncAllAddressInfo(): Promise<void>;
@@ -82,7 +94,10 @@ export abstract class AbstractAddressStorage implements AddressStorage {
       this.onChainAddresses.changeAddresses.find(
         (address) => bytes.equal(lock.codeHash, address.lock.codeHash) && bytes.equal(lock.args, address.lock.args),
       ) ||
-      this.offChainAddresses.find(
+      this.offChainAddresses.externalAddresses.find(
+        (address) => bytes.equal(lock.codeHash, address.lock.codeHash) && bytes.equal(lock.args, address.lock.args),
+      ) ||
+      this.offChainAddresses.changeAddresses.find(
         (address) => bytes.equal(lock.codeHash, address.lock.codeHash) && bytes.equal(lock.args, address.lock.args),
       )
     );
@@ -102,12 +117,21 @@ export abstract class AbstractAddressStorage implements AddressStorage {
   getAllOnChainAddresses(): AddressInfo[] {
     return [...this.onChainAddresses.externalAddresses, ...this.onChainAddresses.changeAddresses];
   }
-  async getOffChainAddresses(): Promise<AddressInfo[]> {
-    await this.syncAllAddressInfo();
-    return this.offChainAddresses;
+
+  getOffChainExternalAddresses(): AddressInfo[] {
+    return this.offChainAddresses.externalAddresses;
   }
-  setOffChainAddresses(addresses: AddressInfo[]): void {
-    this.offChainAddresses = addresses;
+  setOffChainExternalAddresses(addresses: AddressInfo[]): void {
+    this.offChainAddresses.externalAddresses = addresses;
+  }
+  getOffChainChangeAddresses(): AddressInfo[] {
+    return this.offChainAddresses.changeAddresses;
+  }
+  setOffChainChangeAddresses(addresses: AddressInfo[]): void {
+    this.offChainAddresses.changeAddresses = addresses;
+  }
+  getAllOffChainAddresses(): AddressInfo[] {
+    return [...this.offChainAddresses.externalAddresses, ...this.offChainAddresses.changeAddresses];
   }
 }
 
@@ -129,6 +153,7 @@ export class FullOwnershipAddressStorage extends AbstractAddressStorage {
     // 3. scan addresses of the external chain; respect the gap limit (20)
 
     const addressInfos: AddressInfo[] = [];
+    const offChainAddressInfos: AddressInfo[] = [];
     let currentGap = 0;
     // TODO: use sampling to improve performance
     for (let index = 0; ; index++) {
@@ -141,17 +166,21 @@ export class FullOwnershipAddressStorage extends AbstractAddressStorage {
         addressInfos.push(currentAddressInfo);
         currentGap = 0;
       } else {
+        offChainAddressInfos.push(currentAddressInfo);
         currentGap++;
         if (currentGap >= MAX_ADDRESS_GAP) {
           break;
         }
       }
     }
-    // update unused addresses, remove all used addresses
-    this.offChainAddresses = this.offChainAddresses.filter(
-      (address) => !addressInfos.find((usedAddress) => usedAddress.path === address.path),
-    );
-    payload.change ? this.setOnChainChangeAddresses(addressInfos) : this.setOnChainExternalAddresses(addressInfos);
+
+    if (payload.change) {
+      this.setOffChainChangeAddresses(offChainAddressInfos);
+      this.setOnChainChangeAddresses(addressInfos);
+    } else {
+      this.setOffChainExternalAddresses(offChainAddressInfos);
+      this.setOnChainExternalAddresses(addressInfos);
+    }
   }
 }
 export class RuleBasedAddressStorage extends AbstractAddressStorage {
@@ -162,15 +191,13 @@ export class RuleBasedAddressStorage extends AbstractAddressStorage {
     return "m/4410179'/0'";
   }
   async syncAllAddressInfo(): Promise<void> {
-    // sync used external addresses
-    await this.syncAddressInfo({});
+    // sync on chain addresses
+    await this.syncAddressInfo();
   }
-  async syncAddressInfo(payload: { change?: boolean }): Promise<void> {
-    if (payload.change) {
-      errors.throwError('RuleBasedAddressStorage only support sync external addresses');
-    }
+  async syncAddressInfo(): Promise<void> {
     // only sync external addresses
     const addressInfos: AddressInfo[] = [];
+    const offChainAddressInfos: AddressInfo[] = [];
     let currentGap = 0;
     // TODO: use sampling to improve performance
     for (let index = 0; ; index++) {
@@ -183,16 +210,15 @@ export class RuleBasedAddressStorage extends AbstractAddressStorage {
         addressInfos.push(currentAddressInfo);
         currentGap = 0;
       } else {
+        offChainAddressInfos.push(currentAddressInfo);
         currentGap++;
         if (currentGap >= RULE_BASED_MAX_LOOP_GAP) {
           break;
         }
       }
     }
-    // update unused addresses, remove all used addresses
-    this.offChainAddresses = this.offChainAddresses.filter(
-      (address) => !addressInfos.find((usedAddress) => usedAddress.path === address.path),
-    );
+    // update offChain addresses
+    this.setOffChainExternalAddresses(offChainAddressInfos);
     this.setOnChainExternalAddresses(addressInfos);
   }
 }

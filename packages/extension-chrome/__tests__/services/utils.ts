@@ -71,6 +71,10 @@ const mockFullOwnershipAddressInfosChange: AddressInfo[] = new Array(100).fill(0
   pubkey: `0x${String(i).padStart(2, '0').repeat(33)}`,
 }));
 
+/**
+ * 100 external addresses index 0~99
+ * 100 change addresses index 100~199
+ */
 export const mockFullOwnershipAddressInfos = [
   ...mockFullOwnershipAddressInfosExternal,
   ...mockFullOwnershipAddressInfosChange,
