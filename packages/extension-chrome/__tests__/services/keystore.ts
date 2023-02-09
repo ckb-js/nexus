@@ -83,7 +83,7 @@ test('re-initialize should throw error', async () => {
 describe('getExtendedPublicKey', () => {
   test('normal', async () => {
     const child = fixture.derived[1];
-    const childPublicKey0 = await service.getExtendedPublicKey({ path: child.path });
+    const childPublicKey0 = await service.getPublicKeyByPath({ path: child.path });
 
     expect(childPublicKey0).toBe(child.publicKey);
   });

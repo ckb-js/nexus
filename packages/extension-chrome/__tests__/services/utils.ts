@@ -4,7 +4,6 @@ import { CkbIndexer } from '@ckb-lumos/ckb-indexer/lib/indexer';
 import { publicKeyToBlake160 } from '@ckb-lumos/hd/lib/key';
 import { Promisable } from '@nexus-wallet/types/lib';
 import { KeystoreService, SignMessagePayload } from '@nexus-wallet/types/lib/services/KeystoreService';
-import { errors } from '@nexus-wallet/utils/lib';
 import { AddressInfo } from '../../src/services/backend/addressStorage';
 import { Backend } from './../../src/services/backend/backend';
 
@@ -35,9 +34,8 @@ export const createMockKeystoreService = (payload: {
   mockSignMessage?: (payload: SignMessagePayload) => Promisable<string>;
 }): KeystoreService => ({
   hasInitialized: () => true,
-  initKeyStore: function (): Promisable<void> {
-    errors.unimplemented();
-  },
+  initKeystore: function (): Promisable<void> {},
+  reset: function (): Promisable<void> {},
   signMessage:
     payload.mockSignMessage ||
     function (_: SignMessagePayload): Promisable<string> {

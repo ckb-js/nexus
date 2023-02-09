@@ -1,7 +1,7 @@
 import type { HexString } from '@ckb-lumos/lumos';
 import type { KeystoreService, Promisable, Storage } from '@nexus-wallet/types';
 import type {
-  GetExtendedPublicKeyPayload,
+  GetPublicKeyPayload,
   InitKeystorePayload,
   SignMessagePayload,
   NonHardenedPath,
@@ -53,7 +53,7 @@ export function createKeystoreService(config: { storage: Storage<KeystoreData> }
       storage.setItem('keystore', { publicInfos, wss });
     },
 
-    getExtendedPublicKey: async (payload: GetExtendedPublicKeyPayload): Promise<string> => {
+    getPublicKeyByPath: async (payload: GetPublicKeyPayload): Promise<string> => {
       const { path } = payload;
 
       assertDerivationPath(path);
