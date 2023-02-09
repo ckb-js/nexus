@@ -9,7 +9,11 @@ export interface KeystoreService {
    */
   hasInitialized(): Promisable<boolean>;
 
-  initKeyStore(payload: InitKeyStorePayload): Promisable<void>;
+  /**
+   * initialize the keystore
+   * @param payload
+   */
+  initKeystore(payload: InitKeystorePayload): Promisable<void>;
 
   /**
    * get an extended public key by a derivation path,
@@ -17,16 +21,21 @@ export interface KeystoreService {
    * the password will be required to derive the extended public key
    * @param payload
    */
-  getExtendedPublicKey(payload: GetExtendedPublicKeyPayload): Promisable<string>;
+  getExtendedPublicKey(payload: GetExtendedPublicKeyPayload): Promisable<HexString>;
 
   /**
    *
    * @param payload {@link SignMessagePayload}
    */
   signMessage(payload: SignMessagePayload): Promisable<HexString>;
+
+  /**
+   * clear all data about the keystore, including the mnemonic, extended public keys, etc.
+   */
+  reset(): Promisable<void>;
 }
 
-interface GetExtendedPublicKeyPayload {
+export interface GetExtendedPublicKeyPayload {
   path: HardenedPath | NonHardenedPath;
   password?: PasswordProvider;
 }
@@ -35,7 +44,7 @@ interface GetExtendedPublicKeyPayload {
  * A {@link https://ethereum.org/en/developers/docs/data-structures-and-encoding/web3-secret-storage/ Web3 secret storage} wrapper,
  * to interact with the keystore
  */
-export interface InitKeyStorePayload {
+export interface InitKeystorePayload {
   /**
    * password to encrypt the keystore
    */
@@ -46,10 +55,18 @@ export interface InitKeyStorePayload {
   mnemonic: string;
 
   /**
-   * non-hardened derivation path,
-   * the corresponding public key will be stored in plain text,
-   * for example, the BIP-44 path `m / 44'/ 309'/ 0'/ 0 / 0` will store the public key of
-   * `m / 44' / 309' / 0' / 0` (external) and `m/44'/ 309'/ 0'/ 1` (internal) in plain text
+   * must be an array of non-hardened derivation path, it is used to derive the extended keys.
+   * @example
+   * ```
+   * // the BIP44 path is `m / purpose' / coin_type' / account' / change / address_index`
+   * // to initialize a BIP44 keystore, we need to provide two paths end with `change`,
+   * // they also act as the parent paths. Once the parent paths are provided, the keystore
+   * // will be able to derive associated child keys
+   * const bip44ParentPaths = [
+   *   `m/44'/309'/0'/0`, // to derive external(change: 0) addresses
+   *   `m/44'/309'/0'/1`, // to derive internal(change: 1) addresses
+   * ];
+   * ```
    */
   paths: NonHardenedPath[];
 }
@@ -72,9 +89,9 @@ export interface SignMessagePayload {
 /**
  * checkout BIP-32 learn more about the {@link https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki#extended-keys hardened key}
  */
-type HardenedPath = string;
+export type HardenedPath = string;
 /**
  * checkout BIP-32 learn more about the {@link https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki#extended-keys non-hardened key}
  */
-type NonHardenedPath = string;
-type PasswordProvider = Provider<string>;
+export type NonHardenedPath = string;
+export type PasswordProvider = Provider<string>;

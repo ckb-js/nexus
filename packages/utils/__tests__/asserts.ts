@@ -7,4 +7,6 @@ it('utils#asserts', () => {
   expect(() => asserts.nonFalsy(null)).toThrow();
 
   expect(() => asserts.nonFalsy(1)).not.toThrow();
+
+  expect(() => asserts.asserts(1 + 1 === 3)).toThrow();
 });
