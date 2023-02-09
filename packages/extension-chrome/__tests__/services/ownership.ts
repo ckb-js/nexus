@@ -103,7 +103,7 @@ it('ownership#sign data with 1st lock', async () => {
     backend: mockBackend,
   });
   const usedExternalLocks = await service.getOnChainLocks({});
-  mockAddressStorage.setUsedExternalAddresses([
+  mockAddressStorage.setOnChainExternalAddresses([
     {
       path: `m/44'/309'/0'/0/0`,
       addressIndex: 0,
@@ -145,7 +145,7 @@ it('ownership#get live cells', async () => {
     backend: mockBackend,
   });
   const usedExternalLocks = await service.getOnChainLocks({});
-  mockAddressStorage.setUsedExternalAddresses([
+  mockAddressStorage.setOnChainExternalAddresses([
     {
       path: `m/44'/309'/0'/0/0`,
       addressIndex: 0,
@@ -269,7 +269,7 @@ it('ownership#sign tx', async () => {
       .mockReturnValueOnce(mockSignatures[1]), // second signature
   });
   const mockAddressStorage = new FullOwnershipAddressStorage(mockBackend, mockKeystoreService);
-  mockAddressStorage.setUsedExternalAddresses([
+  mockAddressStorage.setOnChainExternalAddresses([
     {
       path: `m/44'/309'/0'/0/0`,
       addressIndex: 0,

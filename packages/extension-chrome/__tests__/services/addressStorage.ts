@@ -14,9 +14,9 @@ it('addressStorage#set and get unused addresses', async () => {
   });
   const mockAddressStorage = new FullOwnershipAddressStorage(mockBackend, mockKeystoreService);
 
-  expect(await mockAddressStorage.getUnusedAddresses()).toEqual([]);
-  mockAddressStorage.setUnusedAddresses([mockFullOwnershipAddressInfos[0]]);
-  expect(await mockAddressStorage.getUnusedAddresses()).toEqual([mockFullOwnershipAddressInfos[0]]);
+  expect(await mockAddressStorage.getOffChainAddresses()).toEqual([]);
+  mockAddressStorage.setOffChainAddresses([mockFullOwnershipAddressInfos[0]]);
+  expect(await mockAddressStorage.getOffChainAddresses()).toEqual([mockFullOwnershipAddressInfos[0]]);
 });
 
 describe('rule based ownership addressStorage', () => {
@@ -43,10 +43,10 @@ describe('rule based ownership addressStorage', () => {
     });
     const mockAddressStorage = new RuleBasedAddressStorage(mockBackend, mockKeystoreService);
 
-    expect(await mockAddressStorage.getUsedExternalAddresses()).toEqual([]);
+    expect(await mockAddressStorage.getOnChainExternalAddresses()).toEqual([]);
 
     await mockAddressStorage.syncAllAddressInfo();
-    expect(await mockAddressStorage.getUsedExternalAddresses()).toEqual([mockRuleBasedOwnershipAddressInfos[0]]);
+    expect(await mockAddressStorage.getOnChainExternalAddresses()).toEqual([mockRuleBasedOwnershipAddressInfos[0]]);
   });
 
   it('sync address success when backend resolves 1st and 3rd lock has tx history', async () => {
@@ -61,9 +61,9 @@ describe('rule based ownership addressStorage', () => {
       getPublicKeyByPath: ({ path }) => mockRuleBasedOwnershipAddressInfos.find((info) => info.path === path)!.pubkey,
     });
     const mockAddressStorage = new RuleBasedAddressStorage(mockBackend, mockKeystoreService);
-    expect(await mockAddressStorage.getUsedExternalAddresses()).toEqual([]);
+    expect(await mockAddressStorage.getOnChainExternalAddresses()).toEqual([]);
     await mockAddressStorage.syncAllAddressInfo();
-    expect(await mockAddressStorage.getUsedExternalAddresses()).toEqual([
+    expect(await mockAddressStorage.getOnChainExternalAddresses()).toEqual([
       mockRuleBasedOwnershipAddressInfos[0],
       mockRuleBasedOwnershipAddressInfos[2],
     ]);
@@ -79,9 +79,9 @@ describe('full ownership addressStorage', () => {
       getPublicKeyByPath: () => mockFullOwnershipAddressInfos[0].pubkey,
     });
     const mockAddressStorage = new FullOwnershipAddressStorage(mockBackend, mockKeystoreService);
-    expect(await mockAddressStorage.getUsedExternalAddresses()).toEqual([]);
+    expect(await mockAddressStorage.getOnChainExternalAddresses()).toEqual([]);
     await mockAddressStorage.syncAllAddressInfo();
-    expect(await mockAddressStorage.getUsedExternalAddresses()).toEqual([mockFullOwnershipAddressInfos[0]]);
+    expect(await mockAddressStorage.getOnChainExternalAddresses()).toEqual([mockFullOwnershipAddressInfos[0]]);
   });
 
   it('sync address success when backend resolves 1st and 3rd lock has tx history', async () => {
@@ -96,9 +96,9 @@ describe('full ownership addressStorage', () => {
       getPublicKeyByPath: ({ path }) => mockFullOwnershipAddressInfos.find((info) => info.path === path)!.pubkey,
     });
     const mockAddressStorage = new FullOwnershipAddressStorage(mockBackend, mockKeystoreService);
-    expect(await mockAddressStorage.getUsedExternalAddresses()).toEqual([]);
+    expect(await mockAddressStorage.getOnChainExternalAddresses()).toEqual([]);
     await mockAddressStorage.syncAllAddressInfo();
-    expect(await mockAddressStorage.getUsedExternalAddresses()).toEqual([
+    expect(await mockAddressStorage.getOnChainExternalAddresses()).toEqual([
       mockFullOwnershipAddressInfos[0],
       mockFullOwnershipAddressInfos[2],
     ]);

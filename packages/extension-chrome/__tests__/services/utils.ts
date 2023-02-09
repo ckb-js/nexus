@@ -47,7 +47,7 @@ export const createMockKeystoreService = (payload: Partial<KeystoreService>): Ke
       },
 });
 
-const mockFullOwnershipAddressInfosExternal: AddressInfo[] = new Array(50).fill(0).flatMap((_, i) => ({
+const mockFullOwnershipAddressInfosExternal: AddressInfo[] = new Array(100).fill(0).flatMap((_, i) => ({
   path: `m/44'/309'/0'/0/${i}`,
   addressIndex: i,
   lock: {
@@ -59,7 +59,7 @@ const mockFullOwnershipAddressInfosExternal: AddressInfo[] = new Array(50).fill(
   pubkey: `0x${String(i).padStart(2, '0').repeat(33)}`,
 }));
 
-const mockFullOwnershipAddressInfosChange: AddressInfo[] = new Array(50).fill(0).flatMap((_, i) => ({
+const mockFullOwnershipAddressInfosChange: AddressInfo[] = new Array(100).fill(0).flatMap((_, i) => ({
   path: `m/44'/309'/0'/1/${i}`,
   addressIndex: i,
   lock: {
@@ -76,7 +76,7 @@ export const mockFullOwnershipAddressInfos = [
   ...mockFullOwnershipAddressInfosChange,
 ];
 
-export const mockRuleBasedOwnershipAddressInfos: AddressInfo[] = new Array(50).fill(0).map((_, i) => ({
+export const mockRuleBasedOwnershipAddressInfos: AddressInfo[] = new Array(100).fill(0).map((_, i) => ({
   path: `m/4410179'/0'/${i}`,
   addressIndex: i,
   lock: {

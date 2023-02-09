@@ -21,7 +21,7 @@ function createOwnershipService(config: {
 }): OwnershipService {
   return {
     getLiveCells: async () => {
-      const locks = config.addressStorageService.getAllUsedAddresses().map((addressInfo) => addressInfo.lock);
+      const locks = config.addressStorageService.getAllOnChainAddresses().map((addressInfo) => addressInfo.lock);
       const cells = await config.backend.getLiveCells({ locks });
       return {
         // TODO implement the cursor here
@@ -31,18 +31,18 @@ function createOwnershipService(config: {
     },
     getOffChainLocks: async (payload: getOffChainLocksPayload) => {
       const addressInfos = payload.change
-        ? config.addressStorageService.getUsedChangeAddresses()
-        : config.addressStorageService.getUsedExternalAddresses();
+        ? config.addressStorageService.getOnChainChangeAddresses()
+        : config.addressStorageService.getOnChainExternalAddresses();
       const locks = addressInfos.map((addressInfo) => addressInfo.lock);
       return locks;
     },
     getOnChainLocks: async (payload: getOnChainLocksPayload): Promise<Paginate<Script>> => {
       await config.addressStorageService.syncAllAddressInfo();
       const changeScripts = config.addressStorageService
-        .getUsedChangeAddresses()
+        .getOnChainChangeAddresses()
         .map((addressInfo) => addressInfo.lock);
       const externalScripts = config.addressStorageService
-        .getUsedExternalAddresses()
+        .getOnChainExternalAddresses()
         .map((addressInfo) => addressInfo.lock);
       return payload.change
         ? {
