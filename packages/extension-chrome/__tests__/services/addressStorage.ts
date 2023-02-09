@@ -52,8 +52,8 @@ describe('rule based ownership addressStorage', () => {
   it('sync address success when backend resolves 1st and 3rd lock has tx history', async () => {
     const mockBackend: Backend = createMockBackend({
       hasHistory: jest.fn(({ lock }) => {
-        if (lock.args === mockRuleBasedOwnershipAddressInfos[0].lock.args) return Promise.resolve(true); // m/49'/309'/0'/0/0
-        if (lock.args === mockRuleBasedOwnershipAddressInfos[2].lock.args) return Promise.resolve(true); // m/49'/309'/0'/0/2
+        if (lock.args === mockRuleBasedOwnershipAddressInfos[0].lock.args) return Promise.resolve(true); // m/4410179'/0'/0
+        if (lock.args === mockRuleBasedOwnershipAddressInfos[2].lock.args) return Promise.resolve(true); // m/4410179'/0'/2
         return Promise.resolve(false);
       }),
     });

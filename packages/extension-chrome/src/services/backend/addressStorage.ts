@@ -23,7 +23,7 @@ export interface AddressStorage {
   };
   unusedAddresses: AddressInfo[];
 
-  getHardendedPathPrefix: () => string; // m/44'/309'/0' for full ownership, m/49'/309'/0'/0 for rule based ownership
+  getHardendedPathPrefix: () => string; // m/44'/309'/0' for full ownership, m/4410179'/0' for rule based ownership
   // updateUnusedAddresses: (payload: { keystoreService: KeystoreService }) => Promise<void>;
   getUsedExternalAddresses: () => AddressInfo[];
   getUsedChangeAddresses: () => AddressInfo[];
@@ -129,8 +129,7 @@ export class FullOwnershipAddressStorage extends AbstractAddressStorage {
     for (let index = 0; ; index++) {
       const currentAddressInfo = await getAddressInfoByPath(
         this.keystoreService,
-        `${this.getHardendedPathPrefix()}/${payload.change ? 1 : 0}`,
-        index,
+        `${this.getHardendedPathPrefix()}/${payload.change ? 1 : 0}/${index}`,
       );
       const childScriptHasHistory = await this.backend.hasHistory({ lock: currentAddressInfo.lock });
       if (childScriptHasHistory) {
@@ -153,7 +152,9 @@ export class FullOwnershipAddressStorage extends AbstractAddressStorage {
 export class RuleBasedAddressStorage extends AbstractAddressStorage {
   ownershipType = 'RULE_BASED' as const;
   getHardendedPathPrefix(): string {
-    return "m/49'/309'/0'";
+    // https://github.com/ckb-js/nexus/pull/9/files#diff-1f583e1e0396a08122d2991f1bc3d22b0125a40a9725a5a46e973749edb2ce8aR20
+    // 4410179 for 0x434b42
+    return "m/4410179'/0'";
   }
   async syncAllAddressInfo(): Promise<void> {
     // sync used external addresses
@@ -170,8 +171,7 @@ export class RuleBasedAddressStorage extends AbstractAddressStorage {
     for (let index = 0; ; index++) {
       const currentAddressInfo = await getAddressInfoByPath(
         this.keystoreService,
-        `${this.getHardendedPathPrefix()}/0`,
-        index,
+        `${this.getHardendedPathPrefix()}/${index}`,
       );
       const childScriptHasHistory = await this.backend.hasHistory({ lock: currentAddressInfo.lock });
       if (childScriptHasHistory) {
@@ -194,12 +194,11 @@ export class RuleBasedAddressStorage extends AbstractAddressStorage {
 
 /**
  * @param keystoreService
- * @param pathPrefix eg: m/44'/309'/0'/0
- * @param index eg: 0
+ * @param path eg: m/4410179'/0'/0
  * @returns
  */
-async function getAddressInfoByPath(keystoreService: KeystoreService, pathPrefix: string, index: number) {
-  const path = `${pathPrefix}/${index}`;
+async function getAddressInfoByPath(keystoreService: KeystoreService, path: string) {
+  const index = Number(path.split('/').pop()!);
   const pubkey = await keystoreService.getPublicKeyByPath({ path });
   const childScript: Script = toScript(pubkey);
   const currentAddressInfo = {

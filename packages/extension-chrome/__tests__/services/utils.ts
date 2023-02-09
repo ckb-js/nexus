@@ -77,7 +77,7 @@ export const mockFullOwnershipAddressInfos = [
 ];
 
 export const mockRuleBasedOwnershipAddressInfos: AddressInfo[] = new Array(50).fill(0).map((_, i) => ({
-  path: `m/49'/309'/0'/0/${i}`,
+  path: `m/4410179'/0'/${i}`,
   addressIndex: i,
   lock: {
     args: publicKeyToBlake160(`0x${String(i).padStart(2, '0').repeat(33)}`),
