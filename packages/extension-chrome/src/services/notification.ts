@@ -2,8 +2,8 @@ import { NotificationService } from '@nexus-wallet/types';
 import { errors } from '@nexus-wallet/utils';
 import browser from 'webextension-polyfill';
 
-const NOTIFICATION_WIDTH = 360;
-const NOTIFICATION_HEIGHT = 600;
+const NOTIFICATION_WIDTH = 516;
+const NOTIFICATION_HEIGHT = 640;
 
 // TODO this is a mocked notification service,
 //  just demonstrating how we organize the code
@@ -19,7 +19,7 @@ export function createNotificationService(): NotificationService {
         left: lastFocused.left! + (lastFocused.width! - 360),
         width: NOTIFICATION_WIDTH,
         height: NOTIFICATION_HEIGHT,
-        url: 'notification.html',
+        url: 'notification.html#/grant',
       });
 
       const notificationTabId = notification.tabs?.[0]?.id;

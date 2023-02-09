@@ -21,3 +21,8 @@ export interface NetworkConfig {
  * {@link https://github.com/nervosnetwork/ckb/blob/develop/rpc/README.md#type-chaininfo network type}
  */
 export type NetworkName = 'ckb' | 'ckb_testnet' | string;
+
+export type Whitelist = {
+  url: string;
+  favicon: string;
+};

@@ -1,10 +1,10 @@
 import React, { FC } from 'react';
-import { Button, FormControl, FormLabel, Input, Flex } from '@chakra-ui/react';
-import { ResponsiveContainer } from '../../../Components/ResponsiveContainer';
+import { Button, FormControl, FormLabel, Input, Flex, Spacer } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import { useSetState } from 'react-use';
 // TODO: use real service
 import configService, { NetworkConfig } from '../../../../mockServices/config';
+import { WhiteAlphaBox } from '../../../Components/WhiteAlphaBox';
 
 export const AddNetwork: FC = () => {
   const navigate = useNavigate();
@@ -19,28 +19,24 @@ export const AddNetwork: FC = () => {
   };
 
   return (
-    <ResponsiveContainer>
-      <Flex h="100%" as="form" direction="column" justifyContent="center">
-        <FormControl isRequired>
+    <>
+      <WhiteAlphaBox mt="32px" w="448px" p="35px 20px" direction="column">
+        <FormControl>
           <FormLabel>Name</FormLabel>
-          <Input onChange={onChange('name')} name="name" />
+          <Input color="black" backgroundColor="white" onChange={onChange('name')} name="name" />
         </FormControl>
 
-        <FormControl isRequired>
+        <FormControl>
           <FormLabel>URL</FormLabel>
-          <Input name="url" onChange={onChange('url')} />
+          <Input color="black" backgroundColor="white" name="url" onChange={onChange('url')} />
         </FormControl>
-        <Button disabled={!state.name || !state.url} marginY="12px" onClick={onAddNetwork}>
+      </WhiteAlphaBox>
+      <Spacer />
+      <Flex as="form" direction="column" justifyContent="center">
+        <Button size="lg" width="448px" marginY="12px" onClick={onAddNetwork}>
           Add
         </Button>
-        <Button
-          onClick={() => {
-            navigate('/network');
-          }}
-        >
-          Cancel
-        </Button>
       </Flex>
-    </ResponsiveContainer>
+    </>
   );
 };
