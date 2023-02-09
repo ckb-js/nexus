@@ -50,7 +50,7 @@ The P2SH transaction in CKB looks like this
 Unlike full ownership, rule-based ownership tends to exist on-chain as script hash, and because of the flexibility of CKB scripts, script hash does not exist as a fixed `OP_HASH160 [20-byte-hash-value] OP_EQUAL`, but appears on-chain dynamically in various scripts with business logic. As a result, it is difficult for wallets to probe rule-based locks that have already been used.
 
 ```
-`m / ckb_purpose 1' / account' / index
+m / ckb_purpose 1' / account' / index
 ```
 
 Check out the [ckb_purpose](./purpose-field.md) for more details about the purpose field.
