@@ -23,7 +23,7 @@ addMethod('wallet_enable', async (_, { getRequesterAppInfo, resolveService }) =>
   await grantService.grant({ host });
 });
 
-addMethod('wallet_fullOwnership_getUnusedLocks', () => {
+addMethod('wallet_fullOwnership_getOffChainLocks', () => {
   // TODO implement me, this is just a mock
   return [
     {

@@ -12,7 +12,7 @@ export interface RpcMethods {
   wallet_isEnabled: RpcCall<void, boolean>;
   wallet_getNetworkName: RpcCall<void, string>;
 
-  wallet_fullOwnership_getUnusedLocks: RpcCall<void, Script[]>;
+  wallet_fullOwnership_getOffChainLocks: RpcCall<void, Script[]>;
 }
 
 /**

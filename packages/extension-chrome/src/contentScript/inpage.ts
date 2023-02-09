@@ -20,8 +20,8 @@ const injectedCkb: InjectedCkb = {
           return client.request('wallet_fullOwnership_getLiveCells', payload);
         },
 
-        async getUnusedLocks(payload) {
-          return client.request('wallet_fullOwnership_getUnusedLocks', payload);
+        async getOffChainLocks(payload) {
+          return client.request('wallet_fullOwnership_getOffChainLocks', payload);
         },
 
         async signTransaction(payload) {
@@ -32,8 +32,8 @@ const injectedCkb: InjectedCkb = {
           return client.request('wallet_fullOwnership_signData', payload);
         },
 
-        async getUsedLocks(payload) {
-          return client.request('wallet_fullOwnership_getUsedLocks', payload);
+        async getOnChainLocks(payload) {
+          return client.request('wallet_fullOwnership_getOnChainLocks', payload);
         },
       },
       ruleBasedOwnership: {
@@ -41,8 +41,8 @@ const injectedCkb: InjectedCkb = {
           return client.request('wallet_ruleBasedOwnership_getLiveCells', payload);
         },
 
-        async getUnusedLocks(payload) {
-          return client.request('wallet_ruleBasedOwnership_getUnusedLocks', payload);
+        async getOffChainLocks(payload) {
+          return client.request('wallet_ruleBasedOwnership_getOffChainLocks', payload);
         },
 
         async signTransaction(payload) {
@@ -53,8 +53,8 @@ const injectedCkb: InjectedCkb = {
           return client.request('wallet_ruleBasedOwnership_signData', payload);
         },
 
-        async getUsedLocks(payload) {
-          return client.request('wallet_ruleBasedOwnership_getUsedLocks', payload);
+        async getOnChainLocks(payload) {
+          return client.request('wallet_ruleBasedOwnership_getOnChainLocks', payload);
         },
       },
       async getNetworkName() {

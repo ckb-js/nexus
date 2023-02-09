@@ -32,7 +32,7 @@ describe('usedLocks and unusedLocks in ownership', () => {
       addressStorageService: mockAddressStorage,
       backend: mockBackend,
     });
-    const usedLocks = await service.getUsedLocks({});
+    const usedLocks = await service.getOnChainLocks({});
     expect(usedLocks).toEqual({ cursor: '', objects: [] });
   });
   it('should return a list with a lock if there is one history', async () => {
@@ -49,7 +49,7 @@ describe('usedLocks and unusedLocks in ownership', () => {
       addressStorageService: mockAddressStorage,
       backend: mockBackend,
     });
-    const usedLocks = await service.getUsedLocks({});
+    const usedLocks = await service.getOnChainLocks({});
     expect(usedLocks).toEqual({
       cursor: '',
       objects: [mockFullOwnershipAddressInfos[0].lock],
@@ -78,7 +78,7 @@ describe('usedLocks and unusedLocks in ownership', () => {
       addressStorageService: mockAddressStorage,
       backend: mockBackend,
     });
-    const usedLocks = await service.getUsedLocks({});
+    const usedLocks = await service.getOnChainLocks({});
 
     expect(usedLocks).toEqual({
       cursor: '',
@@ -102,7 +102,7 @@ it('ownership#sign data with 1st lock', async () => {
     addressStorageService: mockAddressStorage,
     backend: mockBackend,
   });
-  const usedExternalLocks = await service.getUsedLocks({});
+  const usedExternalLocks = await service.getOnChainLocks({});
   mockAddressStorage.setUsedExternalAddresses([
     {
       path: `m/44'/309'/0'/0/0`,
@@ -144,7 +144,7 @@ it('ownership#get live cells', async () => {
     addressStorageService: mockAddressStorage,
     backend: mockBackend,
   });
-  const usedExternalLocks = await service.getUsedLocks({});
+  const usedExternalLocks = await service.getOnChainLocks({});
   mockAddressStorage.setUsedExternalAddresses([
     {
       path: `m/44'/309'/0'/0/0`,

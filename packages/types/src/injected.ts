@@ -24,8 +24,8 @@ export interface CkbProvider {
 }
 
 export interface Keyring {
-  getUnusedLocks(options?: GetUnusedLocksOptions): Promise<Script[]>;
-  getUsedLocks(payload?: { cursor?: string }): Promise<Paginate<Script>>;
+  getOffChainLocks(options?: getOffChainLocksOptions): Promise<Script[]>;
+  getOnChainLocks(payload?: { cursor?: string }): Promise<Paginate<Script>>;
   getLiveCells(payload?: { cursor?: string }): Promise<Paginate<Cell>>;
   signTransaction(payload: { tx: Transaction }): Promise<GroupedSignature>;
 
@@ -44,7 +44,7 @@ export interface WalletEventListener {
  */
 export type Network = 'ckb' | 'ckb_testnet';
 
-export type GetUnusedLocksOptions = {
+export type getOffChainLocksOptions = {
   change?: boolean;
 };
 

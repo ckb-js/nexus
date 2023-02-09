@@ -4,9 +4,9 @@ import { AddressStorage, FullOwnershipAddressStorage, RuleBasedAddressStorage } 
 import { Script } from '@ckb-lumos/base';
 import { OwnershipService, Paginate, KeystoreService, NotificationService } from '@nexus-wallet/types';
 import {
-  GetUsedLocksPayload,
+  getOnChainLocksPayload,
   SignDataPayload,
-  GetUnusedLocksPayload,
+  getOffChainLocksPayload,
   GroupedSignature,
 } from '@nexus-wallet/types/lib/services/OwnershipService';
 import { asserts } from '@nexus-wallet/utils';
@@ -29,14 +29,14 @@ function createOwnershipService(config: {
         objects: cells,
       };
     },
-    getUnusedLocks: async (payload: GetUnusedLocksPayload) => {
+    getOffChainLocks: async (payload: getOffChainLocksPayload) => {
       const addressInfos = payload.change
         ? config.addressStorageService.getUsedChangeAddresses()
         : config.addressStorageService.getUsedExternalAddresses();
       const locks = addressInfos.map((addressInfo) => addressInfo.lock);
       return locks;
     },
-    getUsedLocks: async (payload: GetUsedLocksPayload): Promise<Paginate<Script>> => {
+    getOnChainLocks: async (payload: getOnChainLocksPayload): Promise<Paginate<Script>> => {
       await config.addressStorageService.syncAllAddressInfo();
       const changeScripts = config.addressStorageService
         .getUsedChangeAddresses()
