@@ -37,7 +37,7 @@ m / 44' / 309' / 0' / change / index
 
 The fully owned cell means that the unlock rule of a cell can only be done by signing with a private key, which typically means the cell owned by a single user, such as sUDT or NFT asset cell.
 
-### Rule-based Ownership
+### Rule-Based Ownership
 
 In some cases, there are additional rules for cell ownership, such as domain names, which are usually represented in the blockchain as an NFT, but this NFT usually have an expiration date for the holder, and will be recalled after the expiration date. In this NFT case, the NFT cell cannot use the holder's `secp256k1_blake160` lock as the NFT's lock, instead, it uses holders lock for [P2SH](https://github.com/bitcoin/bips/blob/master/bip-0016.mediawiki)
 
@@ -47,10 +47,34 @@ The P2SH transaction in CKB looks like this
   <img width="480" src="./design/p2sh.png" />
 </p>
 
-To differentiate from the BIP-44 derivation rules, Nexus can use the [BIP-49](https://github.com/bitcoin/bips/blob/master/bip-0049.mediawiki) derivation rules to manage these keys for P2SH
+Unlike full ownership, rule-based ownership tends to exist on-chain as script hash, and because of the flexibility of CKB scripts, script hash does not exist as a fixed `OP_HASH160 [20-byte-hash-value] OP_EQUAL`, but appears on-chain dynamically in various scripts with business logic. As a result, it is difficult for wallets to probe rule-based locks that have already been used.
 
 ```
-m / 49' / 309' / 0' / change / index
+`m / ckb_purpose 1' / account' / index
+```
+
+Check out the [ckb_purpose](./purpose-field.md) for more details about the purpose field.
+
+Rule-based locks do not usually exist on the chain immediately when they are used, We use the domain cell as an example
+
+```mermaid
+sequenceDiagram
+  participant dapp as dApp
+  participant Nexus
+  participant CKB
+  note over dapp,CKB: Create a domain cell
+  note right of dapp: rb for rule-based
+  dapp ->> Nexus: rb.get_off_chain_lock()
+  Nexus ->> dapp: off_chain_lock
+  dapp ->> dapp: lock_hash = hash(off_chain_lock)
+  dapp ->> CKB: create_domain_cell with a off-chain lock hash
+  note over dapp,CKB: Update the domain cell's data
+  dapp ->> CKB: transfer CKB to off_chain_lock
+  dapp ->> dapp: transfer to be confirmed
+  note right of dapp: off_chain_lock becomes on_chain_cell
+  dapp ->> Nexus: rb.sign_transaction(update_domain_cell_tx)
+  Nexus ->> dapp: signature
+  dapp ->> CKB: update_domain_cell with the on_chain_cell
 ```
 
 ## JavaScript Provider
@@ -84,10 +108,10 @@ interface CkbProvider {
   ruleBasedOwnership: Ownership;
 }
 
-interface Ownership {
-  getUnusedLocks(options?: GetUnusedLocksOptions): Promise<Script[]>;
+interface FullOwnership {
+  getOffChainLocks(options?: GetOffChainLocksOptions): Promise<Script[]>;
 
-  getUsedLocks(payload?: { cursor?: string }): Promise<Paginate<Script>>;
+  getOnChainLockss(payload?: { cursor?: string }): Promise<Paginate<Script>>;
 
   getLiveCells(payload?: { cursor?: string }): Promise<Paginate<Cell>>;
 
@@ -108,7 +132,8 @@ interface WalletEventListener {
  */
 type Network = 'ckb' | 'ckb_testnet';
 
-type GetUnusedLocksOptions = {
+type GetOffChainLocksOptions = {
+  // will be ignored in rule-based ownership
   change?: boolean;
 };
 
@@ -145,7 +170,7 @@ Some wallets may be able to signing with the TEE and auth by biometric authentic
 
 ### Is There a Problem with BIP-44 as with Neuron?
 
-Users may use their seeds in both Neuron and Nexus, but this is not a problem, Neuron will only consume cells with [empty](https://github.com/nervosnetwork/neuron/blob/master/packages/neuron-wallet/src/services/cells.ts#L432-L462) data and type when transferring. But this bring up another thought, the dApp may have a bug that causes the user's cell to be consumed incorrectly. So far we have considered using UI/UX to let the user double-check the content when signing.
+Users may use their seeds in both Neuron and Nexus, but this is not a problem, Neuron will only consume cells with [empty](https://github.com/nervosnetwork/neuron/blob/master/packages/neuron-wallet/src/services/cells.ts#L432-L462) data and type when transferring. But this brings up another thought, the dApp may have a bug that causes the user's cell to be consumed incorrectly. So far we have considered using UI/UX to let the user double-check the content when signing.
 
 ### Can You Talk About the Disadvantages of the Design?
 
