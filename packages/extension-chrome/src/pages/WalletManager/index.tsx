@@ -15,7 +15,7 @@ import { OutsideCreateFrame } from './containers/OutsideCreateFrame';
 import { CreateProcessFrame } from './containers/CreateProcessFrame';
 import { BeforeStart } from './containers/BeforeStart';
 import { CreateAccount } from './containers/CreateAccount';
-import { CreateFlowRouteConfig } from './types';
+import { CreateFlowConfig } from './types';
 
 const routeConfig: RouteObject[] = [
   {
@@ -40,12 +40,17 @@ const routeConfig: RouteObject[] = [
     path: '/create',
     loader: () => {
       return {
-        flow: ['account', 'password', 'seed', 'confirm'],
+        steps: [
+          { path: 'account', title: 'Select Username', description: 'Select a username' },
+          { path: 'password', title: 'Create Password', description: 'Choose a secure one' },
+          { path: 'seed', title: 'Generate Wallet Seed', description: 'remember it!' },
+          { path: 'confirm', title: 'Confirm Seed', description: 'Confirm your seed' },
+        ],
         entry: '/',
         exit: '/success',
         disableBackOnExit: true,
         exitButtonText: 'Confirm',
-      } as CreateFlowRouteConfig;
+      } as CreateFlowConfig;
     },
     children: [
       {
@@ -71,10 +76,18 @@ const routeConfig: RouteObject[] = [
     path: '/import',
     loader: () => {
       return {
-        flow: ['seed', 'password', 'account'],
+        steps: [
+          {
+            path: 'seed',
+            title: 'Confirm Seed',
+            description: 'Confirm your wallet seed',
+          },
+          { path: 'password', title: 'Create Password', description: 'Create a secure password' },
+          { path: 'account', title: 'Create Username', description: 'Create a username' },
+        ],
         entry: '/',
         exit: '/success',
-      } as CreateFlowRouteConfig;
+      } as CreateFlowConfig;
     },
 
     children: [
