@@ -11,7 +11,7 @@ export type ConnectStatusCardProps = {
 
 export const ConnectStatusCard: FC<ConnectStatusCardProps> = ({ name, status }) => {
   return (
-    <WhiteAlphaBox mt="44px" mb="20px" alignItems="center" h="108px" w="450px" justify="space-between" paddingX="30px">
+    <WhiteAlphaBox mt="44px" mb="20px" alignItems="center" h="108px" justify="space-between" paddingX="30px">
       <Flex alignItems="center">
         <Icon as={AvatarIcon} mr="16px" viewBox="0 0 96 96" w="48px" h="48px" />
         <Box fontWeight="bold" fontSize="md">

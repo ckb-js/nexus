@@ -20,7 +20,7 @@ export const AddNetwork: FC = () => {
 
   return (
     <>
-      <WhiteAlphaBox mt="32px" w="448px" p="35px 20px" direction="column">
+      <WhiteAlphaBox mt="32px" p="35px 20px" direction="column">
         <FormControl>
           <FormLabel>Name</FormLabel>
           <Input color="black" backgroundColor="white" onChange={onChange('name')} name="name" />
@@ -33,7 +33,7 @@ export const AddNetwork: FC = () => {
       </WhiteAlphaBox>
       <Spacer />
       <Flex as="form" direction="column" justifyContent="center">
-        <Button size="lg" width="448px" marginY="12px" onClick={onAddNetwork}>
+        <Button size="lg" width="452px" marginY="12px" onClick={onAddNetwork}>
           Add
         </Button>
       </Flex>

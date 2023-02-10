@@ -38,9 +38,9 @@ export const WhitelistSites: FC = () => {
             <SearchIcon />
           </Center>
         </InputLeftElement>
-        <Input w="450px" onChange={(e) => setSearchQuery(e.target.value)} value={searchQuery} colorScheme="white" />
+        <Input w="452px" onChange={(e) => setSearchQuery(e.target.value)} value={searchQuery} colorScheme="white" />
       </InputGroup>
-      <VStack w="450px" padding="16px 20px" as={WhiteAlphaBox} spacing="12px" flexDirection="column">
+      <VStack padding="16px 20px" as={WhiteAlphaBox} spacing="12px" flexDirection="column">
         {filteredSites?.map((site) => (
           <Flex alignItems="center" h="48px" w="100%" key={site.url}>
             <Center w="48px" borderRadius="50%" padding="4px" h="48px" backgroundColor="whiteAlpha.300">

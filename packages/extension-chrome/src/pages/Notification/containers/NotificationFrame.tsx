@@ -12,6 +12,7 @@ export const NotificationFrame: FC = () => {
       position="relative"
       h="100vh"
       w="100vw"
+      px="24px"
       pb="72px"
       color="white"
     >

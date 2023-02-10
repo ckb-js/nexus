@@ -32,11 +32,11 @@ export const Grant: React.FC = () => {
         </Box>
       </Flex>
 
-      <Box w="448px" fontSize="md">
+      <Box w="452px" fontSize="md">
         This app would like to:
       </Box>
 
-      <VStack my="8px" width="448px" p="20px 30px" alignItems="flex-start" as={WhiteAlphaBox} spacing="12px">
+      <VStack my="8px" p="20px 30px" alignItems="flex-start" as={WhiteAlphaBox} spacing="12px">
         {permissions.map((p) => (
           <Flex key={p} fontSize="md" alignItems="center" fontWeight="semibold" mb="8px">
             <CheckCircleIcon mr="20px" color="green.300" />
@@ -45,7 +45,7 @@ export const Grant: React.FC = () => {
         ))}
       </VStack>
 
-      <Box w="448px" fontSize="16px">
+      <Box w="452px" fontSize="16px">
         Only connect with sites you trust
       </Box>
 

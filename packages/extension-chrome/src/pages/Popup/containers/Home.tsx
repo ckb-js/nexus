@@ -30,7 +30,7 @@ export const Home: FC = () => {
     <>
       <ConnectStatusCard name="Yan" status="connected" />
 
-      <WhiteAlphaBox w="450px" direction="column">
+      <WhiteAlphaBox direction="column">
         {entries.map(({ title, icon, onClick }) => (
           <Flex as="button" alignItems="center" paddingX="30px" h="88px" onClick={onClick}>
             <Center mr="20px" w="48px" backgroundColor="whiteAlpha.300" h="48px" borderRadius="50%">
@@ -42,30 +42,6 @@ export const Home: FC = () => {
           </Flex>
         ))}
       </WhiteAlphaBox>
-
-      {/* <Flex w="100%" mt="24px" alignItems="center">
-        <Box mr="8px" height="24px" borderRadius="50%" width="24px" backgroundColor="green.400"></Box>
-        <Text fontSize="md">Site Connects</Text>
-      </Flex>
-      <Flex h="100%" direction="column" alignItems="center" justifyContent="center">
-        <Button
-          w="150px"
-          onClick={() => {
-            navigate('/whitelistSites');
-          }}
-        >
-          Whitelist Sites
-        </Button>
-        <Button
-          w="150px"
-          mt="24px"
-          onClick={() => {
-            navigate('network');
-          }}
-        >
-          Networks
-        </Button>
-      </Flex> */}
     </>
   );
 };
