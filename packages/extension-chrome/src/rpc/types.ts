@@ -1,5 +1,11 @@
-import { Script } from '@ckb-lumos/lumos';
+import { Cell, Script } from '@ckb-lumos/lumos';
 import { Promisable } from '@nexus-wallet/types/lib/base';
+import {
+  SignTransactionPayload,
+  GroupedSignature,
+  SignDataPayload,
+  Signature,
+} from '@nexus-wallet/types/lib/services/OwnershipService';
 import { Services } from '../services';
 
 interface RpcCall<Params, Result> {
@@ -13,6 +19,12 @@ export interface RpcMethods {
   wallet_getNetworkName: RpcCall<void, string>;
 
   wallet_fullOwnership_getOffChainLocks: RpcCall<void, Script[]>;
+
+  wallet_ruleBasedOwnership_getOffChainLocks: RpcCall<void, Script[]>;
+  wallet_ruleBasedOwnership_getOnChainLocks: RpcCall<void, Script[]>;
+  wallet_ruleBasedOwnership_getLiveCells: RpcCall<void, Cell[]>;
+  wallet_ruleBasedOwnership_signTransaction: RpcCall<SignTransactionPayload, GroupedSignature>;
+  wallet_ruleBasedOwnership_signData: RpcCall<SignDataPayload, Signature>;
 }
 
 /**

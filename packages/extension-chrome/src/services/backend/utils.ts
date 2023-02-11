@@ -1,40 +1,13 @@
 import { asserts } from '@nexus-wallet/utils';
 import { hashWitness } from '@ckb-lumos/common-scripts/lib/helper';
-import { blockchain, Transaction } from '@ckb-lumos/base';
+import { blockchain, Transaction, utils } from '@ckb-lumos/base';
 import { KeystoreService } from '@nexus-wallet/types';
-import { AddressInfo } from './addressStorage';
+import { LockInfo } from './locksManager';
 import { HexString, Script } from '@ckb-lumos/base';
 import { publicKeyToBlake160 } from '@ckb-lumos/hd/lib/key';
 import { config } from '@ckb-lumos/lumos';
 import { ckbHash, CKBHasher } from '@ckb-lumos/base/lib/utils';
-
-/**
- *  This function will NOT call `derivePath` of keychain, The keychain should be aligned with the path passed in.
- * @param keychain
- * @param path
- * @returns
- */
-export async function getAddressInfo(
-  keystoreService: KeystoreService,
-  change = false,
-  index: number,
-): Promise<AddressInfo> {
-  const path = `m/44'/309'/0'/${change ? 1 : 0}/${index}`;
-  const pubkey = await keystoreService.getPublicKeyByPath({ path });
-  const scriptArgs = publicKeyToBlake160(pubkey);
-  const lock: Script = {
-    codeHash: config.getConfig().SCRIPTS!.SECP256K1_BLAKE160!.CODE_HASH,
-    hashType: 'type',
-    args: scriptArgs,
-  };
-  return {
-    path,
-    addressIndex: index,
-    pubkey,
-    blake160: scriptArgs,
-    lock,
-  };
-}
+import { StorageSchema, LocksAndPointer } from './locksManager';
 
 export function toScript(pubkey: HexString): Script {
   // args for SECP256K1_BLAKE160 script
@@ -53,9 +26,9 @@ export function toScript(pubkey: HexString): Script {
  * @param addressInfos
  * @returns
  */
-export function getGroupedHash(tx: Transaction, addressInfos: AddressInfo[]): [AddressInfo, HexString][] {
+export function getGroupedHash(tx: Transaction, addressInfos: LockInfo[]): [LockInfo, HexString][] {
   // lockHash <-> addressInfo
-  const addressInfoMap = new Map<string, AddressInfo>();
+  const addressInfoMap = new Map<string, LockInfo>();
   // lockHash <-> groupInfo
   const groupInfoMap = new Map<string, number[]>();
   // lockHash <-> signature
@@ -95,9 +68,79 @@ export function getGroupedHash(tx: Transaction, addressInfos: AddressInfo[]): [A
     group = inputGroups.next();
   }
 
-  let result: [AddressInfo, HexString][] = [];
+  let result: [LockInfo, HexString][] = [];
   for (let entry of addressInfoMap) {
     result.push([entry[1], signatureMap.get(entry[0])!]);
   }
   return result;
+}
+
+/**
+ * @param keystoreService
+ * @param path eg: m/4410179'/0'/0
+ * @returns
+ */
+export async function getAddressInfoByPath(keystoreService: KeystoreService, path: string): Promise<LockInfo> {
+  const index = indexOfPath(path);
+  const pubkey = await keystoreService.getPublicKeyByPath({ path });
+  const childScript: Script = toScript(pubkey);
+  const currentAddressInfo = {
+    path,
+    index,
+    pubkey,
+    blake160: childScript.args,
+    lock: childScript,
+    lockHash: utils.computeScriptHash(childScript),
+  };
+  return currentAddressInfo;
+}
+
+/**
+ * returns the address index of the path
+ * @param path eg: m/4410179'/0'/0
+ * @returns 0
+ */
+export function indexOfPath(path: string): number {
+  const pathList = path.split('/');
+  return Number(pathList[pathList.length - 1]);
+}
+
+export function isFullOwnership(path: string): boolean {
+  return path.startsWith("m/44'/309'/0'");
+}
+
+export function isRuleBasedOwnership(path: string): boolean {
+  return path.startsWith("m/4410179'/0'");
+}
+
+export function fromJSONString(payload: { cachedAddressDetailsStr: string }): LocksAndPointer {
+  return JSON.parse(payload.cachedAddressDetailsStr);
+}
+
+export function getParentPath(payload: { keyName: keyof StorageSchema }): string {
+  const fullOwnershipParentPath = "m/44'/309'/0'";
+  const ruleBasedOwnershipParentPath = "m/4410179'/0'";
+  if (payload.keyName === 'ruleBasedOwnershipAddressInfo') {
+    return ruleBasedOwnershipParentPath;
+  }
+  return fullOwnershipParentPath;
+}
+
+export function getDefaultLocksAndPointer(): LocksAndPointer {
+  return {
+    details: {
+      onChainAddresses: { externalAddresses: [], changeAddresses: [] },
+      offChainAddresses: { externalAddresses: [], changeAddresses: [] },
+    },
+    pointers: {
+      onChain: {
+        external: -1,
+        change: -1,
+      },
+      offChain: {
+        external: -1,
+        change: -1,
+      },
+    },
+  };
 }
