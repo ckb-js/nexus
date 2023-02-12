@@ -1,4 +1,3 @@
-import { bytes } from '@ckb-lumos/codec';
 import { Backend } from './backend';
 import { KeystoreService } from '@nexus-wallet/types';
 import { LocksAndPointer, LocksManager, LockInfo } from './locksManager';
@@ -20,8 +19,12 @@ export class LocksProvider {
   }
 
   async getNextOffChainExternalLocks(): Promise<LockInfo[]> {
+    const lockInfos = this.locksManager.getNextOffChainExternalLocks();
+    if (lockInfos.length === 0) {
+      return [];
+    }
     // TODO assume getNextOffChainExternalLocks return only one lock for now
-    const lockInfo = this.locksManager.getNextOffChainExternalLocks()[0];
+    const lockInfo = lockInfos[0];
     if (await this.backend.hasHistory({ lock: lockInfo.lock })) {
       this.locksManager.markAddressAsUsed({ lockInfoList: [lockInfo] });
       return this.getNextOffChainExternalLocks();
@@ -29,8 +32,12 @@ export class LocksProvider {
     return [lockInfo];
   }
   async getNextOffChainChangeLocks(): Promise<LockInfo[]> {
+    const lockInfos = this.locksManager.getNextOffChainChangeLocks();
+    if (lockInfos.length === 0) {
+      return [];
+    }
     // TODO assume getNextOffChainExternalLocks return only one lock for now
-    const lockInfo = this.locksManager.getNextOffChainChangeLocks()[0];
+    const lockInfo = lockInfos[0];
     if (await this.backend.hasHistory({ lock: lockInfo.lock })) {
       this.locksManager.markAddressAsUsed({ lockInfoList: [lockInfo] });
       return this.getNextOffChainChangeLocks();
@@ -50,14 +57,6 @@ export class LocksProvider {
     return this.locksManager.getNextOnChainChangeLocks();
   }
   getlockInfoByLock({ lock }: { lock: Script }): LockInfo | undefined {
-    const allLockInfo = [
-      ...this.locksManager.onChainAddresses.externalAddresses,
-      ...this.locksManager.onChainAddresses.changeAddresses,
-      ...this.locksManager.offChainAddresses.externalAddresses,
-      ...this.locksManager.offChainAddresses.changeAddresses,
-    ];
-    return allLockInfo.find((lockInfo) => {
-      return bytes.equal(lockInfo.lock.args, lock.args) && bytes.equal(lockInfo.lock.codeHash, lock.codeHash);
-    });
+    return this.locksManager.getlockInfoByLock({ lock });
   }
 }

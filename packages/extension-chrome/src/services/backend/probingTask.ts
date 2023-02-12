@@ -9,7 +9,13 @@ import {
 } from './locksManager';
 import { Storage, KeystoreService } from '@nexus-wallet/types';
 import { Backend } from './backend';
-import { fromJSONString, getAddressInfoByPath, getDefaultLocksAndPointer, getParentPath } from './utils';
+import {
+  fromJSONString,
+  getAddressInfoByPath,
+  getAddressInfoDetailsFromStorage,
+  getDefaultLocksAndPointer,
+  getParentPath,
+} from './utils';
 
 export class ProbeTask {
   private static instance: ProbeTask;
@@ -57,33 +63,31 @@ export class ProbeTask {
     }
     // external addresses
     const newOnChainExternalAddresses: LockInfo[] = [];
-    addressDetails.details.offChainAddresses.externalAddresses.forEach(async (address) => {
+    addressDetails.details.offChain.external.forEach(async (address) => {
       if (await this.backend.hasHistory({ lock: address.lock })) {
         newOnChainExternalAddresses.push(address);
       }
     });
     // add new on chain locks to cached on chain locks
-    addressDetails.details.onChainAddresses.externalAddresses.push(...newOnChainExternalAddresses);
+    addressDetails.details.onChain.external.push(...newOnChainExternalAddresses);
     // remove new on chain locks from cached off chain locks
-    addressDetails.details.offChainAddresses.externalAddresses =
-      addressDetails.details.offChainAddresses.externalAddresses.filter(
-        (address) => !newOnChainExternalAddresses.includes(address),
-      );
+    addressDetails.details.offChain.external = addressDetails.details.offChain.external.filter(
+      (address) => !newOnChainExternalAddresses.includes(address),
+    );
 
     // change addresses
     const newOnChainChangeAddresses: LockInfo[] = [];
-    addressDetails.details.offChainAddresses.changeAddresses.forEach(async (address) => {
+    addressDetails.details.offChain.change.forEach(async (address) => {
       if (await this.backend.hasHistory({ lock: address.lock })) {
         newOnChainChangeAddresses.push(address);
       }
     });
     // add new on chain locks to cached on chain locks
-    addressDetails.details.onChainAddresses.changeAddresses.push(...newOnChainChangeAddresses);
+    addressDetails.details.onChain.change.push(...newOnChainChangeAddresses);
     // remove new on chain locks from cached off chain locks
-    addressDetails.details.offChainAddresses.changeAddresses =
-      addressDetails.details.offChainAddresses.changeAddresses.filter(
-        (address) => !newOnChainChangeAddresses.includes(address),
-      );
+    addressDetails.details.offChain.change = addressDetails.details.offChain.change.filter(
+      (address) => !newOnChainChangeAddresses.includes(address),
+    );
 
     const newCacheString = JSON.stringify(addressDetails);
     if (!isEqual(cachedAddressDetailsStr, newCacheString)) {
@@ -98,9 +102,9 @@ export class ProbeTask {
    */
   async supplyOffChainAddresses(payload: { keyName: keyof StorageSchema }): Promise<void> {
     const shreshold = payload.keyName === 'fullOwnershipAddressInfo' ? MAX_ADDRESS_GAP : RULE_BASED_MAX_ADDRESS_GAP;
-    const lockDetail = await this.getAddressInfoDetailsFromStorage({ keyName: payload.keyName });
+    const lockDetail = await getAddressInfoDetailsFromStorage({ keyName: payload.keyName, storage: this.storage });
     const lockDetailManager = new LocksManager({ lockDetail });
-    // supply off chain external addresses if needed
+    // supply external addresses if needed
     while (lockDetailManager.getOffChainExternalAddresses().length < shreshold) {
       const parentPath = getParentPath({ keyName: payload.keyName });
       const path =
@@ -108,9 +112,9 @@ export class ProbeTask {
           ? `${parentPath}/0/${lockDetailManager.currentMaxExternalAddressIndex() + 1}`
           : `${parentPath}/${lockDetailManager.currentMaxExternalAddressIndex() + 1}`;
       const nextLockInfo = await getAddressInfoByPath(this.keystoreService, path);
-      lockDetailManager.offChainAddresses.externalAddresses.push(nextLockInfo);
+      lockDetailManager.offChain.external.push(nextLockInfo);
     }
-    // supply off chain change addresses if needed
+    // supply change addresses if needed
     while (
       // only full ownership chain needs change addresses
       payload.keyName === 'fullOwnershipAddressInfo' &&
@@ -119,16 +123,7 @@ export class ProbeTask {
       const parentPath = getParentPath({ keyName: payload.keyName });
       const path = `${parentPath}/1/${lockDetailManager.currentMaxChangeAddressIndex() + 1}`;
       const nextLockInfo = await getAddressInfoByPath(this.keystoreService, path);
-      lockDetailManager.offChainAddresses.changeAddresses.push(nextLockInfo);
+      lockDetailManager.offChain.change.push(nextLockInfo);
     }
-  }
-
-  async getAddressInfoDetailsFromStorage(payload: { keyName: keyof StorageSchema }): Promise<LocksAndPointer> {
-    let addressDetails: LocksAndPointer = getDefaultLocksAndPointer();
-    const cachedAddressDetailsStr = await this.storage.getItem(payload.keyName);
-    if (cachedAddressDetailsStr) {
-      addressDetails = fromJSONString({ cachedAddressDetailsStr });
-    }
-    return addressDetails;
   }
 }

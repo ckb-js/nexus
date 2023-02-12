@@ -1,7 +1,7 @@
 import { asserts } from '@nexus-wallet/utils';
 import { hashWitness } from '@ckb-lumos/common-scripts/lib/helper';
 import { blockchain, Transaction, utils } from '@ckb-lumos/base';
-import { KeystoreService } from '@nexus-wallet/types';
+import { KeystoreService, Storage } from '@nexus-wallet/types';
 import { LockInfo } from './locksManager';
 import { HexString, Script } from '@ckb-lumos/base';
 import { publicKeyToBlake160 } from '@ckb-lumos/hd/lib/key';
@@ -129,8 +129,8 @@ export function getParentPath(payload: { keyName: keyof StorageSchema }): string
 export function getDefaultLocksAndPointer(): LocksAndPointer {
   return {
     details: {
-      onChainAddresses: { externalAddresses: [], changeAddresses: [] },
-      offChainAddresses: { externalAddresses: [], changeAddresses: [] },
+      onChain: { external: [], change: [] },
+      offChain: { external: [], change: [] },
     },
     pointers: {
       onChain: {
@@ -143,4 +143,16 @@ export function getDefaultLocksAndPointer(): LocksAndPointer {
       },
     },
   };
+}
+
+export async function getAddressInfoDetailsFromStorage(payload: {
+  storage: Storage<StorageSchema>;
+  keyName: keyof StorageSchema;
+}): Promise<LocksAndPointer> {
+  let addressDetails: LocksAndPointer = getDefaultLocksAndPointer();
+  const cachedAddressDetailsStr = await payload.storage.getItem(payload.keyName);
+  if (cachedAddressDetailsStr) {
+    addressDetails = fromJSONString({ cachedAddressDetailsStr });
+  }
+  return addressDetails;
 }

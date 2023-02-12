@@ -1,6 +1,8 @@
 import { Script, Transaction } from '@ckb-lumos/base';
 import { publicKeyToBlake160 } from '@ckb-lumos/hd/lib/key';
 import { getGroupedHash } from '../../src/services/backend/utils';
+import { LockInfo } from '../../src/services/backend/locksManager';
+import { generateLocksAndPointers } from './utils';
 
 const fixtures: { pubkey: string; lock: Script }[] = new Array(50).fill(0).map((_, i) => ({
   pubkey: `0x${String(i).padStart(2, '0').repeat(33)}`,
@@ -62,26 +64,42 @@ it('utils# should get grouped hash', () => {
     witnesses: ['0x0001', '0x1234'],
   };
 
-  const mockAddressInfos = [
+  const mockLockInfos: LockInfo[] = [
     {
       path: `m/44'/309'/0'/0/0`,
-      addressIndex: 0,
+      index: 0,
       pubkey: '',
       blake160: '',
       lock: fixtures[0].lock,
+      lockHash: '',
     },
     {
       path: `m/44'/309'/0'/0/1`,
-      addressIndex: 0,
+      index: 0,
       pubkey: '',
       blake160: '',
       lock: fixtures[1].lock,
+      lockHash: '',
     },
   ];
 
-  const groupedHash = getGroupedHash(mockTx, mockAddressInfos);
+  const groupedHash = getGroupedHash(mockTx, mockLockInfos);
   expect(groupedHash).toEqual([
-    [mockAddressInfos[0], '0x5f1cbd06e2a0dcac0bbf67bdfe8256cdf6a503dfaad145dd94e0b48f1edf637b'],
-    [mockAddressInfos[1], '0xdaf81b611585494feba319dfb4b6c4169f26377fe50571851cb59ecf19957c0a'],
+    [mockLockInfos[0], '0x5f1cbd06e2a0dcac0bbf67bdfe8256cdf6a503dfaad145dd94e0b48f1edf637b'],
+    [mockLockInfos[1], '0xdaf81b611585494feba319dfb4b6c4169f26377fe50571851cb59ecf19957c0a'],
   ]);
+});
+
+it('utils# should generate lock details with 80 onchain locks and 20 offchain locks', () => {
+  const locks = generateLocksAndPointers({ fullOwnership: true });
+  expect(locks.details.onChain.external.length).toEqual(80);
+  expect(locks.details.offChain.external.length).toEqual(20);
+  expect(locks.details.onChain.change.length).toEqual(80);
+  expect(locks.details.offChain.change.length).toEqual(20);
+
+  const rbLocks = generateLocksAndPointers({ fullOwnership: false });
+  expect(rbLocks.details.onChain.external.length).toEqual(80);
+  expect(rbLocks.details.offChain.external.length).toEqual(20);
+  expect(rbLocks.details.onChain.change.length).toEqual(0);
+  expect(rbLocks.details.offChain.change.length).toEqual(0);
 });

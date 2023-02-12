@@ -22,13 +22,13 @@ export type LockInfo = {
 };
 
 export type NexusLockInfos = {
-  onChainAddresses: {
-    externalAddresses: LockInfo[];
-    changeAddresses: LockInfo[];
+  onChain: {
+    external: LockInfo[];
+    change: LockInfo[];
   };
-  offChainAddresses: {
-    externalAddresses: LockInfo[];
-    changeAddresses: LockInfo[];
+  offChain: {
+    external: LockInfo[];
+    change: LockInfo[];
   };
 };
 
@@ -50,28 +50,28 @@ export type LocksAndPointer = {
 
 export class LocksManager {
   pointers: NexusLockPointers;
-  onChainAddresses: {
-    externalAddresses: LockInfo[];
-    changeAddresses: LockInfo[];
+  onChain: {
+    external: LockInfo[];
+    change: LockInfo[];
   };
-  offChainAddresses: {
-    externalAddresses: LockInfo[];
-    changeAddresses: LockInfo[];
+  offChain: {
+    external: LockInfo[];
+    change: LockInfo[];
   };
   constructor(payload: { lockDetail: LocksAndPointer }) {
-    this.onChainAddresses = payload.lockDetail.details.onChainAddresses;
-    this.offChainAddresses = payload.lockDetail.details.offChainAddresses;
+    this.onChain = payload.lockDetail.details.onChain;
+    this.offChain = payload.lockDetail.details.offChain;
     this.pointers = payload.lockDetail.pointers;
   }
   toJSONString(): string {
     return JSON.stringify({
-      onChainAddresses: this.onChainAddresses,
-      offChainAddresses: this.offChainAddresses,
+      onChainAddresses: this.onChain,
+      offChainAddresses: this.offChain,
     });
   }
   currentMaxExternalAddressIndex(): number {
     let result = -1;
-    [...this.onChainAddresses.externalAddresses, ...this.offChainAddresses.externalAddresses].forEach((address) => {
+    [...this.onChain.external, ...this.offChain.external].forEach((address) => {
       if (address.index > result) {
         result = address.index;
       }
@@ -80,7 +80,7 @@ export class LocksManager {
   }
   currentMaxChangeAddressIndex(): number {
     let result = -1;
-    [...this.onChainAddresses.changeAddresses, ...this.offChainAddresses.changeAddresses].forEach((address) => {
+    [...this.onChain.change, ...this.offChain.change].forEach((address) => {
       if (address.index > result) {
         result = address.index;
       }
@@ -89,7 +89,10 @@ export class LocksManager {
   }
 
   getNextOffChainExternalLocks(option = { limit: 1 }): LockInfo[] {
-    const lockInfos = this.offChainAddresses.externalAddresses;
+    const lockInfos = this.offChain.external;
+    if (lockInfos.length === 0) {
+      return [];
+    }
     const result = nextLockInfos(lockInfos, this.pointers.offChain.external, option.limit);
     // update pointer
     this.pointers.offChain.external = result[result.length - 1].index;
@@ -97,7 +100,10 @@ export class LocksManager {
   }
 
   getNextOffChainChangeLocks(option = { limit: 1 }): LockInfo[] {
-    const lockInfos = this.offChainAddresses.changeAddresses;
+    const lockInfos = this.offChain.change;
+    if (lockInfos.length === 0) {
+      return [];
+    }
     const result = nextLockInfos(lockInfos, this.pointers.offChain.change, option.limit);
     // update pointer
     this.pointers.offChain.change = result[result.length - 1].index;
@@ -105,7 +111,10 @@ export class LocksManager {
   }
 
   getNextOnChainExternalLocks(option = { limit: 1 }): LockInfo[] {
-    const lockInfos = this.onChainAddresses.externalAddresses;
+    const lockInfos = this.onChain.external;
+    if (lockInfos.length === 0) {
+      return [];
+    }
     const result = nextLockInfos(lockInfos, this.pointers.onChain.external, option.limit);
     // update pointer
     this.pointers.onChain.external = result[result.length - 1].index;
@@ -113,7 +122,10 @@ export class LocksManager {
   }
 
   getNextOnChainChangeLocks(option = { limit: 1 }): LockInfo[] {
-    const lockInfos = this.onChainAddresses.changeAddresses;
+    const lockInfos = this.onChain.change;
+    if (lockInfos.length === 0) {
+      return [];
+    }
     const result = nextLockInfos(lockInfos, this.pointers.onChain.change, option.limit);
     // update pointer
     this.pointers.onChain.change = result[result.length - 1].index;
@@ -130,26 +142,22 @@ export class LocksManager {
     payload.lockInfoList.forEach((address) => {
       const isExternalAddress = this.isExternalAddress({ addressInfo: address });
       if (isExternalAddress) {
-        const needUpdate = !this.onChainAddresses.externalAddresses.some(
-          (onChainAddress) => onChainAddress.path === address.path,
-        );
+        const needUpdate = !this.onChain.external.some((onChainAddress) => onChainAddress.path === address.path);
         if (needUpdate) {
           // add to cached on chain addresses
-          this.onChainAddresses.externalAddresses.push(address);
+          this.onChain.external.push(address);
           // remove from cached off chain addresses
-          this.offChainAddresses.externalAddresses = this.offChainAddresses.externalAddresses.filter(
+          this.offChain.external = this.offChain.external.filter(
             (offChainAddress) => offChainAddress.path !== address.path,
           );
         }
       } else {
-        const needUpdate = !this.onChainAddresses.changeAddresses.some(
-          (onChainAddress) => onChainAddress.path === address.path,
-        );
+        const needUpdate = !this.onChain.change.some((onChainAddress) => onChainAddress.path === address.path);
         if (needUpdate) {
           // add to cached on chain addresses
-          this.onChainAddresses.changeAddresses.push(address);
+          this.onChain.change.push(address);
           // remove from cached off chain addresses
-          this.offChainAddresses.changeAddresses = this.offChainAddresses.changeAddresses.filter(
+          this.offChain.change = this.offChain.change.filter(
             (offChainAddress) => offChainAddress.path !== address.path,
           );
         }
@@ -157,52 +165,47 @@ export class LocksManager {
     });
   }
 
-  getAddressInfoByLock(payload: { lock: Script }): LockInfo | undefined {
-    const lock = payload.lock;
-    return (
-      this.onChainAddresses.externalAddresses.find(
-        (address) => bytes.equal(lock.codeHash, address.lock.codeHash) && bytes.equal(lock.args, address.lock.args),
-      ) ||
-      this.onChainAddresses.changeAddresses.find(
-        (address) => bytes.equal(lock.codeHash, address.lock.codeHash) && bytes.equal(lock.args, address.lock.args),
-      ) ||
-      this.offChainAddresses.externalAddresses.find(
-        (address) => bytes.equal(lock.codeHash, address.lock.codeHash) && bytes.equal(lock.args, address.lock.args),
-      ) ||
-      this.offChainAddresses.changeAddresses.find(
-        (address) => bytes.equal(lock.codeHash, address.lock.codeHash) && bytes.equal(lock.args, address.lock.args),
-      )
-    );
+  getlockInfoByLock({ lock }: { lock: Script }): LockInfo | undefined {
+    const allLockInfo = [
+      ...this.onChain.external,
+      ...this.onChain.change,
+      ...this.offChain.external,
+      ...this.offChain.change,
+    ];
+    return allLockInfo.find((lockInfo) => {
+      return bytes.equal(lockInfo.lock.args, lock.args) && bytes.equal(lockInfo.lock.codeHash, lock.codeHash);
+    });
   }
+
   getOnChainExternalAddresses(): LockInfo[] {
-    return this.onChainAddresses.externalAddresses;
+    return this.onChain.external;
   }
   setOnChainExternalAddresses(addresses: LockInfo[]): void {
-    this.onChainAddresses.externalAddresses = addresses;
+    this.onChain.external = addresses;
   }
   getOnChainChangeAddresses(): LockInfo[] {
-    return this.onChainAddresses.changeAddresses;
+    return this.onChain.change;
   }
   setOnChainChangeAddresses(addresses: LockInfo[]): void {
-    this.onChainAddresses.changeAddresses = addresses;
+    this.onChain.change = addresses;
   }
   getAllOnChainLockList(): LockInfo[] {
-    return [...this.onChainAddresses.externalAddresses, ...this.onChainAddresses.changeAddresses];
+    return [...this.onChain.external, ...this.onChain.change];
   }
   getOffChainExternalAddresses(): LockInfo[] {
-    return this.offChainAddresses.externalAddresses;
+    return this.offChain.external;
   }
   setOffChainExternalAddresses(addresses: LockInfo[]): void {
-    this.offChainAddresses.externalAddresses = addresses;
+    this.offChain.external = addresses;
   }
   getOffChainChangeAddresses(): LockInfo[] {
-    return this.offChainAddresses.changeAddresses;
+    return this.offChain.change;
   }
   setOffChainChangeAddresses(addresses: LockInfo[]): void {
-    this.offChainAddresses.changeAddresses = addresses;
+    this.offChain.change = addresses;
   }
   getAllOffChainAddresses(): LockInfo[] {
-    return [...this.offChainAddresses.externalAddresses, ...this.offChainAddresses.changeAddresses];
+    return [...this.offChain.external, ...this.offChain.change];
   }
 }
 
@@ -217,15 +220,18 @@ function nextLockInfos(lockInfos: LockInfo[], pointer: number, limit: number): L
   const indexList = lockInfos.map((lockInfo) => lockInfo.index);
   const minIndex = min(indexList) || 0;
   const maxIndex = max(indexList) || 0;
-  if (pointer < minIndex || pointer > maxIndex) {
-    return [lockInfos[0]];
+  if (pointer < minIndex || pointer >= maxIndex) {
+    // not to change indexList here
+  } else if (pointer === minIndex) {
+    const lastElement = indexList.shift()!;
+    indexList.push(lastElement);
   } else {
     while (indexList[0] <= pointer) {
       // move first element to last until firts element is bigger than pointer
       const lastElement = indexList.shift()!;
       indexList.push(lastElement);
     }
-    const returnIndexlist = indexList.slice(0, limit);
-    return lockInfos.filter((lockInfo) => returnIndexlist.includes(lockInfo.index));
   }
+  const returnIndexlist = indexList.slice(0, limit);
+  return lockInfos.filter((lockInfo) => returnIndexlist.includes(lockInfo.index));
 }

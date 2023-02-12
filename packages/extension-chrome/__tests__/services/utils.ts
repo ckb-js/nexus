@@ -1,3 +1,4 @@
+import { LocksAndPointer } from './../../src/services/backend/locksManager';
 import { RPC } from '@ckb-lumos/rpc';
 import { Cell } from '@ckb-lumos/base';
 import { CkbIndexer } from '@ckb-lumos/ckb-indexer/lib/indexer';
@@ -5,7 +6,7 @@ import { publicKeyToBlake160 } from '@ckb-lumos/hd/lib/key';
 import { Promisable } from '@nexus-wallet/types/lib';
 import { KeystoreService, SignMessagePayload } from '@nexus-wallet/types/lib/services/KeystoreService';
 import { errors } from '@nexus-wallet/utils/lib';
-import { AddressInfo } from '../../src/services/backend/addressStorage';
+import { LockInfo } from '../../src/services/backend/locksManager';
 import { Backend } from './../../src/services/backend/backend';
 
 it('jest keep', async () => {});
@@ -47,9 +48,9 @@ export const createMockKeystoreService = (payload: Partial<KeystoreService>): Ke
       },
 });
 
-const mockFullOwnershipAddressInfosExternal: AddressInfo[] = new Array(100).fill(0).flatMap((_, i) => ({
+const mockFullOwnershipLockInfosExternal: LockInfo[] = new Array(100).fill(0).flatMap((_, i) => ({
   path: `m/44'/309'/0'/0/${i}`,
-  addressIndex: i,
+  index: i,
   lock: {
     args: publicKeyToBlake160(`0x${String(i).padStart(2, '0').repeat(33)}`),
     codeHash: '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
@@ -57,11 +58,12 @@ const mockFullOwnershipAddressInfosExternal: AddressInfo[] = new Array(100).fill
   },
   blake160: publicKeyToBlake160(`0x${String(i).padStart(2, '0').repeat(33)}`),
   pubkey: `0x${String(i).padStart(2, '0').repeat(33)}`,
+  lockHash: '',
 }));
 
-const mockFullOwnershipAddressInfosChange: AddressInfo[] = new Array(100).fill(0).flatMap((_, i) => ({
+const mockFullOwnershipLockInfosChange: LockInfo[] = new Array(100).fill(0).flatMap((_, i) => ({
   path: `m/44'/309'/0'/1/${i}`,
-  addressIndex: i,
+  index: i,
   lock: {
     args: publicKeyToBlake160(`0x${String(i).padStart(2, '0').repeat(33)}`),
     codeHash: '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
@@ -69,20 +71,22 @@ const mockFullOwnershipAddressInfosChange: AddressInfo[] = new Array(100).fill(0
   },
   blake160: publicKeyToBlake160(`0x${String(i).padStart(2, '0').repeat(33)}`),
   pubkey: `0x${String(i).padStart(2, '0').repeat(33)}`,
+  lockHash: '',
 }));
 
 /**
- * 100 external addresses index 0~99
- * 100 change addresses index 100~199
+ * 100 external addresses index 0..99
+ *
+ * 100 change addresses index 100..199
  */
-export const mockFullOwnershipAddressInfos = [
-  ...mockFullOwnershipAddressInfosExternal,
-  ...mockFullOwnershipAddressInfosChange,
-];
+export const mockFullOwnershipLockInfos = [...mockFullOwnershipLockInfosExternal, ...mockFullOwnershipLockInfosChange];
 
-export const mockRuleBasedOwnershipAddressInfos: AddressInfo[] = new Array(100).fill(0).map((_, i) => ({
+/**
+ * 100 external addresses index 0..99
+ */
+export const mockRuleBasedOwnershipLockInfos: LockInfo[] = new Array(100).fill(0).map((_, i) => ({
   path: `m/4410179'/0'/${i}`,
-  addressIndex: i,
+  index: i,
   lock: {
     args: publicKeyToBlake160(`0x${String(i).padStart(2, '0').repeat(33)}`),
     codeHash: '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
@@ -90,4 +94,55 @@ export const mockRuleBasedOwnershipAddressInfos: AddressInfo[] = new Array(100).
   },
   blake160: publicKeyToBlake160(`0x${String(i).padStart(2, '0').repeat(33)}`),
   pubkey: `0x${String(i).padStart(2, '0').repeat(33)}`,
+  lockHash: '',
 }));
+
+export const generateLocksAndPointers = (payload: { fullOwnership: boolean }): LocksAndPointer => {
+  const lockInfos = payload.fullOwnership ? mockFullOwnershipLockInfos : mockRuleBasedOwnershipLockInfos;
+  const result: LocksAndPointer = payload.fullOwnership
+    ? {
+        details: {
+          offChain: {
+            external: lockInfos.filter((_, i) => i % 5 === 0 && i < 100),
+            change: lockInfos.filter((_, i) => i % 5 === 0 && i >= 100),
+          },
+          onChain: {
+            external: lockInfos.filter((_, i) => i % 5 !== 0 && i < 100),
+            change: lockInfos.filter((_, i) => i % 5 !== 0 && i >= 100),
+          },
+        },
+        pointers: {
+          onChain: {
+            external: -1,
+            change: -1,
+          },
+          offChain: {
+            external: -1,
+            change: -1,
+          },
+        },
+      }
+    : {
+        details: {
+          offChain: {
+            external: lockInfos.filter((_, i) => i % 5 === 0 && i < 100),
+            change: [],
+          },
+          onChain: {
+            external: lockInfos.filter((_, i) => i % 5 !== 0 && i < 100),
+            change: [],
+          },
+        },
+        pointers: {
+          onChain: {
+            external: -1,
+            change: -1,
+          },
+          offChain: {
+            external: -1,
+            change: -1,
+          },
+        },
+      };
+  return result;
+};

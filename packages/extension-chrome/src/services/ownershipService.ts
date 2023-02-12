@@ -37,18 +37,20 @@ export function createOwnershipService(config: {
       return locks;
     },
     getOnChainLocks: async (payload: getOnChainLocksPayload): Promise<Paginate<Script>> => {
-      const changeScripts = config.locksProvider.getOnChainChangeAddresses().map((lockInfo) => lockInfo.lock);
-      const externalScripts = config.locksProvider.getOnChainExternalAddresses().map((lockInfo) => lockInfo.lock);
+      const lockInfoList = payload.change
+        ? await config.locksProvider.getNextOnChainChangeLocks()
+        : await config.locksProvider.getNextOnChainExternalLocks();
+      const locks = lockInfoList.map((lockInfo) => lockInfo.lock);
       return payload.change
         ? {
             // TODO implement the cursor here
             cursor: '',
-            objects: changeScripts,
+            objects: locks,
           }
         : {
             // TODO implement the cursor here
             cursor: '',
-            objects: externalScripts,
+            objects: locks,
           };
     },
     signTransaction: async (payload: SignTransactionPayload) => {
