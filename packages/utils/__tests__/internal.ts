@@ -9,9 +9,16 @@ test('resolveProvider', async () => {
   await expect(resolveProvider(() => Promise.resolve(password))).resolves.toBe(password);
 });
 
-test('formatMessage', () => {
-  expect(formatMessage('string: %s', 'message')).toBe(`string: message`);
-  expect(formatMessage('buffer: %s', Buffer.from([0, 1, 2]))).toBe(`buffer: 0x000102`);
-  expect(formatMessage('number: %s', 1)).toBe(`number: 1`);
-  expect(formatMessage('object: %s', { key: 'value' })).toBe(`object: {"key":"value"}`);
+describe('formatMessage', () => {
+  it('should format message a readable string', () => {
+    expect(formatMessage('string: %s', 'message')).toBe(`string: message`);
+    expect(formatMessage('buffer: %s', Buffer.from([0, 1, 2]))).toBe(`buffer: 0x000102`);
+    expect(formatMessage('number: %s', 1)).toBe(`number: 1`);
+    expect(formatMessage('object: %s', { key: 'value' })).toBe(`object: {"key":"value"}`);
+  });
+
+  it('should append extra arguments to the end of the message', () => {
+    expect(formatMessage('string: %s', 'message', 'extra')).toBe(`string: message extra`);
+    expect(formatMessage('extra buffer', Buffer.from([0, 0, 0]))).toBe('extra buffer 0x000000');
+  });
 });

@@ -3,13 +3,13 @@ import { formatMessage } from './internal';
 let adapter: Logger = console;
 let loglevel: LogLevel = 'info';
 
-export function createLogger(module = 'nexus'): Logger {
+export function createLogger(module = 'Nexus'): Logger {
   const log =
     (method: keyof Logger) =>
     (message?: string, ...args: unknown[]) => {
       const currentLogLevel = typeof loglevel === 'string' ? LOG_LEVELS[loglevel] : loglevel;
       if (LOG_LEVELS[method] < currentLogLevel || !message) return;
-      adapter[method](formatMessage(`${module}  ${message}`, ...args));
+      adapter[method](formatMessage(`[${module}]\t[${method.toUpperCase()}]\t${message}`, ...args));
     };
 
   return {

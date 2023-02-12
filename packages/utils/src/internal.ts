@@ -30,6 +30,10 @@ function formatArgs(arg: unknown): string {
  * @param args
  */
 export function formatMessage(message: string, ...args: unknown[]): string {
-  let i = 0;
-  return message.replace(/%s/g, () => formatArgs(args[i++]));
+  let replaced = 0;
+  let formatted = message.replace(/%s/g, () => formatArgs(args[replaced++]));
+  if (replaced < args.length) {
+    formatted += ' ' + args.slice(replaced).map(formatArgs).join(' ');
+  }
+  return formatted;
 }
