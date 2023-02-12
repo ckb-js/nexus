@@ -26,16 +26,16 @@ import { useMutation } from '@tanstack/react-query';
 import walletService from '../../../mockServices/wallet';
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 
-const PasswordInput: FC<{ index: number }> = ({ index }) => {
-  const [passwordVisible, togglePasswordVisible] = useToggle(false);
+const SeedInput: FC<{ index: number }> = ({ index }) => {
+  const [seedVisible, toggleSeedVisible] = useToggle(false);
 
-  const Eye = passwordVisible ? ViewIcon : ViewOffIcon;
+  const Eye = seedVisible ? ViewIcon : ViewOffIcon;
 
   return (
     <FormControl as={Flex} alignItems="center">
       <FormLabel>{index}</FormLabel>
-      <Input mr="8px" type={passwordVisible ? 'text' : 'password'} w="152px" />
-      <Eye fontSize="lg" onClick={togglePasswordVisible} cursor="pointer" />
+      <Input mr="8px" type={seedVisible ? 'text' : 'password'} w="152px" />
+      <Eye fontSize="lg" onClick={toggleSeedVisible} cursor="pointer" />
     </FormControl>
   );
 };
@@ -52,7 +52,7 @@ export const RecoveryWallet: FC = () => {
   });
   const navigate = useNavigate();
 
-  const inputs = times(12, (index) => <PasswordInput index={index} key={index} />);
+  const inputs = times(12, (index) => <SeedInput index={index} key={index} />);
 
   const onRecoveryWallet = async () => {
     saveWallet.mutateAsync({ mnemonicWords, password });
@@ -61,10 +61,16 @@ export const RecoveryWallet: FC = () => {
 
   return (
     <>
-      <Heading mb="48px">Access Wallet With Your Seed</Heading>
-      <Text fontSize="md" mb="16px" w="672px">
+      <Heading fontWeight="semibold" lineHeight="111%" mb="48px">
+        Access Wallet With Your Seed
+      </Heading>
+      <Text lineHeight="6" fontSize="md" mb="16px" w="672px">
         Nexus cannot recover your password. We will use your Seed to validate your ownership, restore your wallet and
         set up a new password. First, enter the Seed that you were given when you created your wallet.
+      </Text>
+
+      <Text fontSize="md" mb="16px" fontWeight="extrabold" w="672px" as={Box}>
+        Type your Seed here
       </Text>
       <Alert mb="16px" status="info">
         <AlertIcon />

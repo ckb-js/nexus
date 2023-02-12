@@ -22,10 +22,11 @@ export const Grant: React.FC = () => {
 
   return (
     <>
-      <ConnectStatusCard name="Yan" status="connected" />
+      <ConnectStatusCard mt="44px" name="Yan" connected />
 
-      <Flex alignItems="center" direction="column">
-        <Image w="40px" mb="4px" h="40px" src="https://static.figma.com/app/icon/1/favicon.png" />
+      <Flex py="32px" alignItems="center" direction="column">
+        {/* TODO: wait implementation, the request website icon path should be provided in the future */}
+        <Image w="40px" mb="8px" h="40px" src="https://static.figma.com/app/icon/1/favicon.png" />
 
         <Box fontSize="md" fontWeight="semibold">
           {requesterUrl}
@@ -39,7 +40,7 @@ export const Grant: React.FC = () => {
       <VStack my="8px" p="20px 30px" alignItems="flex-start" as={WhiteAlphaBox} spacing="12px">
         {permissions.map((p) => (
           <Flex key={p} fontSize="md" alignItems="center" fontWeight="semibold" mb="8px">
-            <CheckCircleIcon mr="20px" color="green.300" />
+            <CheckCircleIcon w="24px" h="24px" mr="20px" color="green.300" />
             {p}
           </Flex>
         ))}

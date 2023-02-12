@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import { Button, FormControl, FormLabel, Input, Flex, Spacer } from '@chakra-ui/react';
+import { Button, FormControl, FormLabel, Input, Flex, Spacer, VStack } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import { useSetState } from 'react-use';
 // TODO: use real service
@@ -20,17 +20,17 @@ export const AddNetwork: FC = () => {
 
   return (
     <>
-      <WhiteAlphaBox mt="32px" p="35px 20px" direction="column">
+      <VStack as={WhiteAlphaBox} spacing="12px" p="35px 20px" direction="column">
         <FormControl>
           <FormLabel>Name</FormLabel>
-          <Input color="black" backgroundColor="white" onChange={onChange('name')} name="name" />
+          <Input color="black" variant="outline" backgroundColor="white" onChange={onChange('name')} name="name" />
         </FormControl>
 
         <FormControl>
           <FormLabel>URL</FormLabel>
-          <Input color="black" backgroundColor="white" name="url" onChange={onChange('url')} />
+          <Input color="black" variant="outline" backgroundColor="white" name="url" onChange={onChange('url')} />
         </FormControl>
-      </WhiteAlphaBox>
+      </VStack>
       <Spacer />
       <Flex as="form" direction="column" justifyContent="center">
         <Button size="lg" width="452px" marginY="12px" onClick={onAddNetwork}>

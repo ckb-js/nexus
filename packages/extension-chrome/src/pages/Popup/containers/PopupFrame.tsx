@@ -33,9 +33,9 @@ export const PopupFrame: FC = () => {
       color="white"
     >
       {!isHomePage && (
-        <Flex alignItems="center" w="100%">
+        <Flex mb="32px" alignItems="center" w="100%">
           <ArrowBackIcon onClick={goBack} mr="12px" cursor="pointer" w="24px" h="24px" />
-          <Box fontSize="2xl" fontWeight="semibold">
+          <Box height="32px" fontSize="2xl" fontWeight="semibold">
             {navigatorTitle}
           </Box>
         </Flex>

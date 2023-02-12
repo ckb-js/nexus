@@ -1,5 +1,16 @@
 import React, { FC, useMemo, useState } from 'react';
-import { Flex, VStack, Image, Center, Box, Input, InputGroup, InputLeftElement, Highlight } from '@chakra-ui/react';
+import {
+  Flex,
+  VStack,
+  Image,
+  Center,
+  Box,
+  Text,
+  Input,
+  InputGroup,
+  InputLeftElement,
+  Highlight,
+} from '@chakra-ui/react';
 import { DeleteIcon, SearchIcon } from '@chakra-ui/icons';
 
 // TODO: use real service
@@ -31,22 +42,37 @@ export const WhitelistSites: FC = () => {
 
   return (
     <>
-      <Box mb="20px">Yan is connected to these sites. They can view your account address</Box>
-      <InputGroup mb="20px">
-        <InputLeftElement>
-          <Center borderRadius="8px" w="40px" h="40px">
-            <SearchIcon />
-          </Center>
+      <Text as={Box} fontSize="md" mb="20px" w="100%">
+        Yan is connected to these sites. They can view your account address
+      </Text>
+      <InputGroup alignItems="center" mb="20px">
+        <InputLeftElement
+          borderRadius="8px"
+          w="40px"
+          h="40px"
+          backgroundColor="purple.500"
+          top="4px"
+          left="4px"
+          as={Center}
+        >
+          <SearchIcon w="24px" h="24px" />
         </InputLeftElement>
-        <Input w="452px" onChange={(e) => setSearchQuery(e.target.value)} value={searchQuery} colorScheme="white" />
+        <Input
+          size="lg"
+          w="452px"
+          onChange={(e) => setSearchQuery(e.target.value)}
+          value={searchQuery}
+          colorScheme="white"
+          pl="48px"
+        />
       </InputGroup>
-      <VStack padding="16px 20px" as={WhiteAlphaBox} spacing="12px" flexDirection="column">
+      <VStack padding="30px 20px" as={WhiteAlphaBox} spacing="12px" flexDirection="column">
         {filteredSites?.map((site) => (
           <Flex alignItems="center" h="48px" w="100%" key={site.url}>
             <Center w="48px" borderRadius="50%" padding="4px" h="48px" backgroundColor="whiteAlpha.300">
               <Image w="32px" h="32px" src={site.favicon} />
             </Center>
-            <Flex ml="16px" flex={1} fontSize="lg" alignItems="center">
+            <Flex ml="20px" flex={1} fontSize="lg" alignItems="center">
               <Highlight query={searchQuery} styles={{ bg: 'orange.200' }}>
                 {site.url}
               </Highlight>

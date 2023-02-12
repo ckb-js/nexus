@@ -1,13 +1,13 @@
 import React, { FC } from 'react';
-import { Icon } from '@chakra-ui/react';
+import { HStack, Icon } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import HardDrive from '../../Components/icons/HardDrive.svg';
 import { PlusSquareIcon } from '@chakra-ui/icons';
-import { Flex, Text, Card, Heading, Button, Spacer } from '@chakra-ui/react';
+import { Text, Card, Heading, Button, Spacer } from '@chakra-ui/react';
 
 export const Welcome: FC = () => {
   const navigate = useNavigate();
-  const navigateToMnemonic = (createNew: boolean) => () => {
+  const enterCreatePage = (createNew: boolean) => () => {
     if (createNew) {
       navigate('/beforeStart');
     } else {
@@ -17,20 +17,22 @@ export const Welcome: FC = () => {
 
   const cards = [
     {
-      heading: 'No, I already have a wallet',
-      desc: 'Import your existing wallet using the Seed',
-      actionText: 'Import wallet',
-      paddingX: '68px',
-      icon: <Icon w="40px" h="40px" viewBox="0 0 40 40" as={HardDrive} />,
-      action: navigateToMnemonic(false),
-    },
-    {
-      heading: 'Yes, I want to create a new wallet',
-      desc: "Yes, let's get set up!",
-      actionText: 'Create a new wallet',
+      heading: 'Yes. Let’s get set up!',
+      desc: 'This will create a new wallet',
+      actionText: 'Create a Wallet',
+      width: '352px',
       paddingX: '16px',
       icon: <PlusSquareIcon color="purple.300" w="40px" h="40px" />,
-      action: navigateToMnemonic(true),
+      action: enterCreatePage(true),
+    },
+    {
+      heading: 'No, I already have a wallet',
+      desc: 'Import your existing wallet using Seed',
+      actionText: 'Import wallet',
+      width: '324px',
+      paddingX: '68px',
+      icon: <Icon w="40px" h="40px" viewBox="0 0 40 40" as={HardDrive} />,
+      action: enterCreatePage(false),
     },
   ];
 
@@ -39,29 +41,22 @@ export const Welcome: FC = () => {
       <Spacer />
       <Heading marginBottom="48px">New to Nexus?</Heading>
 
-      <Flex flex="1">
-        {cards.map(({ heading, desc, action, actionText, paddingX, icon }) => (
-          <Card
-            mx="12px"
-            key={heading}
-            direction="column"
-            alignItems="center"
-            justifyContent="center"
-            height="294px"
-            paddingY="48px"
-            paddingX={paddingX}
-          >
+      <HStack spacing="36px">
+        {cards.map(({ heading, desc, action, actionText, width, icon }) => (
+          <Card key={heading} direction="column" alignItems="center" h="294px" justifyContent="center" w={width}>
             {icon}
-            <Text marginTop="16px" fontSize="20px" fontWeight="700">
+            <Heading marginTop="16px" fontSize="xl">
               {heading}
+            </Heading>
+            <Text mt="16px" fontSize="md">
+              {desc}
             </Text>
-            <Text fontSize="16px">{desc}</Text>
             <Button marginTop="32px" onClick={action}>
               {actionText}
             </Button>
           </Card>
         ))}
-      </Flex>
+      </HStack>
       <Spacer />
     </>
   );

@@ -1,5 +1,5 @@
 import React, { FC, useMemo } from 'react';
-import { Box, Button, Center, Flex, FlexProps, Grid, HStack, Icon } from '@chakra-ui/react';
+import { Box, Button, Center, Flex, FlexProps, Grid, HStack, Icon, Text } from '@chakra-ui/react';
 import { Outlet, useLoaderData, useLocation, useNavigate } from 'react-router-dom';
 import StepProcessingIcon from '../../Components/icons/StepProcessing.svg';
 import StepWaitingIcon from '../../Components/icons/StepWaiting.svg';
@@ -49,9 +49,9 @@ const renderSingleStep: StepsProps['itemRender'] = ({ title, description, status
       templateColumns="24px auto"
     >
       {icon}
-      <Box ml="4px" alignSelf="center" fontWeight="semibold" fontSize="md">
+      <Text as={Box} ml="4px" alignSelf="center" fontWeight="semibold" fontSize="md">
         {title}
-      </Box>
+      </Text>
       <Box
         className="rc-steps-item-tail"
         w="0"
@@ -62,9 +62,9 @@ const renderSingleStep: StepsProps['itemRender'] = ({ title, description, status
         borderRadius="2px"
         my="1px"
       />
-      <Box ml="8px" fontSize="sm">
+      <Text as={Box} lineHeight="4" ml="8px" fontSize="sm">
         {description}
-      </Box>
+      </Text>
     </Grid>
   );
 };

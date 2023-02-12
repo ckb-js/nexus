@@ -25,9 +25,9 @@ export const CreateMnemonic: FC = () => {
   const toast = useToast();
   const setWalletStore = useWalletCreationStore((actions) => actions.set);
   const { data: mnemonic } = useQuery({
-    queryKey: ['mnemonic'],
+    queryKey: ['randomSeed'],
     queryFn: () => {
-      return walletService.generateRandomMnemonic();
+      return walletService.generateRandomSeed();
     },
   });
 
@@ -50,8 +50,10 @@ export const CreateMnemonic: FC = () => {
 
   return (
     <>
-      <Heading mb="48px">Generate wallet Seed</Heading>
-      <Alert status="warning" mb="12px">
+      <Heading mb="48px" lineHeight="111%" fontWeight="semibold">
+        Generate Wallet Seed
+      </Heading>
+      <Alert variant="left-accent" status="warning" mb="12px">
         <AlertIcon />
         <Box>
           <AlertTitle fontSize="md">Warning</AlertTitle>
@@ -63,7 +65,7 @@ export const CreateMnemonic: FC = () => {
       <Textarea mb="12px" value={mnemonic?.join(' ')} h="80px" />
       <Flex onClick={onCopy} mb="48px" as="button" w="100%" direction="row" fontSize="sm" alignItems="center">
         <Icon mr="12px" w="24px" h="24px" viewBox="0 0 27 31" as={FileCopyIcon} />
-        <Box>Copy to clipboard</Box>
+        <Box textDecoration="underline">Copy to clipboard</Box>
       </Flex>
 
       <Flex>

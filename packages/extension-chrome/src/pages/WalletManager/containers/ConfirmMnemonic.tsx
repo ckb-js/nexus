@@ -1,4 +1,4 @@
-import { Badge, Box, Button, Flex, Grid, Heading, SimpleGrid, Text, Textarea } from '@chakra-ui/react';
+import { Badge, Box, Button, Heading, SimpleGrid, Textarea } from '@chakra-ui/react';
 import React, { FC, ReactElement, useEffect, useMemo } from 'react';
 import { useList } from 'react-use';
 import shuffle from 'lodash.shuffle';
@@ -52,7 +52,9 @@ export const ConfirmMnemonic: FC = () => {
 
   return (
     <>
-      <Heading mb="48px">Confirm your Seed</Heading>
+      <Heading mb="48px" lineHeight="111%" fontWeight="semibold">
+        Confirm your Seed
+      </Heading>
       <Box fontSize="md" mb="8px">
         Please select words below to form the correct Seed.
       </Box>
@@ -61,46 +63,40 @@ export const ConfirmMnemonic: FC = () => {
         {wordElements}
       </Textarea>
 
-      <Grid gridGap="18px" gridTemplate="repeat(2, auto) / repeat(6, auto)"></Grid>
-      <Flex direction="column" marginTop="48px">
-        <Text fontSize="xl" mb="24px">
-          Select the missing word in order
-        </Text>
-        <SimpleGrid spacing="12px" columns={4} w="480px">
-          {word4Choose.map((word, index) => {
-            const chosenOrder = chosenIndex.findIndex((i) => i === index);
-            const hasChosen = chosenOrder !== -1;
-            return (
-              <Box position="relative">
-                {hasChosen && (
-                  <Badge
-                    borderRadius="18px"
-                    w="18px"
-                    h="18px"
-                    colorScheme="purple"
-                    position="absolute"
-                    top="-4px"
-                    right="-4px"
-                    zIndex="1"
-                  >
-                    {chosenOrder + 1}
-                  </Badge>
-                )}
-                <Button
-                  size="lg"
-                  w="108px"
-                  variant={hasChosen ? 'solid' : 'outline'}
-                  onClick={hasChosen ? removeChosenIndex(index) : addChosenIndex(index)}
-                  // for preventing the button size change
-                  borderWidth="1px"
+      <SimpleGrid spacing="12px" marginTop="32px" columns={4} w="480px">
+        {word4Choose.map((word, index) => {
+          const chosenOrder = chosenIndex.findIndex((i) => i === index);
+          const hasChosen = chosenOrder !== -1;
+          return (
+            <Box position="relative">
+              {hasChosen && (
+                <Badge
+                  borderRadius="18px"
+                  w="18px"
+                  h="18px"
+                  colorScheme="purple"
+                  position="absolute"
+                  top="-4px"
+                  right="-4px"
+                  zIndex="1"
                 >
-                  {word}
-                </Button>
-              </Box>
-            );
-          })}
-        </SimpleGrid>
-      </Flex>
+                  {chosenOrder + 1}
+                </Badge>
+              )}
+              <Button
+                size="lg"
+                w="108px"
+                variant={hasChosen ? 'solid' : 'outline'}
+                onClick={hasChosen ? removeChosenIndex(index) : addChosenIndex(index)}
+                // for preventing the button size change
+                borderWidth="1px"
+              >
+                {word}
+              </Button>
+            </Box>
+          );
+        })}
+      </SimpleGrid>
     </>
   );
 };

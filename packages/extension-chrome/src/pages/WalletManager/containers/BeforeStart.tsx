@@ -14,22 +14,24 @@ export const BeforeStart: FC = () => {
   const navigate = useNavigate();
   return (
     <>
-      <Heading mb="48px" fontSize="36px">
+      <Heading mb="48px" fontSize="4xl" fontWeight="semibold">
         Before We Start
       </Heading>
-      <Text fontSize="16px">We want you to know that we prioritize your privacy:</Text>
+      <Text fontSize="16px" w="568px">
+        We want you to know that we prioritize your privacy:
+      </Text>
       <Card borderRadius="8px" my="12px" w="568px" p="20px">
-        <UnorderedList spacing="16px">
+        <UnorderedList spacing="12px">
           {texts.map((t) => (
-            <ListItem display="flex" alignItems="center" fontSize="md" key={t}>
+            <ListItem display="flex" fontSize="md" key={t}>
               <ListIcon as={Marker} />
               {t}
             </ListItem>
           ))}
         </UnorderedList>
       </Card>
-      <Text fontSize="16px" mb="96px">
-        We are not in the information collection business (even anonymized).
+      <Text w="568px" fontSize="16px" mb="72px">
+        We are not in the information collection business (even anonymous data).
       </Text>
 
       <Button

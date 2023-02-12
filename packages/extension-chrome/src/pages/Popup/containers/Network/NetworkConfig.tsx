@@ -39,7 +39,7 @@ export const NetworkConfig: FC = () => {
 
   return (
     <>
-      <WhiteAlphaBox mt="32px" p="16px 20px" w="452px">
+      <WhiteAlphaBox p="16px 20px">
         <RadioGroup onChange={onToggle} defaultValue={currentNetwork} display="flex" flexDirection="column">
           <VStack spacing="20px">
             {networkQuery.data?.networks.map((network) => (
@@ -58,7 +58,7 @@ export const NetworkConfig: FC = () => {
         onClick={() => {
           navigate('/network/add');
         }}
-        w="452px"
+        w="100%"
         size="lg"
         leftIcon={<AddIcon />}
       >

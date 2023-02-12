@@ -1,6 +1,6 @@
 // TODO: remove it when the real service is ready
 const walletService = {
-  async generateRandomMnemonic(): Promise<string[]> {
+  async generateRandomSeed(): Promise<string[]> {
     return Promise.resolve([
       'finite',
       'omit',

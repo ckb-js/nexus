@@ -6,12 +6,12 @@ import { WhiteAlphaBox } from '../../Components/WhiteAlphaBox';
 export const SignData: FC = () => {
   return (
     <>
-      <Heading fontSize="2xl" fontWeight="semibold" w="452px" pt="28px">
+      <Heading fontSize="2xl" fontWeight="semibold" w="452px" mt="28px">
         Sign Message
       </Heading>
 
-      <WhiteAlphaBox mt="32px" p="20px 16px">
-        <Link>https://link3.to</Link>
+      <WhiteAlphaBox mt="32px" p="16px 20px">
+        <Link fontSize="sm">https://link3.to</Link>
       </WhiteAlphaBox>
 
       <Box mt="32px" fontWeight="semibold" fontSize="md">
@@ -19,14 +19,15 @@ export const SignData: FC = () => {
       </Box>
 
       <VStack as={WhiteAlphaBox} mt="32px" spacing="12px" alignItems="flex-start" direction="column" p="16px 20px">
-        <Flex fontSize="md" fontWeight="bold" w="100%" justifyContent="center">
+        <Heading size="sm" as={Flex} w="100%" justifyContent="center">
           You are signing
-        </Flex>
-        <Box fontWeight="bold" fontSize="md">
+        </Heading>
+        <Heading as={Flex} fontWeight="bold" size="sm">
           Message:
-        </Box>
-        <Text w="100%">
-          link3.to wants you to sign in with your Nexus account: 0x2ea31djfakljfkadjkfjda;kfjdf29e43098903458045j
+        </Heading>
+        <Text fontSize="md" w="100%">
+          link3.to wants you to sign in with your Nexus account:
+          {' 0x2ea31djfakljfkadjkfjda;kfjdf29e43098903458045j'}
         </Text>
       </VStack>
 

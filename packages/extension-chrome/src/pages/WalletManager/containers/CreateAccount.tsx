@@ -12,11 +12,13 @@ export const CreateAccount: FC = () => {
 
   return (
     <>
-      <Heading mb="48px">Create Account</Heading>
-      <Box as={Avatar} mb="12px" />
+      <Heading mb="48px" lineHeight="111%" fontWeight="semibold">
+        Select Username
+      </Heading>
+      <Box as={Avatar} mb="12px" w="96px" h="96px" />
 
       <FormControl w="220px">
-        <FormLabel>User name</FormLabel>
+        <FormLabel>A Descriptive Name for Your Wallet</FormLabel>
         <Input value={userName} onChange={onNameChange} placeholder="User name" />
       </FormControl>
     </>

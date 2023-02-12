@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import { Box, Flex, FlexProps, FormControl, FormLabel, Input, Link, Checkbox, Heading } from '@chakra-ui/react';
+import { Flex, FormControl, FormLabel, Input, Link, Checkbox, Heading, VStack } from '@chakra-ui/react';
 import { Formik, Form, Field } from 'formik';
 
 import { useWalletCreationStore } from '../store';
@@ -12,9 +12,9 @@ type FormValues = {
 
 type FormFieldProps = { field: {} };
 
-export const PasswordInputs: FC<FlexProps> = (props) => {
+const PasswordInputs: FC = () => {
   return (
-    <Flex direction="column" width="100%" {...props}>
+    <>
       <FormControl>
         <FormLabel fontSize="sm">New password (8 characters minimum)</FormLabel>
         <Field name="password">{({ field }: FormFieldProps) => <Input size="lg" type="password" {...field} />}</Field>
@@ -25,7 +25,7 @@ export const PasswordInputs: FC<FlexProps> = (props) => {
           {({ field }: FormFieldProps) => <Input size="lg" type="password" {...field} />}
         </Field>
       </FormControl>
-    </Flex>
+    </>
   );
 };
 
@@ -57,7 +57,10 @@ export const SetPassword: FC = () => {
   return (
     <>
       <Flex direction="column" w="100%" maxW="400px">
-        <Heading mb="48px">Create password</Heading>
+        <Heading mb="48px" lineHeight="111%" fontWeight="semibold">
+          Create password
+        </Heading>
+        {/* TODO: formik may not the best form state controller */}
         <Formik
           initialValues={{
             password: '',
@@ -69,8 +72,8 @@ export const SetPassword: FC = () => {
           onSubmit={() => {}}
         >
           {(props) => (
-            <Box as={Form}>
-              <PasswordInputs w="311px" pr="52px" mb="12px" />
+            <VStack as={Form}>
+              <PasswordInputs />
               <FormControl>
                 <Checkbox name="agreeTerms" isChecked={props.values.agreeTerms} onChange={props.handleChange}>
                   I have read and agree to the{' '}
@@ -79,7 +82,7 @@ export const SetPassword: FC = () => {
                   </Link>
                 </Checkbox>
               </FormControl>
-            </Box>
+            </VStack>
           )}
         </Formik>
       </Flex>
