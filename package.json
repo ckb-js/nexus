@@ -40,7 +40,8 @@
     "build": "run-s build:lumos build:nexus",
     "build:nexus": "npm run build --workspace=@nexus-wallet/types --workspace=@nexus-wallet/utils",
     "build:lumos": "cd lumos && npm run build",
-    "test": "jest"
+    "test": "jest",
+    "start": "npm run start -w @nexus-wallet/extension-chrome"
   },
   "repository": {
     "type": "git",
