@@ -21,9 +21,13 @@
     "start:webpack": "ts-node ./scripts/start.ts",
     "build": "tsc",
     "clean": "rimraf build/*",
-    "prepare": "node -p \"'export const LIB_VERSION = ' + JSON.stringify(require('./package.json').version) + ';'\" > src/version.ts"
+    "prepare": "node -p \"'export const LIB_VERSION = ' + JSON.stringify(require('./package.json').version) + ';'\" > src/version.ts && prettier --write src/version.ts"
   },
   "bugs": {
     "url": "https://github.com/ckb-js/nexus/issues"
+  },
+  "dependencies": {
+    "@types/lodash": "4.14.191",
+    "lodash": "4.17.21"
   }
 }
