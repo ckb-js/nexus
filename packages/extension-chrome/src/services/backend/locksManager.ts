@@ -1,3 +1,4 @@
+import { Network } from './../../../../types/src/injected';
 import { bytes } from '@ckb-lumos/codec';
 import { Hash, Script } from '@ckb-lumos/base';
 import min from 'lodash/min';
@@ -7,16 +8,19 @@ export const MAX_ADDRESS_GAP = 20;
 export const RULE_BASED_MAX_ADDRESS_GAP = 50;
 
 export type StorageSchema = {
-  fullOwnershipAddressInfo: string;
-  ruleBasedOwnershipAddressInfo: string;
+  fullOwnership: string;
+  ruleBasedOwnership: string;
 };
 
 export type LockInfo = {
+  // hd wallet path
   path: string;
+  // the BIP44's {@link https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki#index index}
   index: number;
   depth?: number;
   pubkey: string;
   blake160: string;
+  network: Network;
   lock: Script;
   lockHash: Hash;
 };

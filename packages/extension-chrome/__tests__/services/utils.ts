@@ -59,6 +59,7 @@ const mockFullOwnershipLockInfosExternal: LockInfo[] = new Array(100).fill(0).fl
   blake160: publicKeyToBlake160(`0x${String(i).padStart(2, '0').repeat(33)}`),
   pubkey: `0x${String(i).padStart(2, '0').repeat(33)}`,
   lockHash: '',
+  network: 'ckb_testnet' as const,
 }));
 
 const mockFullOwnershipLockInfosChange: LockInfo[] = new Array(100).fill(0).flatMap((_, i) => ({
@@ -72,6 +73,7 @@ const mockFullOwnershipLockInfosChange: LockInfo[] = new Array(100).fill(0).flat
   blake160: publicKeyToBlake160(`0x${String(i).padStart(2, '0').repeat(33)}`),
   pubkey: `0x${String(i).padStart(2, '0').repeat(33)}`,
   lockHash: '',
+  network: 'ckb_testnet' as const,
 }));
 
 /**
@@ -95,6 +97,7 @@ export const mockRuleBasedOwnershipLockInfos: LockInfo[] = new Array(100).fill(0
   blake160: publicKeyToBlake160(`0x${String(i).padStart(2, '0').repeat(33)}`),
   pubkey: `0x${String(i).padStart(2, '0').repeat(33)}`,
   lockHash: '',
+  network: 'ckb_testnet' as const,
 }));
 
 export const generateLocksAndPointers = (payload: { fullOwnership: boolean }): LocksAndPointer => {

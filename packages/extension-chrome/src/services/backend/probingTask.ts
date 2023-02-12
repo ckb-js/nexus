@@ -47,10 +47,10 @@ export class ProbeTask {
     setInterval(async () => {
       console.log('probe task running...');
       // TODO scan all addresses if chain is forked
-      await this.syncAddressInfoWithCurrentState({ keyName: 'fullOwnershipAddressInfo' });
-      await this.syncAddressInfoWithCurrentState({ keyName: 'ruleBasedOwnershipAddressInfo' });
-      await this.supplyOffChainAddresses({ keyName: 'fullOwnershipAddressInfo' });
-      await this.supplyOffChainAddresses({ keyName: 'ruleBasedOwnershipAddressInfo' });
+      await this.syncAddressInfoWithCurrentState({ keyName: 'fullOwnership' });
+      await this.syncAddressInfoWithCurrentState({ keyName: 'ruleBasedOwnership' });
+      await this.supplyOffChainAddresses({ keyName: 'fullOwnership' });
+      await this.supplyOffChainAddresses({ keyName: 'ruleBasedOwnership' });
     }, 10_000);
     this.running = true;
   }
@@ -101,14 +101,14 @@ export class ProbeTask {
    * @param payload
    */
   async supplyOffChainAddresses(payload: { keyName: keyof StorageSchema }): Promise<void> {
-    const shreshold = payload.keyName === 'fullOwnershipAddressInfo' ? MAX_ADDRESS_GAP : RULE_BASED_MAX_ADDRESS_GAP;
+    const shreshold = payload.keyName === 'fullOwnership' ? MAX_ADDRESS_GAP : RULE_BASED_MAX_ADDRESS_GAP;
     const lockDetail = await getAddressInfoDetailsFromStorage({ keyName: payload.keyName, storage: this.storage });
     const lockDetailManager = new LocksManager({ lockDetail });
     // supply external addresses if needed
     while (lockDetailManager.getOffChainExternalAddresses().length < shreshold) {
       const parentPath = getParentPath({ keyName: payload.keyName });
       const path =
-        payload.keyName === 'fullOwnershipAddressInfo'
+        payload.keyName === 'fullOwnership'
           ? `${parentPath}/0/${lockDetailManager.currentMaxExternalAddressIndex() + 1}`
           : `${parentPath}/${lockDetailManager.currentMaxExternalAddressIndex() + 1}`;
       const nextLockInfo = await getAddressInfoByPath(this.keystoreService, path);
@@ -117,7 +117,7 @@ export class ProbeTask {
     // supply change addresses if needed
     while (
       // only full ownership chain needs change addresses
-      payload.keyName === 'fullOwnershipAddressInfo' &&
+      payload.keyName === 'fullOwnership' &&
       lockDetailManager.getOffChainChangeAddresses().length < shreshold
     ) {
       const parentPath = getParentPath({ keyName: payload.keyName });
