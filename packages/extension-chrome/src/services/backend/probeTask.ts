@@ -9,7 +9,14 @@ import {
 } from './locksManager';
 import { Storage, KeystoreService } from '@nexus-wallet/types';
 import { Backend } from './backend';
-import { getLockInfoByPath, getAddressInfoDetailsFromStorage, getDefaultLocksAndPointer, getParentPath } from './utils';
+import {
+  getLockInfoByPath,
+  getAddressInfoDetailsFromStorage,
+  getDefaultLocksAndPointer,
+  getParentPath,
+  toSecp256k1Script,
+} from './utils';
+import { Script, utils } from '@ckb-lumos/base';
 
 export class ProbeTask {
   private static instance: ProbeTask;
@@ -96,6 +103,46 @@ export class ProbeTask {
     }
   }
 
+  async syncAllLocksInfo(): Promise<void> {
+    let lockDetail = await getAddressInfoDetailsFromStorage({ storage: this.storage, keyName: 'fullOwnership' });
+
+    let parentPath = `${getParentPath({ keyName: 'fullOwnership' })}/0`;
+    let lockInfoLists = await syncAllByPath({
+      parentPath,
+      threshold: 20,
+      keystoreService: this.keystoreService,
+      backend: this.backend,
+    });
+    lockDetail.details.offChain.external = lockInfoLists.offChainlockInfoList;
+    lockDetail.details.onChain.external = lockInfoLists.onChainlockInfoList;
+
+    parentPath = `${getParentPath({ keyName: 'fullOwnership' })}/1`;
+    lockInfoLists = await syncAllByPath({
+      parentPath,
+      threshold: 20,
+      keystoreService: this.keystoreService,
+      backend: this.backend,
+    });
+    lockDetail.details.offChain.change = lockInfoLists.offChainlockInfoList;
+    lockDetail.details.onChain.change = lockInfoLists.onChainlockInfoList;
+
+    await this.storage.setItem('fullOwnership', lockDetail);
+
+    lockDetail = await getAddressInfoDetailsFromStorage({ storage: this.storage, keyName: 'fullOwnership' });
+
+    parentPath = getParentPath({ keyName: 'ruleBasedOwnership' });
+    lockInfoLists = await syncAllByPath({
+      parentPath,
+      threshold: 50,
+      keystoreService: this.keystoreService,
+      backend: this.backend,
+    });
+    lockDetail.details.offChain.external = lockInfoLists.offChainlockInfoList;
+    lockDetail.details.onChain.external = lockInfoLists.onChainlockInfoList;
+
+    await this.storage.setItem('ruleBasedOwnership', lockDetail);
+  }
+
   /**
    * make sure full ownership chain has at least 20 offchain locks to use
    * make sure rule based ownership chain has at least 50 offchain locks to use
@@ -133,4 +180,45 @@ export class ProbeTask {
       this.storage.setItem(payload.keyName, newLocks);
     }
   }
+}
+
+export async function syncAllByPath(payload: {
+  parentPath: string;
+  threshold: number;
+  keystoreService: KeystoreService;
+  backend: Backend;
+}): Promise<{
+  onChainlockInfoList: LockInfo[];
+  offChainlockInfoList: LockInfo[];
+}> {
+  const onChainlockInfoList: LockInfo[] = [];
+  const offChainlockInfoList: LockInfo[] = [];
+  let currentGap = 0;
+  for (let index = 0; ; index++) {
+    const path = `${payload.parentPath}/${index}`;
+    const publicKey = await payload.keystoreService.getPublicKeyByPath({ path });
+    const childScript: Script = toSecp256k1Script(publicKey);
+    const lockInfo: LockInfo = {
+      path,
+      index,
+      publicKey,
+      blake160: childScript.args,
+      lock: childScript,
+      // TODO implement mainnet here
+      network: 'ckb_testnet',
+      lockHash: utils.computeScriptHash(childScript),
+    };
+    const childScriptHasHistory = await payload.backend.hasHistory({ lock: childScript });
+    if (childScriptHasHistory) {
+      onChainlockInfoList.push(lockInfo);
+      currentGap = 0;
+    } else {
+      offChainlockInfoList.push(lockInfo);
+      currentGap++;
+      if (currentGap >= payload.threshold) {
+        break;
+      }
+    }
+  }
+  return { onChainlockInfoList, offChainlockInfoList };
 }
