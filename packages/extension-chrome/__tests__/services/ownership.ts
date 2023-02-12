@@ -24,28 +24,26 @@ const mockNotificationService: NotificationService = {
   },
 };
 
-describe('usedLocks and unusedLocks in ownership', () => {
-  it('should return an empty list if no tx record', async () => {
-    const mockBackend: Backend = createMockBackend({});
-    const mockKeystoreService = createMockKeystoreService({
-      getPublicKeyByPath: ({ path }) => mockFullOwnershipLockInfos.find((info) => info.path === path)!.pubkey,
-    });
-    const locksAndPointer = getDefaultLocksAndPointer();
-    const mockLocksProvider = new LocksProvider({
-      backend: mockBackend,
-      keystoreService: mockKeystoreService,
-      lockDetail: locksAndPointer,
-    });
-
-    const service = createOwnershipService({
-      keystoreService: mockKeystoreService,
-      notificationService: mockNotificationService,
-      locksProvider: mockLocksProvider,
-      backend: mockBackend,
-    });
-    const usedLocks = await service.getOnChainLocks({});
-    expect(usedLocks).toEqual({ cursor: '', objects: [] });
+it('ownership#should return an empty list if no tx record', async () => {
+  const mockBackend: Backend = createMockBackend({});
+  const mockKeystoreService = createMockKeystoreService({
+    getPublicKeyByPath: ({ path }) => mockFullOwnershipLockInfos.find((info) => info.path === path)!.pubkey,
   });
+  const locksAndPointer = getDefaultLocksAndPointer();
+  const mockLocksProvider = new LocksProvider({
+    backend: mockBackend,
+    keystoreService: mockKeystoreService,
+    lockDetail: locksAndPointer,
+  });
+
+  const service = createOwnershipService({
+    keystoreService: mockKeystoreService,
+    notificationService: mockNotificationService,
+    locksProvider: mockLocksProvider,
+    backend: mockBackend,
+  });
+  const usedLocks = await service.getOnChainLocks({});
+  expect(usedLocks).toEqual({ cursor: '', objects: [] });
 });
 it('ownership#sign data with 1st lock', async () => {
   const mockCallback = jest.fn().mockReturnValueOnce(Promise.resolve(true)).mockReturnValue(Promise.resolve(false));

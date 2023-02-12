@@ -4,7 +4,7 @@ import { LockInfo } from './locksManager';
 import { HexString, Script } from '@ckb-lumos/base';
 import { publicKeyToBlake160 } from '@ckb-lumos/hd/lib/key';
 import { config } from '@ckb-lumos/lumos';
-import { StorageSchema, LocksAndPointer } from './locksManager';
+import { LockInfoStorage, LocksAndPointer } from './locksManager';
 
 export function toSecp256k1Script(pubkey: HexString): Script {
   // args for SECP256K1_BLAKE160 script
@@ -22,7 +22,7 @@ export function toSecp256k1Script(pubkey: HexString): Script {
  * @param path eg: m/4410179'/0'/0
  * @returns
  */
-export async function getAddressInfoByPath(keystoreService: KeystoreService, path: string): Promise<LockInfo> {
+export async function getLockInfoByPath(keystoreService: KeystoreService, path: string): Promise<LockInfo> {
   const index = indexOfPath(path);
   const pubkey = await keystoreService.getPublicKeyByPath({ path });
   const childScript: Script = toSecp256k1Script(pubkey);
@@ -61,7 +61,7 @@ export function fromJSONString(payload: { cachedAddressDetailsStr: string }): Lo
   return JSON.parse(payload.cachedAddressDetailsStr);
 }
 
-export function getParentPath(payload: { keyName: keyof StorageSchema }): string {
+export function getParentPath(payload: { keyName: keyof LockInfoStorage }): string {
   const fullOwnershipParentPath = "m/44'/309'/0'";
   const ruleBasedOwnershipParentPath = "m/4410179'/0'";
   if (payload.keyName === 'ruleBasedOwnership') {
@@ -90,13 +90,13 @@ export function getDefaultLocksAndPointer(): LocksAndPointer {
 }
 
 export async function getAddressInfoDetailsFromStorage(payload: {
-  storage: Storage<StorageSchema>;
-  keyName: keyof StorageSchema;
+  storage: Storage<LockInfoStorage>;
+  keyName: keyof LockInfoStorage;
 }): Promise<LocksAndPointer> {
   let addressDetails: LocksAndPointer = getDefaultLocksAndPointer();
-  const cachedAddressDetailsStr = await payload.storage.getItem(payload.keyName);
-  if (cachedAddressDetailsStr) {
-    addressDetails = fromJSONString({ cachedAddressDetailsStr });
+  const cachedLocks = await payload.storage.getItem(payload.keyName);
+  if (cachedLocks) {
+    return cachedLocks;
   }
   return addressDetails;
 }

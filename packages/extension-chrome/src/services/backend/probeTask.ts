@@ -1,7 +1,7 @@
 import isEqual from 'lodash.isequal';
 import {
   LockInfo,
-  StorageSchema,
+  LockInfoStorage,
   MAX_ADDRESS_GAP,
   RULE_BASED_MAX_ADDRESS_GAP,
   LocksManager,
@@ -9,19 +9,13 @@ import {
 } from './locksManager';
 import { Storage, KeystoreService } from '@nexus-wallet/types';
 import { Backend } from './backend';
-import {
-  fromJSONString,
-  getAddressInfoByPath,
-  getAddressInfoDetailsFromStorage,
-  getDefaultLocksAndPointer,
-  getParentPath,
-} from './utils';
+import { getLockInfoByPath, getAddressInfoDetailsFromStorage, getDefaultLocksAndPointer, getParentPath } from './utils';
 
 export class ProbeTask {
   private static instance: ProbeTask;
   private constructor(payload: {
     backend: Backend;
-    storage: Storage<StorageSchema>;
+    storage: Storage<LockInfoStorage>;
     keystoreService: KeystoreService;
   }) {
     this.running = false;
@@ -29,7 +23,15 @@ export class ProbeTask {
     this.storage = payload.storage;
     this.keystoreService = payload.keystoreService;
   }
-  static getInstance(backend: Backend, storage: Storage<StorageSchema>, keystoreService: KeystoreService): ProbeTask {
+  static getInstance({
+    backend,
+    storage,
+    keystoreService,
+  }: {
+    backend: Backend;
+    storage: Storage<LockInfoStorage>;
+    keystoreService: KeystoreService;
+  }): ProbeTask {
     if (!ProbeTask.instance) {
       ProbeTask.instance = new ProbeTask({ backend, storage, keystoreService });
     }
@@ -38,7 +40,7 @@ export class ProbeTask {
 
   running: boolean;
   backend: Backend;
-  storage: Storage<StorageSchema>;
+  storage: Storage<LockInfoStorage>;
   keystoreService: KeystoreService;
   run(): void {
     if (this.running) {
@@ -55,43 +57,42 @@ export class ProbeTask {
     this.running = true;
   }
 
-  async syncAddressInfoWithCurrentState(payload: { keyName: keyof StorageSchema }): Promise<void> {
-    let addressDetails: LocksAndPointer = getDefaultLocksAndPointer();
-    const cachedAddressDetailsStr = await this.storage.getItem(payload.keyName);
-    if (cachedAddressDetailsStr) {
-      addressDetails = fromJSONString({ cachedAddressDetailsStr });
+  async syncAddressInfoWithCurrentState(payload: { keyName: keyof LockInfoStorage }): Promise<void> {
+    let locksAndPointer: LocksAndPointer = getDefaultLocksAndPointer();
+    const cachedLocks = await this.storage.getItem(payload.keyName);
+    if (cachedLocks) {
+      locksAndPointer = cachedLocks;
     }
     // external addresses
     const newOnChainExternalAddresses: LockInfo[] = [];
-    addressDetails.details.offChain.external.forEach(async (address) => {
+    locksAndPointer.details.offChain.external.forEach(async (address) => {
       if (await this.backend.hasHistory({ lock: address.lock })) {
         newOnChainExternalAddresses.push(address);
       }
     });
     // add new on chain locks to cached on chain locks
-    addressDetails.details.onChain.external.push(...newOnChainExternalAddresses);
+    locksAndPointer.details.onChain.external.push(...newOnChainExternalAddresses);
     // remove new on chain locks from cached off chain locks
-    addressDetails.details.offChain.external = addressDetails.details.offChain.external.filter(
+    locksAndPointer.details.offChain.external = locksAndPointer.details.offChain.external.filter(
       (address) => !newOnChainExternalAddresses.includes(address),
     );
 
     // change addresses
     const newOnChainChangeAddresses: LockInfo[] = [];
-    addressDetails.details.offChain.change.forEach(async (address) => {
+    locksAndPointer.details.offChain.change.forEach(async (address) => {
       if (await this.backend.hasHistory({ lock: address.lock })) {
         newOnChainChangeAddresses.push(address);
       }
     });
     // add new on chain locks to cached on chain locks
-    addressDetails.details.onChain.change.push(...newOnChainChangeAddresses);
+    locksAndPointer.details.onChain.change.push(...newOnChainChangeAddresses);
     // remove new on chain locks from cached off chain locks
-    addressDetails.details.offChain.change = addressDetails.details.offChain.change.filter(
+    locksAndPointer.details.offChain.change = locksAndPointer.details.offChain.change.filter(
       (address) => !newOnChainChangeAddresses.includes(address),
     );
 
-    const newCacheString = JSON.stringify(addressDetails);
-    if (!isEqual(cachedAddressDetailsStr, newCacheString)) {
-      this.storage.setItem(payload.keyName, newCacheString);
+    if (!isEqual(cachedLocks, locksAndPointer)) {
+      this.storage.setItem(payload.keyName, locksAndPointer);
     }
   }
 
@@ -100,7 +101,7 @@ export class ProbeTask {
    * make sure rule based ownership chain has at least 50 offchain locks to use
    * @param payload
    */
-  async supplyOffChainAddresses(payload: { keyName: keyof StorageSchema }): Promise<void> {
+  async supplyOffChainAddresses(payload: { keyName: keyof LockInfoStorage }): Promise<void> {
     const shreshold = payload.keyName === 'fullOwnership' ? MAX_ADDRESS_GAP : RULE_BASED_MAX_ADDRESS_GAP;
     const lockDetail = await getAddressInfoDetailsFromStorage({ keyName: payload.keyName, storage: this.storage });
     const lockDetailManager = new LocksManager({ lockDetail });
@@ -111,7 +112,7 @@ export class ProbeTask {
         payload.keyName === 'fullOwnership'
           ? `${parentPath}/0/${lockDetailManager.currentMaxExternalAddressIndex() + 1}`
           : `${parentPath}/${lockDetailManager.currentMaxExternalAddressIndex() + 1}`;
-      const nextLockInfo = await getAddressInfoByPath(this.keystoreService, path);
+      const nextLockInfo = await getLockInfoByPath(this.keystoreService, path);
       lockDetailManager.offChain.external.push(nextLockInfo);
     }
     // supply change addresses if needed
@@ -122,8 +123,14 @@ export class ProbeTask {
     ) {
       const parentPath = getParentPath({ keyName: payload.keyName });
       const path = `${parentPath}/1/${lockDetailManager.currentMaxChangeAddressIndex() + 1}`;
-      const nextLockInfo = await getAddressInfoByPath(this.keystoreService, path);
+      const nextLockInfo = await getLockInfoByPath(this.keystoreService, path);
       lockDetailManager.offChain.change.push(nextLockInfo);
+    }
+
+    const cachedLocks = await this.storage.getItem(payload.keyName);
+    const newLocks = lockDetailManager.toLocksAndPointer();
+    if (!isEqual(cachedLocks, newLocks)) {
+      this.storage.setItem(payload.keyName, newLocks);
     }
   }
 }

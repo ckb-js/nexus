@@ -1,6 +1,6 @@
 import { LocksAndPointer } from './../../src/services/backend/locksManager';
 import { RPC } from '@ckb-lumos/rpc';
-import { Cell } from '@ckb-lumos/base';
+import { Cell, utils } from '@ckb-lumos/base';
 import { CkbIndexer } from '@ckb-lumos/ckb-indexer/lib/indexer';
 import { publicKeyToBlake160 } from '@ckb-lumos/hd/lib/key';
 import { Promisable } from '@nexus-wallet/types/lib';
@@ -48,33 +48,38 @@ export const createMockKeystoreService = (payload: Partial<KeystoreService>): Ke
       },
 });
 
-const mockFullOwnershipLockInfosExternal: LockInfo[] = new Array(100).fill(0).flatMap((_, i) => ({
-  path: `m/44'/309'/0'/0/${i}`,
-  index: i,
-  lock: {
+export const mockFullOwnershipLockInfosExternal: LockInfo[] = new Array(100).fill(0).flatMap((_, i) => {
+  const lock = {
     args: publicKeyToBlake160(`0x${String(i).padStart(2, '0').repeat(33)}`),
     codeHash: '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
-    hashType: 'type',
-  },
-  blake160: publicKeyToBlake160(`0x${String(i).padStart(2, '0').repeat(33)}`),
-  pubkey: `0x${String(i).padStart(2, '0').repeat(33)}`,
-  lockHash: '',
-  network: 'ckb_testnet' as const,
-}));
-
-const mockFullOwnershipLockInfosChange: LockInfo[] = new Array(100).fill(0).flatMap((_, i) => ({
-  path: `m/44'/309'/0'/1/${i}`,
-  index: i,
-  lock: {
+    hashType: 'type' as const,
+  };
+  return {
+    path: `m/44'/309'/0'/0/${i}`,
+    index: i,
+    lock,
+    blake160: publicKeyToBlake160(`0x${String(i).padStart(2, '0').repeat(33)}`),
+    pubkey: `0x${String(i).padStart(2, '0').repeat(33)}`,
+    lockHash: utils.computeScriptHash(lock),
+    network: 'ckb_testnet' as const,
+  };
+});
+export const mockFullOwnershipLockInfosChange: LockInfo[] = new Array(100).fill(0).flatMap((_, i) => {
+  const lock = {
     args: publicKeyToBlake160(`0x${String(i).padStart(2, '0').repeat(33)}`),
     codeHash: '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
-    hashType: 'type',
-  },
-  blake160: publicKeyToBlake160(`0x${String(i).padStart(2, '0').repeat(33)}`),
-  pubkey: `0x${String(i).padStart(2, '0').repeat(33)}`,
-  lockHash: '',
-  network: 'ckb_testnet' as const,
-}));
+    hashType: 'type' as const,
+  };
+  return {
+    path: `m/44'/309'/0'/1/${i}`,
+    index: i,
+    lock,
+    blake160: publicKeyToBlake160(`0x${String(i).padStart(2, '0').repeat(33)}`),
+    pubkey: `0x${String(i).padStart(2, '0').repeat(33)}`,
+    lockHash: utils.computeScriptHash(lock),
+    network: 'ckb_testnet' as const,
+  };
+});
 
 /**
  * 100 external addresses index 0..99
@@ -86,19 +91,22 @@ export const mockFullOwnershipLockInfos = [...mockFullOwnershipLockInfosExternal
 /**
  * 100 external addresses index 0..99
  */
-export const mockRuleBasedOwnershipLockInfos: LockInfo[] = new Array(100).fill(0).map((_, i) => ({
-  path: `m/4410179'/0'/${i}`,
-  index: i,
-  lock: {
+export const mockRuleBasedOwnershipLockInfos: LockInfo[] = new Array(100).fill(0).map((_, i) => {
+  const lock = {
     args: publicKeyToBlake160(`0x${String(i).padStart(2, '0').repeat(33)}`),
     codeHash: '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
-    hashType: 'type',
-  },
-  blake160: publicKeyToBlake160(`0x${String(i).padStart(2, '0').repeat(33)}`),
-  pubkey: `0x${String(i).padStart(2, '0').repeat(33)}`,
-  lockHash: '',
-  network: 'ckb_testnet' as const,
-}));
+    hashType: 'type' as const,
+  };
+  return {
+    path: `m/4410179'/0'/${i}`,
+    index: i,
+    lock,
+    blake160: publicKeyToBlake160(`0x${String(i).padStart(2, '0').repeat(33)}`),
+    pubkey: `0x${String(i).padStart(2, '0').repeat(33)}`,
+    lockHash: utils.computeScriptHash(lock),
+    network: 'ckb_testnet' as const,
+  };
+});
 
 export const generateLocksAndPointers = (payload: { fullOwnership: boolean }): LocksAndPointer => {
   const lockInfos = payload.fullOwnership ? mockFullOwnershipLockInfos : mockRuleBasedOwnershipLockInfos;

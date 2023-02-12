@@ -1,6 +1,6 @@
 import { Backend } from './backend';
 import { KeystoreService, Storage } from '@nexus-wallet/types';
-import { StorageSchema } from './locksManager';
+import { LockInfoStorage } from './locksManager';
 import { LocksProvider } from './locksProvider';
 import { getAddressInfoDetailsFromStorage } from './utils';
 
@@ -8,9 +8,9 @@ export class LocksProviderFactory {
   ready: boolean;
   backend: Backend;
   keystoreService: KeystoreService;
-  storage: Storage<StorageSchema>;
+  storage: Storage<LockInfoStorage>;
 
-  constructor(config: { backend: Backend; storage: Storage<StorageSchema>; keystoreService: KeystoreService }) {
+  constructor(config: { backend: Backend; storage: Storage<LockInfoStorage>; keystoreService: KeystoreService }) {
     this.backend = config.backend;
     this.keystoreService = config.keystoreService;
     this.storage = config.storage;

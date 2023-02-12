@@ -7,9 +7,9 @@ import max from 'lodash/max';
 export const MAX_ADDRESS_GAP = 20;
 export const RULE_BASED_MAX_ADDRESS_GAP = 50;
 
-export type StorageSchema = {
-  fullOwnership: string;
-  ruleBasedOwnership: string;
+export type LockInfoStorage = {
+  fullOwnership: LocksAndPointer;
+  ruleBasedOwnership: LocksAndPointer;
 };
 
 export type LockInfo = {
@@ -67,11 +67,15 @@ export class LocksManager {
     this.offChain = payload.lockDetail.details.offChain;
     this.pointers = payload.lockDetail.pointers;
   }
-  toJSONString(): string {
-    return JSON.stringify({
-      onChainAddresses: this.onChain,
-      offChainAddresses: this.offChain,
-    });
+  toLocksAndPointer(): LocksAndPointer {
+    const locksAndPointer: LocksAndPointer = {
+      details: {
+        onChain: this.onChain,
+        offChain: this.offChain,
+      },
+      pointers: this.pointers,
+    };
+    return locksAndPointer;
   }
   currentMaxExternalAddressIndex(): number {
     let result = -1;
