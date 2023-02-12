@@ -24,12 +24,12 @@ export function toSecp256k1Script(pubkey: HexString): Script {
  */
 export async function getLockInfoByPath(keystoreService: KeystoreService, path: string): Promise<LockInfo> {
   const index = indexOfPath(path);
-  const pubkey = await keystoreService.getPublicKeyByPath({ path });
-  const childScript: Script = toSecp256k1Script(pubkey);
-  const currentAddressInfo = {
+  const publicKey = await keystoreService.getPublicKeyByPath({ path });
+  const childScript: Script = toSecp256k1Script(publicKey);
+  const currentAddressInfo: LockInfo = {
     path,
     index,
-    pubkey,
+    publicKey,
     blake160: childScript.args,
     lock: childScript,
     lockHash: utils.computeScriptHash(childScript),

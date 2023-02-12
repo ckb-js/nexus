@@ -11,7 +11,7 @@ describe('fullOwnership', () => {
   it('LocksProvider#should get circular locks when squencially call getNextLock', async () => {
     const mockBackend: Backend = createMockBackend({});
     const mockKeystoreService = createMockKeystoreService({
-      getPublicKeyByPath: ({ path }) => mockFullOwnershipLockInfos.find((info) => info.path === path)!.pubkey,
+      getPublicKeyByPath: ({ path }) => mockFullOwnershipLockInfos.find((info) => info.path === path)!.publicKey,
     });
     const locksAndPointer = generateLocksAndPointers({ fullOwnership: true });
     const mockLocksProvider = new LocksProvider({
@@ -44,7 +44,7 @@ describe('ruleBasedOwnership', () => {
   it('LocksProvider#should get circular locks when squencially call getNextLock', async () => {
     const mockBackend: Backend = createMockBackend({});
     const mockKeystoreService = createMockKeystoreService({
-      getPublicKeyByPath: ({ path }) => mockFullOwnershipLockInfos.find((info) => info.path === path)!.pubkey,
+      getPublicKeyByPath: ({ path }) => mockFullOwnershipLockInfos.find((info) => info.path === path)!.publicKey,
     });
     const locksAndPointer = generateLocksAndPointers({ fullOwnership: false });
     const mockLocksProvider = new LocksProvider({

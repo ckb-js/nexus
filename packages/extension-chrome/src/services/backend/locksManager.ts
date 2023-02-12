@@ -18,7 +18,7 @@ export type LockInfo = {
   // the BIP44's {@link https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki#index index}
   index: number;
   depth?: number;
-  pubkey: string;
+  publicKey: string;
   blake160: string;
   network: Network;
   lock: Script;

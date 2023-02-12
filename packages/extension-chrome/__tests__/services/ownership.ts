@@ -27,7 +27,7 @@ const mockNotificationService: NotificationService = {
 it('ownership#should return an empty list if no tx record', async () => {
   const mockBackend: Backend = createMockBackend({});
   const mockKeystoreService = createMockKeystoreService({
-    getPublicKeyByPath: ({ path }) => mockFullOwnershipLockInfos.find((info) => info.path === path)!.pubkey,
+    getPublicKeyByPath: ({ path }) => mockFullOwnershipLockInfos.find((info) => info.path === path)!.publicKey,
   });
   const locksAndPointer = getDefaultLocksAndPointer();
   const mockLocksProvider = new LocksProvider({
@@ -50,7 +50,7 @@ it('ownership#sign data with 1st lock', async () => {
   const mockBackend: Backend = createMockBackend({ hasHistory: mockCallback });
   const mockSignMessage = jest.fn().mockImplementation(() => Promise.resolve('0x'));
   const mockKeystoreService = createMockKeystoreService({
-    getPublicKeyByPath: ({ path }) => mockFullOwnershipLockInfos.find((info) => info.path === path)!.pubkey,
+    getPublicKeyByPath: ({ path }) => mockFullOwnershipLockInfos.find((info) => info.path === path)!.publicKey,
     signMessage: mockSignMessage,
   });
   const locksAndPointer = generateLocksAndPointers({ fullOwnership: true });
@@ -88,7 +88,7 @@ it('ownership#get live cells', async () => {
     getLiveCells: jest.fn().mockReturnValue(Promise.resolve([mockCells[0]])),
   });
   const mockKeystoreService = createMockKeystoreService({
-    getPublicKeyByPath: ({ path }) => mockFullOwnershipLockInfos.find((info) => info.path === path)!.pubkey,
+    getPublicKeyByPath: ({ path }) => mockFullOwnershipLockInfos.find((info) => info.path === path)!.publicKey,
   });
   const locksAndPointer = generateLocksAndPointers({ fullOwnership: true });
   const mockLocksProvider = new LocksProvider({
@@ -211,7 +211,7 @@ it('ownership#sign tx', async () => {
   });
   const mockSignatures = ['0x01', '0x02'];
   const mockKeystoreService = createMockKeystoreService({
-    getPublicKeyByPath: ({ path }) => mockFullOwnershipLockInfos.find((info) => info.path === path)!.pubkey,
+    getPublicKeyByPath: ({ path }) => mockFullOwnershipLockInfos.find((info) => info.path === path)!.publicKey,
     signMessage: jest
       .fn()
       .mockReturnValueOnce(mockSignatures[0]) // first signature

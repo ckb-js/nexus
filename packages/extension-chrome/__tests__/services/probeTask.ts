@@ -17,7 +17,8 @@ describe('probe task', () => {
     const mockBackend: Backend = createMockBackend({});
     const mockKeystoreService = createMockKeystoreService({
       getPublicKeyByPath: ({ path }) =>
-        [...mockFullOwnershipLockInfos, ...mockRuleBasedOwnershipLockInfos].find((info) => info.path === path)!.pubkey,
+        [...mockFullOwnershipLockInfos, ...mockRuleBasedOwnershipLockInfos].find((info) => info.path === path)!
+          .publicKey,
     });
     const memoryStorage: LockInfoStorage = {
       fullOwnership: getDefaultLocksAndPointer(),

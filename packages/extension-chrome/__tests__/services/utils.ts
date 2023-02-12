@@ -59,7 +59,7 @@ export const mockFullOwnershipLockInfosExternal: LockInfo[] = new Array(100).fil
     index: i,
     lock,
     blake160: publicKeyToBlake160(`0x${String(i).padStart(2, '0').repeat(33)}`),
-    pubkey: `0x${String(i).padStart(2, '0').repeat(33)}`,
+    publicKey: `0x${String(i).padStart(2, '0').repeat(33)}`,
     lockHash: utils.computeScriptHash(lock),
     network: 'ckb_testnet' as const,
   };
@@ -75,7 +75,7 @@ export const mockFullOwnershipLockInfosChange: LockInfo[] = new Array(100).fill(
     index: i,
     lock,
     blake160: publicKeyToBlake160(`0x${String(i).padStart(2, '0').repeat(33)}`),
-    pubkey: `0x${String(i).padStart(2, '0').repeat(33)}`,
+    publicKey: `0x${String(i).padStart(2, '0').repeat(33)}`,
     lockHash: utils.computeScriptHash(lock),
     network: 'ckb_testnet' as const,
   };
@@ -102,7 +102,7 @@ export const mockRuleBasedOwnershipLockInfos: LockInfo[] = new Array(100).fill(0
     index: i,
     lock,
     blake160: publicKeyToBlake160(`0x${String(i).padStart(2, '0').repeat(33)}`),
-    pubkey: `0x${String(i).padStart(2, '0').repeat(33)}`,
+    publicKey: `0x${String(i).padStart(2, '0').repeat(33)}`,
     lockHash: utils.computeScriptHash(lock),
     network: 'ckb_testnet' as const,
   };
