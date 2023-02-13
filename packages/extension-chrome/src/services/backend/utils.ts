@@ -100,3 +100,9 @@ export async function getAddressInfoDetailsFromStorage(payload: {
   }
   return addressDetails;
 }
+
+export function isExternalLockInfo(payload: { lockInfo: LockInfo }): boolean {
+  const pathList = payload.lockInfo.path.split('/');
+  const isChange = pathList[pathList.length - 2] === '1';
+  return !isChange;
+}

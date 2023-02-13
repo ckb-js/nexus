@@ -1,8 +1,9 @@
-import { Network } from './../../../../types/src/injected';
+import { Network } from '@nexus-wallet/types/lib/injected';
 import { bytes } from '@ckb-lumos/codec';
 import { Hash, Script } from '@ckb-lumos/base';
 import min from 'lodash/min';
 import max from 'lodash/max';
+import { isExternalLockInfo } from './utils';
 
 export const MAX_ADDRESS_GAP = 20;
 export const RULE_BASED_MAX_ADDRESS_GAP = 50;
@@ -140,15 +141,9 @@ export class LocksManager {
     return result;
   }
 
-  isExternalAddress(payload: { addressInfo: LockInfo }): boolean {
-    const pathList = payload.addressInfo.path.split('/');
-    const isChange = pathList[pathList.length - 2] === '1';
-    return isChange;
-  }
-
   markAddressAsUsed(payload: { lockInfoList: LockInfo[] }): void {
     payload.lockInfoList.forEach((address) => {
-      const isExternalAddress = this.isExternalAddress({ addressInfo: address });
+      const isExternalAddress = isExternalLockInfo({ lockInfo: address });
       if (isExternalAddress) {
         const needUpdate = !this.onChain.external.some((onChainAddress) => onChainAddress.path === address.path);
         if (needUpdate) {
@@ -185,33 +180,10 @@ export class LocksManager {
     });
   }
 
-  getOnChainExternalAddresses(): LockInfo[] {
-    return this.onChain.external;
-  }
-  setOnChainExternalAddresses(addresses: LockInfo[]): void {
-    this.onChain.external = addresses;
-  }
-  getOnChainChangeAddresses(): LockInfo[] {
-    return this.onChain.change;
-  }
-  setOnChainChangeAddresses(addresses: LockInfo[]): void {
-    this.onChain.change = addresses;
-  }
   getAllOnChainLockList(): LockInfo[] {
     return [...this.onChain.external, ...this.onChain.change];
   }
-  getOffChainExternalAddresses(): LockInfo[] {
-    return this.offChain.external;
-  }
-  setOffChainExternalAddresses(addresses: LockInfo[]): void {
-    this.offChain.external = addresses;
-  }
-  getOffChainChangeAddresses(): LockInfo[] {
-    return this.offChain.change;
-  }
-  setOffChainChangeAddresses(addresses: LockInfo[]): void {
-    this.offChain.change = addresses;
-  }
+
   getAllOffChainAddresses(): LockInfo[] {
     return [...this.offChain.external, ...this.offChain.change];
   }

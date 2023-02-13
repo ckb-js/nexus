@@ -153,7 +153,7 @@ export class ProbeTask {
     const lockDetail = await getAddressInfoDetailsFromStorage({ keyName: payload.keyName, storage: this.storage });
     const lockDetailManager = new LocksManager({ lockDetail });
     // supply external addresses if needed
-    while (lockDetailManager.getOffChainExternalAddresses().length < shreshold) {
+    while (lockDetailManager.offChain.external.length < shreshold) {
       const parentPath = getParentPath({ keyName: payload.keyName });
       const path =
         payload.keyName === 'fullOwnership'
@@ -166,7 +166,7 @@ export class ProbeTask {
     while (
       // only full ownership chain needs change addresses
       payload.keyName === 'fullOwnership' &&
-      lockDetailManager.getOffChainChangeAddresses().length < shreshold
+      lockDetailManager.offChain.change.length < shreshold
     ) {
       const parentPath = getParentPath({ keyName: payload.keyName });
       const path = `${parentPath}/1/${lockDetailManager.currentMaxChangeAddressIndex() + 1}`;
