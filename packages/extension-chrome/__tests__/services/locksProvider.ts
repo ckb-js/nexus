@@ -6,8 +6,26 @@ import {
   generateLocksAndPointers,
   mockFullOwnershipLockInfos,
 } from './utils';
+import { getDefaultLocksAndPointer } from '../../src/services/backend/utils';
 
 describe('fullOwnership', () => {
+  it('LocksProvider#should get empty locks when lockDetail is empty', async () => {
+    const mockBackend: Backend = createMockBackend({});
+    const mockKeystoreService = createMockKeystoreService({
+      getPublicKeyByPath: ({ path }) => mockFullOwnershipLockInfos.find((info) => info.path === path)!.publicKey,
+    });
+    const locksAndPointer = getDefaultLocksAndPointer();
+    const mockLocksProvider = new LocksProvider({
+      backend: mockBackend,
+      keystoreService: mockKeystoreService,
+      lockDetail: locksAndPointer,
+    });
+
+    expect(await mockLocksProvider.getNextOffChainExternalLocks()).toEqual([]);
+    expect(await mockLocksProvider.getNextOffChainChangeLocks()).toEqual([]);
+    expect(await mockLocksProvider.getNextOnChainExternalLocks()).toEqual([]);
+    expect(await mockLocksProvider.getNextOnChainChangeLocks()).toEqual([]);
+  });
   it('LocksProvider#should get circular locks when squencially call getNextLock', async () => {
     const mockBackend: Backend = createMockBackend({});
     const mockKeystoreService = createMockKeystoreService({

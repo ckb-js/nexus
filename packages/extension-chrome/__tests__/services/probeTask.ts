@@ -71,4 +71,41 @@ describe('probe task', () => {
       pointers: getDefaultLocksAndPointer().pointers,
     });
   });
+
+  it('should run probe task', async () => {
+    const mockBackend: Backend = createMockBackend({});
+    const mockKeystoreService = createMockKeystoreService({
+      getPublicKeyByPath: ({ path }) =>
+        [...mockFullOwnershipLockInfos, ...mockRuleBasedOwnershipLockInfos].find((info) => info.path === path)!
+          .publicKey,
+    });
+    const memoryStorage: LockInfoStorage = {
+      fullOwnership: getDefaultLocksAndPointer(),
+      ruleBasedOwnership: getDefaultLocksAndPointer(),
+    };
+    const mockStorage: Storage<LockInfoStorage> = {
+      setItem: jest.fn((key, value) => {
+        memoryStorage[key] = value;
+        return Promise.resolve();
+      }),
+      getItem: jest.fn((key) => {
+        return Promise.resolve(memoryStorage[key]);
+      }),
+      removeItem: jest.fn(),
+      hasItem: jest.fn(),
+    };
+
+    const probeTask = ProbeTask.getInstance({
+      backend: mockBackend,
+      keystoreService: mockKeystoreService,
+      storage: mockStorage,
+    });
+    expect(probeTask.running).toBe(false);
+    probeTask.run();
+    (() => {
+      return new Promise((resolve) => setTimeout(resolve, 3_000));
+    })();
+    expect(probeTask.running).toBe(true);
+    probeTask.stop();
+  });
 });

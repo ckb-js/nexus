@@ -49,11 +49,12 @@ export class ProbeTask {
   backend: Backend;
   storage: Storage<LockInfoStorage>;
   keystoreService: KeystoreService;
+  handler: unknown;
   run(): void {
     if (this.running) {
       return;
     }
-    setInterval(async () => {
+    this.handler = setInterval(async () => {
       console.log('probe task running...');
       // TODO scan all addresses if chain is forked
       await this.syncAddressInfoWithCurrentState({ keyName: 'fullOwnership' });
@@ -62,6 +63,11 @@ export class ProbeTask {
       await this.supplyOffChainAddresses({ keyName: 'ruleBasedOwnership' });
     }, 10_000);
     this.running = true;
+  }
+
+  stop(): void {
+    clearInterval(this.handler as NodeJS.Timeout);
+    this.running = false;
   }
 
   async syncAddressInfoWithCurrentState(payload: { keyName: keyof LockInfoStorage }): Promise<void> {
