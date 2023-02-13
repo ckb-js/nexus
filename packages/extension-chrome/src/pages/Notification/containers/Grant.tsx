@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Flex, Heading, Spacer, Text } from '@chakra-ui/react';
-import browser from 'webextension-polyfill';
+import { useSessionMessenger } from '../../hooks/useSessionMessenger';
 
 export const Grant: React.FC = () => {
   const [requesterUrl, setRequesterUrl] = useState<string>();
+  const messenger = useSessionMessenger();
 
   useEffect(() => {
     (async () => {
-      const res = await browser.runtime.sendMessage({ method: 'getRequesterAppInfo' });
+      const res = await messenger.send('session_getRequesterAppInfo');
       setRequesterUrl(res.url);
     })();
-  }, []);
+  }, [messenger]);
 
   if (!requesterUrl) return <h1>waiting...</h1>;
 
@@ -22,7 +23,7 @@ export const Grant: React.FC = () => {
       <Spacer />
       <Button
         onClick={async () => {
-          await browser.runtime.sendMessage({ method: 'userHasEnabledWallet' });
+          await messenger.send('session_approveEnableWallet');
           window.close();
         }}
       >
