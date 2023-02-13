@@ -108,7 +108,7 @@ interface CkbProvider {
   ruleBasedOwnership: Ownership;
 }
 
-interface FullOwnership {
+interface Ownership {
   getOffChainLocks(options?: GetOffChainLocksOptions): Promise<Script[]>;
 
   getOnChainLocks(payload?: { cursor?: string }): Promise<Paginate<Script>>;
