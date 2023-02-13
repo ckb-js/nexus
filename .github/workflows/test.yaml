@@ -27,7 +27,7 @@ jobs:
           git diff --exit-code
 
       - name: Run unit test
-        run: npx jest --coverage
+        run: npx jest --coverage --verbose
 
       - uses: codecov/codecov-action@v3
         with:
