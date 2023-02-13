@@ -111,7 +111,7 @@ interface CkbProvider {
 interface FullOwnership {
   getOffChainLocks(options?: GetOffChainLocksOptions): Promise<Script[]>;
 
-  getOnChainLockss(payload?: { cursor?: string }): Promise<Paginate<Script>>;
+  getOnChainLocks(payload?: { cursor?: string }): Promise<Paginate<Script>>;
 
   getLiveCells(payload?: { cursor?: string }): Promise<Paginate<Cell>>;
 
