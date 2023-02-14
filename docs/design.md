@@ -111,9 +111,9 @@ interface CkbProvider {
 interface Ownership {
   getOffChainLocks(options?: GetOffChainLocksOptions): Promise<Script[]>;
 
-  getOnChainLocks(payload?: { cursor?: string }): Promise<Paginate<Script>>;
+  getOnChainLocks(payload: GetOnChainLocksPayload): Promise<Paginate<Script>>;
 
-  getLiveCells(payload?: { cursor?: string }): Promise<Paginate<Cell>>;
+  getLiveCells(payload?: GetLiveCellsPayload): Promise<Paginate<Cell>>;
 
   signTransaction(payload: { tx: Transaction }): Promise<GroupedSignature>;
 
@@ -132,7 +132,17 @@ interface WalletEventListener {
  */
 type Network = 'ckb' | 'ckb_testnet';
 
-type GetOffChainLocksOptions = {
+export interface GetPaginateItemsPayload {
+  cursor?: string;
+}
+
+export interface OwnershipFilter {
+  change?: 'external' | 'internal'; 
+}
+
+export interface GetLiveCellsPayload extends OwnershipFilter, GetPaginateItemsPayload{}
+export interface GetOnChainLocksPayload extends OwnershipFilter, GetPaginateItemsPayload {}
+export interface GetOffChainLocksPayload extends OwnershipFilter {};
   // will be ignored in rule-based ownership
   change?: boolean;
 };
