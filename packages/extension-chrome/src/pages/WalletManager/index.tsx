@@ -97,7 +97,7 @@ const routeConfig: RouteObject[] = [
       },
       {
         path: 'password',
-        element: <SetPassword />,
+        element: <SetPassword isImportSeed />,
       },
       {
         path: 'account',

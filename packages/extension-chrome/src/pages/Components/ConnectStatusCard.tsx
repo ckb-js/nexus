@@ -20,7 +20,7 @@ export const ConnectStatusCard: FC<ConnectStatusCardProps> = ({ name, connected,
       </Flex>
 
       <Flex alignItems="center">
-        <CheckCircleIcon mr="4px" color={'green.300'} />
+        <CheckCircleIcon mr="4px" w="16px" h="16px" color={'green.300'} />
         <Box fontSize="sm">{connected ? 'Connected' : 'Disconnected'}</Box>
       </Flex>
     </WhiteAlphaBox>

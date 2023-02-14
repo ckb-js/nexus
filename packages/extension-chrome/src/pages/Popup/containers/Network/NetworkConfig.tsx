@@ -60,7 +60,7 @@ export const NetworkConfig: FC = () => {
         }}
         w="100%"
         size="lg"
-        leftIcon={<AddIcon />}
+        leftIcon={<AddIcon h="16px" w="16px" />}
       >
         Add Network
       </Button>

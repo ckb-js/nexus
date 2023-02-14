@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import { Flex, FormControl, FormLabel, Input, Heading, VStack } from '@chakra-ui/react';
+import { FormControl, FormLabel, Input, Heading, VStack, Box } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
 
 import { useWalletCreationStore } from '../store';
@@ -10,7 +10,11 @@ type FormValues = {
   agreeTerms: boolean;
 };
 
-export const SetPassword: FC = () => {
+export type SetPasswordProps = {
+  isImportSeed?: boolean;
+};
+
+export const SetPassword: FC<SetPasswordProps> = ({ isImportSeed }) => {
   const store = useWalletCreationStore();
 
   const { register, handleSubmit } = useForm<FormValues>({
@@ -41,33 +45,37 @@ export const SetPassword: FC = () => {
 
   return (
     <>
-      <Flex direction="column" w="100%" maxW="400px">
-        <Heading mb="48px" lineHeight="111%" fontWeight="semibold">
-          Create password
-        </Heading>
-        {/* TODO: formik may not the best form state controller */}
-        <VStack as="form" onSubmit={handleSubmit(onValidateForm)}>
-          <FormControl>
-            <FormLabel fontSize="sm">New password (8 characters minimum)</FormLabel>
-            <Input
-              size="lg"
-              placeholder="Input your password"
-              type="password"
-              {...register('password', { required: true })}
-            />
-          </FormControl>
-          <FormControl>
-            <FormLabel fontSize="sm">Confirm password</FormLabel>
-            <Input
-              size="lg"
-              type="password"
-              placeholder="input your password"
-              {...register('confirmPassword', { required: true })}
-            />
-          </FormControl>
+      <Heading mb="48px" lineHeight="111%" fontWeight="semibold">
+        Create password
+      </Heading>
+      {isImportSeed && (
+        <Box maxW="502px" mb="16px" fontSize="md">
+          This password will unlock your Nexus wallet only on this device. Nexus can not recover this password.
+        </Box>
+      )}
+      {/* TODO: formik may not the best form state controller */}
+      <VStack as="form" onSubmit={handleSubmit(onValidateForm)}>
+        <FormControl>
+          <FormLabel fontSize="sm">New password (8 characters minimum)</FormLabel>
+          <Input
+            size="lg"
+            placeholder="Input your password"
+            type="password"
+            {...register('password', { required: true })}
+          />
+        </FormControl>
+        <FormControl>
+          <FormLabel fontSize="sm">Confirm password</FormLabel>
+          <Input
+            size="lg"
+            type="password"
+            placeholder="input your password"
+            {...register('confirmPassword', { required: true })}
+          />
+        </FormControl>
 
-          {/* Not implement */}
-          {/* <FormControl>
+        {/* Not implement */}
+        {/* <FormControl>
             <Checkbox onChange={register('agreeTerms', {}).onChange}>
               I have read and agree to the{' '}
               <Link color="purple.500" fontWeight="bold">
@@ -75,8 +83,7 @@ export const SetPassword: FC = () => {
               </Link>
             </Checkbox>
           </FormControl> */}
-        </VStack>
-      </Flex>
+      </VStack>
     </>
   );
 };

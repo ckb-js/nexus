@@ -39,7 +39,7 @@ export const Grant: React.FC = () => {
 
       <VStack my="8px" p="20px 30px" alignItems="flex-start" as={WhiteAlphaBox} spacing="12px">
         {permissions.map((p) => (
-          <Flex key={p} fontSize="md" alignItems="center" fontWeight="semibold" mb="8px">
+          <Flex key={p} fontSize="md" alignItems="center" fontWeight="semibold">
             <CheckCircleIcon w="24px" h="24px" mr="20px" color="green.300" />
             {p}
           </Flex>
@@ -62,7 +62,7 @@ export const Grant: React.FC = () => {
             window.close();
           }}
         >
-          Approve
+          Connect
         </Button>
       </ButtonGroup>
     </>

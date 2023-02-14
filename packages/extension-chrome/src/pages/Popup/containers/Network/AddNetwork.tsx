@@ -5,6 +5,7 @@ import { useSetState } from 'react-use';
 // TODO: use real service
 import configService, { NetworkConfig } from '../../../../mockServices/config';
 import { WhiteAlphaBox } from '../../../Components/WhiteAlphaBox';
+import { AddIcon } from '@chakra-ui/icons';
 
 export const AddNetwork: FC = () => {
   const navigate = useNavigate();
@@ -20,7 +21,7 @@ export const AddNetwork: FC = () => {
 
   return (
     <>
-      <VStack as={WhiteAlphaBox} spacing="12px" p="35px 20px" direction="column">
+      <VStack as={WhiteAlphaBox} spacing="16px" p="35px 20px" direction="column">
         <FormControl>
           <FormLabel>Name</FormLabel>
           <Input color="black" variant="outline" backgroundColor="white" onChange={onChange('name')} name="name" />
@@ -33,7 +34,7 @@ export const AddNetwork: FC = () => {
       </VStack>
       <Spacer />
       <Flex as="form" direction="column" justifyContent="center">
-        <Button size="lg" width="452px" marginY="12px" onClick={onAddNetwork}>
+        <Button size="lg" width="452px" leftIcon={<AddIcon h="16px" w="16px" />} marginY="12px" onClick={onAddNetwork}>
           Add
         </Button>
       </Flex>

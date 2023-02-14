@@ -45,14 +45,14 @@ export const WhitelistSites: FC = () => {
       <Text as={Box} fontSize="md" mb="20px" w="100%">
         Yan is connected to these sites. They can view your account address
       </Text>
-      <InputGroup alignItems="center" mb="20px">
+      <InputGroup alignItems="center" h="60px" mb="20px">
         <InputLeftElement
           borderRadius="8px"
+          top="10px"
+          left="6px"
           w="40px"
           h="40px"
           backgroundColor="purple.500"
-          top="4px"
-          left="4px"
           as={Center}
         >
           <SearchIcon w="24px" h="24px" />
@@ -66,7 +66,7 @@ export const WhitelistSites: FC = () => {
           pl="48px"
         />
       </InputGroup>
-      <VStack padding="30px 20px" as={WhiteAlphaBox} spacing="12px" flexDirection="column">
+      <VStack padding="30px 20px" as={WhiteAlphaBox} spacing="16px" flexDirection="column">
         {filteredSites?.map((site) => (
           <Flex alignItems="center" h="48px" w="100%" key={site.url}>
             <Center w="48px" borderRadius="50%" padding="4px" h="48px" backgroundColor="whiteAlpha.300">
@@ -77,7 +77,7 @@ export const WhitelistSites: FC = () => {
                 {site.url}
               </Highlight>
             </Flex>
-            <DeleteIcon cursor="pointer" w="24px" h="24px" onClick={removeSite(site.url)} />
+            <DeleteIcon cursor="pointer" w="20px" h="20px" onClick={removeSite(site.url)} />
           </Flex>
         ))}
       </VStack>

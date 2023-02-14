@@ -1,10 +1,19 @@
 import React, { FC } from 'react';
 import { Flex, Box, Icon, Center } from '@chakra-ui/react';
+import { useNavigate } from 'react-router-dom';
+import { Button, ButtonProps } from '@chakra-ui/react';
 import TerminalIcon from '../../Components/icons/Terminal.svg';
 import NetworkIcon from '../../Components/icons/Network.svg';
-import { useNavigate } from 'react-router-dom';
 import { WhiteAlphaBox } from '../../Components/WhiteAlphaBox';
 import { ConnectStatusCard } from '../../Components/ConnectStatusCard';
+
+const FeedbackButton: FC<ButtonProps> = (props) => {
+  return (
+    <Button size="xs" {...props}>
+      Feedback
+    </Button>
+  );
+};
 
 export const Home: FC = () => {
   const navigate = useNavigate();
@@ -42,6 +51,7 @@ export const Home: FC = () => {
           </Flex>
         ))}
       </WhiteAlphaBox>
+      <FeedbackButton position="absolute" transform="rotate(-90deg)" left="440px" top="498px" />
     </>
   );
 };
