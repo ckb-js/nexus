@@ -35,8 +35,8 @@ export type NexusLockInfos = {
 
 export type NexusLockPointers = {
   offChain: {
-    external: LockInfo;
-    change: LockInfo;
+    external: LockInfo | null;
+    change: LockInfo | null;
   };
 };
 

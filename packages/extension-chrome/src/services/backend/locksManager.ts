@@ -3,9 +3,9 @@ import { bytes } from '@ckb-lumos/codec';
 import { Script } from '@ckb-lumos/base';
 import { Storage } from '@nexus-wallet/types';
 import { getAddressInfoDetailsFromStorage as loadLocksInfoFromStorage } from './utils';
-import { LockInfoStorage, LocksAndPointer, LockInfo } from './types';
 import { Circular, CircularLockInfo } from './circular';
-import { DefaultOnChainLockProvider, OnChainLockProvider } from './onchainLockProvider';
+import { OnChainLockProvider, DefaultOnChainLockProvider } from './onchainLockProvider';
+import { LockInfoStorage, LocksAndPointer, LockInfo } from './types';
 
 export class LocksManager {
   storage: Storage<LockInfoStorage>;
@@ -69,25 +69,6 @@ export class LocksManager {
       return bytes.equal(lockInfo.lock.args, lock.args) && bytes.equal(lockInfo.lock.codeHash, lock.codeHash);
     });
     asserts.nonEmpty(result);
-    return result;
-  }
-
-  currentMaxExternalAddressIndex(): number {
-    let result = -1;
-    [...this.onChain.external, ...this.offChain.external].forEach((address) => {
-      if (address.index > result) {
-        result = address.index;
-      }
-    });
-    return result;
-  }
-  currentMaxChangeAddressIndex(): number {
-    let result = -1;
-    [...this.onChain.change, ...this.offChain.change].forEach((address) => {
-      if (address.index > result) {
-        result = address.index;
-      }
-    });
     return result;
   }
 }

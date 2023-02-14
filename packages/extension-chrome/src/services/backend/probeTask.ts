@@ -2,7 +2,7 @@ import isEqual from 'lodash.isequal';
 import { Storage, KeystoreService } from '@nexus-wallet/types';
 import { Backend } from './backend';
 import {
-  getLockInfoByPath,
+  generateLockInfoByPath,
   getAddressInfoDetailsFromStorage,
   getDefaultLocksAndPointer,
   getParentPath,
@@ -162,7 +162,7 @@ export class ProbeTask {
         payload.keyName === 'fullOwnership'
           ? `${parentPath}/0/${maxExternalLockIndex({ storageData }) + 1}`
           : `${parentPath}/${maxExternalLockIndex({ storageData }) + 1}`;
-      const nextLockInfo = await getLockInfoByPath(this.keystoreService, path);
+      const nextLockInfo = await generateLockInfoByPath(this.keystoreService, path);
       storageData.details.offChain.external.push(nextLockInfo);
     }
     // supply change addresses if needed
@@ -173,7 +173,7 @@ export class ProbeTask {
     ) {
       const parentPath = getParentPath({ keyName: payload.keyName });
       const path = `${parentPath}/1/${maxChangeLockIndex({ storageData }) + 1}`;
-      const nextLockInfo = await getLockInfoByPath(this.keystoreService, path);
+      const nextLockInfo = await generateLockInfoByPath(this.keystoreService, path);
       storageData.details.offChain.change.push(nextLockInfo);
     }
 

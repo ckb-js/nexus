@@ -21,12 +21,12 @@ export function toSecp256k1Script(pubkey: HexString): Script {
  * @param path eg: m/4410179'/0'/0
  * @returns
  */
-export async function getLockInfoByPath(keystoreService: KeystoreService, path: string): Promise<LockInfo> {
+export async function generateLockInfoByPath(keystoreService: KeystoreService, path: string): Promise<LockInfo> {
   const index = indexOfPath(path);
   const publicKey = await keystoreService.getPublicKeyByPath({ path });
   const childScript: Script = toSecp256k1Script(publicKey);
   const currentAddressInfo: LockInfo = {
-    path,
+    parentPath: parentOfPath(path),
     index,
     publicKey,
     blake160: childScript.args,
@@ -34,6 +34,7 @@ export async function getLockInfoByPath(keystoreService: KeystoreService, path: 
     lockHash: utils.computeScriptHash(childScript),
     // TODO get network from network service?
     network: 'ckb_testnet' as const,
+    onchain: false,
   };
   return currentAddressInfo;
 }
@@ -46,6 +47,11 @@ export async function getLockInfoByPath(keystoreService: KeystoreService, path: 
 export function indexOfPath(path: string): number {
   const pathList = path.split('/');
   return Number(pathList[pathList.length - 1]);
+}
+export function parentOfPath(path: string): string {
+  const pathList = path.split('/');
+  pathList.pop();
+  return pathList.join('/');
 }
 
 export function isFullOwnership(path: string): boolean {
@@ -76,13 +82,9 @@ export function getDefaultLocksAndPointer(): LocksAndPointer {
       offChain: { external: [], change: [] },
     },
     pointers: {
-      onChain: {
-        external: -1,
-        change: -1,
-      },
       offChain: {
-        external: -1,
-        change: -1,
+        external: null,
+        change: null,
       },
     },
   };
