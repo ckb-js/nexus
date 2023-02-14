@@ -9,9 +9,9 @@ export const server = new JSONRPCServer<ServerParams>();
 
 export function addMethod<K extends keyof RpcMethods>(
   method: K,
-  handler: (params: RpcMethods[K]['params'], context: ServerParams) => RpcMethods[K]['result'],
+  handler: (param: RpcMethods[K]['params'], context: ServerParams) => RpcMethods[K]['result'],
 ): void {
-  server.addMethod(method, handler);
+  server.addMethod(String(method), handler);
 }
 
 let servicesFactory = createServicesFactory();

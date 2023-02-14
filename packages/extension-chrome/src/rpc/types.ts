@@ -1,18 +1,18 @@
 import { Script } from '@ckb-lumos/lumos';
 import { Promisable } from '@nexus-wallet/types/lib/base';
 import { Services } from '../services';
+import { Call, CallMap } from '@nexus-wallet/types';
 
-interface RpcCall<Params, Result> {
-  params: Params;
-  result: Result;
+export interface RpcMethods extends CallMap {
+  wallet_enable: Call<void, void>;
+  wallet_isEnabled: Call<void, boolean>;
+  wallet_getNetworkName: Call<void, string>;
+
+  wallet_fullOwnership_getUnusedLocks: Call<void, Script[]>;
 }
 
-export interface RpcMethods {
-  wallet_enable: RpcCall<void, void>;
-  wallet_isEnabled: RpcCall<void, boolean>;
-  wallet_getNetworkName: RpcCall<void, string>;
-
-  wallet_fullOwnership_getUnusedLocks: RpcCall<void, Script[]>;
+export interface InternalMethods extends CallMap {
+  internal_initWallet: Call<{ password: string; nickname: string; mnemonics: string[] }, void>;
 }
 
 /**

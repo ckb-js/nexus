@@ -1,9 +1,9 @@
-import type { NotificationService } from '@nexus-wallet/types';
+import type { Call, NotificationService } from '@nexus-wallet/types';
 import { errors } from '@nexus-wallet/utils';
 import browser from 'webextension-polyfill';
 import { TransactionSkeletonObject } from '@ckb-lumos/helpers';
 import type { HexString, Script } from '@ckb-lumos/base';
-import { Call, createSessionMessenger } from '../messaging/session';
+import { createSessionMessenger } from '../messaging/session';
 import { browserExtensionAdapter } from '../messaging/adapters';
 import { nanoid } from 'nanoid';
 

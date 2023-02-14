@@ -1,6 +1,5 @@
-// import browser from 'webextension-polyfill';
 import { nanoid } from 'nanoid';
-import { Promisable } from '@nexus-wallet/types';
+import { CallMap, CallParam, CallResult, Promisable } from '@nexus-wallet/types';
 import {
   createJSONRPCErrorResponse,
   createJSONRPCRequest,
@@ -18,15 +17,6 @@ export interface SessionMessenger<Map extends CallMap = CallMap> {
   send<T extends keyof Map>(method: T, params?: CallParam<Map[T]>): Promise<CallResult<Map[T]>>;
   register<T extends keyof Map>(method: T, handler: (data: CallParam<Map[T]>) => Promisable<CallResult<Map[T]>>): void;
   destroy(): void;
-}
-
-export type CallMap = Record<string, Call<unknown, unknown>>;
-export type CallParam<T> = T extends Call<infer P, unknown> ? P : never;
-export type CallResult<T> = T extends Call<unknown, infer R> ? R : never;
-
-export interface Call<Param, Result> {
-  param: Param;
-  result: Result;
 }
 
 export const SESSION_MESSAGE_SYMBOL = '__SESSION_MESSAGE_SYMBOL__' as const;
