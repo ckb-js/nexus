@@ -4,9 +4,10 @@ import { Script } from '@ckb-lumos/base';
 import { Indexer, TransactionCollector } from '@ckb-lumos/ckb-indexer';
 import { RPC } from '@ckb-lumos/rpc';
 import { RPC as IndexerRPC } from '@ckb-lumos/ckb-indexer/lib/rpc';
+import { GetLiveCellsResult } from '@ckb-lumos/ckb-indexer/lib/type';
 
-export type CellWithCursor = {
-  cell: Cell;
+export type CellsWithCursor = {
+  cells: Cell[];
   cursor: string;
 };
 export interface Backend {
@@ -16,8 +17,13 @@ export interface Backend {
   indexerRPC: IndexerRPC;
 
   hasHistory: (payload: { lock: Script }) => Promise<boolean>;
-  // getLiveCells: (payload: { locks: Script[] }) => Promise<CellWithCursor[]>;
-  getNextLiveCellWithCursor: (payload: { lock: Script; indexerCursor?: string }) => Promise<CellWithCursor | undefined>;
+  getNextLiveCellWithCursor: (payload: {
+    lock: Script;
+    filter: {
+      limit: number;
+      indexerCursor?: string;
+    };
+  }) => Promise<CellsWithCursor>;
   getLiveCellFetcher: () => (outPoint: OutPoint) => Promise<Cell>;
 }
 
@@ -46,36 +52,42 @@ export class DefaultBackend implements Backend {
 
   async getNextLiveCellWithCursor(payload: {
     lock: Script;
-    indexerCursor?: string;
-  }): Promise<CellWithCursor | undefined> {
-    let rpcResult;
-    if (payload.indexerCursor) {
+    filter: {
+      limit: number;
+      indexerCursor?: string;
+    };
+  }): Promise<CellsWithCursor> {
+    const limit = `0x${payload.filter.limit.toString(16)}`;
+    let rpcResult: GetLiveCellsResult<true>;
+    if (payload.filter.indexerCursor) {
       rpcResult = await this.indexerRPC.getCells(
         { script: payload.lock, scriptType: 'lock' },
         'asc',
-        '0x1',
-        payload.indexerCursor,
+        limit,
+        payload.filter.indexerCursor,
       );
     } else {
-      rpcResult = await this.indexerRPC.getCells({ script: payload.lock, scriptType: 'lock' }, 'asc', '0x1');
+      rpcResult = await this.indexerRPC.getCells({ script: payload.lock, scriptType: 'lock' }, 'asc', limit);
     }
     if (rpcResult.objects.length === 0) {
-      return undefined;
+      return {
+        cells: [],
+        cursor: '',
+      };
     }
-    const indexerCell = rpcResult.objects[0];
-    const cell: Cell = {
-      cellOutput: indexerCell.output,
-      data: indexerCell.outputData,
-      outPoint: indexerCell.outPoint,
-      blockNumber: indexerCell.blockNumber,
-    };
-
-    const result: CellWithCursor = {
-      cell,
+    const result: Cell[] = rpcResult.objects.map((indexerCell) => {
+      const cells: Cell = {
+        cellOutput: indexerCell.output,
+        data: indexerCell.outputData,
+        outPoint: indexerCell.outPoint,
+        blockNumber: indexerCell.blockNumber,
+      };
+      return cells;
+    });
+    return {
+      cells: result,
       cursor: rpcResult.lastCursor,
     };
-
-    return result;
   }
 
   async hasHistory(payload: { lock: Script }): Promise<boolean> {

@@ -12,14 +12,23 @@ export interface Circular<T> {
   takeAndSupply(take: number | T, newItem: T): T;
 }
 
-export class CircularLockInfo implements Circular<LockInfo> {
+export class CircularOffChainLockInfo implements Circular<LockInfo> {
   items: LinkedList<LockInfo>;
   pointer: Node<LockInfo> | null;
+  storageUpdator: (items: LockInfo[]) => Promise<void>;
+  pointerUpdator: (pointer: LockInfo | null) => Promise<void>;
 
-  constructor(payload: { items: LockInfo[]; pointer: LockInfo | null }) {
+  constructor(payload: {
+    items: LockInfo[];
+    pointer: LockInfo | null;
+    storageUpdator: (items: LockInfo[]) => Promise<void>;
+    pointerUpdator: (pointer: LockInfo | null) => Promise<void>;
+  }) {
     const list = new LinkedList<LockInfo>(payload.items);
     this.items = list;
     this.pointer = payload.pointer ? list.search((data) => isEqual(data, payload.pointer)) : null;
+    this.storageUpdator = payload.storageUpdator;
+    this.pointerUpdator = payload.pointerUpdator;
   }
 
   current(): LockInfo | undefined {
@@ -32,17 +41,20 @@ export class CircularLockInfo implements Circular<LockInfo> {
     } else {
       targetNode = this.items.search((data) => isEqual(data, take));
     }
-    asserts.nonEmpty(targetNode);
+    asserts.asserts(targetNode, 'targetNode should not be empty when calling takeAndSupply', take);
     !targetNode.data.onchain && this.items.insertAtEnd(newItem);
     targetNode.data.onchain = true;
+    this.storageUpdator(this.items.traverse());
     return newItem;
   }
   next(): LockInfo | undefined {
     const next = this.pointer?.next || this.items.headNode;
     if (next) {
       this.pointer = next;
+      this.pointerUpdator(this.pointer.data);
       return next.data;
     }
+    this.pointerUpdator(null);
     return undefined;
   }
 }

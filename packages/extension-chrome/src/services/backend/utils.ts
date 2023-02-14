@@ -48,6 +48,12 @@ export function indexOfPath(path: string): number {
   const pathList = path.split('/');
   return Number(pathList[pathList.length - 1]);
 }
+
+/**
+ * returns the parentPath of the path
+ * @param path eg: m/4410179'/0'/0
+ * @returns m/4410179'/0'
+ */
 export function parentOfPath(path: string): string {
   const pathList = path.split('/');
   pathList.pop();
@@ -62,11 +68,7 @@ export function isRuleBasedOwnership(path: string): boolean {
   return path.startsWith("m/4410179'/0'");
 }
 
-export function fromJSONString(payload: { cachedAddressDetailsStr: string }): LocksAndPointer {
-  return JSON.parse(payload.cachedAddressDetailsStr);
-}
-
-export function getParentPath(payload: { keyName: keyof LockInfoStorage }): string {
+export function getHardendPathByType(payload: { keyName: keyof LockInfoStorage }): string {
   const fullOwnershipParentPath = "m/44'/309'/0'";
   const ruleBasedOwnershipParentPath = "m/4410179'/0'";
   if (payload.keyName === 'ruleBasedOwnership') {
@@ -102,8 +104,8 @@ export async function getAddressInfoDetailsFromStorage(payload: {
   return addressDetails;
 }
 
-export function isExternal(payload: { lockInfo: LockInfo }): boolean {
-  const pathList = payload.lockInfo.parentPath.split('/');
+export function isExternalParentPath(payload: { parentPath: string }): boolean {
+  const pathList = payload.parentPath.split('/');
   const isChange = pathList.pop() === '1';
   return !isChange;
 }

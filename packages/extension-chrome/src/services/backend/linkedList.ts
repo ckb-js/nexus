@@ -15,11 +15,8 @@ export class LinkedList<T> implements ILinkedList<T> {
   get headNode(): Node<T> | null {
     return this.head;
   }
-
   constructor(array: T[] = []) {
-    const instance = new LinkedList<T>();
-    array.forEach((data) => instance.insertAtEnd(data));
-    return instance;
+    array.forEach((data) => this.insertAtEnd(data));
   }
 
   public insertAtEnd(data: T): Node<T> {

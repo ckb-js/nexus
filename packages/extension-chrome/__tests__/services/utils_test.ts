@@ -1,4 +1,4 @@
-import { isExternal } from '../../src/services/backend/utils';
+import { isExternalParentPath } from '../../src/services/backend/utils';
 import { generateLocksAndPointers } from './utils';
 
 describe('utils', () => {
@@ -17,38 +17,10 @@ describe('utils', () => {
   });
   it('should judge if a lockInfo is eternal lock by path', () => {
     expect(
-      isExternal({
-        lockInfo: {
-          path: "m/4410179'/0'/0",
-          index: 0,
-          lock: {
-            codeHash: '',
-            hashType: 'type' as const,
-            args: '',
-          },
-          blake160: '',
-          publicKey: '',
-          lockHash: '',
-          network: 'ckb_testnet' as const,
-        },
+      isExternalParentPath({
+        parentPath: "m/4410179'/0'",
       }),
     ).toEqual(true);
-    expect(
-      isExternal({
-        lockInfo: {
-          path: "m/44'/309'/0'/1/0",
-          index: 0,
-          lock: {
-            codeHash: '',
-            hashType: 'type' as const,
-            args: '',
-          },
-          blake160: '',
-          publicKey: '',
-          lockHash: '',
-          network: 'ckb_testnet' as const,
-        },
-      }),
-    ).toEqual(false);
+    expect(isExternalParentPath({ parentPath: "m/44'/309'/0'/1" })).toEqual(false);
   });
 });

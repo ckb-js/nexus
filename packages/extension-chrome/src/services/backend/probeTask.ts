@@ -5,7 +5,7 @@ import {
   generateLockInfoByPath,
   getAddressInfoDetailsFromStorage,
   getDefaultLocksAndPointer,
-  getParentPath,
+  getHardendPathByType,
   toSecp256k1Script,
   maxChangeLockIndex,
   maxExternalLockIndex,
@@ -110,7 +110,7 @@ export class ProbeTask {
   async syncAllLocksInfo(): Promise<void> {
     let lockDetail = await getAddressInfoDetailsFromStorage({ storage: this.storage, keyName: 'fullOwnership' });
 
-    let parentPath = `${getParentPath({ keyName: 'fullOwnership' })}/0`;
+    let parentPath = `${getHardendPathByType({ keyName: 'fullOwnership' })}/0`;
     let lockInfoLists = await syncAllByPath({
       parentPath,
       threshold: 20,
@@ -120,7 +120,7 @@ export class ProbeTask {
     lockDetail.details.offChain.external = lockInfoLists.offChainlockInfoList;
     lockDetail.details.onChain.external = lockInfoLists.onChainlockInfoList;
 
-    parentPath = `${getParentPath({ keyName: 'fullOwnership' })}/1`;
+    parentPath = `${getHardendPathByType({ keyName: 'fullOwnership' })}/1`;
     lockInfoLists = await syncAllByPath({
       parentPath,
       threshold: 20,
@@ -134,7 +134,7 @@ export class ProbeTask {
 
     lockDetail = await getAddressInfoDetailsFromStorage({ storage: this.storage, keyName: 'fullOwnership' });
 
-    parentPath = getParentPath({ keyName: 'ruleBasedOwnership' });
+    parentPath = getHardendPathByType({ keyName: 'ruleBasedOwnership' });
     lockInfoLists = await syncAllByPath({
       parentPath,
       threshold: 50,
@@ -157,7 +157,7 @@ export class ProbeTask {
     const storageData = await getAddressInfoDetailsFromStorage({ storage: this.storage, keyName: payload.keyName });
     // supply external addresses if needed
     while (storageData.details.offChain.external.length < shreshold) {
-      const parentPath = getParentPath({ keyName: payload.keyName });
+      const parentPath = getHardendPathByType({ keyName: payload.keyName });
       const path =
         payload.keyName === 'fullOwnership'
           ? `${parentPath}/0/${maxExternalLockIndex({ storageData }) + 1}`
@@ -171,7 +171,7 @@ export class ProbeTask {
       payload.keyName === 'fullOwnership' &&
       storageData.details.offChain.change.length < shreshold
     ) {
-      const parentPath = getParentPath({ keyName: payload.keyName });
+      const parentPath = getHardendPathByType({ keyName: payload.keyName });
       const path = `${parentPath}/1/${maxChangeLockIndex({ storageData }) + 1}`;
       const nextLockInfo = await generateLockInfoByPath(this.keystoreService, path);
       storageData.details.offChain.change.push(nextLockInfo);

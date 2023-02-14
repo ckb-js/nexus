@@ -14,7 +14,7 @@ import { asserts } from '@nexus-wallet/utils';
 import { createTransactionSkeleton } from '@ckb-lumos/helpers';
 import { prepareSigningEntries } from '@ckb-lumos/common-scripts/lib/secp256k1_blake160';
 import { LocksManager } from './backend/locksManager';
-import { Circular, CircularLockInfo } from './backend/circular';
+import { CircularOffChainLockInfo } from './backend/circular';
 import { LockInfo } from './backend/types';
 import { throwError } from '@nexus-wallet/utils/lib/error';
 import { DefaultLockCursor, DefaultLiveCellCursor } from './backend/cursor';
@@ -32,7 +32,8 @@ export function createOwnershipService(config: Props): OwnershipService {
     getLiveCells: async (payload?: GetLiveCellsPayload) => {
       const lockProvider: OnChainLockProvider = await getOnchainLockProvider(config);
       const liveCellCursor = payload?.cursor ? DefaultLiveCellCursor.fromString(payload.cursor) : undefined;
-      const fetchCell = async (): Promise<Paginate<Cell>> => {
+
+      const fetchCell = async (limit: number): Promise<Paginate<Cell>> => {
         const result = {
           cursor: '',
           objects: [],
@@ -47,23 +48,32 @@ export function createOwnershipService(config: Props): OwnershipService {
         // pass indexer cursor to rpc only when the lockCursor points to the lock
         const indexerCursor =
           lockInfoWithCursor!.lockInfo.index === liveCellCursor!.index ? liveCellCursor?.indexerCursor : undefined;
-        const cellWithCursor = await config.backend.getNextLiveCellWithCursor({
+        const cellsWithCursor = await config.backend.getNextLiveCellWithCursor({
           lock: lockInfoWithCursor!.lockInfo.lock,
-          indexerCursor,
+          filter: { indexerCursor, limit },
         });
-        if (!cellWithCursor) {
-          return await fetchCell();
+
+        if (cellsWithCursor.cells.length < limit) {
+          const moreCells = await fetchCell(limit - cellsWithCursor.cells.length);
+          return {
+            cursor: moreCells.cursor || cellsWithCursor.cursor,
+            objects: [...cellsWithCursor.cells, ...moreCells.objects],
+          };
         }
+
         return {
-          cursor: cellWithCursor.cursor,
-          objects: [cellWithCursor.cell],
+          cursor: cellsWithCursor.cursor,
+          objects: cellsWithCursor.cells,
         };
       };
-      return await fetchCell();
+
+      //TODO try fetch 10 cells for now, will support `limit` filter in the future
+      return await fetchCell(10);
     },
     getOffChainLocks: async (payload: GetOffChainLocksPayload) => {
-      const provider: CircularLockInfo = await getOffChainLockProvider(config, payload);
+      const provider: CircularOffChainLockInfo = await getOffChainLockProvider(config, payload);
       const result = provider.next();
+      //TODO try fetch 1 lock for now, will support `limit` filter in the future
       return result ? [result.lock] : [];
     },
     getOnChainLocks: async (payload: GetOnChainLocksPayload): Promise<Paginate<Script>> => {
@@ -75,6 +85,7 @@ export function createOwnershipService(config: Props): OwnershipService {
         : '';
       return {
         cursor: lastCursor,
+        //TODO try fetch 1 lock for now, will support `limit` filter in the future
         objects: nextLockWithCursor ? [nextLockWithCursor.lockInfo.lock] : [],
       };
     },
@@ -86,12 +97,13 @@ export function createOwnershipService(config: Props): OwnershipService {
         .get('inputs')
         .map((input) => input.cellOutput.lock)
         .toArray();
-      const lockInfoList = await Promise.all(
+      const allLockInfoList = await Promise.all(
         inputLocks.map(async (lock) => {
           const lockInfo = await config.locksManager.getlockInfoByLock({ lock });
           return lockInfo;
         }),
       );
+      const lockInfoList: LockInfo[] = allLockInfoList.filter((lockInfo) => !!lockInfo) as LockInfo[];
       const signingEntries = txSkeleton.get('signingEntries').toArray();
       const password = (await config.notificationService.requestSignTransaction({ tx: payload.tx })).password;
       const result: GroupedSignature = [];
@@ -109,7 +121,7 @@ export function createOwnershipService(config: Props): OwnershipService {
     },
     signData: async (payload: SignDataPayload) => {
       const lockInfo = await config.locksManager.getlockInfoByLock({ lock: payload.lock });
-      asserts.nonEmpty(lockInfo);
+      asserts.asserts(lockInfo, 'Lock not found when call signData with', payload);
       const password = (await config.notificationService.requestSignData({ data: payload.data })).password;
       const signature = await config.keystoreService.signMessage({
         message: payload.data,
@@ -135,8 +147,8 @@ async function getOnchainLockProvider(config: Pick<Props, 'type' | 'locksManager
 async function getOffChainLockProvider(
   config: Pick<Props, 'type' | 'locksManager'>,
   payload: Pick<GetOffChainLocksPayload, 'change'>,
-): Promise<CircularLockInfo> {
-  let provider: Circular<LockInfo>;
+): Promise<CircularOffChainLockInfo> {
+  let provider: CircularOffChainLockInfo;
   if (config.type === 'full' && (payload.change === 'external' || !payload.change)) {
     provider = await config.locksManager.fullExternalProvider();
   } else if (config.type === 'full' && payload.change === 'internal') {

@@ -1,9 +1,8 @@
-import { asserts } from '@nexus-wallet/utils';
 import { bytes } from '@ckb-lumos/codec';
 import { Script } from '@ckb-lumos/base';
 import { Storage } from '@nexus-wallet/types';
 import { getAddressInfoDetailsFromStorage as loadLocksInfoFromStorage } from './utils';
-import { Circular, CircularLockInfo } from './circular';
+import { CircularOffChainLockInfo } from './circular';
 import { OnChainLockProvider, DefaultOnChainLockProvider } from './onchainLockProvider';
 import { LockInfoStorage, LocksAndPointer, LockInfo } from './types';
 
@@ -14,25 +13,56 @@ export class LocksManager {
     this.storage = payload.storage;
   }
 
-  async fullExternalProvider(): Promise<Circular<LockInfo>> {
+  // offchain circular lock providers
+  async fullExternalProvider(): Promise<CircularOffChainLockInfo> {
     const locks = await this.loadLocksAndPointer('fullOwnership');
-    return new CircularLockInfo({
+    const storageUpdator = async (items: LockInfo[]) => {
+      locks.details.offChain.external = items;
+      await this.storage.setItem('fullOwnership', locks);
+    };
+    const pointerUpdator = async (pointer: LockInfo | null) => {
+      locks.pointers.offChain.external = pointer;
+      await this.storage.setItem('fullOwnership', locks);
+    };
+    return new CircularOffChainLockInfo({
       items: locks.details.offChain.external,
       pointer: locks.pointers.offChain.external,
+      storageUpdator,
+      pointerUpdator,
     });
   }
-  async fullChangeProvider(): Promise<Circular<LockInfo>> {
+  async fullChangeProvider(): Promise<CircularOffChainLockInfo> {
     const locks = await this.loadLocksAndPointer('fullOwnership');
-    return new CircularLockInfo({
+    const storageUpdator = async (items: LockInfo[]) => {
+      locks.details.offChain.change = items;
+      await this.storage.setItem('fullOwnership', locks);
+    };
+    const pointerUpdator = async (pointer: LockInfo | null) => {
+      locks.pointers.offChain.change = pointer;
+      await this.storage.setItem('fullOwnership', locks);
+    };
+    return new CircularOffChainLockInfo({
       items: locks.details.offChain.change,
       pointer: locks.pointers.offChain.change,
+      storageUpdator,
+      pointerUpdator,
     });
   }
-  async ruleBasedProvider(): Promise<Circular<LockInfo>> {
+  async ruleBasedProvider(): Promise<CircularOffChainLockInfo> {
     const locks = await this.loadLocksAndPointer('ruleBasedOwnership');
-    return new CircularLockInfo({
+    const storageUpdator = async (items: LockInfo[]) => {
+      locks.details.offChain.external = items;
+      await this.storage.setItem('ruleBasedOwnership', locks);
+    };
+    const pointerUpdator = async (pointer: LockInfo | null) => {
+      locks.pointers.offChain.external = pointer;
+      await this.storage.setItem('ruleBasedOwnership', locks);
+    };
+    return new CircularOffChainLockInfo({
       items: locks.details.offChain.external,
       pointer: locks.pointers.offChain.external,
+      storageUpdator,
+      pointerUpdator,
     });
   }
 
@@ -54,7 +84,7 @@ export class LocksManager {
     return loadLocksInfoFromStorage({ storage: this.storage, keyName });
   }
 
-  async getlockInfoByLock({ lock }: { lock: Script }): Promise<LockInfo> {
+  async getlockInfoByLock({ lock }: { lock: Script }): Promise<LockInfo | undefined> {
     const full = await this.loadLocksAndPointer('fullOwnership');
     const rb = await this.loadLocksAndPointer('ruleBasedOwnership');
     const allLockInfo: LockInfo[] = [
@@ -68,7 +98,6 @@ export class LocksManager {
     const result = allLockInfo.find((lockInfo) => {
       return bytes.equal(lockInfo.lock.args, lock.args) && bytes.equal(lockInfo.lock.codeHash, lock.codeHash);
     });
-    asserts.nonEmpty(result);
     return result;
   }
 }

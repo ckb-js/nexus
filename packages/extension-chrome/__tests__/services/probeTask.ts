@@ -7,10 +7,10 @@ import {
   mockFullOwnershipLockInfosChange,
   mockRuleBasedOwnershipLockInfos,
 } from './utils';
-import { LockInfoStorage } from '../../src/services/backend/locksManager';
 import { ProbeTask } from '../../src/services/backend/probeTask';
 import { Storage } from '@nexus-wallet/types';
-import { getDefaultLocksAndPointer } from '../../src/services/backend/utils';
+import { getDefaultLocksAndPointer, indexOfPath, parentOfPath } from '../../src/services/backend/utils';
+import { LockInfoStorage } from '../../src/services/backend/types';
 
 let probeTask: ProbeTask;
 let memoryStorage: LockInfoStorage;
@@ -19,7 +19,9 @@ beforeAll(() => {
   const mockBackend: Backend = createMockBackend({});
   const mockKeystoreService = createMockKeystoreService({
     getPublicKeyByPath: ({ path }) =>
-      [...mockFullOwnershipLockInfos, ...mockRuleBasedOwnershipLockInfos].find((info) => info.path === path)!.publicKey,
+      [...mockFullOwnershipLockInfos, ...mockRuleBasedOwnershipLockInfos].find(
+        (info) => info.index === indexOfPath(path) && info.parentPath === parentOfPath(path),
+      )!.publicKey,
   });
   memoryStorage = {
     fullOwnership: getDefaultLocksAndPointer(),
@@ -93,6 +95,6 @@ describe('probe task', () => {
 
   it('should sync from scratch', async () => {
     await probeTask.syncAllLocksInfo();
-    expect(mockStorage.setItem).toBeCalledTimes(2);
+    expect(mockStorage.setItem).toBeCalledTimes(6);
   });
 });

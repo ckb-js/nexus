@@ -1,11 +1,11 @@
-import { LocksAndPointer } from './../../src/services/backend/locksManager';
 import { RPC } from '@ckb-lumos/rpc';
+import { RPC as IndexerRPC } from '@ckb-lumos/ckb-indexer/lib/rpc';
 import { Cell, utils } from '@ckb-lumos/base';
 import { CkbIndexer } from '@ckb-lumos/ckb-indexer/lib/indexer';
 import { publicKeyToBlake160 } from '@ckb-lumos/hd/lib/key';
 import { Promisable } from '@nexus-wallet/types/lib';
 import { KeystoreService, SignMessagePayload } from '@nexus-wallet/types/lib/services/KeystoreService';
-import { LockInfo } from '../../src/services/backend/locksManager';
+import { LockInfo, LocksAndPointer } from '../../src/services/backend/types';
 import { Backend } from './../../src/services/backend/backend';
 
 it('jest keep', async () => {});
@@ -15,12 +15,11 @@ export const createMockBackend = (payload: Partial<Backend>): Backend => {
     hasHistory: payload.hasHistory ? payload.hasHistory : async () => false,
     nodeUri: payload.nodeUri ? payload.nodeUri : '',
     indexer: payload.indexer ? payload.indexer : new CkbIndexer(''),
+    indexerRPC: payload.indexerRPC ? payload.indexerRPC : new IndexerRPC(''),
     rpc: payload.rpc ? payload.rpc : new RPC(''),
-    getLiveCells: payload.getLiveCells
-      ? payload.getLiveCells
-      : function (): Promise<Cell[]> {
-          return Promise.resolve([]);
-        },
+    getNextLiveCellWithCursor: () => {
+      return Promise.resolve({ cursor: '', cells: [] });
+    },
     getLiveCellFetcher: payload.getLiveCellFetcher
       ? payload.getLiveCellFetcher
       : () =>
@@ -53,13 +52,14 @@ export const mockFullOwnershipLockInfosExternal: LockInfo[] = new Array(100).fil
     hashType: 'type' as const,
   };
   return {
-    path: `m/44'/309'/0'/0/${i}`,
+    parentPath: `m/44'/309'/0'/0`,
     index: i,
     lock,
     blake160: publicKeyToBlake160(`0x${String(i).padStart(2, '0').repeat(33)}`),
     publicKey: `0x${String(i).padStart(2, '0').repeat(33)}`,
     lockHash: utils.computeScriptHash(lock),
     network: 'ckb_testnet' as const,
+    onchain: false,
   };
 });
 export const mockFullOwnershipLockInfosChange: LockInfo[] = new Array(100).fill(0).flatMap((_, i) => {
@@ -69,13 +69,14 @@ export const mockFullOwnershipLockInfosChange: LockInfo[] = new Array(100).fill(
     hashType: 'type' as const,
   };
   return {
-    path: `m/44'/309'/0'/1/${i}`,
+    parentPath: `m/44'/309'/0'/1`,
     index: i,
     lock,
     blake160: publicKeyToBlake160(`0x${String(i).padStart(2, '0').repeat(33)}`),
     publicKey: `0x${String(i).padStart(2, '0').repeat(33)}`,
     lockHash: utils.computeScriptHash(lock),
     network: 'ckb_testnet' as const,
+    onchain: false,
   };
 });
 
@@ -96,62 +97,58 @@ export const mockRuleBasedOwnershipLockInfos: LockInfo[] = new Array(100).fill(0
     hashType: 'type' as const,
   };
   return {
-    path: `m/4410179'/0'/${i}`,
+    parentPath: `m/4410179'/0'`,
     index: i,
     lock,
     blake160: publicKeyToBlake160(`0x${String(i).padStart(2, '0').repeat(33)}`),
     publicKey: `0x${String(i).padStart(2, '0').repeat(33)}`,
     lockHash: utils.computeScriptHash(lock),
     network: 'ckb_testnet' as const,
+    onchain: false,
   };
 });
 
 export const generateLocksAndPointers = (payload: { fullOwnership: boolean }): LocksAndPointer => {
   const lockInfos = payload.fullOwnership ? mockFullOwnershipLockInfos : mockRuleBasedOwnershipLockInfos;
-  const result: LocksAndPointer = payload.fullOwnership
-    ? {
-        details: {
-          offChain: {
-            external: lockInfos.filter((_, i) => i % 5 === 0 && i < 100),
-            change: lockInfos.filter((_, i) => i % 5 === 0 && i >= 100),
-          },
-          onChain: {
-            external: lockInfos.filter((_, i) => i % 5 !== 0 && i < 100),
-            change: lockInfos.filter((_, i) => i % 5 !== 0 && i >= 100),
-          },
-        },
-        pointers: {
-          onChain: {
-            external: -1,
-            change: -1,
-          },
-          offChain: {
-            external: -1,
-            change: -1,
-          },
-        },
-      }
-    : {
-        details: {
-          offChain: {
-            external: lockInfos.filter((_, i) => i % 5 === 0 && i < 100),
-            change: [],
-          },
-          onChain: {
-            external: lockInfos.filter((_, i) => i % 5 !== 0 && i < 100),
-            change: [],
-          },
-        },
-        pointers: {
-          onChain: {
-            external: -1,
-            change: -1,
-          },
-          offChain: {
-            external: -1,
-            change: -1,
-          },
-        },
-      };
-  return result;
+  const fullOwnership: LocksAndPointer = {
+    details: {
+      offChain: {
+        external: lockInfos.filter((_, i) => i % 5 === 0 && i < 100),
+        change: lockInfos.filter((_, i) => i % 5 === 0 && i >= 100),
+      },
+      onChain: {
+        external: lockInfos
+          .filter((_, i) => i % 5 !== 0 && i < 100)
+          .map((lockInfo) => ({ ...lockInfo, onchain: true })),
+        change: lockInfos.filter((_, i) => i % 5 !== 0 && i >= 100).map((lockInfo) => ({ ...lockInfo, onchain: true })),
+      },
+    },
+    pointers: {
+      offChain: {
+        external: null,
+        change: null,
+      },
+    },
+  };
+  const rbOwnership: LocksAndPointer = {
+    details: {
+      offChain: {
+        external: lockInfos.filter((_, i) => i % 5 === 0 && i < 100),
+        change: [],
+      },
+      onChain: {
+        external: lockInfos
+          .filter((_, i) => i % 5 !== 0 && i < 100)
+          .map((lockInfo) => ({ ...lockInfo, onchain: true })),
+        change: [],
+      },
+    },
+    pointers: {
+      offChain: {
+        external: null,
+        change: null,
+      },
+    },
+  };
+  return payload.fullOwnership ? fullOwnership : rbOwnership;
 };
