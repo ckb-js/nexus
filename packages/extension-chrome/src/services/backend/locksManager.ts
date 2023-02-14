@@ -1,83 +1,77 @@
-import { Network } from '@nexus-wallet/types/lib/injected';
+import { asserts } from '@nexus-wallet/utils';
 import { bytes } from '@ckb-lumos/codec';
-import { Hash, Script } from '@ckb-lumos/base';
-import min from 'lodash/min';
-import max from 'lodash/max';
-import { isExternalLockInfo } from './utils';
-
-export const MAX_ADDRESS_GAP = 20;
-export const RULE_BASED_MAX_ADDRESS_GAP = 50;
-
-export type LockInfoStorage = {
-  fullOwnership: LocksAndPointer;
-  ruleBasedOwnership: LocksAndPointer;
-};
-
-export type LockInfo = {
-  // hd wallet path
-  path: string;
-  // the BIP44's {@link https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki#index index}
-  index: number;
-  depth?: number;
-  publicKey: string;
-  blake160: string;
-  network: Network;
-  lock: Script;
-  lockHash: Hash;
-};
-
-export type NexusLockInfos = {
-  onChain: {
-    external: LockInfo[];
-    change: LockInfo[];
-  };
-  offChain: {
-    external: LockInfo[];
-    change: LockInfo[];
-  };
-};
-
-export type NexusLockPointers = {
-  onChain: {
-    external: number;
-    change: number;
-  };
-  offChain: {
-    external: number;
-    change: number;
-  };
-};
-
-export type LocksAndPointer = {
-  details: NexusLockInfos;
-  pointers: NexusLockPointers;
-};
+import { Script } from '@ckb-lumos/base';
+import { Storage } from '@nexus-wallet/types';
+import { getAddressInfoDetailsFromStorage as loadLocksInfoFromStorage } from './utils';
+import { LockInfoStorage, LocksAndPointer, LockInfo } from './types';
+import { Circular, CircularLockInfo } from './circular';
+import { DefaultOnChainLockProvider, OnChainLockProvider } from './onchainLockProvider';
 
 export class LocksManager {
-  pointers: NexusLockPointers;
-  onChain: {
-    external: LockInfo[];
-    change: LockInfo[];
-  };
-  offChain: {
-    external: LockInfo[];
-    change: LockInfo[];
-  };
-  constructor(payload: { lockDetail: LocksAndPointer }) {
-    this.onChain = payload.lockDetail.details.onChain;
-    this.offChain = payload.lockDetail.details.offChain;
-    this.pointers = payload.lockDetail.pointers;
+  storage: Storage<LockInfoStorage>;
+
+  constructor(payload: { storage: Storage<LockInfoStorage> }) {
+    this.storage = payload.storage;
   }
-  toLocksAndPointer(): LocksAndPointer {
-    const locksAndPointer: LocksAndPointer = {
-      details: {
-        onChain: this.onChain,
-        offChain: this.offChain,
-      },
-      pointers: this.pointers,
-    };
-    return locksAndPointer;
+
+  async fullExternalProvider(): Promise<Circular<LockInfo>> {
+    const locks = await this.loadLocksAndPointer('fullOwnership');
+    return new CircularLockInfo({
+      items: locks.details.offChain.external,
+      pointer: locks.pointers.offChain.external,
+    });
   }
+  async fullChangeProvider(): Promise<Circular<LockInfo>> {
+    const locks = await this.loadLocksAndPointer('fullOwnership');
+    return new CircularLockInfo({
+      items: locks.details.offChain.change,
+      pointer: locks.pointers.offChain.change,
+    });
+  }
+  async ruleBasedProvider(): Promise<Circular<LockInfo>> {
+    const locks = await this.loadLocksAndPointer('ruleBasedOwnership');
+    return new CircularLockInfo({
+      items: locks.details.offChain.external,
+      pointer: locks.pointers.offChain.external,
+    });
+  }
+
+  async fullOnChainLockProvider(): Promise<OnChainLockProvider> {
+    const onChain = (await this.loadLocksAndPointer('fullOwnership')).details.onChain;
+    return new DefaultOnChainLockProvider({
+      items: [...onChain.external, ...onChain.change],
+    });
+  }
+
+  async ruleBasedOnChainLockProvider(): Promise<OnChainLockProvider> {
+    const onChain = (await this.loadLocksAndPointer('ruleBasedOwnership')).details.onChain;
+    return new DefaultOnChainLockProvider({
+      items: onChain.external,
+    });
+  }
+
+  async loadLocksAndPointer(keyName: keyof LockInfoStorage): Promise<LocksAndPointer> {
+    return loadLocksInfoFromStorage({ storage: this.storage, keyName });
+  }
+
+  async getlockInfoByLock({ lock }: { lock: Script }): Promise<LockInfo> {
+    const full = await this.loadLocksAndPointer('fullOwnership');
+    const rb = await this.loadLocksAndPointer('ruleBasedOwnership');
+    const allLockInfo: LockInfo[] = [
+      ...full.details.onChain.external,
+      ...full.details.onChain.change,
+      ...full.details.offChain.external,
+      ...full.details.offChain.change,
+      ...rb.details.onChain.external,
+      ...rb.details.offChain.external,
+    ];
+    const result = allLockInfo.find((lockInfo) => {
+      return bytes.equal(lockInfo.lock.args, lock.args) && bytes.equal(lockInfo.lock.codeHash, lock.codeHash);
+    });
+    asserts.nonEmpty(result);
+    return result;
+  }
+
   currentMaxExternalAddressIndex(): number {
     let result = -1;
     [...this.onChain.external, ...this.offChain.external].forEach((address) => {
@@ -96,122 +90,4 @@ export class LocksManager {
     });
     return result;
   }
-
-  getNextOffChainExternalLocks(option = { limit: 1 }): LockInfo[] {
-    const lockInfos = this.offChain.external;
-    if (lockInfos.length === 0) {
-      return [];
-    }
-    const result = nextLockInfos(lockInfos, this.pointers.offChain.external, option.limit);
-    // update pointer
-    this.pointers.offChain.external = result[result.length - 1].index;
-    return result;
-  }
-
-  getNextOffChainChangeLocks(option = { limit: 1 }): LockInfo[] {
-    const lockInfos = this.offChain.change;
-    if (lockInfos.length === 0) {
-      return [];
-    }
-    const result = nextLockInfos(lockInfos, this.pointers.offChain.change, option.limit);
-    // update pointer
-    this.pointers.offChain.change = result[result.length - 1].index;
-    return result;
-  }
-
-  getNextOnChainExternalLocks(option = { limit: 1 }): LockInfo[] {
-    const lockInfos = this.onChain.external;
-    if (lockInfos.length === 0) {
-      return [];
-    }
-    const result = nextLockInfos(lockInfos, this.pointers.onChain.external, option.limit);
-    // update pointer
-    this.pointers.onChain.external = result[result.length - 1].index;
-    return result;
-  }
-
-  getNextOnChainChangeLocks(option = { limit: 1 }): LockInfo[] {
-    const lockInfos = this.onChain.change;
-    if (lockInfos.length === 0) {
-      return [];
-    }
-    const result = nextLockInfos(lockInfos, this.pointers.onChain.change, option.limit);
-    // update pointer
-    this.pointers.onChain.change = result[result.length - 1].index;
-    return result;
-  }
-
-  markAddressAsUsed(payload: { lockInfoList: LockInfo[] }): void {
-    payload.lockInfoList.forEach((address) => {
-      const isExternalAddress = isExternalLockInfo({ lockInfo: address });
-      if (isExternalAddress) {
-        const needUpdate = !this.onChain.external.some((onChainAddress) => onChainAddress.path === address.path);
-        if (needUpdate) {
-          // add to cached on chain addresses
-          this.onChain.external.push(address);
-          // remove from cached off chain addresses
-          this.offChain.external = this.offChain.external.filter(
-            (offChainAddress) => offChainAddress.path !== address.path,
-          );
-        }
-      } else {
-        const needUpdate = !this.onChain.change.some((onChainAddress) => onChainAddress.path === address.path);
-        if (needUpdate) {
-          // add to cached on chain addresses
-          this.onChain.change.push(address);
-          // remove from cached off chain addresses
-          this.offChain.change = this.offChain.change.filter(
-            (offChainAddress) => offChainAddress.path !== address.path,
-          );
-        }
-      }
-    });
-  }
-
-  getlockInfoByLock({ lock }: { lock: Script }): LockInfo | undefined {
-    const allLockInfo = [
-      ...this.onChain.external,
-      ...this.onChain.change,
-      ...this.offChain.external,
-      ...this.offChain.change,
-    ];
-    return allLockInfo.find((lockInfo) => {
-      return bytes.equal(lockInfo.lock.args, lock.args) && bytes.equal(lockInfo.lock.codeHash, lock.codeHash);
-    });
-  }
-
-  getAllOnChainLockList(): LockInfo[] {
-    return [...this.onChain.external, ...this.onChain.change];
-  }
-
-  getAllOffChainAddresses(): LockInfo[] {
-    return [...this.offChain.external, ...this.offChain.change];
-  }
-}
-
-/**
- * eg: if current indexList is [ 1, 2, 5, 6, 9 ]
- *                                    ↑
- *                           pointer: 3
- * then return [ 5, 6, 9, 1, 2 ]
- * default limit is 1, so return [ 5 ]
- */
-function nextLockInfos(lockInfos: LockInfo[], pointer: number, limit: number): LockInfo[] {
-  const indexList = lockInfos.map((lockInfo) => lockInfo.index);
-  const minIndex = min(indexList) || 0;
-  const maxIndex = max(indexList) || 0;
-  if (pointer < minIndex || pointer >= maxIndex) {
-    // not to change indexList here
-  } else if (pointer === minIndex) {
-    const lastElement = indexList.shift()!;
-    indexList.push(lastElement);
-  } else {
-    while (indexList[0] <= pointer) {
-      // move first element to last until firts element is bigger than pointer
-      const lastElement = indexList.shift()!;
-      indexList.push(lastElement);
-    }
-  }
-  const returnIndexlist = indexList.slice(0, limit);
-  return lockInfos.filter((lockInfo) => returnIndexlist.includes(lockInfo.index));
 }

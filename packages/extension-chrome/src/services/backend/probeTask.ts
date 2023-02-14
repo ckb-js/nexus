@@ -1,12 +1,4 @@
 import isEqual from 'lodash.isequal';
-import {
-  LockInfo,
-  LockInfoStorage,
-  MAX_ADDRESS_GAP,
-  RULE_BASED_MAX_ADDRESS_GAP,
-  LocksManager,
-  LocksAndPointer,
-} from './locksManager';
 import { Storage, KeystoreService } from '@nexus-wallet/types';
 import { Backend } from './backend';
 import {
@@ -15,8 +7,14 @@ import {
   getDefaultLocksAndPointer,
   getParentPath,
   toSecp256k1Script,
+  maxChangeLockIndex,
+  maxExternalLockIndex,
 } from './utils';
 import { Script, utils } from '@ckb-lumos/base';
+import { LockInfoStorage, LocksAndPointer, LockInfo } from './types';
+
+export const MAX_ADDRESS_GAP = 20;
+export const RULE_BASED_MAX_ADDRESS_GAP = 50;
 
 export class ProbeTask {
   private static instance: ProbeTask;
@@ -156,35 +154,30 @@ export class ProbeTask {
    */
   async supplyOffChainAddresses(payload: { keyName: keyof LockInfoStorage }): Promise<void> {
     const shreshold = payload.keyName === 'fullOwnership' ? MAX_ADDRESS_GAP : RULE_BASED_MAX_ADDRESS_GAP;
-    const lockDetail = await getAddressInfoDetailsFromStorage({ keyName: payload.keyName, storage: this.storage });
-    const lockDetailManager = new LocksManager({ lockDetail });
+    const storageData = await getAddressInfoDetailsFromStorage({ storage: this.storage, keyName: payload.keyName });
     // supply external addresses if needed
-    while (lockDetailManager.offChain.external.length < shreshold) {
+    while (storageData.details.offChain.external.length < shreshold) {
       const parentPath = getParentPath({ keyName: payload.keyName });
       const path =
         payload.keyName === 'fullOwnership'
-          ? `${parentPath}/0/${lockDetailManager.currentMaxExternalAddressIndex() + 1}`
-          : `${parentPath}/${lockDetailManager.currentMaxExternalAddressIndex() + 1}`;
+          ? `${parentPath}/0/${maxExternalLockIndex({ storageData }) + 1}`
+          : `${parentPath}/${maxExternalLockIndex({ storageData }) + 1}`;
       const nextLockInfo = await getLockInfoByPath(this.keystoreService, path);
-      lockDetailManager.offChain.external.push(nextLockInfo);
+      storageData.details.offChain.external.push(nextLockInfo);
     }
     // supply change addresses if needed
     while (
       // only full ownership chain needs change addresses
       payload.keyName === 'fullOwnership' &&
-      lockDetailManager.offChain.change.length < shreshold
+      storageData.details.offChain.change.length < shreshold
     ) {
       const parentPath = getParentPath({ keyName: payload.keyName });
-      const path = `${parentPath}/1/${lockDetailManager.currentMaxChangeAddressIndex() + 1}`;
+      const path = `${parentPath}/1/${maxChangeLockIndex({ storageData }) + 1}`;
       const nextLockInfo = await getLockInfoByPath(this.keystoreService, path);
-      lockDetailManager.offChain.change.push(nextLockInfo);
+      storageData.details.offChain.change.push(nextLockInfo);
     }
 
-    const cachedLocks = await this.storage.getItem(payload.keyName);
-    const newLocks = lockDetailManager.toLocksAndPointer();
-    if (!isEqual(cachedLocks, newLocks)) {
-      this.storage.setItem(payload.keyName, newLocks);
-    }
+    this.storage.setItem(payload.keyName, storageData);
   }
 }
 
@@ -205,7 +198,7 @@ export async function syncAllByPath(payload: {
     const publicKey = await payload.keystoreService.getPublicKeyByPath({ path });
     const childScript: Script = toSecp256k1Script(publicKey);
     const lockInfo: LockInfo = {
-      path,
+      parentPath: payload.parentPath,
       index,
       publicKey,
       blake160: childScript.args,
@@ -213,9 +206,11 @@ export async function syncAllByPath(payload: {
       // TODO implement mainnet here
       network: 'ckb_testnet',
       lockHash: utils.computeScriptHash(childScript),
+      onchain: false,
     };
     const childScriptHasHistory = await payload.backend.hasHistory({ lock: childScript });
     if (childScriptHasHistory) {
+      lockInfo.onchain = true;
       onChainlockInfoList.push(lockInfo);
       currentGap = 0;
     } else {

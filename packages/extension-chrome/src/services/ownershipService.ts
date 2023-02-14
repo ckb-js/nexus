@@ -1,57 +1,82 @@
+import { OnChainLockProvider } from './backend/onchainLockProvider';
 import { SignTransactionPayload } from '@nexus-wallet/types/src/services/OwnershipService';
 import { Backend } from './backend/backend';
-import { Script } from '@ckb-lumos/base';
+import { Cell, Script } from '@ckb-lumos/base';
 import { OwnershipService, Paginate, KeystoreService, NotificationService } from '@nexus-wallet/types';
 import {
-  getOnChainLocksPayload,
   SignDataPayload,
-  getOffChainLocksPayload,
+  GetOffChainLocksPayload,
   GroupedSignature,
+  GetLiveCellsPayload,
+  GetOnChainLocksPayload,
 } from '@nexus-wallet/types/lib/services/OwnershipService';
 import { asserts } from '@nexus-wallet/utils';
 import { createTransactionSkeleton } from '@ckb-lumos/helpers';
 import { prepareSigningEntries } from '@ckb-lumos/common-scripts/lib/secp256k1_blake160';
-import { LocksProvider } from './backend/locksProvider';
+import { LocksManager } from './backend/locksManager';
+import { Circular, CircularLockInfo } from './backend/circular';
+import { LockInfo } from './backend/types';
+import { throwError } from '@nexus-wallet/utils/lib/error';
+import { DefaultLockCursor, DefaultLiveCellCursor } from './backend/cursor';
 
-export function createOwnershipService(config: {
+type Props = {
   keystoreService: KeystoreService;
   notificationService: NotificationService;
-  locksProvider: LocksProvider;
+  locksManager: LocksManager;
   backend: Backend;
-}): OwnershipService {
+  type: 'full' | 'ruleBased';
+};
+
+export function createOwnershipService(config: Props): OwnershipService {
   return {
-    getLiveCells: async () => {
-      const locks = config.locksProvider.getAllOnChainLockList().map((lockInfo) => lockInfo.lock);
-      const cells = await config.backend.getLiveCells({ locks });
-      return {
-        // TODO implement the cursor here
-        cursor: '',
-        objects: cells,
+    getLiveCells: async (payload?: GetLiveCellsPayload) => {
+      const lockProvider: OnChainLockProvider = await getOnchainLockProvider(config);
+      const liveCellCursor = payload?.cursor ? DefaultLiveCellCursor.fromString(payload.cursor) : undefined;
+      const fetchCell = async (): Promise<Paginate<Cell>> => {
+        const result = {
+          cursor: '',
+          objects: [],
+        };
+        const lockInfoWithCursor = lockProvider.getNextLock({
+          cursor: liveCellCursor,
+          filter: { change: payload?.change },
+        });
+        if (!lockInfoWithCursor) {
+          return result;
+        }
+        // pass indexer cursor to rpc only when the lockCursor points to the lock
+        const indexerCursor =
+          lockInfoWithCursor!.lockInfo.index === liveCellCursor!.index ? liveCellCursor?.indexerCursor : undefined;
+        const cellWithCursor = await config.backend.getNextLiveCellWithCursor({
+          lock: lockInfoWithCursor!.lockInfo.lock,
+          indexerCursor,
+        });
+        if (!cellWithCursor) {
+          return await fetchCell();
+        }
+        return {
+          cursor: cellWithCursor.cursor,
+          objects: [cellWithCursor.cell],
+        };
       };
+      return await fetchCell();
     },
-    getOffChainLocks: async (payload: getOffChainLocksPayload) => {
-      const lockInfoList = payload.change
-        ? await config.locksProvider.getNextOffChainChangeLocks()
-        : await config.locksProvider.getNextOffChainExternalLocks();
-      const locks = lockInfoList.map((lockInfo) => lockInfo.lock);
-      return locks;
+    getOffChainLocks: async (payload: GetOffChainLocksPayload) => {
+      const provider: CircularLockInfo = await getOffChainLockProvider(config, payload);
+      const result = provider.next();
+      return result ? [result.lock] : [];
     },
-    getOnChainLocks: async (payload: getOnChainLocksPayload): Promise<Paginate<Script>> => {
-      const lockInfoList = payload.change
-        ? await config.locksProvider.getNextOnChainChangeLocks()
-        : await config.locksProvider.getNextOnChainExternalLocks();
-      const locks = lockInfoList.map((lockInfo) => lockInfo.lock);
-      return payload.change
-        ? {
-            // TODO implement the cursor here
-            cursor: '',
-            objects: locks,
-          }
-        : {
-            // TODO implement the cursor here
-            cursor: '',
-            objects: locks,
-          };
+    getOnChainLocks: async (payload: GetOnChainLocksPayload): Promise<Paginate<Script>> => {
+      const provider: OnChainLockProvider = await getOnchainLockProvider(config);
+      const cursor = payload.cursor ? DefaultLockCursor.fromString(payload.cursor) : undefined;
+      const nextLockWithCursor = provider.getNextLock({ cursor, filter: { change: payload.change } });
+      const lastCursor = nextLockWithCursor
+        ? new DefaultLockCursor(nextLockWithCursor.lockInfo.parentPath, nextLockWithCursor.lockInfo.index).encode()
+        : '';
+      return {
+        cursor: lastCursor,
+        objects: nextLockWithCursor ? [nextLockWithCursor.lockInfo.lock] : [],
+      };
     },
     signTransaction: async (payload: SignTransactionPayload) => {
       const cellFetcher = config.backend.getLiveCellFetcher();
@@ -61,11 +86,12 @@ export function createOwnershipService(config: {
         .get('inputs')
         .map((input) => input.cellOutput.lock)
         .toArray();
-      const lockInfoList = inputLocks.map((lock) => {
-        const lockInfo = config.locksProvider.getlockInfoByLock({ lock });
-        asserts.nonEmpty(lockInfo);
-        return lockInfo;
-      });
+      const lockInfoList = await Promise.all(
+        inputLocks.map(async (lock) => {
+          const lockInfo = await config.locksManager.getlockInfoByLock({ lock });
+          return lockInfo;
+        }),
+      );
       const signingEntries = txSkeleton.get('signingEntries').toArray();
       const password = (await config.notificationService.requestSignTransaction({ tx: payload.tx })).password;
       const result: GroupedSignature = [];
@@ -75,22 +101,50 @@ export function createOwnershipService(config: {
         const signature = await config.keystoreService.signMessage({
           message: signingEntry.message,
           password,
-          path: lockInfo.path,
+          path: `${lockInfo.parentPath}/${lockInfo.index}`,
         });
         result.push([lockInfo.lock, signature]);
       }
       return result;
     },
     signData: async (payload: SignDataPayload) => {
-      const lockInfo = config.locksProvider.getlockInfoByLock({ lock: payload.lock });
+      const lockInfo = await config.locksManager.getlockInfoByLock({ lock: payload.lock });
       asserts.nonEmpty(lockInfo);
       const password = (await config.notificationService.requestSignData({ data: payload.data })).password;
       const signature = await config.keystoreService.signMessage({
         message: payload.data,
         password,
-        path: lockInfo.path,
+        path: `${lockInfo.parentPath}/${lockInfo.index}`,
       });
       return signature;
     },
   };
+}
+async function getOnchainLockProvider(config: Pick<Props, 'type' | 'locksManager'>): Promise<OnChainLockProvider> {
+  let provider: OnChainLockProvider;
+  if (config.type === 'full') {
+    provider = await config.locksManager.fullOnChainLockProvider();
+  } else if (config.type === 'ruleBased') {
+    provider = await config.locksManager.ruleBasedOnChainLockProvider();
+  } else {
+    throwError('Invalid getOnChainLocks payload', config);
+  }
+  return provider;
+}
+
+async function getOffChainLockProvider(
+  config: Pick<Props, 'type' | 'locksManager'>,
+  payload: Pick<GetOffChainLocksPayload, 'change'>,
+): Promise<CircularLockInfo> {
+  let provider: Circular<LockInfo>;
+  if (config.type === 'full' && (payload.change === 'external' || !payload.change)) {
+    provider = await config.locksManager.fullExternalProvider();
+  } else if (config.type === 'full' && payload.change === 'internal') {
+    provider = await config.locksManager.fullChangeProvider();
+  } else if (config.type === 'ruleBased') {
+    provider = await config.locksManager.ruleBasedProvider();
+  } else {
+    throwError('Invalid getOffChainLocks payload', payload);
+  }
+  return provider;
 }

@@ -1,10 +1,9 @@
 import { utils } from '@ckb-lumos/base';
 import { KeystoreService, Storage } from '@nexus-wallet/types';
-import { LockInfo } from './locksManager';
+import { LockInfo, LockInfoStorage, LocksAndPointer } from './types';
 import { HexString, Script } from '@ckb-lumos/base';
 import { publicKeyToBlake160 } from '@ckb-lumos/hd/lib/key';
 import { config } from '@ckb-lumos/lumos';
-import { LockInfoStorage, LocksAndPointer } from './locksManager';
 
 export function toSecp256k1Script(pubkey: HexString): Script {
   // args for SECP256K1_BLAKE160 script
@@ -101,8 +100,30 @@ export async function getAddressInfoDetailsFromStorage(payload: {
   return addressDetails;
 }
 
-export function isExternalLockInfo(payload: { lockInfo: LockInfo }): boolean {
-  const pathList = payload.lockInfo.path.split('/');
-  const isChange = pathList[pathList.length - 2] === '1';
+export function isExternal(payload: { lockInfo: LockInfo }): boolean {
+  const pathList = payload.lockInfo.parentPath.split('/');
+  const isChange = pathList.pop() === '1';
   return !isChange;
+}
+
+export function maxExternalLockIndex(payload: { storageData: LocksAndPointer }): number {
+  const lockDetails = payload.storageData.details;
+  let result = -1;
+  [...lockDetails.onChain.external, ...lockDetails.offChain.external].forEach((address) => {
+    if (address.index > result) {
+      result = address.index;
+    }
+  });
+  return result;
+}
+
+export function maxChangeLockIndex(payload: { storageData: LocksAndPointer }): number {
+  const lockDetails = payload.storageData.details;
+  let result = -1;
+  [...lockDetails.onChain.change, ...lockDetails.offChain.change].forEach((address) => {
+    if (address.index > result) {
+      result = address.index;
+    }
+  });
+  return result;
 }

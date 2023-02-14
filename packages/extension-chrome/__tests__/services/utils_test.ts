@@ -1,4 +1,4 @@
-import { isExternalLockInfo } from '../../src/services/backend/utils';
+import { isExternal } from '../../src/services/backend/utils';
 import { generateLocksAndPointers } from './utils';
 
 describe('utils', () => {
@@ -17,7 +17,7 @@ describe('utils', () => {
   });
   it('should judge if a lockInfo is eternal lock by path', () => {
     expect(
-      isExternalLockInfo({
+      isExternal({
         lockInfo: {
           path: "m/4410179'/0'/0",
           index: 0,
@@ -34,7 +34,7 @@ describe('utils', () => {
       }),
     ).toEqual(true);
     expect(
-      isExternalLockInfo({
+      isExternal({
         lockInfo: {
           path: "m/44'/309'/0'/1/0",
           index: 0,
