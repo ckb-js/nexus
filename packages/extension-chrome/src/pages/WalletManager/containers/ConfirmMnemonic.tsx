@@ -55,7 +55,7 @@ export const ConfirmMnemonic: FC = () => {
       <Heading mb="48px" lineHeight="111%" fontWeight="semibold">
         Confirm your Seed
       </Heading>
-      <Box fontSize="md" mb="8px">
+      <Box fontSize="md" w="480px" mb="8px">
         Please select words below to form the correct Seed.
       </Box>
 

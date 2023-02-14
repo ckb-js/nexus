@@ -95,14 +95,31 @@ export const CreateProcessFrame: FC = () => {
   };
 
   return (
-    <Flex>
-      <Flex w="468px" pt="170px" pl="80px" position="relative" backgroundColor="purple.700" height="100vh">
+    <Flex background="gray.50" color="blackAlpha.900">
+      <Flex
+        w="468px"
+        pb="132px"
+        alignItems="center"
+        pl="80px"
+        position="relative"
+        backgroundColor="purple.700"
+        height="100vh"
+      >
         <Logo position="absolute" left="80px" top="48px" />
-        <Steps current={currentPathIndex} direction="vertical" itemRender={renderSingleStep} items={flowConfig.steps} />
+        <Box minH="520px">
+          <Steps
+            current={currentPathIndex}
+            direction="vertical"
+            itemRender={renderSingleStep}
+            items={flowConfig.steps}
+          />
+        </Box>
       </Flex>
       <Flex flex={1} direction="column" justifyContent="center" alignItems="center">
         <Center flexDirection="column" flex={1}>
-          <Outlet />
+          <Flex alignItems="center" flexDirection="column" minH="520px">
+            <Outlet />
+          </Flex>
         </Center>
         <HStack spacing="24px" mb="32px">
           {(!isLastStep || !flowConfig.disableBackOnExit) && (

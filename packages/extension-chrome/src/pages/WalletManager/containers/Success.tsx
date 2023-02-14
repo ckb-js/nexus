@@ -7,7 +7,7 @@ export const Success: FC = () => {
     <>
       <Box as={Particle} mb="48px" />
       <Heading mb="48px">Congratulations!</Heading>
-      <Box mb="68px" fontSize="md">
+      <Box mb="48px" fontSize="md">
         You are all set! Keep your Seed safe – it’s your responsibility!
       </Box>
       <Button onClick={() => window.close()}>All Done</Button>

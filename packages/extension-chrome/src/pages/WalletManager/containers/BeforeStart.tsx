@@ -24,7 +24,7 @@ export const BeforeStart: FC = () => {
         <UnorderedList spacing="12px">
           {texts.map((t) => (
             <ListItem display="flex" fontSize="md" key={t}>
-              <ListIcon as={Marker} />
+              <ListIcon as={Marker} mt="4px" />
               {t}
             </ListItem>
           ))}

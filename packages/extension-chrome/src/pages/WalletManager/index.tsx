@@ -105,11 +105,6 @@ const routeConfig: RouteObject[] = [
       },
     ],
   },
-
-  {
-    path: '/import',
-    element: <RecoveryWallet />,
-  },
 ];
 
 const queryClient = new QueryClient();

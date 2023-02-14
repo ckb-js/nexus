@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
-import { Flex, FormControl, FormLabel, Input, Link, Checkbox, Heading, VStack } from '@chakra-ui/react';
-import { Formik, Form, Field } from 'formik';
+import { Flex, FormControl, FormLabel, Input, Heading, VStack } from '@chakra-ui/react';
+import { useForm } from 'react-hook-form';
 
 import { useWalletCreationStore } from '../store';
 
@@ -10,27 +10,12 @@ type FormValues = {
   agreeTerms: boolean;
 };
 
-type FormFieldProps = { field: {} };
-
-const PasswordInputs: FC = () => {
-  return (
-    <>
-      <FormControl>
-        <FormLabel fontSize="sm">New password (8 characters minimum)</FormLabel>
-        <Field name="password">{({ field }: FormFieldProps) => <Input size="lg" type="password" {...field} />}</Field>
-      </FormControl>
-      <FormControl>
-        <FormLabel fontSize="sm">Confirm password</FormLabel>
-        <Field name="confirmPassword">
-          {({ field }: FormFieldProps) => <Input size="lg" type="password" {...field} />}
-        </Field>
-      </FormControl>
-    </>
-  );
-};
-
 export const SetPassword: FC = () => {
   const store = useWalletCreationStore();
+
+  const { register, handleSubmit } = useForm<FormValues>({
+    mode: 'onChange',
+  });
 
   const onValidateForm = ({ password, confirmPassword, agreeTerms }: FormValues) => {
     if (password.length < 8) {
@@ -61,30 +46,36 @@ export const SetPassword: FC = () => {
           Create password
         </Heading>
         {/* TODO: formik may not the best form state controller */}
-        <Formik
-          initialValues={{
-            password: '',
-            confirmPassword: '',
-            agreeTerms: false,
-          }}
-          validate={onValidateForm}
-          validateOnChange
-          onSubmit={() => {}}
-        >
-          {(props) => (
-            <VStack as={Form}>
-              <PasswordInputs />
-              <FormControl>
-                <Checkbox name="agreeTerms" isChecked={props.values.agreeTerms} onChange={props.handleChange}>
-                  I have read and agree to the{' '}
-                  <Link color="purple.500" fontWeight="bold">
-                    Terms of use
-                  </Link>
-                </Checkbox>
-              </FormControl>
-            </VStack>
-          )}
-        </Formik>
+        <VStack as="form" onSubmit={handleSubmit(onValidateForm)}>
+          <FormControl>
+            <FormLabel fontSize="sm">New password (8 characters minimum)</FormLabel>
+            <Input
+              size="lg"
+              placeholder="Input your password"
+              type="password"
+              {...register('password', { required: true })}
+            />
+          </FormControl>
+          <FormControl>
+            <FormLabel fontSize="sm">Confirm password</FormLabel>
+            <Input
+              size="lg"
+              type="password"
+              placeholder="input your password"
+              {...register('confirmPassword', { required: true })}
+            />
+          </FormControl>
+
+          {/* Not implement */}
+          {/* <FormControl>
+            <Checkbox onChange={register('agreeTerms', {}).onChange}>
+              I have read and agree to the{' '}
+              <Link color="purple.500" fontWeight="bold">
+                Terms of use
+              </Link>
+            </Checkbox>
+          </FormControl> */}
+        </VStack>
       </Flex>
     </>
   );
