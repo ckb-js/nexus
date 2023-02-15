@@ -103,6 +103,11 @@ interface CkbProvider {
    *
    */
   getNetworkName(): Promise<Network>;
+  
+  /**
+  * Get the current wallet's nickname for display puropose
+  */
+  getNickname(): Promise<string>;
 
   fullOwnership: Ownership;
   ruleBasedOwnership: Ownership;
