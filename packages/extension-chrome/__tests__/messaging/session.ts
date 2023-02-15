@@ -1,5 +1,6 @@
+import { Call } from '@nexus-wallet/types';
 import { EventEmitter } from 'events';
-import { Call, createSessionMessenger, MessengerAdapter } from '../../src/messaging/session';
+import { createSessionMessenger, MessengerAdapter } from '../../src/messaging/session';
 
 // an adapter based on EventEmitter
 let adapter: MessengerAdapter;
