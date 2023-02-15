@@ -3,6 +3,10 @@
   "version": "0.0.1",
   "description": "An UTxO friendly wallet extension for CKB",
   "private": true,
+  "engines": {
+    "node": ">=18",
+    "npm": ">=8"
+  },
   "workspaces": [
     "packages/*",
     "lumos",
