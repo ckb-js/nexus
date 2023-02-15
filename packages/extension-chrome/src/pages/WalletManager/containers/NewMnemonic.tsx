@@ -44,7 +44,7 @@ export const CreateMnemonic: FC = () => {
   useEffect(() => {
     if (mnemonic) {
       clipboard.setValue(mnemonic.join(' '));
-      setWalletStore({ seed: mnemonic, dischargeNext: true });
+      setWalletStore({ seed: mnemonic });
     }
   }, [mnemonic, clipboard, setWalletStore]);
 

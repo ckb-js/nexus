@@ -13,8 +13,11 @@ import {
   AlertDescription,
 } from '@chakra-ui/react';
 import times from 'lodash.times';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FC } from 'react';
+import { useForm } from 'react-hook-form';
+import { useWalletCreationStore } from '../store';
+import { useOutletContext } from './CreateProcessFrame';
 
 // TODO: use real service
 
@@ -33,7 +36,31 @@ const SeedInput: FC<{ index: number }> = ({ index }) => {
  * Confirm the mnemonic
  */
 export const RecoveryWallet: FC = () => {
-  const inputs = times(12, (index) => <SeedInput index={index} key={index} />);
+  const setStoreState = useWalletCreationStore((s) => s.set);
+  const { register, formState, handleSubmit } = useForm<{ seed: string[] }>();
+  const { setNextAvailable, whenSubmit } = useOutletContext();
+
+  useEffect(() => {
+    whenSubmit(() =>
+      handleSubmit((values) => {
+        setStoreState({ seed: values.seed });
+        console.log(values);
+      }),
+    );
+  }, [whenSubmit, handleSubmit, setStoreState]);
+
+  useEffect(() => {
+    setNextAvailable(formState.isValid);
+  }, [formState.isValid, setNextAvailable]);
+
+  const inputs = times(12, (index) => (
+    <FormControl as={Flex} alignItems="center">
+      <FormLabel mr="8px" w="16px">
+        {`${index + 1}`.padStart(2, ' ')}
+      </FormLabel>
+      <Input mr="8px" type="password" w="186px" {...register(`seed.${index}`, { required: true })} />
+    </FormControl>
+  ));
 
   return (
     <>

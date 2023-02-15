@@ -1,6 +1,12 @@
-import React, { FC, useMemo } from 'react';
+import React, { FC, useMemo, useState } from 'react';
 import { Box, Button, Center, Flex, FlexProps, Grid, HStack, Icon, Text } from '@chakra-ui/react';
-import { Outlet, useLoaderData, useLocation, useNavigate } from 'react-router-dom';
+import {
+  Outlet,
+  useLoaderData,
+  useLocation,
+  useNavigate,
+  useOutletContext as _useOutletContext,
+} from 'react-router-dom';
 import StepProcessingIcon from '../../Components/icons/StepProcessing.svg';
 import StepWaitingIcon from '../../Components/icons/StepWaiting.svg';
 
@@ -8,7 +14,6 @@ import range from 'lodash.range';
 import { Logo } from '../../Components/Logo';
 import { CheckCircleIcon, ChevronLeftIcon, ChevronRightIcon } from '@chakra-ui/icons';
 import { CreateFlowConfig } from '../types';
-import { useWalletCreationStore } from '../store';
 import Steps from 'rc-steps';
 import { StepsProps } from 'rc-steps/lib/Steps';
 
@@ -69,9 +74,17 @@ const renderSingleStep: StepsProps['itemRender'] = ({ title, description, status
   );
 };
 
+export type OutletContext = {
+  whenSubmit: (cb: () => () => Promise<void>) => void;
+  setNextAvailable: (enable: boolean) => void;
+};
+
+export function useOutletContext(): OutletContext {
+  return _useOutletContext() as OutletContext;
+}
+
 export const CreateProcessFrame: FC = () => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { set: setStoreState, dischargeNext } = useWalletCreationStore();
+  const [nextAvailable, setNextAvailable] = useState(false);
   const currentPath = useLocation().pathname;
   const flowConfig = useLoaderData() as CreateFlowConfig;
   const flowPaths = flowConfig.steps.map((s) => s.path);
@@ -81,17 +94,24 @@ export const CreateProcessFrame: FC = () => {
     () => flowPaths.findIndex((path) => currentPath.endsWith(path)),
     [flowPaths, currentPath],
   );
+  const currentStep = flowConfig.steps[currentPathIndex];
+
   const isLastStep = currentPathIndex === flowPaths.length - 1;
-  const goNext = () => {
-    setStoreState({ dischargeNext: false });
+
+  const goBack = () => {
+    setNextAvailable(false);
+    navigate(currentPathIndex === 0 ? flowConfig.entry : flowPaths[currentPathIndex - 1], { replace: true });
+  };
+
+  const [whenFormSubmit, setWhenFormSubmit] = useState<() => Promise<void>>();
+  const onSubmit = async (e: React.FormEvent<unknown>) => {
+    e.preventDefault();
+    await whenFormSubmit?.();
+    setNextAvailable(false);
+    setWhenFormSubmit(undefined);
     navigate(currentPathIndex === flowPaths.length - 1 ? flowConfig.exit : flowPaths[currentPathIndex + 1], {
       replace: true,
     });
-  };
-
-  const goBack = () => {
-    setStoreState({ dischargeNext: false });
-    navigate(currentPathIndex === 0 ? flowConfig.entry : flowPaths[currentPathIndex - 1], { replace: true });
   };
 
   return (
@@ -115,10 +135,10 @@ export const CreateProcessFrame: FC = () => {
           />
         </Box>
       </Flex>
-      <Flex flex={1} direction="column" justifyContent="center" alignItems="center">
+      <Flex flex={1} as="form" onSubmit={onSubmit} direction="column" justifyContent="center" alignItems="center">
         <Center flexDirection="column" flex={1}>
           <Flex alignItems="center" flexDirection="column" minH="520px">
-            <Outlet />
+            <Outlet context={{ whenSubmit: setWhenFormSubmit, setNextAvailable } as OutletContext} />
           </Flex>
         </Center>
         <HStack spacing="24px" mb="32px">
@@ -129,8 +149,8 @@ export const CreateProcessFrame: FC = () => {
           )}
           <Button
             // only comment for debug
-            // isDisabled={!dischargeNext}
-            onClick={goNext}
+            type="submit"
+            isDisabled={!nextAvailable && !currentStep.displayOnly}
             rightIcon={<ChevronRightIcon />}
           >
             {isLastStep && flowConfig.exitButtonText ? flowConfig.exitButtonText : 'Next'}

@@ -5,9 +5,11 @@ import shuffle from 'lodash.shuffle';
 import zip from 'lodash.zip';
 import { useWalletCreationStore } from '../store';
 import range from 'lodash.range';
+import { useOutletContext } from './CreateProcessFrame';
 
 export const ConfirmMnemonic: FC = () => {
-  const { seed, set: setStore } = useWalletCreationStore();
+  const { seed } = useWalletCreationStore();
+  const { setNextAvailable } = useOutletContext();
 
   const confirmPositions = useMemo(() => shuffle(range(0, seed.length)), [seed]);
 
@@ -47,8 +49,8 @@ export const ConfirmMnemonic: FC = () => {
   }, [chosenWords, seed]);
 
   useEffect(() => {
-    setStore({ dischargeNext: isAllCorrect });
-  }, [isAllCorrect, setStore]);
+    setNextAvailable(isAllCorrect);
+  }, [isAllCorrect, setNextAvailable]);
 
   return (
     <>

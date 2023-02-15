@@ -1,13 +1,15 @@
-import React, { FC } from 'react';
-import { FormControl, FormLabel, Input, Heading, VStack, Box } from '@chakra-ui/react';
+import React, { FC, useEffect } from 'react';
+import { FormControl, FormLabel, Input, Heading, VStack, Box, FormErrorMessage } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
 
 import { useWalletCreationStore } from '../store';
+import { useOutletContext } from 'react-router-dom';
+import { OutletContext } from './CreateProcessFrame';
 
 type FormValues = {
   password: string;
   confirmPassword: string;
-  agreeTerms: boolean;
+  // agreeTerms: boolean;
 };
 
 export type SetPasswordProps = {
@@ -15,33 +17,28 @@ export type SetPasswordProps = {
 };
 
 export const SetPassword: FC<SetPasswordProps> = ({ isImportSeed }) => {
-  const store = useWalletCreationStore();
+  const setStore = useWalletCreationStore((s) => s.set);
+  const { whenSubmit, setNextAvailable } = useOutletContext() as OutletContext;
 
-  const { register, handleSubmit } = useForm<FormValues>({
+  const { register, handleSubmit, getValues, watch, formState } = useForm<FormValues>({
     mode: 'onChange',
   });
 
-  const onValidateForm = ({ password, confirmPassword, agreeTerms }: FormValues) => {
-    if (password.length < 8) {
-      return {
-        password: 'Password must be at least 8 characters',
-      };
-    }
+  useEffect(() => {
+    whenSubmit &&
+      whenSubmit(() =>
+        handleSubmit(({ password }) => {
+          setStore({ password });
+        }),
+      );
+  }, [whenSubmit, setStore, handleSubmit]);
 
-    if (password !== confirmPassword) {
-      return {
-        confirmPassword: 'Passwords do not match',
-      };
-    }
+  useEffect(() => {
+    setNextAvailable(formState.isValid);
+  }, [setNextAvailable, formState]);
 
-    if (!agreeTerms) {
-      return {
-        agreeTerms: 'You must agree to the terms',
-      };
-    }
-
-    store.set({ password, dischargeNext: true });
-  };
+  const showPasswordError = !!watch('password') && !!formState.errors.password;
+  const confirmPasswordError = !showPasswordError && !!watch('confirmPassword') && !!formState.errors.confirmPassword;
 
   return (
     <>
@@ -53,25 +50,31 @@ export const SetPassword: FC<SetPasswordProps> = ({ isImportSeed }) => {
           This password will unlock your Nexus wallet only on this device. Nexus can not recover this password.
         </Box>
       )}
-      {/* TODO: formik may not the best form state controller */}
-      <VStack as="form" onSubmit={handleSubmit(onValidateForm)}>
-        <FormControl>
+      <VStack>
+        <FormControl isInvalid={showPasswordError}>
           <FormLabel fontSize="sm">New password (8 characters minimum)</FormLabel>
           <Input
             size="lg"
             placeholder="Input your password"
             type="password"
-            {...register('password', { required: true })}
+            {...register('password', { minLength: 8 })}
           />
+          <FormErrorMessage>Your password must be at least 8 characters long.</FormErrorMessage>
         </FormControl>
-        <FormControl>
+        <FormControl isInvalid={confirmPasswordError}>
           <FormLabel fontSize="sm">Confirm password</FormLabel>
           <Input
             size="lg"
             type="password"
             placeholder="input your password"
-            {...register('confirmPassword', { required: true })}
+            {...register('confirmPassword', {
+              minLength: 8,
+              validate: (value) => {
+                return value && getValues('password') === value;
+              },
+            })}
           />
+          <FormErrorMessage>Your two passwords are not correspond</FormErrorMessage>
         </FormControl>
 
         {/* Not implement */}

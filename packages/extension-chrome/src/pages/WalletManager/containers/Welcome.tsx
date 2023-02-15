@@ -1,12 +1,18 @@
-import React, { FC } from 'react';
+import React, { FC, useEffect } from 'react';
 import { HStack, Icon } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import HardDrive from '../../Components/icons/HardDrive.svg';
 import { PlusSquareIcon } from '@chakra-ui/icons';
 import { Text, Card, Heading, Button, Spacer } from '@chakra-ui/react';
+import { useWalletCreationStore } from '../store';
 
 export const Welcome: FC = () => {
   const navigate = useNavigate();
+  const resetStore = useWalletCreationStore((s) => s.reset);
+
+  useEffect(() => {
+    resetStore();
+  }, [resetStore]);
   const enterCreatePage = (createNew: boolean) => () => {
     if (createNew) {
       navigate('/beforeStart');

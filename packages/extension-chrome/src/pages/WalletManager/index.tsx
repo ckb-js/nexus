@@ -43,7 +43,7 @@ const routeConfig: RouteObject[] = [
         steps: [
           { path: 'account', title: 'Select Username', description: 'Select a username' },
           { path: 'password', title: 'Create Password', description: 'Choose a secure one' },
-          { path: 'seed', title: 'Generate Wallet Seed', description: 'remember it!' },
+          { path: 'seed', title: 'Generate Wallet Seed', description: 'remember it!', displayOnly: true },
           { path: 'confirm', title: 'Confirm Seed', description: 'Confirm your seed' },
         ],
         entry: '/',
