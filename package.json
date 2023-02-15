@@ -40,8 +40,6 @@
     "build": "run-s build:lumos build:nexus",
     "build:nexus": "npm run build --workspace=@nexus-wallet/types --workspace=@nexus-wallet/utils",
     "build:lumos": "cd lumos && npm run build",
-    "test:coverage": "jest --coverage",
-    "test:verbose": "jest --verbose",
     "test": "jest"
   },
   "repository": {
