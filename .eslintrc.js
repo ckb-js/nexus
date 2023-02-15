@@ -1,6 +1,11 @@
 module.exports = {
   root: true,
   extends: ['react-app'],
+  parserOptions: {
+    ecmaVersion: 2020,
+    project: ['tsconfig.json'],
+    sourceType: 'module',
+  },
   rules: {
     '@typescript-eslint/no-unused-vars': [
       'error',
@@ -16,6 +21,7 @@ module.exports = {
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
         '@typescript-eslint/explicit-module-boundary-types': 'error',
+        '@typescript-eslint/no-floating-promises': 'error',
       },
     },
   ],

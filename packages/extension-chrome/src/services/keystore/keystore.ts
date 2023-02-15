@@ -50,7 +50,7 @@ export function createKeystoreService(config: { storage: Storage<KeystoreData> }
 
       const wss = hd.Keystore.create(hd.ExtendedPrivateKey.fromSeed(seed), password).toJson();
 
-      storage.setItem('keystore', { publicInfos, wss });
+      await storage.setItem('keystore', { publicInfos, wss });
     },
 
     getExtendedPublicKey: async (payload: GetExtendedPublicKeyPayload): Promise<string> => {
