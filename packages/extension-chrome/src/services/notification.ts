@@ -1,6 +1,30 @@
-import { NotificationService } from '@nexus-wallet/types';
+import type { NotificationService } from '@nexus-wallet/types';
 import { errors } from '@nexus-wallet/utils';
 import browser from 'webextension-polyfill';
+import { TransactionSkeletonObject } from '@ckb-lumos/helpers';
+import type { HexString, Script } from '@ckb-lumos/base';
+import { Call, createSessionMessenger } from '../messaging/session';
+import { browserExtensionAdapter } from '../messaging/adapters';
+import { nanoid } from 'nanoid';
+
+export type SessionMethods = {
+  session_getRequesterAppInfo: Call<void, { url: string; favicon: string }>;
+  session_approveEnableWallet: Call<void, void>;
+
+  /**
+   * get a ready-to-sign transaction
+   * the input/output scripts of the transaction should be highlighted if they are owned by the wallet
+   */
+  session_getUnsignedTransaction: Call<void, { tx: TransactionSkeletonObject; ownedLocks: Script[] }>;
+  session_approveSignData: Call<{ password: string }, void>;
+
+  /**
+   * get bytes to be signed, the return data should detect if it can be converted to utf8 string,
+   * if so, return the utf8 string, otherwise return the hex string
+   */
+  session_getUnsignedData: Call<void, { data: HexString | string }>;
+  session_approveSignTransaction: Call<{ password: string }, void>;
+};
 
 const NOTIFICATION_WIDTH = 360;
 const NOTIFICATION_HEIGHT = 600;
@@ -11,6 +35,7 @@ export function createNotificationService(): NotificationService {
   return {
     async requestGrant({ url }) {
       const lastFocused = await browser.windows.getLastFocused();
+      const sessionId = nanoid();
 
       const notification = await browser.windows.create({
         type: 'popup',
@@ -19,40 +44,26 @@ export function createNotificationService(): NotificationService {
         left: lastFocused.left! + (lastFocused.width! - 360),
         width: NOTIFICATION_WIDTH,
         height: NOTIFICATION_HEIGHT,
-        url: 'notification.html',
+        url: `notification.html#/grant?sessionId=${sessionId}`,
       });
 
-      const notificationTabId = notification.tabs?.[0]?.id;
-
-      type MessageListener = Parameters<typeof browser.runtime.onMessage.addListener>[0];
-      const getRequesterAppInfoListener: MessageListener = (message, sender) =>
-        new Promise(async (sendResponse) => {
-          if (notificationTabId !== sender.tab?.id) return;
-          if (message.method !== 'getRequesterAppInfo') return;
-
-          sendResponse({ url });
-          browser.runtime.onMessage.removeListener(getRequesterAppInfoListener);
-        });
+      const messenger = createSessionMessenger<SessionMethods>({ adapter: browserExtensionAdapter, sessionId });
 
       return new Promise((resolve, reject) => {
-        const userHasEnabledWalletListener: MessageListener = (message, sender) =>
-          new Promise((sendResponse) => {
-            if (notificationTabId !== sender.tab?.id) return;
-            if (message.method !== 'userHasEnabledWallet') return;
+        messenger.register('session_getRequesterAppInfo', () => {
+          // TODO: favicon from url
+          return { url, favicon: `${new URL(url).origin}/favicon.ico` };
+        });
 
-            sendResponse(void 0);
-            browser.runtime.onMessage.removeListener(userHasEnabledWalletListener);
-            resolve();
-          });
-
-        browser.runtime.onMessage.addListener(getRequesterAppInfoListener);
-        browser.runtime.onMessage.addListener(userHasEnabledWalletListener);
+        messenger.register('session_approveEnableWallet', () => {
+          messenger.destroy();
+          resolve();
+        });
 
         browser.windows.onRemoved.addListener((windowId) => {
           if (windowId === notification.id) {
-            browser.runtime.onMessage.removeListener(getRequesterAppInfoListener);
-            browser.runtime.onMessage.removeListener(userHasEnabledWalletListener);
-            reject(errors);
+            messenger.destroy();
+            reject();
           }
         });
       });
