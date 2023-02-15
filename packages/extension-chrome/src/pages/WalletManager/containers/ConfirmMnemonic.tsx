@@ -30,13 +30,13 @@ export const ConfirmMnemonic: FC = () => {
   const { wordElements, isAllCorrect } = useMemo(() => {
     const wordElements: ReactElement[] = [];
     let isAllCorrect = chosenWords.length === seed.length;
-    zip(chosenWords, seed).forEach(([chosenWord, seedWord]) => {
+    zip(chosenWords, seed).forEach(([chosenWord, seedWord], index) => {
       const isCorrect = chosenWord === seedWord;
       if (!isCorrect) {
         isAllCorrect = false;
       }
       wordElements.push(
-        <Box as="span" color={isCorrect ? 'black' : 'red'}>
+        <Box as="span" data-test-id={`selectedSeed[${index}]`} color={isCorrect ? 'black' : 'red'}>
           {chosenWord}{' '}
         </Box>,
       );
@@ -61,7 +61,7 @@ export const ConfirmMnemonic: FC = () => {
         Please select words below to form the correct Seed.
       </Box>
 
-      <Textarea as="div" w="480px" h="200px">
+      <Textarea data-test-id="selectedSeed" as="div" w="480px" h="200px">
         {wordElements}
       </Textarea>
 
@@ -70,7 +70,7 @@ export const ConfirmMnemonic: FC = () => {
           const chosenOrder = chosenIndex.findIndex((i) => i === index);
           const hasChosen = chosenOrder !== -1;
           return (
-            <Box position="relative">
+            <Box position="relative" data-test-id={`seed[${index}]`} data-test-selected={hasChosen}>
               {hasChosen && (
                 <Badge
                   borderRadius="18px"

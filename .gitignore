@@ -35,3 +35,6 @@ node_modules/
 .idea
 build
 lib
+
+# MacOS
+.DS_Store

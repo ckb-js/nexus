@@ -40,11 +40,17 @@ export const NetworkConfig: FC = () => {
   return (
     <>
       <WhiteAlphaBox p="16px 20px">
-        <RadioGroup onChange={onToggle} defaultValue={currentNetwork} display="flex" flexDirection="column">
+        <RadioGroup
+          data-test-id="networkRadio"
+          onChange={onToggle}
+          defaultValue={currentNetwork}
+          display="flex"
+          flexDirection="column"
+        >
           <VStack spacing="20px">
-            {networkQuery.data?.networks.map((network) => (
+            {networkQuery.data?.networks.map((network, index) => (
               <Flex key={network.id} w="100%" alignItems="center">
-                <Radio colorScheme="cyan" ml="32px" value={network.id}>
+                <Radio colorScheme="cyan" data-test-id={`networkRadio[${index}]`} ml="32px" value={network.id}>
                   {network.displayName}
                 </Radio>
                 <Spacer />
@@ -55,6 +61,7 @@ export const NetworkConfig: FC = () => {
       </WhiteAlphaBox>
       <Spacer />
       <Button
+        data-test-id="addNetwork"
         onClick={() => {
           navigate('/network/add');
         }}

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   FormControl,
   Input,
@@ -20,17 +19,6 @@ import { useWalletCreationStore } from '../store';
 import { useOutletContext } from './CreateProcessFrame';
 
 // TODO: use real service
-
-const SeedInput: FC<{ index: number }> = ({ index }) => {
-  return (
-    <FormControl as={Flex} alignItems="center">
-      <FormLabel mr="8px" w="16px">
-        {`${index + 1}`.padStart(2, ' ')}
-      </FormLabel>
-      <Input mr="8px" type="password" w="186px" />
-    </FormControl>
-  );
-};
 
 /**
  * Confirm the mnemonic
@@ -58,7 +46,13 @@ export const RecoveryWallet: FC = () => {
       <FormLabel mr="8px" w="16px">
         {`${index + 1}`.padStart(2, ' ')}
       </FormLabel>
-      <Input mr="8px" type="password" w="186px" {...register(`seed.${index}`, { required: true })} />
+      <Input
+        mr="8px"
+        type="password"
+        w="186px"
+        data-test-id={`seed[${index}]`}
+        {...register(`seed.${index}`, { required: true })}
+      />
     </FormControl>
   ));
 

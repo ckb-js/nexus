@@ -62,8 +62,17 @@ export const CreateMnemonic: FC = () => {
           </AlertDescription>
         </Box>
       </Alert>
-      <Textarea resize="none" mb="12px" value={mnemonic?.join(' ')} h="80px" />
-      <Flex onClick={onCopy} mb="48px" as="button" w="100%" direction="row" fontSize="sm" alignItems="center">
+      <Textarea as={Box} data-test-id="seed" resize="none" mb="12px" value={mnemonic?.join(' ')} h="80px" />
+      <Flex
+        data-test-id="copyToClipboard"
+        onClick={onCopy}
+        mb="48px"
+        as="button"
+        w="100%"
+        direction="row"
+        fontSize="sm"
+        alignItems="center"
+      >
         <Icon mr="12px" w="24px" h="24px" viewBox="0 0 27 31" as={FileCopyIcon} />
         <Box textDecoration="underline" h="20px">
           Copy to clipboard

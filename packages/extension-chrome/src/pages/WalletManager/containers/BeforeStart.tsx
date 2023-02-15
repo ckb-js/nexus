@@ -38,6 +38,7 @@ export const BeforeStart: FC = () => {
         onClick={() => {
           navigate('/create/account');
         }}
+        data-test-id="getStarted"
         size="lg"
         w="148px"
       >

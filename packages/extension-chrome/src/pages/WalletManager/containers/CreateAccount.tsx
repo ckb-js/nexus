@@ -35,7 +35,7 @@ export const CreateAccount: FC = () => {
       <Box>
         <FormControl>
           <FormLabel>A Descriptive Name For Your Wallet</FormLabel>
-          <Input {...register('username', { required: true })} placeholder="User name" />
+          <Input data-test-id="username" {...register('username', { required: true })} placeholder="User name" />
         </FormControl>
       </Box>
     </>

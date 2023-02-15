@@ -10,7 +10,9 @@ export const Success: FC = () => {
       <Box mb="48px" fontSize="md">
         You are all set! Keep your Seed safe – it’s your responsibility!
       </Box>
-      <Button onClick={() => window.close()}>All Done</Button>
+      <Button data-test-id="done" onClick={() => window.close()}>
+        All Done
+      </Button>
     </>
   );
 };

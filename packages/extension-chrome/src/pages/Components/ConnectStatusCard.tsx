@@ -11,17 +11,27 @@ export type ConnectStatusCardProps = {
 
 export const ConnectStatusCard: FC<ConnectStatusCardProps> = ({ name, connected, ...rest }) => {
   return (
-    <WhiteAlphaBox alignItems="center" h="108px" justify="space-between" paddingX="30px" {...rest}>
+    <WhiteAlphaBox
+      data-test-id="connectedStatus"
+      data-connected={connected}
+      alignItems="center"
+      h="108px"
+      justify="space-between"
+      paddingX="30px"
+      {...rest}
+    >
       <Flex alignItems="center">
         <Icon as={AvatarIcon} mr="16px" viewBox="0 0 96 96" w="48px" h="48px" />
-        <Box fontWeight="bold" fontSize="md">
+        <Box data-test-id="username" fontWeight="bold" fontSize="md">
           Hi, {name}
         </Box>
       </Flex>
 
       <Flex alignItems="center">
-        <CheckCircleIcon mr="4px" w="16px" h="16px" color={'green.300'} />
-        <Box fontSize="sm">{connected ? 'Connected' : 'Disconnected'}</Box>
+        <CheckCircleIcon mr="4px" data-test-id="connectedStatusIndicator" w="16px" h="16px" color={'green.300'} />
+        <Box fontSize="sm" data-test-id="connectedStatusText">
+          {connected ? 'Connected' : 'Disconnected'}
+        </Box>
       </Flex>
     </WhiteAlphaBox>
   );

@@ -58,6 +58,7 @@ export const WhitelistSites: FC = () => {
           <SearchIcon w="24px" h="24px" />
         </InputLeftElement>
         <Input
+          data-test-id="siteSearch"
           size="lg"
           w="452px"
           onChange={(e) => setSearchQuery(e.target.value)}
@@ -66,18 +67,31 @@ export const WhitelistSites: FC = () => {
           pl="48px"
         />
       </InputGroup>
-      <VStack padding="30px 20px" as={WhiteAlphaBox} spacing="16px" flexDirection="column">
-        {filteredSites?.map((site) => (
-          <Flex alignItems="center" h="48px" w="100%" key={site.url}>
+      <VStack
+        data-test-id="siteList"
+        overflowY="auto"
+        padding="30px 20px"
+        as={WhiteAlphaBox}
+        spacing="16px"
+        flexDirection="column"
+      >
+        {filteredSites?.map((site, index) => (
+          <Flex data-test-id={`site[${index}]`} alignItems="center" h="48px" w="100%" key={site.url}>
             <Center w="48px" borderRadius="50%" padding="4px" h="48px" backgroundColor="whiteAlpha.300">
-              <Image w="32px" h="32px" src={site.favicon} />
+              <Image data-test-id={`site[${index}].favicon`} w="32px" h="32px" src={site.favicon} />
             </Center>
-            <Flex ml="20px" flex={1} fontSize="lg" alignItems="center">
+            <Flex ml="20px" data-test-id={`site[${index}].url`} flex={1} fontSize="lg" alignItems="center">
               <Highlight query={searchQuery} styles={{ bg: 'orange.200' }}>
                 {site.url}
               </Highlight>
             </Flex>
-            <DeleteIcon cursor="pointer" w="20px" h="20px" onClick={removeSite(site.url)} />
+            <DeleteIcon
+              data-test-id={`site[${index}].remove`}
+              cursor="pointer"
+              w="20px"
+              h="20px"
+              onClick={removeSite(site.url)}
+            />
           </Flex>
         ))}
       </VStack>

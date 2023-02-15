@@ -24,6 +24,7 @@ export const Home: FC = () => {
       onClick: () => {
         navigate('/whitelistSites');
       },
+      testId: 'whitelistSites',
       icon: <Icon as={TerminalIcon} viewBox="0 0 24 24" w="24px" h="24px" />,
     },
     {
@@ -31,6 +32,7 @@ export const Home: FC = () => {
       onClick: () => {
         navigate('/network');
       },
+      testId: 'network',
       icon: <Icon as={NetworkIcon} viewBox="0 0 24 24" w="24px" h="24px" />,
     },
   ];
@@ -40,8 +42,16 @@ export const Home: FC = () => {
       <ConnectStatusCard name="Yan" connected mt="44px" />
 
       <WhiteAlphaBox direction="column" mt="20px">
-        {entries.map(({ title, icon, onClick }) => (
-          <Flex as="button" alignItems="center" px="30px" h="88px" onClick={onClick} type="button">
+        {entries.map(({ title, icon, onClick, testId }) => (
+          <Flex
+            data-test-id={testId}
+            as="button"
+            alignItems="center"
+            px="30px"
+            h="88px"
+            onClick={onClick}
+            type="button"
+          >
             <Center mr="20px" w="48px" backgroundColor="whiteAlpha.300" h="48px" borderRadius="50%">
               {icon}
             </Center>

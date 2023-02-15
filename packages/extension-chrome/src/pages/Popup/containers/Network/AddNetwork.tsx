@@ -42,13 +42,22 @@ export const AddNetwork: FC = () => {
             color="black"
             variant="outline"
             backgroundColor="white"
-            {...register('url', { pattern: /https:\/\/[a-zA-Z_-.~]/ })}
+            {...register('url', {
+              // pattern: /https:\/\/[a-zA-Z_-.~]+/
+            })}
           />
         </FormControl>
       </VStack>
       <Spacer />
       <Flex as="form" direction="column" justifyContent="center">
-        <Button size="lg" width="452px" leftIcon={<AddIcon h="16px" w="16px" />} marginY="12px" type="submit">
+        <Button
+          data-test-id="add"
+          size="lg"
+          width="452px"
+          leftIcon={<AddIcon h="16px" w="16px" />}
+          marginY="12px"
+          type="submit"
+        >
           Add
         </Button>
       </Flex>

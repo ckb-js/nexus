@@ -6,7 +6,7 @@ import { WhiteAlphaBox } from '../../Components/WhiteAlphaBox';
 import { CheckCircleIcon } from '@chakra-ui/icons';
 
 export const Grant: React.FC = () => {
-  const [requesterUrl, setRequesterUrl] = useState<string>();
+  const [requesterUrl, setRequesterUrl] = useState<string>('https://links.to');
 
   useEffect(() => {
     (async () => {
@@ -26,9 +26,15 @@ export const Grant: React.FC = () => {
 
       <Flex py="32px" alignItems="center" direction="column">
         {/* TODO: wait implementation, the request website icon path should be provided in the future */}
-        <Image w="40px" mb="8px" h="40px" src="https://static.figma.com/app/icon/1/favicon.png" />
+        <Image
+          data-test-id="requester.favicon"
+          w="40px"
+          mb="8px"
+          h="40px"
+          src="https://static.figma.com/app/icon/1/favicon.png"
+        />
 
-        <Box fontSize="md" fontWeight="semibold">
+        <Box fontSize="md" data-test-id="requester.url" fontWeight="semibold">
           {requesterUrl}
         </Box>
       </Flex>
@@ -51,12 +57,13 @@ export const Grant: React.FC = () => {
       </Box>
 
       <ButtonGroup mt="32px" size="md">
-        <Button onClick={() => window.close()} w="220px" color="gray.800" colorScheme="gray">
+        <Button data-test-id="cancel" onClick={() => window.close()} w="220px" color="gray.800" colorScheme="gray">
           Cancel
         </Button>
 
         <Button
           w="220px"
+          data-test-id="connect"
           onClick={async () => {
             await browser.runtime.sendMessage({ method: 'userHasEnabledWallet' });
             window.close();
