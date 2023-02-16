@@ -11,6 +11,10 @@ export interface RpcMethods extends CallMap {
   wallet_fullOwnership_getUnusedLocks: Call<void, Script[]>;
 }
 
+export interface RpcDebugMethods extends CallMap {
+  debug_initWallet: Call<void, void>;
+}
+
 export interface InternalMethods extends CallMap {
   internal_initWallet: Call<{ password: string; nickname: string; mnemonics: string[] }, void>;
 }
@@ -20,5 +24,5 @@ export interface InternalMethods extends CallMap {
  */
 export interface ServerParams {
   resolveService<K extends keyof Services>(name: K): Promisable<Services[K]>;
-  getRequesterAppInfo(): Promise<{ url: string; favIconUrl: string }>;
+  getRequesterAppInfo(): Promise<{ url: string }>;
 }

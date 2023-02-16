@@ -3,7 +3,7 @@ module.exports = {
   extends: ['react-app'],
   parserOptions: {
     ecmaVersion: 2020,
-    project: ['tsconfig.json'],
+    project: ['tsconfig.json', 'tsconfig.test.json'],
     sourceType: 'module',
   },
   rules: {

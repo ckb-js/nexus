@@ -1,86 +1,128 @@
 import { ConfigService, Storage } from '@nexus-wallet/types';
-import type { Config, NetworkConfig } from '@nexus-wallet/types/lib/services';
-import { asserts, errors, LIB_VERSION } from '@nexus-wallet/utils';
-import Ajv, { JSONSchemaType } from 'ajv';
+import type { Config, NetworkConfig, TrustedHost } from '@nexus-wallet/types/lib/services';
+import { errors, LIB_VERSION } from '@nexus-wallet/utils';
+import produce from 'immer';
+import joi from 'joi';
 
-const ajv = new Ajv();
-const networkSchema: JSONSchemaType<NetworkConfig> = {
-  type: 'object',
-  properties: {
-    id: { type: 'string' },
-    networkName: { type: 'string' },
-    rpcUrl: { type: 'string' },
-    displayName: { type: 'string' },
-  },
-  required: ['id', 'networkName', 'rpcUrl', 'displayName'],
-};
+const NetworkSchema = joi.object<NetworkConfig>({
+  id: joi.string().required(),
+  networkName: joi.string().required(),
+  rpcUrl: joi.string().uri().required(),
+  displayName: joi.string().required(),
+});
 
-const configSchema: JSONSchemaType<Config> = {
-  type: 'object',
-  properties: {
-    nickname: { type: 'string' },
-    networks: { type: 'array', items: networkSchema },
-    selectedNetwork: { type: 'string' },
-    version: { type: 'string' },
-    whitelist: { type: 'array', items: { type: 'string' } },
-  },
-  required: ['nickname', 'networks', 'selectedNetwork', 'whitelist'],
-  additionalProperties: false,
-};
+const TrustedHostSchema = joi.object<TrustedHost>({
+  host: joi.string().hostname().required(),
+  favicon: joi.string().uri().required(),
+});
+
+const ConfigSchema = joi.object<Config>({
+  nickname: joi.string().required(),
+  selectedNetwork: joi.string().required(),
+  version: joi.string().required(),
+  networks: joi.array().items(NetworkSchema).required(),
+  whitelist: joi.array().items(TrustedHostSchema).required(),
+});
+
+const DEFAULT_CONFIG = Object.freeze({
+  version: LIB_VERSION,
+  whitelist: [],
+  nickname: '',
+  networks: [],
+  selectedNetwork: '',
+});
 
 export function createConfigService(payload: { storage: Storage<{ config: Config }> }): ConfigService {
   const { storage } = payload;
 
-  const impl: ConfigService = {
-    getConfig: async () => {
-      const config = await storage.getItem('config');
-      asserts.asserts(config, 'Config not initialized, Nexus may not be installed correctly');
-      return config;
-    },
-    setConfig: async (payload) => {
-      const original = await storage.getItem('config');
+  const getConfig = async (): Promise<Config> => {
+    const config = await storage.getItem('config');
+    if (!config) {
+      errors.throwError(`Config is not initialized, Nexus may not be initialized`);
+    }
+    return config;
+  };
 
-      const validate = ajv.compile(configSchema);
-      const newConfig = Object.assign(original || { version: LIB_VERSION }, payload.config);
+  const setConfig = async (configOrUpdate: Partial<Config> | ((config: Config) => void)): Promise<void> => {
+    const original = (await storage.getItem('config')) || DEFAULT_CONFIG;
 
-      if (!validate(newConfig)) {
-        errors.throwError(`Invalid config`, validate.errors);
+    const updated = (() => {
+      if (typeof configOrUpdate === 'function') {
+        return produce(original, () => {
+          configOrUpdate(original);
+        });
       }
+      return configOrUpdate;
+    })();
 
-      await storage.setItem('config', newConfig);
+    const newConfig = Object.assign({}, original, updated) as Config;
+
+    const validationResult = ConfigSchema.validate(newConfig);
+
+    if (validationResult.error) {
+      errors.throwError(`config is invalid`, validationResult.error.message);
+    }
+
+    const { networks, selectedNetwork } = newConfig;
+
+    // check if selectedNetwork is in networks
+    const isSelectedInNetworks = networks.find((network) => network.id === selectedNetwork);
+    if (!isSelectedInNetworks) {
+      errors.throwError(
+        `Selected network "%s" is not found in networks, please check if the selected one is in networks[].id`,
+        selectedNetwork,
+      );
+    }
+
+    await storage.setItem('config', newConfig);
+  };
+
+  const impl: ConfigService = {
+    getConfig,
+    setConfig: ({ config }) => setConfig(config),
+    getSelectedNetwork: /* istanbul ignore next */ async () => {
+      const { selectedNetwork, networks } = await impl.getConfig();
+      const selected = networks.find((network) => network.id === selectedNetwork);
+      if (!selected) {
+        errors.throwError('Selected network %s is not found in the list of networks %s', selectedNetwork, networks);
+      }
+      return selected;
     },
-    getSelectedNetwork: () => {
-      errors.unimplemented();
+    addNetwork: /* istanbul ignore next */ (payload) => {
+      return setConfig((draft) => draft.networks.push(payload.network));
     },
-    addNetwork: () => {
-      errors.unimplemented();
+    addWhitelistItem: /* istanbul ignore next */ (host) => {
+      return setConfig((draft) => draft.whitelist.push(host));
     },
-    addWhitelistItem: () => {
-      errors.unimplemented();
+    getNetworks: /* istanbul ignore next */ () => {
+      return getConfig().then((draft) => draft.networks);
     },
-    getNetworks: () => {
-      errors.unimplemented();
+    getNickname: /* istanbul ignore next */ () => {
+      return getConfig().then((draft) => draft.nickname);
     },
-    getNickname: () => {
-      errors.unimplemented();
+    getVersion: /* istanbul ignore next */ () => {
+      return getConfig().then((draft) => draft.version);
     },
-    getVersion: () => {
-      errors.unimplemented();
+    getWhitelist: /* istanbul ignore next */ () => {
+      return getConfig().then((draft) => draft.whitelist);
     },
-    getWhitelist: () => {
-      errors.unimplemented();
+    removeNetwork: /* istanbul ignore next */ ({ id }) => {
+      return setConfig((draft) => (draft.networks = draft.networks.filter((network) => network.id !== id)));
     },
-    removeNetwork: () => {
-      errors.unimplemented();
+    removeWhitelistItem: /* istanbul ignore next */ ({ host }) => {
+      return setConfig((draft) => {
+        draft.whitelist = draft.whitelist.filter((item) => item.host !== host);
+      });
     },
-    removeWhitelistItem: () => {
-      errors.unimplemented();
+    setNickname: /* istanbul ignore next */ ({ nickname }) => {
+      return setConfig((draft) => {
+        draft.nickname = nickname;
+      });
     },
-    setNickname: () => {
-      errors.unimplemented();
-    },
-    setSelectedNetwork: () => {
-      errors.unimplemented();
+    setSelectedNetwork: /* istanbul ignore next */ ({ id }) => {
+      return setConfig((draft) => {
+        draft.selectedNetwork = id;
+      });
     },
   };
 
