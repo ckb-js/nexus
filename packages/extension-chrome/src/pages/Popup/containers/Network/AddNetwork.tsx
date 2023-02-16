@@ -18,7 +18,8 @@ export const AddNetwork: FC = () => {
 
   const { handleSubmit, register } = useForm<AddNetworkFormState>();
   const onSubmit = handleSubmit(({ name, url }) => {
-    configService.addNetwork({ name, url } as NetworkConfig);
+    // TODO: align the type
+    configService.addNetwork({ name, url } as unknown as NetworkConfig);
     navigate(-1);
   });
 
