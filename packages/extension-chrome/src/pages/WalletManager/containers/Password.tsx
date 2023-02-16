@@ -57,6 +57,7 @@ export const SetPassword: FC<SetPasswordProps> = ({ isImportSeed }) => {
             size="lg"
             placeholder="Input your password"
             type="password"
+            data-test-id="password"
             {...register('password', { minLength: 8 })}
           />
           <FormErrorMessage>Your password must be at least 8 characters long.</FormErrorMessage>
@@ -66,6 +67,7 @@ export const SetPassword: FC<SetPasswordProps> = ({ isImportSeed }) => {
           <Input
             size="lg"
             type="password"
+            data-test-id="confirmPassword"
             placeholder="input your password"
             {...register('confirmPassword', {
               minLength: 8,
