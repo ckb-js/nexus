@@ -1,19 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Button, ButtonGroup, Flex, Image, VStack } from '@chakra-ui/react';
-import browser from 'webextension-polyfill';
 import { ConnectStatusCard } from '../../Components/ConnectStatusCard';
 import { WhiteAlphaBox } from '../../Components/WhiteAlphaBox';
 import { CheckCircleIcon } from '@chakra-ui/icons';
+import { useSessionMessenger } from '../../hooks/useSessionMessenger';
 
 export const Grant: React.FC = () => {
-  const [requesterUrl, setRequesterUrl] = useState<string>('https://links.to');
-
+  const [requesterUrl, setRequesterUrl] = useState<string>();
+  const messenger = useSessionMessenger();
   useEffect(() => {
     (async () => {
-      const res = await browser.runtime.sendMessage({ method: 'getRequesterAppInfo' });
+      const res = await messenger.send('session_getRequesterAppInfo');
       setRequesterUrl(res.url);
     })();
-  }, []);
+  }, [messenger]);
 
   const permissions = ['View your addresses', 'Request approval for transactions'];
 
@@ -65,7 +65,7 @@ export const Grant: React.FC = () => {
           w="220px"
           data-test-id="connect"
           onClick={async () => {
-            await browser.runtime.sendMessage({ method: 'userHasEnabledWallet' });
+            await messenger.send('session_approveEnableWallet');
             window.close();
           }}
         >
