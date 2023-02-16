@@ -28,7 +28,9 @@ export function createKeystoreService(config: { storage: Storage<KeystoreData> }
     initKeystore: async (payload: InitKeystorePayload): Promise<void> => {
       const isInitialized = await keystoreService.hasInitialized();
 
-      if (isInitialized) errors.throwError('Keystore has been initialized');
+      if (isInitialized) {
+        errors.throwError('keystore has been initialized, seems like trying to re-initialize wallet');
+      }
 
       const { mnemonic: inputMnemonic, password, paths } = payload;
 

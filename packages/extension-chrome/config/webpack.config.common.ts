@@ -6,12 +6,21 @@ import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
 import merge from 'webpack-merge';
 import { __DEV__ } from './env';
 
+console.log(require.resolve('buffer/'));
+
 const configExcludeEntry: Configuration = {
   output: {
     path: env.paths.resolve('/build'),
   },
   resolve: {
     extensions: ['.js', '.jsx', '.ts', '.tsx'],
+    fallback: {
+      fs: false,
+      buffer: require.resolve('buffer/'),
+      crypto: require.resolve('crypto-browserify'),
+      path: require.resolve('path-browserify'),
+      stream: require.resolve('stream-browserify'),
+    },
   },
   context: env.paths.resolve('/'),
   module: {
