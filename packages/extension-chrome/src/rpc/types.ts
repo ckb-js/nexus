@@ -3,7 +3,7 @@ import { Promisable } from '@nexus-wallet/types/lib/base';
 import { Modules } from '../services';
 import { Call, CallMap } from '@nexus-wallet/types';
 
-export interface RpcMethods extends CallMap {
+export interface WalletMethods extends CallMap {
   wallet_enable: Call<void, void>;
   wallet_isEnabled: Call<void, boolean>;
   wallet_getNetworkName: Call<void, string>;
@@ -11,12 +11,8 @@ export interface RpcMethods extends CallMap {
   wallet_fullOwnership_getUnusedLocks: Call<void, Script[]>;
 }
 
-export interface RpcDebugMethods extends CallMap {
+export interface DebugMethods extends CallMap {
   debug_initWallet: Call<void, void>;
-}
-
-export interface InternalMethods extends CallMap {
-  internal_initWallet: Call<{ password: string; nickname: string; mnemonics: string[] }, void>;
 }
 
 /**

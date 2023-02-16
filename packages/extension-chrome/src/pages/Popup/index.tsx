@@ -1,13 +1,14 @@
 import React, { FC } from 'react';
 import { ChakraProvider } from '@chakra-ui/react';
 import { createRoot } from 'react-dom/client';
-import { createHashRouter, RouterProvider, RouteObject } from 'react-router-dom';
+import { createHashRouter, RouteObject, RouterProvider } from 'react-router-dom';
 import { WhitelistSites } from './containers/WhitelistSites';
 import { NetworkConfig } from './containers/Network/NetworkConfig';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { Home } from './containers/Home';
 import { AddNetwork } from './containers/Network/AddNetwork';
+import { useStartInitIfNotInitialized } from '../hooks/useStartInitIfNotInitialized';
 
 const routeConfig: RouteObject[] = [
   {
@@ -38,6 +39,9 @@ const hashRouter = createHashRouter(routeConfig);
 const queryClient = new QueryClient();
 
 const App: FC = () => {
+  const initialized = useStartInitIfNotInitialized();
+  if (!initialized) return null;
+
   return (
     <React.StrictMode>
       <ChakraProvider>

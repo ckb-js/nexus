@@ -1,5 +1,6 @@
 import { ConfigService, KeystoreService } from '@nexus-wallet/types';
 import { NetworkConfig } from '@nexus-wallet/types/lib/services';
+import browser from 'webextension-polyfill';
 
 // full ownership with external chain
 export const FULL_OWNERSHIP_EXTERNAL_PARENT_PATH = `m/44'/309'/0'/0`;
@@ -17,6 +18,8 @@ const DEFAULT_NETWORKS: NetworkConfig[] = [
 
 export interface InternalService {
   initWallet: (payload: { password: string; nickname: string; mnemonic: string | string[] }) => Promise<void>;
+  startInitIfNotInitialized: () => Promise<void>;
+  isInitialized: () => Promise<boolean>;
 }
 
 export function createInternalService(payload: {
@@ -25,7 +28,7 @@ export function createInternalService(payload: {
 }): InternalService {
   const { keystoreService, configService } = payload;
 
-  return {
+  const impl: InternalService = {
     initWallet: async (payload) => {
       const mnemonic = Array.isArray(payload.mnemonic) ? payload.mnemonic.join(' ') : payload.mnemonic;
       await configService.setConfig({
@@ -42,5 +45,14 @@ export function createInternalService(payload: {
         paths: [FULL_OWNERSHIP_EXTERNAL_PARENT_PATH, FULL_OWNERSHIP_INTERNAL_PARENT_PATH, RULE_BASED_PARENT_PATH],
       });
     },
+
+    isInitialized: () => Promise.resolve(keystoreService.hasInitialized()),
+    startInitIfNotInitialized: async () => {
+      const initialized = await impl.isInitialized();
+      if (initialized) return;
+      await browser.tabs.create({ url: `walletManager.html` });
+    },
   };
+
+  return impl;
 }

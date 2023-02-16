@@ -1,15 +1,15 @@
 import { Endpoint } from 'webext-bridge';
 import browser from 'webextension-polyfill';
 import { errors } from '@nexus-wallet/utils';
-import { RpcDebugMethods, RpcMethods, ServerParams } from './types';
+import { DebugMethods, WalletMethods, ServerParams } from './types';
 import { JSONRPCServer } from 'json-rpc-2.0';
 import { createServicesFactory } from '../services';
 
 export const server = new JSONRPCServer<ServerParams>();
 
-export function addMethod<K extends keyof (RpcMethods & RpcDebugMethods)>(
+export function addMethod<K extends keyof (WalletMethods & DebugMethods)>(
   method: K,
-  handler: (param: RpcMethods[K]['params'], context: ServerParams) => RpcMethods[K]['result'],
+  handler: (param: WalletMethods[K]['params'], context: ServerParams) => WalletMethods[K]['result'],
 ): void {
   server.addMethod(String(method), handler);
 }
