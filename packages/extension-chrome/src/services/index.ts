@@ -5,8 +5,11 @@ import { createNotificationService } from './notification';
 import { createInternalService, InternalService } from './internal';
 import { createKeystoreService } from './keystore';
 import { createConfigService } from './config';
+import type { Browser } from 'webextension-polyfill';
+import browser from 'webextension-polyfill';
 
 export interface Modules {
+  browser: Browser;
   storage: Storage<unknown>;
   notificationService: NotificationService;
   keystoreService: KeystoreService;
@@ -21,7 +24,7 @@ export interface ServicesFactory {
 export function createServicesFactory(): ServicesFactory {
   const container = awilix.createContainer<Modules>();
   container.register({
-    // TODO replace with the real storage
+    browser: awilix.asValue(browser),
     storage: awilix.asFunction(createBrowserExtensionStorage).singleton(),
     configService: awilix.asFunction(createConfigService).singleton(),
     internalService: awilix.asFunction(createInternalService).singleton(),

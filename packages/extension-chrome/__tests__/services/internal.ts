@@ -6,6 +6,8 @@ import { createConfigService } from '../../src/services/config';
 test('internal service', async () => {
   const storage = createInMemoryStorage();
   const internalService = createInternalService({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    browser: {} as any,
     keystoreService: createKeystoreService({ storage }),
     configService: createConfigService({ storage }),
   });
@@ -19,6 +21,7 @@ test('internal service', async () => {
   const configService = createConfigService({ storage });
   const keystoreService = createKeystoreService({ storage });
 
+  await expect(internalService.isInitialized()).resolves.toBe(true);
   await expect(Promise.resolve(keystoreService.hasInitialized())).resolves.toBe(true);
 
   const publicKey = await keystoreService.getExtendedPublicKey({
