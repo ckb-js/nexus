@@ -1,20 +1,13 @@
-import { ConfigService, GrantService, KeystoreService, NotificationService, Storage } from '@nexus-wallet/types';
-import { createGrantService } from './grant';
-import { createInMemoryStorage } from './storage';
+import * as awilix from 'awilix';
+import { ConfigService, KeystoreService, NotificationService, Storage } from '@nexus-wallet/types';
+import { createBrowserExtensionStorage } from './storage';
 import { createNotificationService } from './notification';
 import { createInternalService, InternalService } from './internal';
 import { createKeystoreService } from './keystore';
 import { createConfigService } from './config';
-import { Config } from '@nexus-wallet/types/lib/services';
 
-interface Schema {
-  grant: string[];
-  config?: Config;
-}
-
-export interface Services {
-  storage: Storage<Schema>;
-  grantService: GrantService;
+export interface Modules {
+  storage: Storage<unknown>;
   notificationService: NotificationService;
   keystoreService: KeystoreService;
   configService: ConfigService;
@@ -22,36 +15,21 @@ export interface Services {
 }
 
 export interface ServicesFactory {
-  get<K extends keyof Services>(name: K): Promise<Services[K]>;
+  get<K extends keyof Modules>(name: K): Modules[K];
 }
 
 export function createServicesFactory(): ServicesFactory {
-  // TODO replace with the real storage
-  const storage = createInMemoryStorage<Schema>();
-
-  const defaultStorage = {
-    grant: [],
-  };
-  storage.setAll({
-    ...defaultStorage,
-    ...storage.getAll(),
+  const container = awilix.createContainer<Modules>();
+  container.register({
+    // TODO replace with the real storage
+    storage: awilix.asFunction(createBrowserExtensionStorage).singleton(),
+    configService: awilix.asFunction(createConfigService).singleton(),
+    internalService: awilix.asFunction(createInternalService).singleton(),
+    keystoreService: awilix.asFunction(createKeystoreService).singleton(),
+    notificationService: awilix.asFunction(createNotificationService).singleton(),
   });
 
-  const keystoreService = createKeystoreService({ storage });
-  const configService = createConfigService({ storage });
-
-  const services = {
-    storage,
-    grantService: createGrantService({ storage }),
-    notificationService: createNotificationService(),
-    keystoreService,
-    configService,
-    internalService: createInternalService({ keystoreService, configService }),
-  };
-
   return {
-    get(key) {
-      return Promise.resolve(services[key]);
-    },
+    get: (key) => container.resolve(key),
   };
 }

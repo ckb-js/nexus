@@ -1,6 +1,6 @@
 import { Script } from '@ckb-lumos/lumos';
 import { Promisable } from '@nexus-wallet/types/lib/base';
-import { Services } from '../services';
+import { Modules } from '../services';
 import { Call, CallMap } from '@nexus-wallet/types';
 
 export interface RpcMethods extends CallMap {
@@ -23,6 +23,6 @@ export interface InternalMethods extends CallMap {
  * the RPC server handler second params
  */
 export interface ServerParams {
-  resolveService<K extends keyof Services>(name: K): Promisable<Services[K]>;
+  resolveService<K extends keyof Modules>(name: K): Promisable<Modules[K]>;
   getRequesterAppInfo(): Promise<{ url: string }>;
 }
