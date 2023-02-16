@@ -1,6 +1,6 @@
 import * as awilix from 'awilix';
 import { ConfigService, KeystoreService, NotificationService, Storage } from '@nexus-wallet/types';
-import { createBrowserExtensionStorage } from './storage';
+import { createBrowserExtensionStorage } from './storage/extension';
 import { createNotificationService } from './notification';
 import { createInternalService, InternalService } from './internal';
 import { createKeystoreService } from './keystore';
