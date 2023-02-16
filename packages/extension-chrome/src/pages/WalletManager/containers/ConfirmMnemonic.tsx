@@ -8,8 +8,14 @@ import range from 'lodash.range';
 import { useOutletContext } from './CreateProcessFrame';
 
 export const ConfirmMnemonic: FC = () => {
-  const { seed } = useWalletCreationStore();
-  const { setNextAvailable } = useOutletContext();
+  const { initWallet, seed } = useWalletCreationStore();
+  const { setNextAvailable, whenSubmit } = useOutletContext();
+
+  useEffect(() => {
+    whenSubmit(async () => {
+      await initWallet();
+    });
+  }, [initWallet, whenSubmit]);
 
   const confirmPositions = useMemo(() => shuffle(range(0, seed.length)), [seed]);
 
@@ -36,7 +42,7 @@ export const ConfirmMnemonic: FC = () => {
         isAllCorrect = false;
       }
       wordElements.push(
-        <Box as="span" data-test-id={`selectedSeed[${index}]`} color={isCorrect ? 'black' : 'red'}>
+        <Box as="span" key={index} data-test-id={`selectedSeed[${index}]`} color={isCorrect ? 'black' : 'red'}>
           {chosenWord}{' '}
         </Box>,
       );

@@ -1,6 +1,6 @@
 import React, { FC, useEffect } from 'react';
 import { FormControl, FormLabel, Input, Heading, VStack, Box, FormErrorMessage } from '@chakra-ui/react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 
 import { useWalletCreationStore } from '../store';
 import { useOutletContext } from 'react-router-dom';
@@ -20,13 +20,17 @@ export const SetPassword: FC<SetPasswordProps> = ({ isImportSeed }) => {
   const setStore = useWalletCreationStore((s) => s.set);
   const { whenSubmit, setNextAvailable } = useOutletContext() as OutletContext;
 
-  const { register, handleSubmit, getValues, watch, formState } = useForm<FormValues>({
+  const { control, handleSubmit, formState } = useForm<FormValues>({
     mode: 'onChange',
+    defaultValues: {
+      password: '',
+      confirmPassword: '',
+    },
   });
 
   useEffect(() => {
     whenSubmit &&
-      whenSubmit(() =>
+      whenSubmit(
         handleSubmit(({ password }) => {
           setStore({ password });
         }),
@@ -36,9 +40,6 @@ export const SetPassword: FC<SetPasswordProps> = ({ isImportSeed }) => {
   useEffect(() => {
     setNextAvailable(formState.isValid);
   }, [setNextAvailable, formState]);
-
-  const showPasswordError = !!watch('password') && !!formState.errors.password;
-  const confirmPasswordError = !showPasswordError && !!watch('confirmPassword') && !!formState.errors.confirmPassword;
 
   return (
     <>
@@ -51,33 +52,57 @@ export const SetPassword: FC<SetPasswordProps> = ({ isImportSeed }) => {
         </Box>
       )}
       <VStack>
-        <FormControl isInvalid={showPasswordError}>
-          <FormLabel fontSize="sm">New password (8 characters minimum)</FormLabel>
-          <Input
-            size="lg"
-            placeholder="Input your password"
-            type="password"
-            data-test-id="password"
-            {...register('password', { minLength: 8 })}
-          />
-          <FormErrorMessage>Your password must be at least 8 characters long.</FormErrorMessage>
-        </FormControl>
-        <FormControl isInvalid={confirmPasswordError}>
-          <FormLabel fontSize="sm">Confirm password</FormLabel>
-          <Input
-            size="lg"
-            type="password"
-            data-test-id="confirmPassword"
-            placeholder="input your password"
-            {...register('confirmPassword', {
-              minLength: 8,
-              validate: (value) => {
-                return value && getValues('password') === value;
-              },
-            })}
-          />
-          <FormErrorMessage>Your two passwords are not correspond</FormErrorMessage>
-        </FormControl>
+        <Controller
+          control={control}
+          name="password"
+          rules={{
+            required: true,
+            minLength: 8,
+          }}
+          render={({ field, fieldState }) => (
+            <FormControl
+              isInvalid={fieldState.invalid && field.value.length > 0 && fieldState.error?.type !== 'required'}
+            >
+              <FormLabel fontSize="sm">New password (8 characters minimum)</FormLabel>
+              <Input
+                w="264px"
+                size="lg"
+                placeholder="Input your password"
+                type="password"
+                data-test-id="password"
+                {...field}
+              />
+              <FormErrorMessage>Your password must be at least 8 characters long.</FormErrorMessage>
+            </FormControl>
+          )}
+        />
+
+        <Controller
+          control={control}
+          name="confirmPassword"
+          rules={{
+            required: true,
+            validate: (password, formValue) => {
+              return password === formValue.confirmPassword;
+            },
+          }}
+          render={({ field, fieldState }) => (
+            <FormControl
+              isInvalid={fieldState.invalid && field.value.length > 0 && fieldState.error?.type !== 'required'}
+            >
+              <FormLabel fontSize="sm">Confirm password</FormLabel>
+              <Input
+                w="264px"
+                size="lg"
+                type="password"
+                data-test-id="confirmPassword"
+                placeholder="input your password"
+                {...field}
+              />
+              <FormErrorMessage>Your two passwords are not correspond</FormErrorMessage>
+            </FormControl>
+          )}
+        />
 
         {/* Not implement */}
         {/* <FormControl>

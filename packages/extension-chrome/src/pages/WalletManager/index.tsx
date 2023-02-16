@@ -101,7 +101,7 @@ const routeConfig: RouteObject[] = [
       },
       {
         path: 'account',
-        element: <CreateAccount />,
+        element: <CreateAccount isImportSeed />,
       },
     ],
   },

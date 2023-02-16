@@ -24,7 +24,7 @@ import { useWalletCreationStore } from '../store';
 export const CreateMnemonic: FC = () => {
   const toast = useToast();
   const setWalletStore = useWalletCreationStore((actions) => actions.set);
-  const { data: mnemonic } = useQuery({
+  const { data: mnemonic } = useQuery(['randomSeed'], {
     queryFn: () => {
       return walletService.generateRandomSeed();
     },

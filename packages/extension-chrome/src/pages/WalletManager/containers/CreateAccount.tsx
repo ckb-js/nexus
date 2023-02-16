@@ -5,8 +5,8 @@ import React, { FC, useEffect } from 'react';
 import { useWalletCreationStore } from '../store';
 import { useOutletContext } from './CreateProcessFrame';
 
-export const CreateAccount: FC = () => {
-  const { set: setStoreState } = useWalletCreationStore();
+export const CreateAccount: FC<{ isImportSeed?: boolean }> = ({ isImportSeed }) => {
+  const { set: setStoreState, initWallet } = useWalletCreationStore();
 
   const { whenSubmit, setNextAvailable } = useOutletContext();
 
@@ -14,12 +14,13 @@ export const CreateAccount: FC = () => {
 
   useEffect(() => {
     whenSubmit &&
-      whenSubmit(() =>
+      whenSubmit(
         handleSubmit(({ username }) => {
           setStoreState({ username: username });
+          return isImportSeed && initWallet();
         }),
       );
-  }, [whenSubmit, handleSubmit, setStoreState]);
+  }, [whenSubmit, handleSubmit, setStoreState, isImportSeed, initWallet]);
 
   useEffect(() => {
     setNextAvailable(formState.isValid);
@@ -28,7 +29,7 @@ export const CreateAccount: FC = () => {
   return (
     <>
       <Heading mb="48px" lineHeight="111%" fontWeight="semibold">
-        Select Username
+        {isImportSeed ? 'Select Username' : 'Create Username'}
       </Heading>
       <Box as={Avatar} mb="12px" w="96px" h="96px" />
 

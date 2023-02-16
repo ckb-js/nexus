@@ -1,4 +1,4 @@
-import React, { FC, useMemo, useState } from 'react';
+import React, { FC, useCallback, useMemo, useState } from 'react';
 import { Box, Button, Center, Flex, FlexProps, Grid, HStack, Icon, Text } from '@chakra-ui/react';
 import {
   Outlet,
@@ -75,7 +75,7 @@ const renderSingleStep: StepsProps['itemRender'] = ({ title, description, status
 };
 
 export type OutletContext = {
-  whenSubmit: (cb: () => () => Promise<void>) => void;
+  whenSubmit: (cb: () => Promise<unknown>) => void;
   setNextAvailable: (enable: boolean) => void;
 };
 
@@ -103,10 +103,19 @@ export const CreateProcessFrame: FC = () => {
     navigate(currentPathIndex === 0 ? flowConfig.entry : flowPaths[currentPathIndex - 1], { replace: true });
   };
 
-  const [whenFormSubmit, setWhenFormSubmit] = useState<() => Promise<void>>();
+  const [whenFormSubmit, _setWhenFormSubmit] = useState({ action: () => Promise.resolve() as Promise<unknown> });
+
+  const setWhenFormSubmit = useCallback((cb: (() => Promise<unknown>) | undefined) => {
+    _setWhenFormSubmit({ action: cb ?? (() => Promise.resolve()) });
+  }, []);
+
+  const [submitting, setSubmitting] = useState(false);
+
   const onSubmit = async (e: React.FormEvent<unknown>) => {
     e.preventDefault();
-    await whenFormSubmit?.();
+    setSubmitting(true);
+    await whenFormSubmit.action();
+    setSubmitting(false);
     setNextAvailable(false);
     setWhenFormSubmit(undefined);
     navigate(currentPathIndex === flowPaths.length - 1 ? flowConfig.exit : flowPaths[currentPathIndex + 1], {
@@ -148,9 +157,9 @@ export const CreateProcessFrame: FC = () => {
             </Button>
           )}
           <Button
-            // only comment for debug
             type="submit"
             data-test-id="next"
+            isLoading={submitting}
             isDisabled={!nextAvailable && !currentStep.displayOnly}
             rightIcon={<ChevronRightIcon />}
           >

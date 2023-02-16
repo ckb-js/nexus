@@ -14,25 +14,56 @@ import {
 import times from 'lodash.times';
 import React, { useEffect } from 'react';
 import { FC } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useFieldArray, useForm } from 'react-hook-form';
+import wordList from '@ckb-lumos/hd/lib/mnemonic/word_list';
 import { useWalletCreationStore } from '../store';
 import { useOutletContext } from './CreateProcessFrame';
 
-// TODO: use real service
+const MNEMONIC_LENGTH = 12;
+
+const wordSet = new Set(wordList);
+
+const validateWordInList = (word: string) => {
+  return wordSet.has(word);
+};
+
+const validateUniqueWord = (index: number) => (word: string, formValues: FormFields) => {
+  if (index === 0) return true;
+
+  return formValues.seed.slice(0, index).every((s) => s.value !== word);
+};
+
+type FormFields = { seed: { value: string }[] };
+
+type ValidateErrorType = 'wordInList' | 'unique';
+
+const _ErrorMessageMap: Record<ValidateErrorType, string | undefined> = {
+  unique: 'Seed words must be unique',
+  wordInList: 'Seed words must be in the word list',
+};
 
 /**
  * Confirm the mnemonic
  */
 export const RecoveryWallet: FC = () => {
   const setStoreState = useWalletCreationStore((s) => s.set);
-  const { register, formState, handleSubmit } = useForm<{ seed: string[] }>();
+  const { formState, handleSubmit, control } = useForm<FormFields>({
+    defaultValues: {
+      seed: times(MNEMONIC_LENGTH, () => ({ value: '' })),
+    },
+    mode: 'onChange',
+  });
+
+  const { fields } = useFieldArray({
+    control,
+    name: 'seed',
+  });
   const { setNextAvailable, whenSubmit } = useOutletContext();
 
   useEffect(() => {
-    whenSubmit(() =>
+    whenSubmit(
       handleSubmit((values) => {
-        setStoreState({ seed: values.seed });
-        console.log(values);
+        setStoreState({ seed: values.seed.map((s) => s.value) });
       }),
     );
   }, [whenSubmit, handleSubmit, setStoreState]);
@@ -41,20 +72,30 @@ export const RecoveryWallet: FC = () => {
     setNextAvailable(formState.isValid);
   }, [formState.isValid, setNextAvailable]);
 
-  const inputs = times(12, (index) => (
-    <FormControl as={Flex} alignItems="center">
-      <FormLabel mr="8px" w="16px">
-        {`${index + 1}`.padStart(2, ' ')}
-      </FormLabel>
-      <Input
-        mr="8px"
-        type="password"
-        w="186px"
-        data-test-id={`seed[${index}]`}
-        {...register(`seed.${index}`, { required: true })}
+  const inputs = fields.map((field, index) => {
+    return (
+      <Controller
+        control={control}
+        key={field.id}
+        name={`seed.${index}.value`}
+        rules={{
+          required: true,
+          validate: {
+            wordInList: validateWordInList,
+            unique: validateUniqueWord(index),
+          } as Record<ValidateErrorType, (value: string, formValues: FormFields) => boolean>,
+        }}
+        render={({ field, fieldState }) => (
+          <FormControl isInvalid={fieldState.invalid && field.value.length > 0} as={Flex} alignItems="center">
+            <FormLabel mr="8px" w="16px">
+              {`${index + 1}`.padStart(2, ' ')}
+            </FormLabel>
+            <Input mr="8px" type="password" w="186px" data-test-id={`seed[${index}]`} {...field} />
+          </FormControl>
+        )}
       />
-    </FormControl>
-  ));
+    );
+  });
 
   return (
     <>
@@ -78,6 +119,29 @@ export const RecoveryWallet: FC = () => {
           {inputs}
         </Grid>
       </Box>
+      <Controller
+        control={control}
+        name="seed"
+        render={({ formState }) => {
+          const { errors, isValid } = formState;
+          const hasInvalidWord =
+            !isValid &&
+            times(MNEMONIC_LENGTH, (i) => errors.seed?.[i]?.value?.type).some(
+              (t) => t !== undefined && t !== 'required',
+            );
+
+          return (
+            <>
+              {hasInvalidWord && (
+                <Alert mt="16px" status="error">
+                  <AlertIcon />
+                  <AlertDescription fontSize="md">Please check your Seed</AlertDescription>
+                </Alert>
+              )}
+            </>
+          );
+        }}
+      />
     </>
   );
 };

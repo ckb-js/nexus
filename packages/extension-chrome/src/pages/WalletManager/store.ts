@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { internalService } from '../../mockServices/internal';
 
 type State = {
   seed: string[];
@@ -9,10 +10,10 @@ type State = {
 type Actions = {
   set: (state: Partial<State>) => void;
   reset: () => void;
-  createWallet: () => Promise<void>;
+  initWallet: () => Promise<void>;
 };
 
-export const useWalletCreationStore = create<State & Actions>((setState) => ({
+export const useWalletCreationStore = create<State & Actions>((setState, get) => ({
   seed: [],
   password: '',
   username: '',
@@ -27,9 +28,10 @@ export const useWalletCreationStore = create<State & Actions>((setState) => ({
     });
   },
 
-  createWallet: () => {
+  initWallet: () => {
     return new Promise((resolve) => {
       setTimeout(() => {
+        internalService.initWallet({ password: get().password, nickname: get().username, mnemonic: get().seed });
         resolve();
       }, 2000);
     });
