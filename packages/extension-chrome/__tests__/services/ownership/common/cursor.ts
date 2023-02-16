@@ -1,4 +1,4 @@
-import { DefaultLiveCellCursor, DefaultLockCursor } from '../../src/services/backend/cursor';
+import { DefaultLiveCellCursor, DefaultLockCursor } from '../../../../src/services/ownership/cursor';
 
 describe('Cursor', () => {
   it('should decode and encode lock cursor', () => {

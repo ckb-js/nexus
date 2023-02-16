@@ -1,5 +1,5 @@
-import { CircularOffChainLockInfo } from '../../src/services/backend/circular';
-import { LockInfo } from '../../src/services/backend/types';
+import { CircularOffChainLockInfo } from '../../../../src/services/ownership/circular';
+import { LockInfo } from '../../../../src/services/ownership/types';
 
 const generateLockInfo = (index = 0): LockInfo => ({
   parentPath: `m/44'/309'/0'/0/${index}`,

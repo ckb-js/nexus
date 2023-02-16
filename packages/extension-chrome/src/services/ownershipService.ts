@@ -1,6 +1,6 @@
-import { OnChainLockProvider } from './backend/onchainLockProvider';
+import { OnChainLockProvider } from './ownership/onchainLockProvider';
 import { SignTransactionPayload } from '@nexus-wallet/types/src/services/OwnershipService';
-import { Backend } from './backend/backend';
+import { Backend } from './ownership/backend';
 import { Cell, Script } from '@ckb-lumos/base';
 import { OwnershipService, Paginate, KeystoreService, NotificationService } from '@nexus-wallet/types';
 import {
@@ -13,11 +13,11 @@ import {
 import { asserts } from '@nexus-wallet/utils';
 import { createTransactionSkeleton } from '@ckb-lumos/helpers';
 import { prepareSigningEntries } from '@ckb-lumos/common-scripts/lib/secp256k1_blake160';
-import { LocksManager } from './backend/locksManager';
-import { CircularOffChainLockInfo } from './backend/circular';
-import { LockInfo } from './backend/types';
+import { LocksManager } from './ownership/locksManager';
+import { CircularOffChainLockInfo } from './ownership/circular';
+import { LockInfo } from './ownership/types';
 import { throwError } from '@nexus-wallet/utils/lib/error';
-import { DefaultLockCursor, DefaultLiveCellCursor } from './backend/cursor';
+import { DefaultLockCursor, DefaultLiveCellCursor } from './ownership/cursor';
 
 type Props = {
   keystoreService: KeystoreService;

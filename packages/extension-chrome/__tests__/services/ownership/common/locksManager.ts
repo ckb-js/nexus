@@ -1,12 +1,12 @@
 import {
-  generateLocksAndPointers,
+  generateFullLocksAndPointers,
+  generateRuleBasedLocksAndPointers,
   mockFullOwnershipLockInfosChange,
   mockFullOwnershipLockInfosExternal,
   mockRuleBasedOwnershipLockInfos,
 } from './utils';
-import { getDefaultLocksAndPointer } from '../../src/services/backend/utils';
-import { LocksManager } from '../../src/services/backend/locksManager';
-import { LockInfoStorage, LockInfo } from '../../src/services/backend/types';
+import { LocksManager } from '../../../../src/services/ownership/locksManager';
+import { LockInfoStorage, LockInfo } from '../../../../src/services/ownership/types';
 import { Storage } from '@nexus-wallet/types';
 
 const generateLockInfo = (index = 0, change = 0): LockInfo => ({
@@ -27,8 +27,8 @@ const generateLockInfo = (index = 0, change = 0): LockInfo => ({
 describe('locksManager', () => {
   it('should return default value when lockDetails are empty', async () => {
     const memoryStorage: LockInfoStorage = {
-      fullOwnership: getDefaultLocksAndPointer(),
-      ruleBasedOwnership: getDefaultLocksAndPointer(),
+      full: generateFullLocksAndPointers(),
+      ruleBased: generateRuleBasedLocksAndPointers(),
     };
     const mockStorage: Storage<LockInfoStorage> = {
       setItem: jest.fn((key, value) => {
@@ -46,7 +46,7 @@ describe('locksManager', () => {
 
     expect(
       await locksManager.getlockInfoByLock({
-        lock: { codeHash: '0x', args: '0x', hashType: 'type' },
+        lock: { codeHash: '0x01', args: '0x', hashType: 'type' },
       }),
     ).toEqual(undefined);
   });
@@ -56,8 +56,8 @@ describe('locksManager', () => {
   let mockStorage: Storage<LockInfoStorage>;
   beforeEach(() => {
     const memoryStorage: LockInfoStorage = {
-      fullOwnership: generateLocksAndPointers({ fullOwnership: true }),
-      ruleBasedOwnership: generateLocksAndPointers({ fullOwnership: false }),
+      full: generateFullLocksAndPointers(),
+      ruleBased: generateRuleBasedLocksAndPointers(),
     };
     mockStorage = {
       setItem: jest.fn((key, value) => {
@@ -82,9 +82,9 @@ describe('locksManager', () => {
 
     expect(provider.items.size()).toEqual(20);
     provider.takeAndSupply(0, generateLockInfo(101));
-    expect(provider.items.size()).toEqual(21);
-    const offChains = await mockStorage.getItem('fullOwnership');
-    expect(offChains?.details.offChain.external.length).toEqual(21);
+    expect(provider.items.size()).toEqual(20);
+    const offChains = await mockStorage.getItem('full');
+    expect(offChains?.lockInfos.external.length).toEqual(101);
   });
   it('fullChangeProvider should return 1st internal lock when call next()', async () => {
     const provider = await locksManager.fullChangeProvider();
@@ -92,10 +92,10 @@ describe('locksManager', () => {
     expect(provider.next()).toEqual(mockFullOwnershipLockInfosChange[0]);
 
     expect(provider.items.size()).toEqual(20);
-    provider.takeAndSupply(0, generateLockInfo(101));
-    expect(provider.items.size()).toEqual(21);
-    const offChains = await mockStorage.getItem('fullOwnership');
-    expect(offChains?.details.offChain.change.length).toEqual(21);
+    provider.takeAndSupply(0, generateLockInfo(101, 1));
+    expect(provider.items.size()).toEqual(20);
+    const offChains = await mockStorage.getItem('full');
+    expect(offChains?.lockInfos.change.length).toEqual(101);
   });
   it('ruleBasedOnChainLockProvider should return 1st lock when call next()', async () => {
     const provider = await locksManager.ruleBasedProvider();
@@ -104,9 +104,9 @@ describe('locksManager', () => {
 
     expect(provider.items.size()).toEqual(20);
     provider.takeAndSupply(0, generateLockInfo(101));
-    expect(provider.items.size()).toEqual(21);
-    const offChains = await mockStorage.getItem('ruleBasedOwnership');
-    expect(offChains?.details.offChain.external.length).toEqual(21);
+    expect(provider.items.size()).toEqual(20);
+    const offChains = await mockStorage.getItem('ruleBased');
+    expect(offChains?.lockInfos.length).toEqual(101);
   });
 
   it('fullOnChainLockProvider should return 1st external lock when call getNextLock()', async () => {

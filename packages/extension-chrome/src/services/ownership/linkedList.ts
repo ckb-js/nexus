@@ -7,6 +7,7 @@ export interface ILinkedList<T> {
   insertAtEnd(data: T): Node<T>;
   traverse(): T[];
   size(): number;
+  delete(predict: (data: T) => boolean): void;
   search(comparator: (data: T) => boolean): Node<T> | null;
 }
 
@@ -31,6 +32,25 @@ export class LinkedList<T> implements ILinkedList<T> {
       lastNode.next = node;
     }
     return node;
+  }
+
+  public delete(predict: (data: T) => boolean): Node<T> | null {
+    const deleteNext = (node: Node<T>, prev: Node<T> | null): Node<T> | null => {
+      if (predict(node.data)) {
+        if (prev) {
+          prev.next = node.next;
+        } else {
+          this.head = node.next;
+        }
+        return node;
+      } else {
+        return node.next ? deleteNext(node.next, node) : node;
+      }
+    };
+    if (!this.head) {
+      return null;
+    }
+    return deleteNext(this.head, null);
   }
 
   public search(comparator: (data: T) => boolean): Node<T> | null {

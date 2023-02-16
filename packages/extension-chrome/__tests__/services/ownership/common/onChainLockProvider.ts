@@ -1,6 +1,6 @@
-import { DefaultLockCursor } from './../../src/services/backend/cursor';
-import { DefaultOnChainLockProvider } from '../../src/services/backend/onchainLockProvider';
-import { LockInfo } from '../../src/services/backend/types';
+import { DefaultLockCursor } from '../../../../src/services/ownership/cursor';
+import { DefaultOnChainLockProvider } from '../../../../src/services/ownership/onchainLockProvider';
+import { LockInfo } from '../../../../src/services/ownership/types';
 
 const generateLockInfo = (index = 0, change = 0): LockInfo => ({
   parentPath: `m/44'/309'/0'/${change}`,

@@ -1,8 +1,10 @@
+import { throwError } from '@nexus-wallet/utils/lib/error';
 import { LockInfo } from './types';
 import { LockCursor } from './cursor';
 import { LinkedList } from './linkedList';
 import { OwnershipFilter } from '@nexus-wallet/types/lib/services/OwnershipService';
-import { isExternalParentPath } from './utils';
+import { isExternal, isFullOwnership } from './full/utils';
+import { isRuleBasedOwnership } from './ruleBased/utils';
 
 type LockInfoWithCursor = {
   lockInfo: LockInfo;
@@ -44,7 +46,13 @@ function cursorComparator(lockInfo: LockInfo, cursor?: LockCursor): boolean {
  */
 function filterComparator(lockInfo: LockInfo, filter?: OwnershipFilter): boolean {
   if (!filter) return true;
-  return filter.change === 'external'
-    ? isExternalParentPath({ parentPath: lockInfo.parentPath })
-    : !isExternalParentPath({ parentPath: lockInfo.parentPath });
+  const parentPath = lockInfo.parentPath;
+  if (isFullOwnership({ path: parentPath })) {
+    const isLockInfoExternal = isExternal({ path: parentPath });
+    return (filter.change === 'external') === isLockInfoExternal;
+  } else if (isRuleBasedOwnership({ path: parentPath })) {
+    return filter.change === 'external';
+  } else {
+    throwError('unknown ownership type', parentPath);
+  }
 }

@@ -43,7 +43,7 @@ export class CircularOffChainLockInfo implements Circular<LockInfo> {
     }
     asserts.asserts(targetNode, 'targetNode should not be empty when calling takeAndSupply', take);
     !targetNode.data.onchain && this.items.insertAtEnd(newItem);
-    targetNode.data.onchain = true;
+    this.items.delete((data) => data.index === targetNode!.data.index);
     this.storageUpdator(this.items.traverse());
     return newItem;
   }

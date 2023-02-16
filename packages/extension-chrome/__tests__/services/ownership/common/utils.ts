@@ -1,12 +1,12 @@
+import { FullLocksAndPointer, RuleBasedLocksAndPointer } from '../../../../src/services/ownership/types';
 import { RPC } from '@ckb-lumos/rpc';
 import { RPC as IndexerRPC } from '@ckb-lumos/ckb-indexer/lib/rpc';
-import { Cell, utils } from '@ckb-lumos/base';
+import { Cell } from '@ckb-lumos/base';
 import { CkbIndexer } from '@ckb-lumos/ckb-indexer/lib/indexer';
-import { publicKeyToBlake160 } from '@ckb-lumos/hd/lib/key';
 import { Promisable } from '@nexus-wallet/types/lib';
 import { KeystoreService, SignMessagePayload } from '@nexus-wallet/types/lib/services/KeystoreService';
-import { LockInfo, LocksAndPointer } from '../../src/services/backend/types';
-import { Backend } from './../../src/services/backend/backend';
+import { LockInfo } from '../../../../src/services/ownership/types';
+import { Backend } from '../../../../src/services/ownership/backend';
 
 it('jest keep', async () => {});
 
@@ -47,34 +47,34 @@ export const createMockKeystoreService = (payload: Partial<KeystoreService>): Ke
 
 export const mockFullOwnershipLockInfosExternal: LockInfo[] = new Array(100).fill(0).flatMap((_, i) => {
   const lock = {
-    args: publicKeyToBlake160(`0x${String(i).padStart(2, '0').repeat(33)}`),
-    codeHash: '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
+    args: '0x',
+    codeHash: '0x',
     hashType: 'type' as const,
   };
   return {
     parentPath: `m/44'/309'/0'/0`,
     index: i,
     lock,
-    blake160: publicKeyToBlake160(`0x${String(i).padStart(2, '0').repeat(33)}`),
-    publicKey: `0x${String(i).padStart(2, '0').repeat(33)}`,
-    lockHash: utils.computeScriptHash(lock),
+    blake160: '',
+    publicKey: '0x000000000000000000000000000000000000000000000000000000000000000000',
+    lockHash: '0x',
     network: 'ckb_testnet' as const,
     onchain: false,
   };
 });
 export const mockFullOwnershipLockInfosChange: LockInfo[] = new Array(100).fill(0).flatMap((_, i) => {
   const lock = {
-    args: publicKeyToBlake160(`0x${String(i).padStart(2, '0').repeat(33)}`),
-    codeHash: '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
+    args: '0x',
+    codeHash: '0x',
     hashType: 'type' as const,
   };
   return {
     parentPath: `m/44'/309'/0'/1`,
     index: i,
     lock,
-    blake160: publicKeyToBlake160(`0x${String(i).padStart(2, '0').repeat(33)}`),
-    publicKey: `0x${String(i).padStart(2, '0').repeat(33)}`,
-    lockHash: utils.computeScriptHash(lock),
+    blake160: '',
+    publicKey: '0x000000000000000000000000000000000000000000000000000000000000000000',
+    lockHash: '0x',
     network: 'ckb_testnet' as const,
     onchain: false,
   };
@@ -92,63 +92,73 @@ export const mockFullOwnershipLockInfos = [...mockFullOwnershipLockInfosExternal
  */
 export const mockRuleBasedOwnershipLockInfos: LockInfo[] = new Array(100).fill(0).map((_, i) => {
   const lock = {
-    args: publicKeyToBlake160(`0x${String(i).padStart(2, '0').repeat(33)}`),
-    codeHash: '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
+    args: '0x',
+    codeHash: '0x',
     hashType: 'type' as const,
   };
   return {
     parentPath: `m/4410179'/0'`,
     index: i,
     lock,
-    blake160: publicKeyToBlake160(`0x${String(i).padStart(2, '0').repeat(33)}`),
-    publicKey: `0x${String(i).padStart(2, '0').repeat(33)}`,
-    lockHash: utils.computeScriptHash(lock),
+    blake160: '',
+    publicKey: '0x000000000000000000000000000000000000000000000000000000000000000000',
+    lockHash: '0x',
     network: 'ckb_testnet' as const,
     onchain: false,
   };
 });
 
-export const generateLocksAndPointers = (payload: { fullOwnership: boolean }): LocksAndPointer => {
-  const lockInfos = payload.fullOwnership ? mockFullOwnershipLockInfos : mockRuleBasedOwnershipLockInfos;
-  const fullOwnership: LocksAndPointer = {
-    details: {
-      offChain: {
-        external: lockInfos.filter((_, i) => i % 5 === 0 && i < 100),
-        change: lockInfos.filter((_, i) => i % 5 === 0 && i >= 100),
-      },
-      onChain: {
-        external: lockInfos
-          .filter((_, i) => i % 5 !== 0 && i < 100)
-          .map((lockInfo) => ({ ...lockInfo, onchain: true })),
-        change: lockInfos.filter((_, i) => i % 5 !== 0 && i >= 100).map((lockInfo) => ({ ...lockInfo, onchain: true })),
-      },
+export function generateBlankFullLocksAndPointers(): FullLocksAndPointer {
+  const fullOwnership: FullLocksAndPointer = {
+    lockInfos: {
+      external: [],
+      change: [],
     },
     pointers: {
-      offChain: {
-        external: null,
-        change: null,
-      },
+      external: null,
+      change: null,
     },
   };
-  const rbOwnership: LocksAndPointer = {
-    details: {
-      offChain: {
-        external: lockInfos.filter((_, i) => i % 5 === 0 && i < 100),
-        change: [],
-      },
-      onChain: {
-        external: lockInfos
-          .filter((_, i) => i % 5 !== 0 && i < 100)
-          .map((lockInfo) => ({ ...lockInfo, onchain: true })),
-        change: [],
-      },
+  return fullOwnership;
+}
+
+export function generateFullLocksAndPointers(): FullLocksAndPointer {
+  const fullOwnership: FullLocksAndPointer = {
+    lockInfos: {
+      external: mockFullOwnershipLockInfosExternal.map((lock, i) => {
+        const offChain = i % 5 === 0 && i < 100;
+        lock.onchain = !offChain;
+        return lock;
+      }),
+      change: mockFullOwnershipLockInfosChange.map((lock, i) => {
+        const offChain = i % 5 === 0 && i < 100;
+        lock.onchain = !offChain;
+        return lock;
+      }),
     },
     pointers: {
-      offChain: {
-        external: null,
-        change: null,
-      },
+      external: null,
+      change: null,
     },
   };
-  return payload.fullOwnership ? fullOwnership : rbOwnership;
-};
+  return fullOwnership;
+}
+
+export function generateRuleBasedLocksAndPointers(): RuleBasedLocksAndPointer {
+  const rbOwnership: RuleBasedLocksAndPointer = {
+    lockInfos: mockRuleBasedOwnershipLockInfos.map((lock, i) => {
+      const offChain = i % 5 === 0 && i < 100;
+      lock.onchain = !offChain;
+      return lock;
+    }),
+    pointer: null,
+  };
+  return rbOwnership;
+}
+export function generateBlankRuleBasedLocksAndPointers(): RuleBasedLocksAndPointer {
+  const rbOwnership: RuleBasedLocksAndPointer = {
+    lockInfos: [],
+    pointer: null,
+  };
+  return rbOwnership;
+}
