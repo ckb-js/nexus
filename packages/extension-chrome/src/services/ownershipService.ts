@@ -19,15 +19,27 @@ import { LockInfo } from './ownership/types';
 import { throwError } from '@nexus-wallet/utils/lib/error';
 import { DefaultLockCursor, DefaultLiveCellCursor } from './ownership/cursor';
 
-type Props = {
+type ServiceProps = {
   keystoreService: KeystoreService;
   notificationService: NotificationService;
   locksManager: LocksManager;
   backend: Backend;
-  type: 'full' | 'ruleBased';
+};
+type CreateOwnershipServiceProps = ServiceProps & { type: 'full' | 'ruleBased' };
+
+type OwnershipServiceMap = {
+  fullOwnershipService: OwnershipService;
+  ruleBasedOwnershipService: OwnershipService;
 };
 
-export function createOwnershipService(config: Props): OwnershipService {
+export function createOwnershipServices(config: ServiceProps): OwnershipServiceMap {
+  return {
+    fullOwnershipService: createOwnershipService({ ...config, type: 'full' }),
+    ruleBasedOwnershipService: createOwnershipService({ ...config, type: 'ruleBased' }),
+  };
+}
+
+function createOwnershipService(config: CreateOwnershipServiceProps): OwnershipService {
   return {
     getLiveCells: async (payload?: GetLiveCellsPayload) => {
       const lockProvider: OnChainLockProvider = await getOnchainLockProvider(config);
@@ -98,10 +110,7 @@ export function createOwnershipService(config: Props): OwnershipService {
         .map((input) => input.cellOutput.lock)
         .toArray();
       const allLockInfoList = await Promise.all(
-        inputLocks.map(async (lock) => {
-          const lockInfo = await config.locksManager.getlockInfoByLock({ lock });
-          return lockInfo;
-        }),
+        inputLocks.map(async (lock) => await config.locksManager.getlockInfoByLock({ lock })),
       );
       const lockInfoList: LockInfo[] = allLockInfoList.filter((lockInfo) => !!lockInfo) as LockInfo[];
       const signingEntries = txSkeleton.get('signingEntries').toArray();
@@ -132,7 +141,9 @@ export function createOwnershipService(config: Props): OwnershipService {
     },
   };
 }
-async function getOnchainLockProvider(config: Pick<Props, 'type' | 'locksManager'>): Promise<OnChainLockProvider> {
+async function getOnchainLockProvider(
+  config: Pick<CreateOwnershipServiceProps, 'type' | 'locksManager'>,
+): Promise<OnChainLockProvider> {
   let provider: OnChainLockProvider;
   if (config.type === 'full') {
     provider = await config.locksManager.fullOnChainLockProvider();
@@ -145,7 +156,7 @@ async function getOnchainLockProvider(config: Pick<Props, 'type' | 'locksManager
 }
 
 async function getOffChainLockProvider(
-  config: Pick<Props, 'type' | 'locksManager'>,
+  config: Pick<CreateOwnershipServiceProps, 'type' | 'locksManager'>,
   payload: Pick<GetOffChainLocksPayload, 'change'>,
 ): Promise<CircularOffChainLockInfo> {
   let provider: CircularOffChainLockInfo;
