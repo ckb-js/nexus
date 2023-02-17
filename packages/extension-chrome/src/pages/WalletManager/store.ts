@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { internalService } from '../../mockServices/internal';
+import { createServicesFactory } from '../../services';
 
 type State = {
   seed: string[];
@@ -29,11 +29,11 @@ export const useWalletCreationStore = create<State & Actions>((setState, get) =>
   },
 
   initWallet: () => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        internalService.initWallet({ password: get().password, nickname: get().username, mnemonic: get().seed });
-        resolve();
-      }, 2000);
+    const internalService = createServicesFactory().get('internalService');
+    return internalService.initWallet({
+      password: get().password,
+      nickname: get().username,
+      mnemonic: get().seed,
     });
   },
 }));

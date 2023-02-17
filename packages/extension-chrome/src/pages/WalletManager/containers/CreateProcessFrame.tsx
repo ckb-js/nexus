@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useMemo, useState } from 'react';
-import { Box, Button, Center, Flex, FlexProps, Grid, HStack, Icon, Text } from '@chakra-ui/react';
+import { Box, Button, Center, Flex, FlexProps, Grid, HStack, Icon, Text, useToast } from '@chakra-ui/react';
 import {
   Outlet,
   useLoaderData,
@@ -83,6 +83,8 @@ export function useOutletContext(): OutletContext {
   return _useOutletContext() as OutletContext;
 }
 
+const NOOP = () => Promise.resolve() as Promise<unknown>;
+
 export const CreateProcessFrame: FC = () => {
   const [nextAvailable, setNextAvailable] = useState(false);
   const currentPath = useLocation().pathname;
@@ -103,24 +105,33 @@ export const CreateProcessFrame: FC = () => {
     navigate(currentPathIndex === 0 ? flowConfig.entry : flowPaths[currentPathIndex - 1], { replace: true });
   };
 
-  const [whenFormSubmit, _setWhenFormSubmit] = useState({ action: () => Promise.resolve() as Promise<unknown> });
+  const [whenFormSubmit, _setWhenFormSubmit] = useState({ action: NOOP });
 
   const setWhenFormSubmit = useCallback((cb: (() => Promise<unknown>) | undefined) => {
-    _setWhenFormSubmit({ action: cb ?? (() => Promise.resolve()) });
+    _setWhenFormSubmit({ action: cb ?? NOOP });
   }, []);
 
   const [submitting, setSubmitting] = useState(false);
+  const toast = useToast();
 
   const onSubmit = async (e: React.FormEvent<unknown>) => {
     e.preventDefault();
     setSubmitting(true);
-    await whenFormSubmit.action();
-    setSubmitting(false);
-    setNextAvailable(false);
-    setWhenFormSubmit(undefined);
-    navigate(currentPathIndex === flowPaths.length - 1 ? flowConfig.exit : flowPaths[currentPathIndex + 1], {
-      replace: true,
-    });
+    try {
+      await whenFormSubmit.action();
+      setNextAvailable(false);
+      setWhenFormSubmit(undefined);
+      navigate(currentPathIndex === flowPaths.length - 1 ? flowConfig.exit : flowPaths[currentPathIndex + 1], {
+        replace: true,
+      });
+    } catch {
+      toast({
+        status: 'error',
+        title: 'Something went wrong',
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
