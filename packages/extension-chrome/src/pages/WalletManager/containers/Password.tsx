@@ -82,8 +82,8 @@ export const SetPassword: FC<SetPasswordProps> = ({ isImportSeed }) => {
           name="confirmPassword"
           rules={{
             required: true,
-            validate: (password, formValue) => {
-              return password === formValue.confirmPassword;
+            validate: (confirmPassword, formValue) => {
+              return confirmPassword === formValue.password;
             },
           }}
           render={({ field, fieldState }) => (
