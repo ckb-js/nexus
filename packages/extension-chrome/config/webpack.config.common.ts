@@ -6,8 +6,6 @@ import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
 import merge from 'webpack-merge';
 import { __DEV__ } from './env';
 
-console.log(require.resolve('buffer/'));
-
 const configExcludeEntry: Configuration = {
   output: {
     path: env.paths.resolve('/build'),
