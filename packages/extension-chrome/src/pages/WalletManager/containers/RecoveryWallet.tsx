@@ -90,7 +90,14 @@ export const RecoveryWallet: FC = () => {
             <FormLabel mr="8px" w="16px">
               {`${index + 1}`.padStart(2, ' ')}
             </FormLabel>
-            <Input mr="8px" type="password" w="186px" data-test-id={`seed[${index}]`} {...field} />
+            <Input
+              mr="8px"
+              autoFocus={index === 0}
+              type="password"
+              w="186px"
+              data-test-id={`seed[${index}]`}
+              {...field}
+            />
           </FormControl>
         )}
       />

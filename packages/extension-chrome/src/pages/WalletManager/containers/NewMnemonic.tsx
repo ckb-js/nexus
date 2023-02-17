@@ -12,23 +12,17 @@ import {
   Text,
   useToast,
 } from '@chakra-ui/react';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FC } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { hd } from '@ckb-lumos/lumos';
 import FileCopyIcon from '../../Components/icons/FileCopy.svg';
 
-// TODO: use real service
-import walletService from '../../../mockServices/wallet';
 import { useWalletCreationStore } from '../store';
 
 export const CreateMnemonic: FC = () => {
   const toast = useToast();
   const setWalletStore = useWalletCreationStore((actions) => actions.set);
-  const { data: mnemonic } = useQuery(['randomSeed'], {
-    queryFn: () => {
-      return walletService.generateRandomSeed();
-    },
-  });
+  const [mnemonic] = useState(() => hd.mnemonic.generateMnemonic().split(' '));
 
   const clipboard = useClipboard('');
   const onCopy = () => {

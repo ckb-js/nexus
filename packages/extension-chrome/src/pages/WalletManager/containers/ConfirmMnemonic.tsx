@@ -76,7 +76,7 @@ export const ConfirmMnemonic: FC = () => {
           const chosenOrder = chosenIndex.findIndex((i) => i === index);
           const hasChosen = chosenOrder !== -1;
           return (
-            <Box position="relative" data-test-id={`seed[${index}]`} data-test-selected={hasChosen}>
+            <Box position="relative" key={word} data-test-id={`seed[${index}]`} data-test-selected={hasChosen}>
               {hasChosen && (
                 <Badge
                   borderRadius="18px"
