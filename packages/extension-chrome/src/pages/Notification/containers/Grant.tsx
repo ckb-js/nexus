@@ -9,7 +9,7 @@ export const Grant: React.FC = () => {
   const [requesterUrl, setRequesterUrl] = useState<string>();
   const messenger = useSessionMessenger();
   useEffect(() => {
-    (async () => {
+    void (async () => {
       const res = await messenger.send('session_getRequesterAppInfo');
       setRequesterUrl(res.url);
     })();

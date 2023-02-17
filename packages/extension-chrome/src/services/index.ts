@@ -1,42 +1,38 @@
-import { GrantService, NotificationService, Promisable, Storage } from '@nexus-wallet/types';
-import { createGrantService } from './grant';
-import { createInMemoryStorage } from './storage';
+import * as awilix from 'awilix';
+import { ConfigService, KeystoreService, NotificationService, Storage } from '@nexus-wallet/types';
+import { createBrowserExtensionStorage } from './storage/extension';
 import { createNotificationService } from './notification';
+import { createInternalService, InternalService } from './internal';
+import { createKeystoreService } from './keystore';
+import { createConfigService } from './config';
+import type { Browser } from 'webextension-polyfill';
+import browser from 'webextension-polyfill';
 
-interface Schema {
-  grant: string[];
-}
-
-export interface Services {
-  storage: Storage<Schema>;
-  grantService: GrantService;
+export interface Modules {
+  browser: Browser;
+  storage: Storage<unknown>;
   notificationService: NotificationService;
+  keystoreService: KeystoreService;
+  configService: ConfigService;
+  internalService: InternalService;
 }
 
 export interface ServicesFactory {
-  get<K extends keyof Services>(name: K): Promisable<Services[K]>;
+  get<K extends keyof Modules>(name: K): Modules[K];
 }
 
 export function createServicesFactory(): ServicesFactory {
-  const storage = createInMemoryStorage<Schema>();
-
-  const defaultStorage = {
-    grant: [],
-  };
-  storage.setAll({
-    ...defaultStorage,
-    ...storage.getAll(),
+  const container = awilix.createContainer<Modules>();
+  container.register({
+    browser: awilix.asValue(browser),
+    storage: awilix.asFunction(createBrowserExtensionStorage).singleton(),
+    configService: awilix.asFunction(createConfigService).singleton(),
+    internalService: awilix.asFunction(createInternalService).singleton(),
+    keystoreService: awilix.asFunction(createKeystoreService).singleton(),
+    notificationService: awilix.asFunction(createNotificationService).singleton(),
   });
 
-  const services = {
-    storage,
-    grantService: createGrantService({ storage }),
-    notificationService: createNotificationService(),
-  };
-
   return {
-    get(key) {
-      return services[key];
-    },
+    get: (key) => container.resolve(key),
   };
 }

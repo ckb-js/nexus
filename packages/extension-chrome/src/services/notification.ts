@@ -1,11 +1,11 @@
-import type { NotificationService } from '@nexus-wallet/types';
+import type { Call, NotificationService } from '@nexus-wallet/types';
 import { errors } from '@nexus-wallet/utils';
-import browser from 'webextension-polyfill';
 import { TransactionSkeletonObject } from '@ckb-lumos/helpers';
 import type { HexString, Script } from '@ckb-lumos/base';
-import { Call, createSessionMessenger } from '../messaging/session';
+import { createSessionMessenger } from '../messaging/session';
 import { browserExtensionAdapter } from '../messaging/adapters';
 import { nanoid } from 'nanoid';
+import type { Browser } from 'webextension-polyfill';
 
 export type SessionMethods = {
   session_getRequesterAppInfo: Call<void, { url: string; favicon: string }>;
@@ -31,7 +31,7 @@ const NOTIFICATION_HEIGHT = 640;
 
 // TODO this is a mocked notification service,
 //  just demonstrating how we organize the code
-export function createNotificationService(): NotificationService {
+export function createNotificationService({ browser }: { browser: Browser }): NotificationService {
   return {
     async requestGrant({ url }) {
       const lastFocused = await browser.windows.getLastFocused();

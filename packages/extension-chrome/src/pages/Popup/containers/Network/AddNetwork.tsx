@@ -3,10 +3,11 @@ import { Button, FormControl, FormLabel, Input, Flex, Spacer, VStack } from '@ch
 import { useNavigate } from 'react-router-dom';
 
 // TODO: use real service
-import configService, { NetworkConfig } from '../../../../mockServices/config';
+import configService from '../../../../mockServices/config';
 import { WhiteAlphaBox } from '../../../Components/WhiteAlphaBox';
 import { AddIcon } from '@chakra-ui/icons';
 import { useForm } from 'react-hook-form';
+import { nanoid } from 'nanoid';
 
 type AddNetworkFormState = {
   name: string;
@@ -17,9 +18,9 @@ export const AddNetwork: FC = () => {
   const navigate = useNavigate();
 
   const { handleSubmit, register } = useForm<AddNetworkFormState>();
-  const onSubmit = handleSubmit(({ name, url }) => {
+  const onSubmit = handleSubmit(async ({ name, url }) => {
     // TODO: align the type
-    configService.addNetwork({ name, url } as unknown as NetworkConfig);
+    await configService.addNetwork({ displayName: name, networkName: name, id: nanoid(), rpcUrl: url });
     navigate(-1);
   });
 

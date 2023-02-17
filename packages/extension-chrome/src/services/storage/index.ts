@@ -1,0 +1,1 @@
+export { createInMemoryStorage } from './memory';
