@@ -4,8 +4,10 @@ import { errors } from '@nexus-wallet/utils';
 import { DebugMethods, WalletMethods, ServerParams } from './types';
 import { JSONRPCServer } from 'json-rpc-2.0';
 import { createServicesFactory } from '../services';
+import { whitelistMiddleware } from './middlewares/whitelistMiddleware';
 
 export const server = new JSONRPCServer<ServerParams>();
+server.applyMiddleware(whitelistMiddleware);
 
 export function addMethod<K extends keyof (WalletMethods & DebugMethods)>(
   method: K,
