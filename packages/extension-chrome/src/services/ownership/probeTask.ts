@@ -12,7 +12,7 @@ import {
 } from './full/utils';
 import { getRuleBasedStorageData, maxRuleBasedLockIndex, RULE_BASED_HARDENED_PATH } from './ruleBased/utils';
 
-export const MAX_ADDRESS_GAP = 20;
+export const FULL_MAX_LOCK_GAP = 20;
 export const RULE_BASED_MAX_LOCK_GAP = 50;
 
 export class ProbeTask {
@@ -90,7 +90,7 @@ export class ProbeTask {
     const locksAndPointer: FullLocksAndPointer = await getFullStorageData({ storage: this.storage });
     let lockInfoLists = await syncAllByPath({
       parentPath: FULL_EXTERNAL_PARENT_PATH,
-      threshold: MAX_ADDRESS_GAP,
+      threshold: FULL_MAX_LOCK_GAP,
       keystoreService: this.keystoreService,
       backend: this.backend,
     });
@@ -101,7 +101,7 @@ export class ProbeTask {
     const locksAndPointer: FullLocksAndPointer = await getFullStorageData({ storage: this.storage });
     let lockInfoLists = await syncAllByPath({
       parentPath: FULL_CHANGE_PARENT_PATH,
-      threshold: MAX_ADDRESS_GAP,
+      threshold: FULL_MAX_LOCK_GAP,
       keystoreService: this.keystoreService,
       backend: this.backend,
     });
@@ -133,13 +133,13 @@ export class ProbeTask {
   async supplyFullOffChainAddresses(): Promise<void> {
     const storageData: FullLocksAndPointer = await getFullStorageData({ storage: this.storage });
     // supply external addresses if needed
-    while (offChain({ lockInfos: storageData.lockInfos.external }).length < MAX_ADDRESS_GAP) {
+    while (offChain({ lockInfos: storageData.lockInfos.external }).length < FULL_MAX_LOCK_GAP) {
       const path = `m/44'/309'/0'/0/${maxExternalLockIndex({ locksAndPointer: storageData }) + 1}`;
       const nextLockInfo = await generateLockInfoByPath(this.keystoreService, path);
       storageData.lockInfos.external.push(nextLockInfo);
     }
     // supply change addresses if needed
-    while (offChain({ lockInfos: storageData.lockInfos.change }).length < MAX_ADDRESS_GAP) {
+    while (offChain({ lockInfos: storageData.lockInfos.change }).length < FULL_MAX_LOCK_GAP) {
       const path = `m/44'/309'/0'/1/${maxChangeLockIndex({ locksAndPointer: storageData }) + 1}`;
       const nextLockInfo = await generateLockInfoByPath(this.keystoreService, path);
       storageData.lockInfos.change.push(nextLockInfo);

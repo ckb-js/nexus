@@ -46,8 +46,12 @@ beforeAll(() => {
   });
 });
 
+afterEach(() => {
+  jest.clearAllMocks();
+});
+
 describe('probe task', () => {
-  it('should supplyOffChainAddresses if not enough', async () => {
+  it('fullOwnership#should supplyOffChainAddresses if not enough', async () => {
     await probeTask.supplyFullOffChainAddresses();
     const externalOffChainLocks = offChain({ lockInfos: memoryStorage.full.lockInfos.external });
     const internalOffChainLocks = offChain({ lockInfos: memoryStorage.full.lockInfos.change });
@@ -56,41 +60,33 @@ describe('probe task', () => {
       expect(internalOffChainLocks[i].index).toEqual(i);
     }
   });
-  // it('should supplyOffChainAddresses if not enough', async () => {
-  //   await probeTask.supplyRuleBasedOffChainAddresses();
-  //   expect(memoryStorage.ruleBased).toEqual({
-  //     details: {
-  //       offChain: {
-  //         external: mockRuleBasedOwnershipLockInfos.slice(0, 50),
-  //         change: [],
-  //       },
-  //       onChain: {
-  //         external: [],
-  //         change: [],
-  //       },
-  //     },
-  //     pointer: generateRuleBasedLocksAndPointers().pointer,
-  //   });
+  it('ruleBasedOwnership#should supplyOffChainAddresses if not enough', async () => {
+    await probeTask.supplyRuleBasedOffChainAddresses();
+    const offChainLocks = offChain({ lockInfos: memoryStorage.ruleBased.lockInfos });
+    for (let i = 0; i < offChainLocks.length; i++) {
+      expect(offChainLocks[i].index).toEqual(i);
+    }
+  });
 
-  // });
+  it('should run probe task', async () => {
+    expect(probeTask.running).toBe(false);
+    jest.useFakeTimers();
+    const logSpy = jest.spyOn(console, 'log');
+    probeTask.run();
+    // the second call will be ignored
+    probeTask.run();
+    jest.advanceTimersByTime(10_000);
+    expect(logSpy).toBeCalledWith('probe task running...');
+    expect(probeTask.running).toBe(true);
+    probeTask.stop();
+    jest.clearAllTimers();
+    logSpy.mockRestore();
+  });
 
-  // it('should run probe task', async () => {
-  //   expect(probeTask.running).toBe(false);
-  //   jest.useFakeTimers();
-  //   const logSpy = jest.spyOn(console, 'log');
-  //   probeTask.run();
-  //   // the second call will be ignored
-  //   probeTask.run();
-  //   jest.advanceTimersByTime(10_000);
-  //   expect(logSpy).toBeCalledWith('probe task running...');
-  //   expect(probeTask.running).toBe(true);
-  //   probeTask.stop();
-  //   jest.clearAllTimers();
-  //   logSpy.mockRestore();
-  // });
-
-  // it('should sync from scratch', async () => {
-  //   await probeTask.syncAllLocksInfo();
-  //   expect(mockStorage.setItem).toBeCalledTimes(6);
-  // });
+  it('should sync from scratch', async () => {
+    await probeTask.syncAllLocksInfo();
+    expect(mockStorage.setItem).toBeCalledTimes(3);
+    expect(memoryStorage.full.lockInfos.external.length).toBe(20);
+    expect(memoryStorage.ruleBased.lockInfos.length).toBe(50);
+  });
 });
