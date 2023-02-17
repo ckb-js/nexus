@@ -49,48 +49,46 @@ const fixture = {
   ],
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let storage: Storage<any>;
-let service: KeystoreService;
+describe('KeystoreService', () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let storage: Storage<any>;
+  let service: KeystoreService;
 
-beforeEach(async () => {
-  storage = createInMemoryStorage();
-  service = createKeystoreService({ storage });
+  beforeAll(async () => {
+    storage = createInMemoryStorage();
+    service = createKeystoreService({ storage });
 
-  const parent = fixture.derived[0];
-  await service.initKeystore({
-    mnemonic: fixture.mnemonic,
-    // parent path
-    paths: [parent.path],
-    password: '123456',
-  });
-});
-
-afterEach(() => {
-  jest.clearAllMocks();
-});
-
-test('re-initialize should throw error', async () => {
-  await expect(
-    service.initKeystore({
-      mnemonic: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
-      paths: [`m/44'/309'/0'/0`],
+    const parent = fixture.derived[0];
+    await service.initKeystore({
+      mnemonic: fixture.mnemonic,
+      // parent path
+      paths: [parent.path],
       password: '123456',
-    }),
-  ).rejects.toThrow();
-});
+    });
+  });
 
-describe('getPublicKeyByPath', () => {
-  test('normal', async () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('re-initialize should throw error', async () => {
+    await expect(
+      service.initKeystore({
+        mnemonic: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
+        paths: [`m/44'/309'/0'/0`],
+        password: '123456',
+      }),
+    ).rejects.toThrow();
+  });
+
+  test('getPublicKeyByPath should works', async () => {
     const child = fixture.derived[1];
     const childPublicKey0 = await service.getPublicKeyByPath({ path: child.path });
 
     expect(childPublicKey0).toBe(child.publicKey);
   });
-});
 
-describe('signMessage', () => {
-  test('normal', async () => {
+  test('should sign message as expected if the password is correct', async () => {
     const mockedMessage = '0x00';
     const mockedSignature = '0x01';
 
@@ -104,15 +102,13 @@ describe('signMessage', () => {
     expect(mockedSign.mock.calls[0][1]).toBe(child.privateKey);
   });
 
-  test('incorrect password', async () => {
+  test('should throw when the password is incorrect', async () => {
     await expect(
       service.signMessage({ path: `m/44'/309'/0'/0/0`, message: '0x00', password: 'incorrect password' }),
     ).rejects.toThrow();
   });
-});
 
-describe('reset', () => {
-  test('normal', async () => {
+  test('storage should be empty after reset()', async () => {
     await service.reset();
     await expect(Promise.resolve(storage.getItem('keystore'))).resolves.toBeFalsy();
   });

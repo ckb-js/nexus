@@ -1,21 +1,8 @@
 import { LIB_VERSION } from './version';
-import { bytes, BytesLike } from '@ckb-lumos/codec';
-
-function formatArgs(arg: unknown): string {
-  if (typeof arg === 'string') {
-    return arg;
-  }
-
-  try {
-    return bytes.hexify(bytes.bytify(arg as BytesLike));
-  } catch {
-    return JSON.stringify(arg);
-  }
-}
+import { formatMessage } from './internal';
 
 export function makeError(message = 'Unknown error', ...args: unknown[]): Error {
-  let i = 0;
-  const formatted = message.replace(/%s/g, () => formatArgs(args[i++]));
+  const formatted = formatMessage(message, ...args);
   return new Error(`[NexusWallet]: ${formatted}  (version=${LIB_VERSION})`);
 }
 

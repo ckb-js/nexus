@@ -11,7 +11,7 @@ if (!container) throw new Error('Impossible');
 
 const routes: RouteObject[] = [
   {
-    path: '/grand',
+    path: '/grant',
     element: <Grant />,
   },
   {
