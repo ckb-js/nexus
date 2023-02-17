@@ -12,7 +12,10 @@ export function createInMemoryStorage<S>(): InMemoryStorage<S> {
 
   return {
     getItem(key) {
-      return store.get(key);
+      const value = store.get(key);
+      if (!value) return value;
+      // deep clone to avoid the value being modified by the caller
+      return JSON.parse(JSON.stringify(value));
     },
     hasItem(key) {
       return store.has(key);

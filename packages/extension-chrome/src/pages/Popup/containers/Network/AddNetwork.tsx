@@ -10,8 +10,9 @@ export const AddNetwork: FC = () => {
   const navigate = useNavigate();
   const [state, setState] = useSetState({ name: '', url: '' });
   const onAddNetwork = () => {
-    configService.addNetwork({ displayName: state.name, networkName: state.name, id: '114514' } as NetworkConfig);
-    navigate('/network');
+    void configService
+      .addNetwork({ displayName: state.name, networkName: state.name, id: '114514' } as NetworkConfig)
+      .then(() => navigate('/network'));
   };
 
   const onChange = (field: keyof typeof state) => (e: React.ChangeEvent<HTMLInputElement>) => {

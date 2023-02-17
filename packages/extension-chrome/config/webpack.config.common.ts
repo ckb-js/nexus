@@ -12,6 +12,13 @@ const configExcludeEntry: Configuration = {
   },
   resolve: {
     extensions: ['.js', '.jsx', '.ts', '.tsx'],
+    fallback: {
+      fs: false,
+      buffer: require.resolve('buffer/'),
+      crypto: require.resolve('crypto-browserify'),
+      path: require.resolve('path-browserify'),
+      stream: require.resolve('stream-browserify'),
+    },
   },
   context: env.paths.resolve('/'),
   module: {
