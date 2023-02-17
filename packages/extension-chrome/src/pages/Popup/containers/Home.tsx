@@ -6,6 +6,7 @@ import TerminalIcon from '../../Components/icons/Terminal.svg';
 import NetworkIcon from '../../Components/icons/Network.svg';
 import { WhiteAlphaBox } from '../../Components/WhiteAlphaBox';
 import { ConnectStatusCard } from '../../Components/ConnectStatusCard';
+import { useConfig } from '../../hooks/useConfig';
 
 const FeedbackButton: FC<ButtonProps> = (props) => {
   return (
@@ -17,6 +18,7 @@ const FeedbackButton: FC<ButtonProps> = (props) => {
 
 export const Home: FC = () => {
   const navigate = useNavigate();
+  const { data: config } = useConfig();
 
   const entries = [
     {
@@ -39,7 +41,7 @@ export const Home: FC = () => {
 
   return (
     <>
-      <ConnectStatusCard name="Yan" connected mt="44px" />
+      <ConnectStatusCard name={config?.nickname!} connected mt="44px" />
 
       <WhiteAlphaBox direction="column" mt="20px">
         {entries.map(({ title, icon, onClick, testId }) => (

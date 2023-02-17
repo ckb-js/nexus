@@ -1,41 +1,34 @@
-import React, { useEffect, useState } from 'react';
-import { Box, Button, ButtonGroup, Flex, Image, VStack } from '@chakra-ui/react';
+import React from 'react';
+import { Box, Button, ButtonGroup, Flex, Image, Skeleton, VStack } from '@chakra-ui/react';
 import { ConnectStatusCard } from '../../Components/ConnectStatusCard';
 import { WhiteAlphaBox } from '../../Components/WhiteAlphaBox';
 import { CheckCircleIcon } from '@chakra-ui/icons';
 import { useSessionMessenger } from '../../hooks/useSessionMessenger';
+import { useQuery } from '@tanstack/react-query';
+import { useConfig } from '../../hooks/useConfig';
 
 export const Grant: React.FC = () => {
-  const [requesterUrl, setRequesterUrl] = useState<string>();
   const messenger = useSessionMessenger();
-  useEffect(() => {
-    void (async () => {
-      const res = await messenger.send('session_getRequesterAppInfo');
-      setRequesterUrl(res.url);
-    })();
-  }, [messenger]);
+  const requestAppInfoQuery = useQuery({
+    queryKey: ['session_getRequesterAppInfo', messenger] as const,
+    queryFn: ({ queryKey: [, messenger] }) => messenger.send('session_getRequesterAppInfo'),
+  });
 
+  const configQuery = useConfig();
+
+  const { url, favicon } = requestAppInfoQuery.data || {};
   const permissions = ['View your addresses', 'Request approval for transactions'];
 
-  // only comment for debug
-  // if (!requesterUrl) return <h1>waiting...</h1>;
-
   return (
-    <>
-      <ConnectStatusCard mt="44px" name="Yan" connected />
+    <Skeleton colorScheme="purple" isLoaded={!requestAppInfoQuery.isLoading && !configQuery.isLoading}>
+      <ConnectStatusCard mt="44px" name={configQuery.data?.nickname!} />
 
       <Flex py="32px" alignItems="center" direction="column">
         {/* TODO: wait implementation, the request website icon path should be provided in the future */}
-        <Image
-          data-test-id="requester.favicon"
-          w="40px"
-          mb="8px"
-          h="40px"
-          src="https://static.figma.com/app/icon/1/favicon.png"
-        />
+        <Image data-test-id="requester.favicon" w="40px" mb="8px" h="40px" src={favicon} />
 
         <Box fontSize="md" data-test-id="requester.url" fontWeight="semibold">
-          {requesterUrl}
+          {url}
         </Box>
       </Flex>
 
@@ -72,6 +65,6 @@ export const Grant: React.FC = () => {
           Connect
         </Button>
       </ButtonGroup>
-    </>
+    </Skeleton>
   );
 };

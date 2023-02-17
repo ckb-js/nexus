@@ -28,10 +28,14 @@ export const ConnectStatusCard: FC<ConnectStatusCardProps> = ({ name, connected,
       </Flex>
 
       <Flex alignItems="center">
-        <CheckCircleIcon mr="4px" data-test-id="connectedStatusIndicator" w="16px" h="16px" color={'green.300'} />
-        <Box fontSize="sm" data-test-id="connectedStatusText">
-          {connected ? 'Connected' : 'Disconnected'}
-        </Box>
+        {connected !== undefined && (
+          <>
+            <CheckCircleIcon mr="4px" data-test-id="connectedStatusIndicator" w="16px" h="16px" color={'green.300'} />
+            <Box fontSize="sm" data-test-id="connectedStatusText">
+              {connected ? 'Connected' : 'Disconnected'}
+            </Box>
+          </>
+        )}
       </Flex>
     </WhiteAlphaBox>
   );
