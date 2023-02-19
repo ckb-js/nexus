@@ -9,7 +9,7 @@ import {
 } from './utils';
 import { ProbeTask } from '../../../../src/services/ownership/probeTask';
 import { Storage } from '@nexus-wallet/types';
-import { indexOfPath, offChain, parentOfPath } from '../../../../src/services/ownership/utils';
+import { indexOfPath, offChainFilter, parentOfPath } from '../../../../src/services/ownership/utils';
 import { LockInfoStorage } from '../../../../src/services/ownership/types';
 
 let probeTask: ProbeTask;
@@ -53,8 +53,8 @@ afterEach(() => {
 describe('probe task', () => {
   it('fullOwnership#should supplyOffChainAddresses if not enough', async () => {
     await probeTask.supplyFullOffChainAddresses();
-    const externalOffChainLocks = offChain({ lockInfos: memoryStorage.full.lockInfos.external });
-    const internalOffChainLocks = offChain({ lockInfos: memoryStorage.full.lockInfos.change });
+    const externalOffChainLocks = offChainFilter({ lockInfos: memoryStorage.full.lockInfos.external });
+    const internalOffChainLocks = offChainFilter({ lockInfos: memoryStorage.full.lockInfos.change });
     for (let i = 0; i < externalOffChainLocks.length; i++) {
       expect(externalOffChainLocks[i].index).toEqual(i);
       expect(internalOffChainLocks[i].index).toEqual(i);
@@ -62,7 +62,7 @@ describe('probe task', () => {
   });
   it('ruleBasedOwnership#should supplyOffChainAddresses if not enough', async () => {
     await probeTask.supplyRuleBasedOffChainAddresses();
-    const offChainLocks = offChain({ lockInfos: memoryStorage.ruleBased.lockInfos });
+    const offChainLocks = offChainFilter({ lockInfos: memoryStorage.ruleBased.lockInfos });
     for (let i = 0; i < offChainLocks.length; i++) {
       expect(offChainLocks[i].index).toEqual(i);
     }
@@ -85,7 +85,7 @@ describe('probe task', () => {
 
   it('should sync from scratch', async () => {
     await probeTask.syncAllLocksInfo();
-    expect(mockStorage.setItem).toBeCalledTimes(3);
+    expect(mockStorage.setItem).toBeCalledTimes(4);
     expect(memoryStorage.full.lockInfos.external.length).toBe(20);
     expect(memoryStorage.ruleBased.lockInfos.length).toBe(50);
   });

@@ -32,8 +32,6 @@ export async function generateLockInfoByPath(keystoreService: KeystoreService, p
     blake160: childScript.args,
     lock: childScript,
     lockHash: utils.computeScriptHash(childScript),
-    // TODO get network from network service?
-    network: 'ckb_testnet' as const,
     onchain: false,
   };
   return currentAddressInfo;
@@ -60,11 +58,11 @@ export function parentOfPath(path: string): string {
   return pathList.join('/');
 }
 
-export function offChain(payload: { lockInfos: LockInfo[] }): LockInfo[] {
+export function offChainFilter(payload: { lockInfos: LockInfo[] }): LockInfo[] {
   return payload.lockInfos.filter((lockInfo) => !lockInfo.onchain);
 }
 
-export function onChain(payload: { lockInfos: LockInfo[] }): LockInfo[] {
+export function onChainFilter(payload: { lockInfos: LockInfo[] }): LockInfo[] {
   return payload.lockInfos.filter((lockInfo) => lockInfo.onchain);
 }
 

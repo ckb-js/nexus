@@ -1,4 +1,3 @@
-import { Network } from '@nexus-wallet/types/lib/injected';
 import { Hash, Script } from '@ckb-lumos/base';
 
 export const MAX_ADDRESS_GAP = 20;
@@ -12,7 +11,6 @@ export type LockInfo = {
   index: number;
   publicKey: string;
   blake160: string;
-  network: Network;
   lock: Script;
   lockHash: Hash;
   onchain: boolean;

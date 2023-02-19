@@ -13,6 +13,7 @@ type LockInfoWithCursor = {
 
 export interface OnChainLockProvider {
   items: LinkedList<LockInfo>;
+  currentCursorLock(payload: { cursor: LockCursor }): LockInfo | undefined;
   getNextLock(payload: { cursor?: LockCursor; filter?: OwnershipFilter }): LockInfoWithCursor | undefined;
 }
 
@@ -23,6 +24,12 @@ export class DefaultOnChainLockProvider implements OnChainLockProvider {
     this.items = new LinkedList<LockInfo>(payload.items);
   }
 
+  currentCursorLock(payload: { cursor: LockCursor }): LockInfo | undefined {
+    return this.items.search(
+      (data) => data.onchain && data.parentPath === payload.cursor.parentPath && data.index === payload.cursor.index,
+    )?.data;
+  }
+
   getNextLock(payload: { cursor?: LockCursor; filter?: OwnershipFilter }): LockInfoWithCursor | undefined {
     const result = this.items.search(
       (data) => data.onchain && cursorComparator(data, payload.cursor) && filterComparator(data, payload.filter),
@@ -30,6 +37,7 @@ export class DefaultOnChainLockProvider implements OnChainLockProvider {
     return result ? { lockInfo: result, cursor: { index: result.index, parentPath: result.parentPath } } : undefined;
   }
 }
+
 /**
  * decides whether the lockInfo is after the cursor
  * @param lockInfo
@@ -45,7 +53,7 @@ function cursorComparator(lockInfo: LockInfo, cursor?: LockCursor): boolean {
  * @param filter
  */
 function filterComparator(lockInfo: LockInfo, filter?: OwnershipFilter): boolean {
-  if (!filter) return true;
+  if (!filter || !filter.change) return true;
   const parentPath = lockInfo.parentPath;
   if (isFullOwnership({ path: parentPath })) {
     const isLockInfoExternal = isExternal({ path: parentPath });

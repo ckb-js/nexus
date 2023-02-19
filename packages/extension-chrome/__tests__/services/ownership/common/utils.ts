@@ -17,9 +17,11 @@ export const createMockBackend = (payload: Partial<Backend>): Backend => {
     indexer: payload.indexer ? payload.indexer : new CkbIndexer(''),
     indexerRPC: payload.indexerRPC ? payload.indexerRPC : new IndexerRPC(''),
     rpc: payload.rpc ? payload.rpc : new RPC(''),
-    getNextLiveCellWithCursor: () => {
-      return Promise.resolve({ cursor: '', cells: [] });
-    },
+    getNextLiveCellWithCursor: payload.getNextLiveCellWithCursor
+      ? payload.getNextLiveCellWithCursor
+      : () => {
+          return Promise.resolve({ cursor: '', cells: [] });
+        },
     getLiveCellFetcher: payload.getLiveCellFetcher
       ? payload.getLiveCellFetcher
       : () =>
@@ -48,7 +50,7 @@ export const createMockKeystoreService = (payload: Partial<KeystoreService>): Ke
 export const mockFullOwnershipLockInfosExternal: LockInfo[] = new Array(100).fill(0).flatMap((_, i) => {
   const lock = {
     args: '0x',
-    codeHash: '0x',
+    codeHash: '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
     hashType: 'type' as const,
   };
   return {
@@ -58,14 +60,13 @@ export const mockFullOwnershipLockInfosExternal: LockInfo[] = new Array(100).fil
     blake160: '',
     publicKey: '0x000000000000000000000000000000000000000000000000000000000000000000',
     lockHash: '0x',
-    network: 'ckb_testnet' as const,
     onchain: false,
   };
 });
 export const mockFullOwnershipLockInfosChange: LockInfo[] = new Array(100).fill(0).flatMap((_, i) => {
   const lock = {
     args: '0x',
-    codeHash: '0x',
+    codeHash: '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
     hashType: 'type' as const,
   };
   return {
@@ -75,7 +76,6 @@ export const mockFullOwnershipLockInfosChange: LockInfo[] = new Array(100).fill(
     blake160: '',
     publicKey: '0x000000000000000000000000000000000000000000000000000000000000000000',
     lockHash: '0x',
-    network: 'ckb_testnet' as const,
     onchain: false,
   };
 });
@@ -93,7 +93,7 @@ export const mockFullOwnershipLockInfos = [...mockFullOwnershipLockInfosExternal
 export const mockRuleBasedOwnershipLockInfos: LockInfo[] = new Array(100).fill(0).map((_, i) => {
   const lock = {
     args: '0x',
-    codeHash: '0x',
+    codeHash: '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
     hashType: 'type' as const,
   };
   return {
@@ -103,7 +103,6 @@ export const mockRuleBasedOwnershipLockInfos: LockInfo[] = new Array(100).fill(0
     blake160: '',
     publicKey: '0x000000000000000000000000000000000000000000000000000000000000000000',
     lockHash: '0x',
-    network: 'ckb_testnet' as const,
     onchain: false,
   };
 });

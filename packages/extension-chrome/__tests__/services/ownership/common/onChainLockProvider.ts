@@ -13,7 +13,6 @@ const generateLockInfo = (index = 0, change = 0): LockInfo => ({
   blake160: '0x',
   publicKey: `0x`,
   lockHash: '0x',
-  network: 'ckb_testnet' as const,
   onchain: true,
 });
 
@@ -33,7 +32,7 @@ describe('onChainLockProvider', () => {
       lockInfo: lock,
     });
   });
-  it('should getNextLock return nothing if filters change', () => {
+  it('should getNextLock return nothing if filter "change" is "internal"', () => {
     const lock = generateLockInfo();
     const provider = new DefaultOnChainLockProvider({ items: [lock] });
     expect(provider.getNextLock({ filter: { change: 'internal' } })).toEqual(undefined);

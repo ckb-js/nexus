@@ -12,7 +12,6 @@ const generateLockInfo = (index = 0): LockInfo => ({
   blake160: '0x',
   publicKey: `0x`,
   lockHash: '0x',
-  network: 'ckb_testnet' as const,
   onchain: false,
 });
 

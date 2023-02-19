@@ -4,7 +4,7 @@ describe('Cursor', () => {
   it('should decode and encode lock cursor', () => {
     const cursor = new DefaultLockCursor("m/44'/309'/0'/0", 0);
     expect(cursor.encode()).toEqual('Im0vNDQnLzMwOScvMCcvMDowIg==');
-    expect(DefaultLockCursor.fromString('Im0vNDQnLzMwOScvMCcvMDowIg')).toEqual({
+    expect(DefaultLockCursor.fromString('Im0vNDQnLzMwOScvMCcvMDowIg==')).toEqual({
       parentPath: "m/44'/309'/0'/0",
       index: 0,
     });

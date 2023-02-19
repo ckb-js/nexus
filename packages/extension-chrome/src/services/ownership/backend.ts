@@ -57,6 +57,8 @@ export class DefaultBackend implements Backend {
       indexerCursor?: string;
     };
   }): Promise<CellsWithCursor> {
+    console.log('getNextLiveCellWithCursor payload', payload);
+
     const limit = `0x${payload.filter.limit.toString(16)}`;
     let rpcResult: GetLiveCellsResult<true>;
     if (payload.filter.indexerCursor) {

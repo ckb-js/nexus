@@ -6,7 +6,7 @@ import { OnChainLockProvider, DefaultOnChainLockProvider } from './onchainLockPr
 import { LockInfoStorage, LockInfo } from './types';
 import { getFullStorageData } from './full/utils';
 import { getRuleBasedStorageData } from './ruleBased/utils';
-import { offChain, onChain, updateOffChainLockInfos } from './utils';
+import { offChainFilter, onChainFilter, updateOffChainLockInfos } from './utils';
 
 export class LocksManager {
   storage: Storage<LockInfoStorage>;
@@ -30,7 +30,7 @@ export class LocksManager {
       await this.storage.setItem('full', locks);
     };
     return new CircularOffChainLockInfo({
-      items: offChain({ lockInfos: locks.lockInfos.external }),
+      items: offChainFilter({ lockInfos: locks.lockInfos.external }),
       pointer: locks.pointers.external,
       storageUpdator,
       pointerUpdator,
@@ -50,7 +50,7 @@ export class LocksManager {
       await this.storage.setItem('full', locks);
     };
     return new CircularOffChainLockInfo({
-      items: offChain({ lockInfos: locks.lockInfos.change }),
+      items: offChainFilter({ lockInfos: locks.lockInfos.change }),
       pointer: locks.pointers.change,
       storageUpdator,
       pointerUpdator,
@@ -70,7 +70,7 @@ export class LocksManager {
       await this.storage.setItem('ruleBased', locks);
     };
     return new CircularOffChainLockInfo({
-      items: offChain({ lockInfos: locks.lockInfos }),
+      items: offChainFilter({ lockInfos: locks.lockInfos }),
       pointer: locks.pointer,
       storageUpdator,
       pointerUpdator,
@@ -80,14 +80,14 @@ export class LocksManager {
   async fullOnChainLockProvider(): Promise<OnChainLockProvider> {
     const lockInfos = (await getFullStorageData({ storage: this.storage })).lockInfos;
     return new DefaultOnChainLockProvider({
-      items: onChain({ lockInfos: [...lockInfos.external, ...lockInfos.change] }),
+      items: onChainFilter({ lockInfos: [...lockInfos.external, ...lockInfos.change] }),
     });
   }
 
   async ruleBasedOnChainLockProvider(): Promise<OnChainLockProvider> {
     const lockInfos = (await getRuleBasedStorageData({ storage: this.storage })).lockInfos;
     return new DefaultOnChainLockProvider({
-      items: onChain({ lockInfos }),
+      items: onChainFilter({ lockInfos }),
     });
   }
 

@@ -1,6 +1,6 @@
 import { Storage, KeystoreService } from '@nexus-wallet/types';
 import { Backend } from './backend';
-import { generateLockInfoByPath, offChain, toSecp256k1Script } from './utils';
+import { generateLockInfoByPath, offChainFilter, toSecp256k1Script } from './utils';
 import { Script, utils } from '@ckb-lumos/base';
 import { LockInfoStorage, FullLocksAndPointer, LockInfo, RuleBasedLocksAndPointer } from './types';
 import {
@@ -36,7 +36,7 @@ export class ProbeTask {
     storage: Storage<LockInfoStorage>;
     keystoreService: KeystoreService;
   }): ProbeTask {
-    if (!ProbeTask.instance) {
+    if (!ProbeTask.instance || ProbeTask.instance.running === false) {
       ProbeTask.instance = new ProbeTask({ backend, storage, keystoreService });
     }
     return ProbeTask.instance;
@@ -69,21 +69,43 @@ export class ProbeTask {
 
   async syncFullWithCurrentState(): Promise<void> {
     const locksAndPointer: FullLocksAndPointer = await getFullStorageData({ storage: this.storage });
-    offChain({ lockInfos: [...locksAndPointer.lockInfos.external, ...locksAndPointer.lockInfos.change] }).forEach(
-      async (lockInfo) => {
-        if (await this.backend.hasHistory({ lock: lockInfo.lock })) {
-          lockInfo.onchain = true;
-        }
+    const updatedExternalLockInfoTasks = offChainFilter({ lockInfos: locksAndPointer.lockInfos.external }).map(
+      (lockInfo) => {
+        return this.backend.hasHistory({ lock: lockInfo.lock }).then((res) => {
+          lockInfo.onchain = res;
+          return lockInfo;
+        });
       },
     );
+    const updatedInternalLockInfoTasks = offChainFilter({ lockInfos: locksAndPointer.lockInfos.change }).map(
+      (lockInfo) => {
+        return this.backend.hasHistory({ lock: lockInfo.lock }).then((res) => {
+          lockInfo.onchain = res;
+          return lockInfo;
+        });
+      },
+    );
+    // TODO use rpc batch request to reduce http
+    const updatedExternalLockInfos = await Promise.all(updatedExternalLockInfoTasks);
+    // TODO use rpc batch request to reduce http
+    const updatedInternalLockInfos = await Promise.all(updatedInternalLockInfoTasks);
+
+    locksAndPointer.lockInfos.external = updatedExternalLockInfos;
+    locksAndPointer.lockInfos.change = updatedInternalLockInfos;
+    await this.storage.setItem('full', locksAndPointer);
   }
   async syncRuleBasedWithCurrentState(): Promise<void> {
     const locksAndPointer: RuleBasedLocksAndPointer = await getRuleBasedStorageData({ storage: this.storage });
-    offChain({ lockInfos: locksAndPointer.lockInfos }).forEach(async (lockInfo) => {
-      if (await this.backend.hasHistory({ lock: lockInfo.lock })) {
-        lockInfo.onchain = true;
-      }
+    const updatedLockInfoTasks = offChainFilter({ lockInfos: locksAndPointer.lockInfos }).map((lockInfo) => {
+      return this.backend.hasHistory({ lock: lockInfo.lock }).then((res) => {
+        lockInfo.onchain = res;
+        return lockInfo;
+      });
     });
+    // TODO use rpc batch request to reduce http
+    const updatedLockInfos = await Promise.all(updatedLockInfoTasks);
+    locksAndPointer.lockInfos = updatedLockInfos;
+    await this.storage.setItem('ruleBased', locksAndPointer);
   }
 
   private async syncAllFullExternalLocksInfo(): Promise<void> {
@@ -133,13 +155,13 @@ export class ProbeTask {
   async supplyFullOffChainAddresses(): Promise<void> {
     const storageData: FullLocksAndPointer = await getFullStorageData({ storage: this.storage });
     // supply external addresses if needed
-    while (offChain({ lockInfos: storageData.lockInfos.external }).length < FULL_MAX_LOCK_GAP) {
+    while (offChainFilter({ lockInfos: storageData.lockInfos.external }).length < FULL_MAX_LOCK_GAP) {
       const path = `m/44'/309'/0'/0/${maxExternalLockIndex({ locksAndPointer: storageData }) + 1}`;
       const nextLockInfo = await generateLockInfoByPath(this.keystoreService, path);
       storageData.lockInfos.external.push(nextLockInfo);
     }
     // supply change addresses if needed
-    while (offChain({ lockInfos: storageData.lockInfos.change }).length < FULL_MAX_LOCK_GAP) {
+    while (offChainFilter({ lockInfos: storageData.lockInfos.change }).length < FULL_MAX_LOCK_GAP) {
       const path = `m/44'/309'/0'/1/${maxChangeLockIndex({ locksAndPointer: storageData }) + 1}`;
       const nextLockInfo = await generateLockInfoByPath(this.keystoreService, path);
       storageData.lockInfos.change.push(nextLockInfo);
@@ -153,7 +175,7 @@ export class ProbeTask {
   async supplyRuleBasedOffChainAddresses(): Promise<void> {
     const storageData: RuleBasedLocksAndPointer = await getRuleBasedStorageData({ storage: this.storage });
     // supply locks if needed
-    while (offChain({ lockInfos: storageData.lockInfos }).length < RULE_BASED_MAX_LOCK_GAP) {
+    while (offChainFilter({ lockInfos: storageData.lockInfos }).length < RULE_BASED_MAX_LOCK_GAP) {
       const path = `${RULE_BASED_HARDENED_PATH}/${maxRuleBasedLockIndex({ locksAndPointer: storageData }) + 1}`;
       const nextLockInfo = await generateLockInfoByPath(this.keystoreService, path);
       storageData.lockInfos.push(nextLockInfo);
@@ -181,8 +203,6 @@ export async function syncAllByPath(payload: {
       publicKey,
       blake160: childScript.args,
       lock: childScript,
-      // TODO implement mainnet here
-      network: 'ckb_testnet',
       lockHash: utils.computeScriptHash(childScript),
       onchain: false,
     };

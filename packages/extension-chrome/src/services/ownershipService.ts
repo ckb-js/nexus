@@ -41,9 +41,10 @@ export function createOwnershipServices(config: ServiceProps): OwnershipServiceM
 
 function createOwnershipService(config: CreateOwnershipServiceProps): OwnershipService {
   return {
+    //TODO try fetch 10 cells for now, will support `limit` filter in the future
     getLiveCells: async (payload?: GetLiveCellsPayload) => {
       const lockProvider: OnChainLockProvider = await getOnchainLockProvider(config);
-      const liveCellCursor = payload?.cursor ? DefaultLiveCellCursor.fromString(payload.cursor) : undefined;
+      const payloadCursor = payload?.cursor ? DefaultLiveCellCursor.fromString(payload.cursor) : undefined;
 
       const fetchCell = async (limit: number): Promise<Paginate<Cell>> => {
         const result = {
@@ -51,20 +52,17 @@ function createOwnershipService(config: CreateOwnershipServiceProps): OwnershipS
           objects: [],
         };
         const lockInfoWithCursor = lockProvider.getNextLock({
-          cursor: liveCellCursor,
+          cursor: payloadCursor,
           filter: { change: payload?.change },
         });
         if (!lockInfoWithCursor) {
           return result;
         }
         // pass indexer cursor to rpc only when the lockCursor points to the lock
-        const indexerCursor =
-          lockInfoWithCursor!.lockInfo.index === liveCellCursor!.index ? liveCellCursor?.indexerCursor : undefined;
         const cellsWithCursor = await config.backend.getNextLiveCellWithCursor({
           lock: lockInfoWithCursor!.lockInfo.lock,
-          filter: { indexerCursor, limit },
+          filter: { limit },
         });
-
         if (cellsWithCursor.cells.length < limit) {
           const moreCells = await fetchCell(limit - cellsWithCursor.cells.length);
           return {
@@ -72,15 +70,36 @@ function createOwnershipService(config: CreateOwnershipServiceProps): OwnershipS
             objects: [...cellsWithCursor.cells, ...moreCells.objects],
           };
         }
-
         return {
           cursor: cellsWithCursor.cursor,
           objects: cellsWithCursor.cells,
         };
       };
 
-      //TODO try fetch 10 cells for now, will support `limit` filter in the future
-      return await fetchCell(10);
+      let result: Paginate<Cell> = {
+        cursor: '',
+        objects: [],
+      };
+      if (payloadCursor) {
+        const currentCursorLock = lockProvider.currentCursorLock({ cursor: payloadCursor });
+        asserts.asserts(currentCursorLock, 'Invalid cursor.', payloadCursor);
+        const cellsWithCursor = await config.backend.getNextLiveCellWithCursor({
+          lock: currentCursorLock.lock,
+          filter: { indexerCursor: payloadCursor.indexerCursor, limit: 10 },
+        });
+        result = {
+          cursor: cellsWithCursor.cursor,
+          objects: cellsWithCursor.cells,
+        };
+      }
+      if (result.objects.length < 10) {
+        const moreCells = await fetchCell(10 - result.objects.length);
+        result = {
+          cursor: moreCells.cursor || result.cursor,
+          objects: [...result.objects, ...moreCells.objects],
+        };
+      }
+      return result;
     },
     getOffChainLocks: async (payload: GetOffChainLocksPayload) => {
       const provider: CircularOffChainLockInfo = await getOffChainLockProvider(config, payload);
@@ -116,6 +135,7 @@ function createOwnershipService(config: CreateOwnershipServiceProps): OwnershipS
       const signingEntries = txSkeleton.get('signingEntries').toArray();
       const password = (await config.notificationService.requestSignTransaction({ tx: payload.tx })).password;
       const result: GroupedSignature = [];
+
       for (let index = 0; index < signingEntries.length; index++) {
         const signingEntry = signingEntries[index];
         const lockInfo = lockInfoList[signingEntry.index];
