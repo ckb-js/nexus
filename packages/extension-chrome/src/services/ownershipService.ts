@@ -161,7 +161,7 @@ function createOwnershipService(config: CreateOwnershipServiceProps): OwnershipS
     },
   };
 }
-async function getOnchainLockProvider(
+export async function getOnchainLockProvider(
   config: Pick<CreateOwnershipServiceProps, 'type' | 'locksManager'>,
 ): Promise<OnChainLockProvider> {
   let provider: OnChainLockProvider;
@@ -175,7 +175,7 @@ async function getOnchainLockProvider(
   return provider;
 }
 
-async function getOffChainLockProvider(
+export async function getOffChainLockProvider(
   config: Pick<CreateOwnershipServiceProps, 'type' | 'locksManager'>,
   payload: Pick<GetOffChainLocksPayload, 'change'>,
 ): Promise<CircularOffChainLockInfo> {

@@ -5,13 +5,18 @@ import {
   generateBlankFullLocksAndPointers,
   generateBlankRuleBasedLocksAndPointers,
   generateFullLocksAndPointers,
+  generateRuleBasedLocksAndPointers,
   mockFullOwnershipLockInfos,
   mockFullOwnershipLockInfosExternal,
   mockRuleBasedOwnershipLockInfos,
 } from './common/utils';
 import { LocksManager } from '../../../src/services/ownership/locksManager';
 import { LockInfoStorage } from '../../../src/services/ownership/types';
-import { createOwnershipServices } from '../../../src/services/ownershipService';
+import {
+  createOwnershipServices,
+  getOffChainLockProvider,
+  getOnchainLockProvider,
+} from '../../../src/services/ownershipService';
 import { Storage, KeystoreService, NotificationService, OwnershipService } from '@nexus-wallet/types';
 import { Backend } from '../../../src/services/ownership/backend';
 import { indexOfPath, parentOfPath } from '../../../src/services/ownership/utils';
@@ -256,9 +261,30 @@ describe('full ownership with non-empty storage', () => {
       },
     ]);
   });
+  it('should get next offchain internal locks', async () => {
+    expect(await fullOwnershipService.getOffChainLocks({ change: 'internal' })).toEqual([
+      {
+        args: '0x',
+        codeHash: '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
+        hashType: 'type',
+      },
+    ]);
+  });
   it('should get next onchain locks without cursor', async () => {
     expect(await fullOwnershipService.getOnChainLocks({})).toEqual({
       cursor: new DefaultLockCursor("m/44'/309'/0'/0", 1).encode(),
+      objects: [
+        {
+          args: '0x',
+          codeHash: '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
+          hashType: 'type',
+        },
+      ],
+    });
+  });
+  it('should get next onchain locks without cursor, internal', async () => {
+    expect(await fullOwnershipService.getOnChainLocks({ change: 'internal' })).toEqual({
+      cursor: new DefaultLockCursor("m/44'/309'/0'/1", 1).encode(),
       objects: [
         {
           args: '0x',
@@ -272,6 +298,19 @@ describe('full ownership with non-empty storage', () => {
     const cursor = new DefaultLockCursor("m/44'/309'/0'/0", 1).encode();
     expect(await fullOwnershipService.getOnChainLocks({ cursor })).toEqual({
       cursor: new DefaultLockCursor("m/44'/309'/0'/0", 2).encode(),
+      objects: [
+        {
+          args: '0x',
+          codeHash: '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
+          hashType: 'type',
+        },
+      ],
+    });
+  });
+  it('should get next onchain locks with some cursor, internal', async () => {
+    const cursor = new DefaultLockCursor("m/44'/309'/0'/1", 1).encode();
+    expect(await fullOwnershipService.getOnChainLocks({ cursor, change: 'internal' })).toEqual({
+      cursor: new DefaultLockCursor("m/44'/309'/0'/1", 2).encode(),
       objects: [
         {
           args: '0x',
@@ -333,6 +372,176 @@ describe('full ownership with non-empty storage', () => {
       password: '123456',
       path: "m/44'/309'/0'/0/0",
     });
+  });
+});
+
+describe('rulebased ownership with non-empty storage', () => {
+  let ruleBasedOwnershipService: OwnershipService;
+  beforeEach(() => {
+    mockBackend = createMockBackend({
+      getNextLiveCellWithCursor: jest.fn().mockResolvedValue(
+        Promise.resolve({
+          cursor: 'indexer_cursor_0x05',
+          cells: [createCell('0x01'), createCell('0x02'), createCell('0x03'), createCell('0x04'), createCell('0x05')],
+        }),
+      ),
+      getLiveCellFetcher: () =>
+        function (): Promise<Cell> {
+          return Promise.resolve({
+            outPoint: {
+              index: '0x0',
+              txHash: '0x0000000000000000000000000000000000000000000000000000000000000000',
+            },
+            cellOutput: {
+              capacity: '0x1234',
+              lock: {
+                args: '0x',
+                codeHash: '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
+                hashType: 'type' as const,
+              },
+            },
+            data: '0x',
+          } as Cell);
+        },
+    });
+    memoryStorage = {
+      full: generateBlankFullLocksAndPointers(),
+      ruleBased: generateRuleBasedLocksAndPointers(),
+    };
+    mockStorage = {
+      setItem: jest.fn((key, value) => {
+        memoryStorage[key] = value;
+        return Promise.resolve();
+      }),
+      getItem: jest.fn((key) => {
+        return Promise.resolve(memoryStorage[key]);
+      }),
+      removeItem: jest.fn(),
+      hasItem: jest.fn(),
+    };
+    locksManager = new LocksManager({ storage: mockStorage });
+    ruleBasedOwnershipService = createOwnershipServices({
+      backend: mockBackend,
+      keystoreService: mockKeystoreService,
+      notificationService: mockNotificationService,
+      locksManager,
+    }).ruleBasedOwnershipService;
+  });
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+  it('should get next offchain locks', async () => {
+    expect(await ruleBasedOwnershipService.getOffChainLocks({})).toEqual([
+      {
+        args: '0x',
+        codeHash: '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
+        hashType: 'type',
+      },
+    ]);
+  });
+  it('should get next onchain locks without cursor', async () => {
+    expect(await ruleBasedOwnershipService.getOnChainLocks({})).toEqual({
+      cursor: new DefaultLockCursor("m/4410179'/0'", 1).encode(),
+      objects: [
+        {
+          args: '0x',
+          codeHash: '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
+          hashType: 'type',
+        },
+      ],
+    });
+  });
+  it('should get next onchain locks with some cursor', async () => {
+    const cursor = new DefaultLockCursor("m/4410179'/0'", 1).encode();
+    expect(await ruleBasedOwnershipService.getOnChainLocks({ cursor })).toEqual({
+      cursor: new DefaultLockCursor("m/4410179'/0'", 2).encode(),
+      objects: [
+        {
+          args: '0x',
+          codeHash: '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
+          hashType: 'type',
+        },
+      ],
+    });
+  });
+  it('should only the first page of cells will be fetched', async () => {
+    await ruleBasedOwnershipService.getLiveCells();
+    expect(mockBackend.getNextLiveCellWithCursor).toBeCalledTimes(2);
+    expect(mockBackend.getNextLiveCellWithCursor).toBeCalledWith({
+      lock: {
+        codeHash: '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
+        args: '0x',
+        hashType: 'type',
+      },
+      filter: { limit: 10 },
+    });
+  });
+  it('should return paginated when the cursor is non-empty', async () => {
+    const liveCellCursor = new DefaultLiveCellCursor("m/4410179'/0'", 1, 'indexer_cursor_0x01');
+    await ruleBasedOwnershipService.getLiveCells({ cursor: liveCellCursor.encode() });
+    expect(mockBackend.getNextLiveCellWithCursor).toBeCalledTimes(2);
+    expect(mockBackend.getNextLiveCellWithCursor).toBeCalledWith({
+      lock: {
+        codeHash: '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
+        args: '0x',
+        hashType: 'type',
+      },
+      filter: { limit: 10, indexerCursor: 'indexer_cursor_0x01' },
+    });
+  });
+  it('should signData with payload lock', async () => {
+    await ruleBasedOwnershipService.signData({
+      data: '0x123',
+      lock: {
+        codeHash: '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
+        args: '0x',
+        hashType: 'type',
+      },
+    });
+    expect(mockNotificationService.requestSignData).toBeCalledWith({ data: '0x123' });
+    expect(mockKeystoreService.signMessage).toBeCalledWith({
+      message: '0x123',
+      password: '123456',
+      path: "m/4410179'/0'/0",
+    });
+  });
+  it('should sign tx', async () => {
+    await ruleBasedOwnershipService.signTransaction({
+      tx: mockTx,
+    });
+    expect(mockNotificationService.requestSignTransaction).toBeCalledWith({ tx: mockTx });
+    expect(mockKeystoreService.signMessage).toBeCalledTimes(1);
+    expect(mockKeystoreService.signMessage).toBeCalledWith({
+      message: '0xbb289e7c2f8cb2551140b45a892966e73a0312d493547e3430dc5eec25677d05',
+      password: '123456',
+      path: "m/4410179'/0'/0",
+    });
+  });
+});
+
+describe('utility functions', () => {
+  it('should getOnchainLockProvider throw error if type not valid', async () => {
+    await expect(() =>
+      getOnchainLockProvider({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        type: 'invalid-type' as unknown as any,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        locksManager: undefined as any,
+      }),
+    ).rejects.toBeDefined();
+  });
+  it('should getOnchainLockProvider throw error if type not valid', async () => {
+    await expect(() =>
+      getOffChainLockProvider(
+        {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          type: 'invalid-type' as unknown as any,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          locksManager: undefined as any,
+        },
+        {},
+      ),
+    ).rejects.toBeDefined();
   });
 });
 
