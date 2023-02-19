@@ -166,7 +166,7 @@ export class ProbeTask {
       const nextLockInfo = await generateLockInfoByPath(this.keystoreService, path);
       storageData.lockInfos.change.push(nextLockInfo);
     }
-    this.storage.setItem('full', storageData);
+    await this.storage.setItem('full', storageData);
   }
   /**
    * make sure rule based ownership chain has at least 50 offchain locks to use
@@ -180,8 +180,7 @@ export class ProbeTask {
       const nextLockInfo = await generateLockInfoByPath(this.keystoreService, path);
       storageData.lockInfos.push(nextLockInfo);
     }
-
-    this.storage.setItem('ruleBased', storageData);
+    await this.storage.setItem('ruleBased', storageData);
   }
 }
 
