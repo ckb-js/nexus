@@ -67,5 +67,10 @@ const injectedCkb: InjectedCkb = {
   },
 };
 
+// additional properties, for development purpose
+Object.assign(injectedCkb, {
+  request: (payload: { method: string; params: unknown }) => client.request(payload.method, payload.params),
+});
+
 window.ckb = Object.freeze(injectedCkb);
 export {};

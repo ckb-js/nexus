@@ -35,8 +35,7 @@ export const RecoveryWallet: FC = () => {
   ));
 
   const onRecoveryWallet = async () => {
-    saveWallet.mutateAsync({ mnemonicWords, password });
-    navigate('/success', { replace: true });
+    void saveWallet.mutateAsync({ mnemonicWords, password }).then(() => navigate('/success', { replace: true }));
   };
 
   return (

@@ -1,26 +1,29 @@
+import { createLogger, errors } from '@nexus-wallet/utils';
 import { addMethod } from './server';
-import { errors } from '@nexus-wallet/utils';
+
+const logger = createLogger();
 
 addMethod('wallet_enable', async (_, { getRequesterAppInfo, resolveService }) => {
-  const grantService = await resolveService('grantService');
+  const configService = await resolveService('configService');
+
   const { url } = await getRequesterAppInfo();
+  const { host, protocol } = new URL(url);
 
-  const { host } = new URL(url);
+  logger.info(`wallet_enable: %s`, url);
 
-  const isGranted = await grantService.getIsGranted({ host });
-  if (isGranted) return;
+  const { whitelist } = await configService.getConfig();
 
-  const granted = await grantService.getIsGranted({ host });
-  if (granted) return;
+  const isTrusted = whitelist.find((item) => item.host === host);
+  if (isTrusted) return;
 
-  const notificationService = await resolveService('notificationService');
   try {
+    const notificationService = await resolveService('notificationService');
     await notificationService.requestGrant({ url });
   } catch {
     errors.throwError('User has rejected');
   }
 
-  await grantService.grant({ host });
+  await configService.addWhitelistItem({ host: host, favicon: `${protocol}//${host}/favicon.ico` });
 });
 
 addMethod('wallet_fullOwnership_getOffChainLocks', () => {

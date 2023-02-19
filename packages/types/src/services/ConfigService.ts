@@ -5,7 +5,7 @@ export interface ConfigService {
    * get a config object
    */
   getConfig(): Promisable<Config>;
-  setConfig(payload: { config: Partial<Config> }): Promisable<void>;
+  setConfig(payload: { config: Partial<Config> | ((config: Config) => void) }): Promisable<void>;
 
   /**
    * get a list of networks that the app can connect to
@@ -45,12 +45,12 @@ export interface ConfigService {
   /**
    * get a list of hosts that have been granted
    */
-  getWhitelist(): Promisable<string[]>;
+  getWhitelist(): Promisable<TrustedHost[]>;
   /**
    * add a host to whitelist to grant permission
    * @param payload
    */
-  addWhitelistItem(payload: { host: string }): Promisable<void>;
+  addWhitelistItem(payload: TrustedHost): Promisable<void>;
   /**
    * remove a host from whitelist to revoke permission
    * @param payload
@@ -60,7 +60,7 @@ export interface ConfigService {
   /**
    * to get current Nexus version
    */
-  getVersion(): Promisable<void>;
+  getVersion(): Promisable<string>;
 }
 
 export interface Config {
@@ -84,7 +84,12 @@ export interface Config {
   /**
    * a list of hosts that have been granted
    */
-  whitelist: string[];
+  whitelist: TrustedHost[];
+}
+
+export interface TrustedHost {
+  host: string;
+  favicon: string;
 }
 
 export interface NetworkConfig {
