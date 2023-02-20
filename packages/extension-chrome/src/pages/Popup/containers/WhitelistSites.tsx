@@ -64,6 +64,7 @@ export const WhitelistSites: FC = () => {
           onChange={(e) => setSearchQuery(e.target.value)}
           value={searchQuery}
           colorScheme="white"
+          h="60px"
           pl="48px"
         />
       </InputGroup>
@@ -81,7 +82,7 @@ export const WhitelistSites: FC = () => {
               <Image data-test-id={`site[${index}].favicon`} w="32px" h="32px" src={site.favicon} />
             </Center>
             <Flex ml="20px" data-test-id={`site[${index}].url`} flex={1} fontSize="lg" alignItems="center">
-              <Highlight query={searchQuery} styles={{ bg: 'orange.200' }}>
+              <Highlight query={searchQuery} styles={{ bg: 'white' }}>
                 {site.url}
               </Highlight>
             </Flex>

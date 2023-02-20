@@ -22,7 +22,7 @@ const routeConfig: RouteObject[] = [
     element: <OutsideCreateFrame />,
     children: [
       {
-        path: '/beforeStart',
+        path: '/before-start',
         element: <BeforeStart />,
       },
       {

@@ -12,9 +12,7 @@ export const ConfirmMnemonic: FC = () => {
   const { setNextAvailable, whenSubmit } = useOutletContext();
 
   useEffect(() => {
-    whenSubmit(async () => {
-      await initWallet();
-    });
+    whenSubmit(initWallet);
   }, [initWallet, whenSubmit]);
 
   const confirmPositions = useMemo(() => shuffle(range(0, seed.length)), [seed]);

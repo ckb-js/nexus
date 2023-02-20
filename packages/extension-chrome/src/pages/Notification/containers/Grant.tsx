@@ -10,8 +10,8 @@ import { useConfig } from '../../hooks/useConfig';
 export const Grant: React.FC = () => {
   const messenger = useSessionMessenger();
   const requestAppInfoQuery = useQuery({
-    queryKey: ['session_getRequesterAppInfo', messenger] as const,
-    queryFn: ({ queryKey: [, messenger] }) => messenger.send('session_getRequesterAppInfo'),
+    queryKey: ['session_getRequesterAppInfo', messenger.sessionId()] as const,
+    queryFn: () => messenger.send('session_getRequesterAppInfo'),
   });
 
   const configQuery = useConfig();

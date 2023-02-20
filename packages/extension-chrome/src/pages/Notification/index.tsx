@@ -21,11 +21,11 @@ const routes: RouteObject[] = [
         element: <Grant />,
       },
       {
-        path: '/signData',
+        path: '/sign-data',
         element: <SignData />,
       },
       {
-        path: '/signTransaction',
+        path: '/sign-transaction',
         element: <SignTransaction />,
       },
     ],

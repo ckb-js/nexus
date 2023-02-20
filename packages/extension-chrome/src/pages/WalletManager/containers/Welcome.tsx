@@ -15,7 +15,7 @@ export const Welcome: FC = () => {
   }, [resetStore]);
   const enterCreatePage = (createNew: boolean) => () => {
     if (createNew) {
-      navigate('/beforeStart');
+      navigate('/before-start');
     } else {
       navigate('/import/seed');
     }

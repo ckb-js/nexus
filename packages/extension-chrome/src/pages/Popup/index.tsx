@@ -21,7 +21,7 @@ const routeConfig: RouteObject[] = [
         element: <Home />,
       },
       {
-        path: '/whitelistSites',
+        path: '/whitelist-sites',
         element: <WhitelistSites />,
       },
       {

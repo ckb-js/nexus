@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import { Flex, Box, Icon, Center } from '@chakra-ui/react';
+import { Flex, Box, Icon, Center, Link } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import { Button, ButtonProps } from '@chakra-ui/react';
 import TerminalIcon from '../../Components/icons/Terminal.svg';
@@ -10,7 +10,7 @@ import { useConfig } from '../../hooks/useConfig';
 
 const FeedbackButton: FC<ButtonProps> = (props) => {
   return (
-    <Button size="xs" {...props}>
+    <Button size="xs" {...props} as="a">
       Feedback
     </Button>
   );
@@ -24,7 +24,7 @@ export const Home: FC = () => {
     {
       title: 'Whitelist Sites',
       onClick: () => {
-        navigate('/whitelistSites');
+        navigate('/whitelist-sites');
       },
       testId: 'whitelistSites',
       icon: <Icon as={TerminalIcon} viewBox="0 0 24 24" w="24px" h="24px" />,
@@ -46,6 +46,7 @@ export const Home: FC = () => {
       <WhiteAlphaBox direction="column" mt="20px">
         {entries.map(({ title, icon, onClick, testId }) => (
           <Flex
+            key={testId}
             data-test-id={testId}
             as="button"
             alignItems="center"
@@ -63,7 +64,15 @@ export const Home: FC = () => {
           </Flex>
         ))}
       </WhiteAlphaBox>
-      <FeedbackButton position="absolute" transform="rotate(-90deg)" left="440px" top="498px" />
+      <Link
+        position="absolute"
+        as={FeedbackButton}
+        target="_blank"
+        href="https://github.com/ckb-js/nexus/issues"
+        top="448px"
+        left="438px"
+        transform="rotate(-90deg)"
+      />
     </>
   );
 };

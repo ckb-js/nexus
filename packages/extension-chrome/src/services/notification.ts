@@ -26,7 +26,7 @@ export type SessionMethods = {
   session_approveSignTransaction: Call<{ password: string }, void>;
 };
 
-const NOTIFICATION_WIDTH = 516;
+const NOTIFICATION_WIDTH = 500;
 const NOTIFICATION_HEIGHT = 640;
 
 // TODO this is a mocked notification service,
