@@ -1,34 +1,39 @@
-import { createReducerContext } from 'react-use';
+import { create } from 'zustand';
+import { createServicesFactory } from '../../services';
 
 type State = {
-  mnemonic: string[];
+  seed: string[];
+  password: string;
+  username: string;
 };
 
-const [useSharedState, SharedStateProvider] = createReducerContext(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (state: State, action: any): State => {
-    switch (action.type) {
-      case 'SET_MNEMONIC':
-        return { ...state, mnemonic: action.payload };
+type Actions = {
+  set: (state: Partial<State>) => void;
+  reset: () => void;
+  initWallet: () => Promise<void>;
+};
 
-      default:
-        return state;
-    }
+export const useWalletCreationStore = create<State & Actions>((setState, get) => ({
+  seed: [],
+  password: '',
+  username: '',
+  set: (state) => {
+    setState(state);
+  },
+  reset: () => {
+    setState({
+      seed: [],
+      password: '',
+      username: '',
+    });
   },
 
-  {
-    mnemonic: [],
+  initWallet: () => {
+    const internalService = createServicesFactory().get('internalService');
+    return internalService.initWallet({
+      password: get().password,
+      nickname: get().username,
+      mnemonic: get().seed,
+    });
   },
-);
-
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export function useWalletManagerStore() {
-  const [state, dispatch] = useSharedState();
-
-  return {
-    ...state,
-    setMnemonic: (mnemonic: string[]) => dispatch({ type: 'SET_MNEMONIC', payload: mnemonic }),
-  };
-}
-
-export { SharedStateProvider };
+}));

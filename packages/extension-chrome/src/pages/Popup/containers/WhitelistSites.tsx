@@ -1,13 +1,22 @@
-import React, { FC } from 'react';
-import { Flex, IconButton } from '@chakra-ui/react';
-import { DeleteIcon, ArrowBackIcon } from '@chakra-ui/icons';
-import { useNavigate } from 'react-router-dom';
-
-import { ResponsiveContainer } from '../../Components/ResponsiveContainer';
+import React, { FC, useMemo, useState } from 'react';
+import {
+  Flex,
+  VStack,
+  Image,
+  Center,
+  Box,
+  Text,
+  Input,
+  InputGroup,
+  InputLeftElement,
+  Highlight,
+} from '@chakra-ui/react';
+import { DeleteIcon, SearchIcon } from '@chakra-ui/icons';
 
 // TODO: use real service
 import configService from '../../../mockServices/config';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { WhiteAlphaBox } from '../../Components/WhiteAlphaBox';
 
 export const WhitelistSites: FC = () => {
   const whitelistSiteQuery = useQuery({
@@ -19,41 +28,74 @@ export const WhitelistSites: FC = () => {
     mutationFn: (url: string) => configService.removeWhitelistItem({ url: url }),
   });
 
-  const navigate = useNavigate();
   const removeSite = (site: string) => async () => {
     await removeWhitelistSiteMutation.mutateAsync(site);
     await whitelistSiteQuery.refetch();
   };
 
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredSites = useMemo(
+    () => whitelistSiteQuery.data?.filter((d) => d.url.includes(searchQuery)),
+    [whitelistSiteQuery.data, searchQuery],
+  );
+
   return (
-    <ResponsiveContainer h="100%" centerContent>
-      <Flex justifyContent="flex-start" w="100%">
-        <IconButton
-          onClick={() => {
-            navigate('/');
-          }}
-          icon={<ArrowBackIcon />}
-          aria-label="back"
+    <>
+      <Text as={Box} fontSize="md" mb="20px" w="100%">
+        Yan is connected to these sites. They can view your account address
+      </Text>
+      <InputGroup alignItems="center" h="60px" mb="20px">
+        <InputLeftElement
+          borderRadius="8px"
+          top="10px"
+          left="6px"
+          w="40px"
+          h="40px"
+          backgroundColor="purple.500"
+          as={Center}
+        >
+          <SearchIcon w="24px" h="24px" />
+        </InputLeftElement>
+        <Input
+          data-test-id="siteSearch"
+          size="lg"
+          w="452px"
+          onChange={(e) => setSearchQuery(e.target.value)}
+          value={searchQuery}
+          colorScheme="white"
+          h="60px"
+          pl="48px"
         />
-      </Flex>
-      <Flex h="100%" w="100%" direction="column" mt="16px" alignItems="center" justifyContent="flex-start">
-        {whitelistSiteQuery.data?.map((site) => (
-          <Flex key={site} w="100%" mb="16px">
-            <Flex ml="16px" flex={1} fontSize="lg" alignItems="center">
-              {site}
+      </InputGroup>
+      <VStack
+        data-test-id="siteList"
+        overflowY="auto"
+        padding="30px 20px"
+        as={WhiteAlphaBox}
+        spacing="16px"
+        flexDirection="column"
+      >
+        {filteredSites?.map((site, index) => (
+          <Flex data-test-id={`site[${index}]`} alignItems="center" h="48px" w="100%" key={site.url}>
+            <Center w="48px" borderRadius="50%" padding="4px" h="48px" backgroundColor="whiteAlpha.300">
+              <Image data-test-id={`site[${index}].favicon`} w="32px" h="32px" src={site.favicon} />
+            </Center>
+            <Flex ml="20px" data-test-id={`site[${index}].url`} flex={1} fontSize="lg" alignItems="center">
+              <Highlight query={searchQuery} styles={{ bg: 'white' }}>
+                {site.url}
+              </Highlight>
             </Flex>
-            <IconButton
-              flex={0}
-              borderRadius="16px"
-              aria-label="delete"
-              icon={<DeleteIcon />}
-              onClick={removeSite(site)}
-            >
-              Remove
-            </IconButton>
+            <DeleteIcon
+              data-test-id={`site[${index}].remove`}
+              cursor="pointer"
+              w="20px"
+              h="20px"
+              onClick={removeSite(site.url)}
+            />
           </Flex>
         ))}
-      </Flex>
-    </ResponsiveContainer>
+      </VStack>
+    </>
   );
 };

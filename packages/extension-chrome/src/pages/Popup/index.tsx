@@ -8,24 +8,31 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { Home } from './containers/Home';
 import { AddNetwork } from './containers/Network/AddNetwork';
+import { theme } from '../theme';
+import { PopupFrame } from './containers/PopupFrame';
 import { useStartInitIfNotInitialized } from '../hooks/useStartInitIfNotInitialized';
 
 const routeConfig: RouteObject[] = [
   {
-    path: '/',
-    element: <Home />,
-  },
-  {
-    path: 'whitelistSites',
-    element: <WhitelistSites />,
-  },
-  {
-    path: 'network',
-    element: <NetworkConfig />,
-  },
-  {
-    path: 'network/add',
-    element: <AddNetwork />,
+    element: <PopupFrame />,
+    children: [
+      {
+        path: '/',
+        element: <Home />,
+      },
+      {
+        path: '/whitelist-sites',
+        element: <WhitelistSites />,
+      },
+      {
+        path: '/network/add',
+        element: <AddNetwork />,
+      },
+      {
+        path: '/network',
+        element: <NetworkConfig />,
+      },
+    ],
   },
 ];
 
@@ -44,7 +51,7 @@ const App: FC = () => {
 
   return (
     <React.StrictMode>
-      <ChakraProvider>
+      <ChakraProvider theme={theme}>
         <QueryClientProvider client={queryClient}>
           <RouterProvider router={hashRouter} />
         </QueryClientProvider>

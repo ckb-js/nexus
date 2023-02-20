@@ -1,4 +1,4 @@
-import { NetworkConfig } from './types';
+import { NetworkConfig, Whitelist } from './types';
 
 // TODO: remove it when the real service is ready
 class ConfigService {
@@ -19,7 +19,16 @@ class ConfigService {
 
   currentNetwork = '1';
 
-  whitelist: string[] = ['https://google.com', 'https://baidu.com'];
+  whitelist = [
+    {
+      url: 'https://google.com',
+      favicon: 'http://www.getfavicon.org/icons/favicon17.ico',
+    },
+    {
+      url: 'https://baidu.com',
+      favicon: 'http://www.getfavicon.org/icons/favicon16.ico',
+    },
+  ];
 
   getNetworks(): NetworkConfig[] {
     return this.networks;
@@ -43,17 +52,17 @@ class ConfigService {
     return Promise.resolve();
   }
 
-  getWhitelist(): Promise<string[]> {
+  getWhitelist(): Promise<Whitelist[]> {
     return Promise.resolve(this.whitelist);
   }
 
-  addWhitelistItem(payload: { url: string }): Promise<void> {
-    this.whitelist.push(payload.url);
-    return Promise.resolve();
-  }
+  // addWhitelistItem(payload: { url: string }): Promise<void> {
+  //   this.whitelist.push(payload.url);
+  //   return Promise.resolve();
+  // }
 
   removeWhitelistItem(payload: { url: string }): Promise<void> {
-    this.whitelist = this.whitelist.filter((item) => item !== payload.url);
+    this.whitelist = this.whitelist.filter((item) => item.url !== payload.url);
     return Promise.resolve();
   }
 }

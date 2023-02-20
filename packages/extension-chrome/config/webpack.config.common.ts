@@ -41,7 +41,12 @@ const configExcludeEntry: Configuration = {
         use: ['style-loader', 'css-loader'],
       },
       {
-        test: /\.(jpe?g|png|gif|svg|ttf|woff|woff2)$/i,
+        test: /\.svg$/i,
+        issuer: /\.[jt]sx?$/,
+        use: ['@svgr/webpack'],
+      },
+      {
+        test: /\.(jpe?g|png|gif|ttf|woff|woff2)$/i,
         use: [
           {
             loader: 'file-loader',
