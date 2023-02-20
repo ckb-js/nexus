@@ -83,6 +83,13 @@ export function createKeystoreService(config: { storage: Storage<KeystoreData> }
       return bytes.hexify(extendedPublicKey.derivePath(childPath).publicKey);
     },
 
+    checkPassword: async ({ password }) => {
+      const keystoreData = await resolveKeystoreData();
+      const keystore = Keystore.fromJson(keystoreData.wss);
+
+      return keystore.checkPassword(password);
+    },
+
     hasInitialized: (): Promisable<boolean> => {
       return storage.hasItem('keystore');
     },
