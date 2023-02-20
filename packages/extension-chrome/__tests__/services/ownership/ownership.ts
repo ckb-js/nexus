@@ -217,7 +217,7 @@ describe('full ownership with non-empty storage', () => {
             cellOutput: {
               capacity: '0x1234',
               lock: {
-                args: '0x',
+                args: '0x00',
                 codeHash: '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
                 hashType: 'type' as const,
               },
@@ -255,7 +255,7 @@ describe('full ownership with non-empty storage', () => {
   it('should get next offchain locks', async () => {
     expect(await fullOwnershipService.getOffChainLocks({})).toEqual([
       {
-        args: '0x',
+        args: '0x00',
         codeHash: '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
         hashType: 'type',
       },
@@ -264,7 +264,7 @@ describe('full ownership with non-empty storage', () => {
   it('should get next offchain internal locks', async () => {
     expect(await fullOwnershipService.getOffChainLocks({ change: 'internal' })).toEqual([
       {
-        args: '0x',
+        args: '0x00',
         codeHash: '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
         hashType: 'type',
       },
@@ -275,7 +275,7 @@ describe('full ownership with non-empty storage', () => {
       cursor: new DefaultLockCursor("m/44'/309'/0'/0", 1).encode(),
       objects: [
         {
-          args: '0x',
+          args: '0x01',
           codeHash: '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
           hashType: 'type',
         },
@@ -287,7 +287,7 @@ describe('full ownership with non-empty storage', () => {
       cursor: new DefaultLockCursor("m/44'/309'/0'/1", 1).encode(),
       objects: [
         {
-          args: '0x',
+          args: '0x01',
           codeHash: '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
           hashType: 'type',
         },
@@ -300,7 +300,7 @@ describe('full ownership with non-empty storage', () => {
       cursor: new DefaultLockCursor("m/44'/309'/0'/0", 2).encode(),
       objects: [
         {
-          args: '0x',
+          args: '0x02',
           codeHash: '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
           hashType: 'type',
         },
@@ -313,7 +313,7 @@ describe('full ownership with non-empty storage', () => {
       cursor: new DefaultLockCursor("m/44'/309'/0'/1", 2).encode(),
       objects: [
         {
-          args: '0x',
+          args: '0x02',
           codeHash: '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
           hashType: 'type',
         },
@@ -326,7 +326,7 @@ describe('full ownership with non-empty storage', () => {
     expect(mockBackend.getNextLiveCellWithCursor).toBeCalledWith({
       lock: {
         codeHash: '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
-        args: '0x',
+        args: '0x01',
         hashType: 'type',
       },
       filter: { limit: 10 },
@@ -339,7 +339,7 @@ describe('full ownership with non-empty storage', () => {
     expect(mockBackend.getNextLiveCellWithCursor).toBeCalledWith({
       lock: {
         codeHash: '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
-        args: '0x',
+        args: '0x01',
         hashType: 'type',
       },
       filter: { limit: 10, indexerCursor: 'indexer_cursor_0x01' },
@@ -350,7 +350,7 @@ describe('full ownership with non-empty storage', () => {
       data: '0x123',
       lock: {
         codeHash: '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
-        args: '0x',
+        args: '0x00',
         hashType: 'type',
       },
     });
@@ -395,7 +395,7 @@ describe('rulebased ownership with non-empty storage', () => {
             cellOutput: {
               capacity: '0x1234',
               lock: {
-                args: '0x',
+                args: '0x00',
                 codeHash: '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
                 hashType: 'type' as const,
               },
@@ -433,7 +433,7 @@ describe('rulebased ownership with non-empty storage', () => {
   it('should get next offchain locks', async () => {
     expect(await ruleBasedOwnershipService.getOffChainLocks({})).toEqual([
       {
-        args: '0x',
+        args: '0x00',
         codeHash: '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
         hashType: 'type',
       },
@@ -444,7 +444,7 @@ describe('rulebased ownership with non-empty storage', () => {
       cursor: new DefaultLockCursor("m/4410179'/0'", 1).encode(),
       objects: [
         {
-          args: '0x',
+          args: '0x01',
           codeHash: '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
           hashType: 'type',
         },
@@ -457,7 +457,7 @@ describe('rulebased ownership with non-empty storage', () => {
       cursor: new DefaultLockCursor("m/4410179'/0'", 2).encode(),
       objects: [
         {
-          args: '0x',
+          args: '0x02',
           codeHash: '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
           hashType: 'type',
         },
@@ -470,7 +470,7 @@ describe('rulebased ownership with non-empty storage', () => {
     expect(mockBackend.getNextLiveCellWithCursor).toBeCalledWith({
       lock: {
         codeHash: '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
-        args: '0x',
+        args: '0x01',
         hashType: 'type',
       },
       filter: { limit: 10 },
@@ -480,13 +480,21 @@ describe('rulebased ownership with non-empty storage', () => {
     const liveCellCursor = new DefaultLiveCellCursor("m/4410179'/0'", 1, 'indexer_cursor_0x01');
     await ruleBasedOwnershipService.getLiveCells({ cursor: liveCellCursor.encode() });
     expect(mockBackend.getNextLiveCellWithCursor).toBeCalledTimes(2);
-    expect(mockBackend.getNextLiveCellWithCursor).toBeCalledWith({
+    expect(mockBackend.getNextLiveCellWithCursor).toHaveBeenNthCalledWith(1, {
       lock: {
         codeHash: '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
-        args: '0x',
+        args: '0x01',
         hashType: 'type',
       },
       filter: { limit: 10, indexerCursor: 'indexer_cursor_0x01' },
+    });
+    expect(mockBackend.getNextLiveCellWithCursor).toHaveBeenNthCalledWith(2, {
+      lock: {
+        codeHash: '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
+        args: '0x02',
+        hashType: 'type',
+      },
+      filter: { limit: 5 },
     });
   });
   it('should signData with payload lock', async () => {
@@ -494,7 +502,7 @@ describe('rulebased ownership with non-empty storage', () => {
       data: '0x123',
       lock: {
         codeHash: '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
-        args: '0x',
+        args: '0x00',
         hashType: 'type',
       },
     });

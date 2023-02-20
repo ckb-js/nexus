@@ -49,7 +49,7 @@ export const createMockKeystoreService = (payload: Partial<KeystoreService>): Ke
 
 export const mockFullOwnershipLockInfosExternal: LockInfo[] = new Array(100).fill(0).flatMap((_, i) => {
   const lock = {
-    args: '0x',
+    args: `0x${String(i).padStart(2, '0')}`,
     codeHash: '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
     hashType: 'type' as const,
   };
@@ -65,7 +65,7 @@ export const mockFullOwnershipLockInfosExternal: LockInfo[] = new Array(100).fil
 });
 export const mockFullOwnershipLockInfosChange: LockInfo[] = new Array(100).fill(0).flatMap((_, i) => {
   const lock = {
-    args: '0x',
+    args: `0x${String(i).padStart(2, '0')}`,
     codeHash: '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
     hashType: 'type' as const,
   };
@@ -92,7 +92,7 @@ export const mockFullOwnershipLockInfos = [...mockFullOwnershipLockInfosExternal
  */
 export const mockRuleBasedOwnershipLockInfos: LockInfo[] = new Array(100).fill(0).map((_, i) => {
   const lock = {
-    args: '0x',
+    args: `0x${String(i).padStart(2, '0')}`,
     codeHash: '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
     hashType: 'type' as const,
   };
