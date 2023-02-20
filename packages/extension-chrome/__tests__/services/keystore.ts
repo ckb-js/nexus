@@ -108,6 +108,11 @@ describe('KeystoreService', () => {
     ).rejects.toThrow();
   });
 
+  test('check password should works', async () => {
+    await expect(service.checkPassword({ password: 'wrong password' })).resolves.toBe(false);
+    await expect(service.checkPassword({ password: '123456' })).resolves.toBe(true);
+  });
+
   test('storage should be empty after reset()', async () => {
     await service.reset();
     await expect(Promise.resolve(storage.getItem('keystore'))).resolves.toBeFalsy();

@@ -16,6 +16,11 @@ export interface KeystoreService {
   initKeystore(payload: InitKeystorePayload): Promisable<void>;
 
   /**
+   * check if the password is correct
+   */
+  checkPassword(payload: { password: string }): Promisable<boolean>;
+
+  /**
    * get an extended public key by a derivation path,
    * if the corresponding extended public is not found in store or cache,
    * the password will be required to derive the extended public key
