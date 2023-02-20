@@ -193,7 +193,7 @@ describe('full ownership with non-empty storage', () => {
       getNextLiveCellWithCursor: jest.fn().mockResolvedValue(
         Promise.resolve({
           cursor: 'indexer_cursor_0xa0',
-          cells: [
+          objects: [
             createCell('0x01'),
             createCell('0x02'),
             createCell('0x03'),
@@ -382,7 +382,7 @@ describe('rulebased ownership with non-empty storage', () => {
       getNextLiveCellWithCursor: jest.fn().mockResolvedValue(
         Promise.resolve({
           cursor: 'indexer_cursor_0x05',
-          cells: [createCell('0x01'), createCell('0x02'), createCell('0x03'), createCell('0x04'), createCell('0x05')],
+          objects: [createCell('0x01'), createCell('0x02'), createCell('0x03'), createCell('0x04'), createCell('0x05')],
         }),
       ),
       getLiveCellFetcher: () =>

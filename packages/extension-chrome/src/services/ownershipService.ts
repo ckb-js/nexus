@@ -15,7 +15,6 @@ import { createTransactionSkeleton } from '@ckb-lumos/helpers';
 import { prepareSigningEntries } from '@ckb-lumos/common-scripts/lib/secp256k1_blake160';
 import { LocksManager } from './ownership/locksManager';
 import { CircularOffChainLockInfo } from './ownership/circular';
-import { LockInfo } from './ownership/types';
 import { throwError } from '@nexus-wallet/utils/lib/error';
 import { DefaultLockCursor, DefaultLiveCellCursor } from './ownership/cursor';
 
@@ -47,33 +46,29 @@ function createOwnershipService(config: CreateOwnershipServiceProps): OwnershipS
       const payloadCursor = payload?.cursor ? DefaultLiveCellCursor.fromString(payload.cursor) : undefined;
 
       const fetchCell = async (limit: number): Promise<Paginate<Cell>> => {
-        const result = {
-          cursor: '',
-          objects: [],
-        };
         const lockInfoWithCursor = lockProvider.getNextLock({
           cursor: payloadCursor,
           filter: { change: payload?.change },
         });
         if (!lockInfoWithCursor) {
-          return result;
+          return {
+            cursor: '',
+            objects: [],
+          };
         }
         // pass indexer cursor to rpc only when the lockCursor points to the lock
-        const cellsWithCursor = await config.backend.getNextLiveCellWithCursor({
+        const paginatedCells = await config.backend.getNextLiveCellWithCursor({
           lock: lockInfoWithCursor!.lockInfo.lock,
           filter: { limit },
         });
-        if (cellsWithCursor.cells.length < limit) {
-          const moreCells = await fetchCell(limit - cellsWithCursor.cells.length);
+        if (paginatedCells.objects.length < limit) {
+          const moreCells = await fetchCell(limit - paginatedCells.objects.length);
           return {
-            cursor: moreCells.cursor || cellsWithCursor.cursor,
-            objects: [...cellsWithCursor.cells, ...moreCells.objects],
+            cursor: moreCells.cursor || paginatedCells.cursor,
+            objects: [...paginatedCells.objects, ...moreCells.objects],
           };
         }
-        return {
-          cursor: cellsWithCursor.cursor,
-          objects: cellsWithCursor.cells,
-        };
+        return paginatedCells;
       };
 
       let result: Paginate<Cell> = {
@@ -87,10 +82,7 @@ function createOwnershipService(config: CreateOwnershipServiceProps): OwnershipS
           lock: currentCursorLock.lock,
           filter: { indexerCursor: payloadCursor.indexerCursor, limit: 10 },
         });
-        result = {
-          cursor: cellsWithCursor.cursor,
-          objects: cellsWithCursor.cells,
-        };
+        result = cellsWithCursor;
       }
       if (result.objects.length < 10) {
         const moreCells = await fetchCell(10 - result.objects.length);
@@ -131,14 +123,14 @@ function createOwnershipService(config: CreateOwnershipServiceProps): OwnershipS
       const allLockInfoList = await Promise.all(
         inputLocks.map(async (lock) => await config.locksManager.getlockInfoByLock({ lock })),
       );
-      const lockInfoList: LockInfo[] = allLockInfoList.filter((lockInfo) => !!lockInfo) as LockInfo[];
       const signingEntries = txSkeleton.get('signingEntries').toArray();
       const password = (await config.notificationService.requestSignTransaction({ tx: payload.tx })).password;
       const result: GroupedSignature = [];
 
       for (let index = 0; index < signingEntries.length; index++) {
         const signingEntry = signingEntries[index];
-        const lockInfo = lockInfoList[signingEntry.index];
+        const lockInfo = allLockInfoList[signingEntry.index];
+        asserts.asserts(lockInfo, 'Lock not found with signingEntry', signingEntry);
         const signature = await config.keystoreService.signMessage({
           message: signingEntry.message,
           password,

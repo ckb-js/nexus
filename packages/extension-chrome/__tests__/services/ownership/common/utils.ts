@@ -20,7 +20,7 @@ export const createMockBackend = (payload: Partial<Backend>): Backend => {
     getNextLiveCellWithCursor: payload.getNextLiveCellWithCursor
       ? payload.getNextLiveCellWithCursor
       : () => {
-          return Promise.resolve({ cursor: '', cells: [] });
+          return Promise.resolve({ cursor: '', objects: [] });
         },
     getLiveCellFetcher: payload.getLiveCellFetcher
       ? payload.getLiveCellFetcher

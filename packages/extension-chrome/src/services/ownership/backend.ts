@@ -1,3 +1,4 @@
+import { Paginate } from '@nexus-wallet/types';
 import { OutPoint } from '@ckb-lumos/base';
 import { Cell } from '@ckb-lumos/base';
 import { Script } from '@ckb-lumos/base';
@@ -6,10 +7,6 @@ import { RPC } from '@ckb-lumos/rpc';
 import { RPC as IndexerRPC } from '@ckb-lumos/ckb-indexer/lib/rpc';
 import { GetLiveCellsResult } from '@ckb-lumos/ckb-indexer/lib/type';
 
-export type CellsWithCursor = {
-  cells: Cell[];
-  cursor: string;
-};
 export interface Backend {
   nodeUri: string;
   indexer: Indexer;
@@ -23,7 +20,7 @@ export interface Backend {
       limit: number;
       indexerCursor?: string;
     };
-  }) => Promise<CellsWithCursor>;
+  }) => Promise<Paginate<Cell>>;
   getLiveCellFetcher: () => (outPoint: OutPoint) => Promise<Cell>;
 }
 
@@ -56,9 +53,7 @@ export class DefaultBackend implements Backend {
       limit: number;
       indexerCursor?: string;
     };
-  }): Promise<CellsWithCursor> {
-    console.log('getNextLiveCellWithCursor payload', payload);
-
+  }): Promise<Paginate<Cell>> {
     const limit = `0x${payload.filter.limit.toString(16)}`;
     let rpcResult: GetLiveCellsResult<true>;
     if (payload.filter.indexerCursor) {
@@ -73,7 +68,7 @@ export class DefaultBackend implements Backend {
     }
     if (rpcResult.objects.length === 0) {
       return {
-        cells: [],
+        objects: [],
         cursor: '',
       };
     }
@@ -87,7 +82,7 @@ export class DefaultBackend implements Backend {
       return cells;
     });
     return {
-      cells: result,
+      objects: result,
       cursor: rpcResult.lastCursor,
     };
   }
