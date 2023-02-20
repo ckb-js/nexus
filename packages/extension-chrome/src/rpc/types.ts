@@ -1,6 +1,7 @@
 import { Script } from '@ckb-lumos/lumos';
 import { Modules } from '../services';
 import { Call, CallMap } from '@nexus-wallet/types';
+import { BytesLike } from '@ckb-lumos/codec';
 
 export interface WalletMethods extends CallMap {
   wallet_enable: Call<void, void>;
@@ -8,6 +9,7 @@ export interface WalletMethods extends CallMap {
   wallet_getNetworkName: Call<void, string>;
 
   wallet_fullOwnership_getUnusedLocks: Call<void, Script[]>;
+  wallet_fullOwnership_signData: Call<{ data: BytesLike }, Promise<string>>;
 }
 
 export interface DebugMethods extends CallMap {

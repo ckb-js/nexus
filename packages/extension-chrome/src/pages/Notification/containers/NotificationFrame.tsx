@@ -12,12 +12,13 @@ export const NotificationFrame: FC = () => {
       position="relative"
       h="100vh"
       w="100vw"
-      px="24px"
       pb="72px"
       color="white"
     >
       <Logo position="absolute" left="24px" bottom="20px" />
-      <Outlet />
+      <Flex px="24px" alignItems="center" maxW="500px" direction="column" h="100%">
+        <Outlet />
+      </Flex>
     </Flex>
   );
 };

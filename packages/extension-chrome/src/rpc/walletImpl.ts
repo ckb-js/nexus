@@ -17,11 +17,22 @@ addMethod('wallet_enable', async (_, { getRequesterAppInfo, resolveService }) =>
   if (isTrusted) return;
 
   try {
-    const notificationService = await resolveService('notificationService');
+    const notificationService = resolveService('notificationService');
     await notificationService.requestGrant({ url });
   } catch {
     errors.throwError('User has rejected');
   }
 
   await configService.addWhitelistItem({ host: host, favicon: `${protocol}//${host}/favicon.ico` });
+});
+
+addMethod('wallet_fullOwnership_signData', async ({ data }, { resolveService }) => {
+  const notificationService = resolveService('notificationService');
+  try {
+    const { password: _password } = await notificationService.requestSignData({ data });
+    // TODO implment it please~
+    return 'mooooock signed data';
+  } catch {
+    errors.throwError('User has rejected');
+  }
 });
