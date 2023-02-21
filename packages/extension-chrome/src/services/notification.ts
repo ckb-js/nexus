@@ -23,8 +23,13 @@ export type SessionMethods = {
    * get bytes to be signed, the return data should detect if it can be converted to utf8 string,
    * if so, return the utf8 string, otherwise return the hex string
    */
-  session_getUnsignedData: Call<void, { data: HexString | string }>;
+  session_getUnsignedData: Call<void, { data: HexString | string; url: string }>;
   session_approveSignTransaction: Call<{ password: string }, void>;
+
+  /**
+   * Check the password. `true` when password is correct
+   */
+  session_checkPassword: Call<{ password: string }, boolean>;
 };
 
 const NOTIFICATION_WIDTH = 500;
@@ -84,10 +89,13 @@ export function createNotificationService({ browser }: { browser: Browser }): No
     requestSignTransaction() {
       errors.unimplemented();
     },
-    async requestSignData() {
+    async requestSignData(payload) {
       const { notificationWindow, messenger } = await createNotificationWindow(browser, 'sign-data');
 
       return new Promise((resolve, reject) => {
+        messenger.register('session_getUnsignedData', () => payload);
+        messenger.register('session_checkPassword', () => false);
+
         messenger.register('session_approveSignData', () => {
           resolve({ password: 'mooooock data' });
         });

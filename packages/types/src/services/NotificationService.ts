@@ -14,7 +14,7 @@ export interface NotificationService {
    * will return a password to decrypt keystore if user approved and input the correct password
    * @param payload
    */
-  requestSignData(payload: { data: BytesLike }): Promise<{ password: string }>;
+  requestSignData(payload: { data: BytesLike; url: string }): Promise<{ password: string }>;
 
   requestGrant(payload: { url: string }): Promise<void>;
 }

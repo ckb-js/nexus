@@ -26,10 +26,11 @@ addMethod('wallet_enable', async (_, { getRequesterAppInfo, resolveService }) =>
   await configService.addWhitelistItem({ host: host, favicon: `${protocol}//${host}/favicon.ico` });
 });
 
-addMethod('wallet_fullOwnership_signData', async ({ data }, { resolveService }) => {
+addMethod('wallet_fullOwnership_signData', async ({ data }, { getRequesterAppInfo, resolveService }) => {
   const notificationService = resolveService('notificationService');
+  const { url } = await getRequesterAppInfo();
   try {
-    const { password: _password } = await notificationService.requestSignData({ data });
+    const { password: _password } = await notificationService.requestSignData({ data, url });
     // TODO implment it please~
     return 'mooooock signed data';
   } catch {

@@ -4,14 +4,16 @@ import {
   ButtonGroup,
   Flex,
   FormControl,
+  FormErrorMessage,
   FormLabel,
   Heading,
   Input,
   Link,
+  Skeleton,
   Text,
   VStack,
 } from '@chakra-ui/react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import React, { FC } from 'react';
 import { useForm } from 'react-hook-form';
 import { WhiteAlphaBox } from '../../Components/WhiteAlphaBox';
@@ -21,13 +23,18 @@ import { useSessionMessenger } from '../../hooks/useSessionMessenger';
 export const SignData: FC = () => {
   const sessionManager = useSessionMessenger();
 
+  const unsignedDataQuery = useQuery({
+    queryKey: ['unsignedData', sessionManager.sessionId()],
+    queryFn: () => sessionManager.send('session_getUnsignedData'),
+  });
+
   const sendSessionMutation = useMutation({
     mutationFn: async (approve: boolean) => {
       await sessionManager.send(approve ? 'session_approveSignData' : 'session_rejectSignData');
     },
   });
 
-  const { handleSubmit, register } = useForm({
+  const { handleSubmit, register, formState } = useForm({
     defaultValues: { password: '' },
   });
   const onSubmit = async () => {
@@ -35,14 +42,18 @@ export const SignData: FC = () => {
     window.close();
   };
 
+  const validatePassword = (password: string) => {
+    return sessionManager.send('session_checkPassword', { password });
+  };
+
   return (
-    <>
+    <Skeleton isLoaded={!!unsignedDataQuery.data}>
       <Heading fontSize="2xl" fontWeight="semibold" w="452px" mt="28px">
         Sign Message
       </Heading>
 
       <WhiteAlphaBox mt="32px" p="16px 20px">
-        <Link fontSize="sm">https://link3.to</Link>
+        <Link fontSize="sm">{unsignedDataQuery.data?.url}</Link>
       </WhiteAlphaBox>
 
       <Box mt="32px" fontWeight="semibold" fontSize="md">
@@ -59,17 +70,26 @@ export const SignData: FC = () => {
           </Heading>
           <Text fontSize="md" w="100%">
             link3.to wants you to sign in with your Nexus account:
-            {' 0x2ea31djfakljfkadjkfjda;kfjdf29e43098903458045j'}
+            <br />
+            {unsignedDataQuery.data?.data}
           </Text>
         </VStack>
-        <FormControl pt="8px">
+        <FormControl isInvalid={!!formState.errors.password} pt="8px">
           <FormLabel>Password</FormLabel>
-          <Input {...register('password')} background="white" color="black" data-test-id="password" />
+          <Input
+            {...register('password', {
+              validate: validatePassword,
+            })}
+            background="white"
+            color="black"
+            data-test-id="password"
+          />
+          <FormErrorMessage>Password Incorrect!</FormErrorMessage>
         </FormControl>
 
         <ButtonGroup mt="32px" size="md">
           <Button
-            isLoading={sendSessionMutation.isLoading}
+            isLoading={formState.isSubmitting}
             onClick={() => window.close()}
             w="220px"
             color="gray.800"
@@ -78,11 +98,11 @@ export const SignData: FC = () => {
             Reject
           </Button>
 
-          <Button w="220px" isLoading={sendSessionMutation.isLoading} type="submit">
+          <Button w="220px" isLoading={formState.isSubmitting} type="submit">
             Approve
           </Button>
         </ButtonGroup>
       </Flex>
-    </>
+    </Skeleton>
   );
 };
