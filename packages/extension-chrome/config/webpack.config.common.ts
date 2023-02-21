@@ -1,4 +1,4 @@
-import { Configuration } from 'webpack';
+import { Configuration, ProvidePlugin } from 'webpack';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import * as env from './env';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
@@ -60,6 +60,11 @@ const configExcludeEntry: Configuration = {
   },
 
   infrastructureLogging: { level: 'info' },
+  plugins: [
+    new ProvidePlugin({
+      Buffer: ['buffer', 'Buffer'],
+    }),
+  ],
 };
 
 export const pageConfig: Configuration = merge(configExcludeEntry, {
@@ -92,6 +97,9 @@ export const pageConfig: Configuration = merge(configExcludeEntry, {
       cache: false,
     }),
     new ForkTsCheckerWebpackPlugin(),
+    new ProvidePlugin({
+      Buffer: ['buffer', 'Buffer'],
+    }),
   ],
 });
 

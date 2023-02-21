@@ -30,13 +30,7 @@ export const pageConfig: WebpackConfiguration = merge(common.pageConfig, {
     headers: { 'Access-Control-Allow-Origin': '*' },
   },
   devtool: 'cheap-module-source-map',
-  plugins: [
-    new webpack.HotModuleReplacementPlugin(),
-    new ReactRefreshPlugin(),
-    new webpack.ProvidePlugin({
-      Buffer: ['buffer', 'Buffer'],
-    }),
-  ],
+  plugins: [new webpack.HotModuleReplacementPlugin(), new ReactRefreshPlugin()],
 });
 
 function buildHmrEntry(entry: string | string[]): string[] {
