@@ -31,8 +31,8 @@ addMethod('wallet_fullOwnership_signData', async ({ data }, { getRequesterAppInf
   const { url } = await getRequesterAppInfo();
   try {
     const { password: _password } = await notificationService.requestSignData({ data, url });
-    // TODO implment it please~
-    return 'mooooock signed data';
+    return 'mooooooock signed message';
+    // return keystoreService.signMessage({  })
   } catch {
     errors.throwError('User has rejected');
   }

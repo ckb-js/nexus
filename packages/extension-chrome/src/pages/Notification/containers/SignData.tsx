@@ -14,14 +14,15 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import React, { FC } from 'react';
+import React, { FC, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { WhiteAlphaBox } from '../../Components/WhiteAlphaBox';
+import { useCheckPassword } from '../../hooks/useCheckPassword';
 import { useSessionMessenger } from '../../hooks/useSessionMessenger';
 
-// TODO: implement
 export const SignData: FC = () => {
   const sessionManager = useSessionMessenger();
+  const checkPassword = useCheckPassword();
 
   const unsignedDataQuery = useQuery({
     queryKey: ['unsignedData', sessionManager.sessionId()],
@@ -34,7 +35,11 @@ export const SignData: FC = () => {
     },
   });
 
-  const { handleSubmit, register, formState } = useForm({
+  const { handleSubmit, register, formState, setValue } = useForm({
+    mode: 'onSubmit',
+
+    // important, without this will take performance issue
+    reValidateMode: 'onSubmit',
     defaultValues: { password: '' },
   });
   const onSubmit = async () => {
@@ -42,9 +47,16 @@ export const SignData: FC = () => {
     window.close();
   };
 
-  const validatePassword = (password: string) => {
-    return sessionManager.send('session_checkPassword', { password });
+  const onInvalid = () => {
+    setValue('password', '');
   };
+
+  const validatePassword = useCallback(
+    (password: string) => {
+      return checkPassword(password);
+    },
+    [checkPassword],
+  );
 
   return (
     <Skeleton isLoaded={!!unsignedDataQuery.data}>
@@ -60,7 +72,7 @@ export const SignData: FC = () => {
         Only sign this message if you fully understand the content and trust the requesting site.
       </Box>
 
-      <Flex direction="column" as="form" onSubmit={handleSubmit(onSubmit)}>
+      <Flex direction="column" as="form" onSubmit={handleSubmit(onSubmit, onInvalid)}>
         <VStack as={WhiteAlphaBox} mt="32px" spacing="12px" alignItems="flex-start" direction="column" p="16px 20px">
           <Heading size="sm" as={Flex} w="100%" justifyContent="center">
             You are signing
@@ -77,6 +89,7 @@ export const SignData: FC = () => {
         <FormControl isInvalid={!!formState.errors.password} pt="8px">
           <FormLabel>Password</FormLabel>
           <Input
+            type="password"
             {...register('password', {
               validate: validatePassword,
             })}

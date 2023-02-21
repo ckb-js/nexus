@@ -94,7 +94,6 @@ export function createNotificationService({ browser }: { browser: Browser }): No
 
       return new Promise((resolve, reject) => {
         messenger.register('session_getUnsignedData', () => payload);
-        messenger.register('session_checkPassword', () => false);
 
         messenger.register('session_approveSignData', () => {
           resolve({ password: 'mooooock data' });
