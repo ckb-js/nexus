@@ -1,4 +1,4 @@
-import { Configuration } from 'webpack';
+import webpack, { Configuration } from 'webpack';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import * as env from './env';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
@@ -41,7 +41,12 @@ const configExcludeEntry: Configuration = {
         use: ['style-loader', 'css-loader'],
       },
       {
-        test: /\.(jpe?g|png|gif|svg|ttf|woff|woff2)$/i,
+        test: /\.svg$/i,
+        issuer: /\.[jt]sx?$/,
+        use: ['@svgr/webpack'],
+      },
+      {
+        test: /\.(jpe?g|png|gif|ttf|woff|woff2)$/i,
         use: [
           {
             loader: 'file-loader',
@@ -55,6 +60,11 @@ const configExcludeEntry: Configuration = {
   },
 
   infrastructureLogging: { level: 'info' },
+  plugins: [
+    new webpack.ProvidePlugin({
+      Buffer: ['buffer', 'Buffer'],
+    }),
+  ],
 };
 
 export const pageConfig: Configuration = merge(configExcludeEntry, {

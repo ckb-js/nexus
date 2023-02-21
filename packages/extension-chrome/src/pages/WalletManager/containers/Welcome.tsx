@@ -1,63 +1,71 @@
-import React, { FC } from 'react';
+import React, { FC, useEffect } from 'react';
+import { HStack, Icon } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
-import { Flex, Text, Container, Card, CardHeader, Heading, CardBody, Button, Center, Spacer } from '@chakra-ui/react';
+import HardDrive from '../../Components/icons/HardDrive.svg';
+import { PlusSquareIcon } from '@chakra-ui/icons';
+import { Text, Card, Heading, Button, Spacer } from '@chakra-ui/react';
+import { useWalletCreationStore } from '../store';
 
 export const Welcome: FC = () => {
   const navigate = useNavigate();
-  const navigateToMnemonic = (createNew: boolean) => () => {
+  const resetStore = useWalletCreationStore((s) => s.reset);
+
+  useEffect(() => {
+    resetStore();
+  }, [resetStore]);
+  const enterCreatePage = (createNew: boolean) => () => {
     if (createNew) {
-      navigate('/create');
+      navigate('/before-start');
     } else {
-      navigate('/import');
+      navigate('/import/seed');
     }
   };
 
   const cards = [
     {
-      heading: 'No, I already have a wallet',
-      desc: 'Import your existing wallet using the Seed',
-      actionText: 'Import wallet',
-      action: navigateToMnemonic(false),
+      heading: 'Yes. Let’s get set up!',
+      desc: 'This will create a new wallet',
+      actionText: 'Create a Wallet',
+      width: '352px',
+      paddingX: '16px',
+      icon: <PlusSquareIcon color="purple.300" w="40px" h="40px" />,
+      testId: 'createWallet',
+      action: enterCreatePage(true),
     },
     {
-      heading: 'Yes, I want to create a new wallet',
-      desc: "Yes, let's get set up!",
-      actionText: 'Create a new wallet',
-      action: navigateToMnemonic(true),
+      heading: 'No, I already have a wallet',
+      desc: 'Import your existing wallet using Seed',
+      actionText: 'Import wallet',
+      width: '324px',
+      paddingX: '68px',
+      testId: 'importWallet',
+      icon: <Icon w="40px" h="40px" viewBox="0 0 40 40" as={HardDrive} />,
+      action: enterCreatePage(false),
     },
   ];
 
   return (
-    <Container maxW="6xl" height="100%" centerContent>
+    <>
       <Spacer />
-      <Heading marginBottom="240px">New to Nexus?</Heading>
+      <Heading marginBottom="48px">New to Nexus?</Heading>
 
-      <Flex flex="1">
-        {cards.map(({ heading, desc, action, actionText }) => (
-          <Card
-            mx="12px"
-            key={heading}
-            direction="column"
-            height="250px"
-            width="500px"
-            alignItems="center"
-            borderRadius="16px"
-          >
-            <CardHeader>
-              <Heading fontSize="2xl">{heading}</Heading>
-            </CardHeader>
-            <CardBody display="flex" flexDirection="column">
-              <Text fontSize="md">{desc}</Text>
-              <Center flex="1">
-                <Button colorScheme="green" onClick={action}>
-                  {actionText}
-                </Button>
-              </Center>
-            </CardBody>
+      <HStack spacing="36px">
+        {cards.map(({ heading, desc, action, actionText, width, icon, testId }) => (
+          <Card key={heading} direction="column" alignItems="center" h="294px" justifyContent="center" w={width}>
+            {icon}
+            <Heading marginTop="16px" fontSize="xl">
+              {heading}
+            </Heading>
+            <Text mt="16px" fontSize="md">
+              {desc}
+            </Text>
+            <Button data-test-id={testId} marginTop="32px" onClick={action}>
+              {actionText}
+            </Button>
           </Card>
         ))}
-      </Flex>
+      </HStack>
       <Spacer />
-    </Container>
+    </>
   );
 };

@@ -1,94 +1,119 @@
-import React, { FC } from 'react';
-import { Button, Container, Flex, FormControl, FormLabel, Input, Spacer, FormErrorMessage } from '@chakra-ui/react';
-import { useNavigate } from 'react-router-dom';
-import { useSetState } from 'react-use';
-import { useMutation } from '@tanstack/react-query';
-import { useWalletManagerStore } from '../store';
+import React, { FC, useEffect } from 'react';
+import { FormControl, FormLabel, Input, Heading, VStack, Box, FormErrorMessage } from '@chakra-ui/react';
+import { Controller, useForm } from 'react-hook-form';
 
-// TODO: use real service
-import walletService from '../../../mockServices/wallet';
+import { useWalletCreationStore } from '../store';
+import { useOutletContext } from 'react-router-dom';
+import { OutletContext } from './CreateProcessFrame';
 
-export const PasswordInputs: FC<{ onChange: (isValid: boolean, value: string) => void }> = ({
-  onChange: externalOnchange,
-}) => {
-  const [state, setState] = useSetState({ password: '', confirmPassword: '' });
-  const isValid = !state.confirmPassword || (state.password === state.confirmPassword && state.password.length >= 8);
-
-  const onChange = (field: 'password' | 'confirmPassword') => (e: React.ChangeEvent<HTMLInputElement>) => {
-    setState({ [field]: e.target.value });
-    externalOnchange(isValid, state.password);
-  };
-
-  return (
-    <Flex direction="column" width="100%">
-      <FormControl>
-        <FormLabel>New password(8 character min)</FormLabel>
-        <Input value={state.password} onChange={onChange('password')} size="lg" type="password" name="password" />
-      </FormControl>
-      <FormControl minH="108px" isInvalid={!isValid}>
-        <FormLabel>Confirm password</FormLabel>
-        <Input
-          onChange={onChange('confirmPassword')}
-          value={state.confirmPassword}
-          size="lg"
-          type="password"
-          name="confirmPassword"
-        />
-        <FormErrorMessage>Password are not correspond</FormErrorMessage>
-      </FormControl>
-    </Flex>
-  );
+type FormValues = {
+  password: string;
+  confirmPassword: string;
+  // agreeTerms: boolean;
 };
 
-export const SetPassword: FC = () => {
-  const navigate = useNavigate();
-  const { mnemonic } = useWalletManagerStore();
-  const [state, setState] = useSetState({ isValid: false, value: '' });
-  const password = state.value;
-  const onPasswordChange = (isValid: boolean, value: string) => {
-    setState({ isValid, value });
-    if (isValid) {
-      setState({ value });
-    }
-  };
+export type SetPasswordProps = {
+  isImportSeed?: boolean;
+};
 
-  const createWallet = useMutation({
-    mutationFn: ({ mnemonic, password }: { mnemonic: string[]; password: string }) =>
-      walletService.createNewWallet(mnemonic, password),
+export const SetPassword: FC<SetPasswordProps> = ({ isImportSeed }) => {
+  const setStore = useWalletCreationStore((s) => s.set);
+  const { whenSubmit, setNextAvailable } = useOutletContext() as OutletContext;
+
+  const { control, handleSubmit, formState } = useForm<FormValues>({
+    mode: 'onChange',
+    defaultValues: {
+      password: '',
+      confirmPassword: '',
+    },
   });
 
-  const onCreateWallet = async () => {
-    if (state.isValid) {
-      await createWallet.mutateAsync({ mnemonic, password });
-      navigate('/success', { replace: true });
-    }
-  };
+  useEffect(() => {
+    whenSubmit &&
+      whenSubmit(
+        handleSubmit(({ password }) => {
+          setStore({ password });
+        }),
+      );
+  }, [whenSubmit, setStore, handleSubmit]);
+
+  useEffect(() => {
+    setNextAvailable(formState.isValid);
+  }, [setNextAvailable, formState]);
 
   return (
-    <Container centerContent maxW="6xl" height="100%">
-      <Spacer />
-      <Flex direction="column" w="100%" maxW="400px">
-        <PasswordInputs onChange={onPasswordChange} />
-      </Flex>
-      <Flex direction="column">
-        <Button onClick={onCreateWallet} size="lg" mt="24px" w="300px" borderRadius="48px" colorScheme="green">
-          Create
-        </Button>
-        <Button
-          onClick={() => {
-            navigate('/create', { replace: true });
+    <>
+      <Heading mb="48px" lineHeight="111%" fontWeight="semibold">
+        Create password
+      </Heading>
+      {isImportSeed && (
+        <Box maxW="502px" mb="16px" fontSize="md">
+          This password will unlock your Nexus wallet only on this device. Nexus can not recover this password.
+        </Box>
+      )}
+      <VStack>
+        <Controller
+          control={control}
+          name="password"
+          rules={{
+            required: true,
+            minLength: 8,
           }}
-          size="lg"
-          mt="12px"
-          w="300px"
-          borderRadius="48px"
-          colorScheme="green"
-          variant="outline"
-        >
-          Back
-        </Button>
-      </Flex>
-      <Spacer />
-    </Container>
+          render={({ field, fieldState }) => (
+            <FormControl
+              isInvalid={fieldState.invalid && field.value.length > 0 && fieldState.error?.type !== 'required'}
+            >
+              <FormLabel fontSize="sm">New password (8 characters minimum)</FormLabel>
+              <Input
+                w="264px"
+                size="lg"
+                placeholder="Input your password"
+                type="password"
+                data-test-id="password"
+                {...field}
+              />
+              <FormErrorMessage>Your password must be at least 8 characters long.</FormErrorMessage>
+            </FormControl>
+          )}
+        />
+
+        <Controller
+          control={control}
+          name="confirmPassword"
+          rules={{
+            required: true,
+            validate: (confirmPassword, formValue) => {
+              return confirmPassword === formValue.password;
+            },
+          }}
+          render={({ field, fieldState }) => (
+            <FormControl
+              isInvalid={fieldState.invalid && field.value.length > 0 && fieldState.error?.type !== 'required'}
+            >
+              <FormLabel fontSize="sm">Confirm password</FormLabel>
+              <Input
+                w="264px"
+                size="lg"
+                type="password"
+                data-test-id="confirmPassword"
+                placeholder="input your password"
+                {...field}
+              />
+              <FormErrorMessage>Your two passwords are not correspond</FormErrorMessage>
+            </FormControl>
+          )}
+        />
+
+        {/* Not implement */}
+        {/* <FormControl>
+            <Checkbox onChange={register('agreeTerms', {}).onChange}>
+              I have read and agree to the{' '}
+              <Link color="purple.500" fontWeight="bold">
+                Terms of use
+              </Link>
+            </Checkbox>
+          </FormControl> */}
+      </VStack>
+    </>
   );
 };

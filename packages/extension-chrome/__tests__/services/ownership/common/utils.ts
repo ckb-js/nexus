@@ -35,6 +35,9 @@ export const createMockKeystoreService = (payload: Partial<KeystoreService>): Ke
   hasInitialized: () => true,
   initKeystore: function (): Promisable<void> {},
   reset: function (): Promisable<void> {},
+  checkPassword: function (): Promisable<boolean> {
+    return true;
+  },
   signMessage:
     payload.signMessage ||
     function (_: SignMessagePayload): Promisable<string> {
