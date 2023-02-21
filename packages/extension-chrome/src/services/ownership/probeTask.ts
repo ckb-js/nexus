@@ -16,7 +16,7 @@ export const FULL_MAX_LOCK_GAP = 20;
 export const RULE_BASED_MAX_LOCK_GAP = 50;
 
 export class ProbeTask {
-  private static instance: ProbeTask;
+  static instance: ProbeTask;
   private constructor(payload: {
     backend: Backend;
     storage: Storage<LockInfoStorage>;
@@ -69,22 +69,23 @@ export class ProbeTask {
 
   async syncFullWithCurrentState(): Promise<void> {
     const locksAndPointer: FullLocksAndPointer = await getFullStorageData({ storage: this.storage });
-    const updatedExternalLockInfoTasks = offChainFilter({ lockInfos: locksAndPointer.lockInfos.external }).map(
-      (lockInfo) => {
-        return this.backend.hasHistory({ lock: lockInfo.lock }).then((res) => {
-          lockInfo.onchain = res;
-          return lockInfo;
-        });
-      },
-    );
-    const updatedInternalLockInfoTasks = offChainFilter({ lockInfos: locksAndPointer.lockInfos.change }).map(
-      (lockInfo) => {
-        return this.backend.hasHistory({ lock: lockInfo.lock }).then((res) => {
-          lockInfo.onchain = res;
-          return lockInfo;
-        });
-      },
-    );
+    console.log('syncFullWithCurrentState start:', locksAndPointer);
+
+    const updatedExternalLockInfoTasks = locksAndPointer.lockInfos.external.map((lockInfo) => {
+      return this.backend.hasHistory({ lock: lockInfo.lock }).then((res) => {
+        lockInfo.onchain = res;
+        return lockInfo;
+      });
+    });
+    const updatedInternalLockInfoTasks = locksAndPointer.lockInfos.change.map((lockInfo) => {
+      if (lockInfo.onchain) {
+        return lockInfo;
+      }
+      return this.backend.hasHistory({ lock: lockInfo.lock }).then((res) => {
+        lockInfo.onchain = res;
+        return lockInfo;
+      });
+    });
     // TODO use rpc batch request to reduce http
     const updatedExternalLockInfos = await Promise.all(updatedExternalLockInfoTasks);
     // TODO use rpc batch request to reduce http
@@ -96,7 +97,10 @@ export class ProbeTask {
   }
   async syncRuleBasedWithCurrentState(): Promise<void> {
     const locksAndPointer: RuleBasedLocksAndPointer = await getRuleBasedStorageData({ storage: this.storage });
-    const updatedLockInfoTasks = offChainFilter({ lockInfos: locksAndPointer.lockInfos }).map((lockInfo) => {
+    const updatedLockInfoTasks = locksAndPointer.lockInfos.map((lockInfo) => {
+      if (lockInfo.onchain) {
+        return lockInfo;
+      }
       return this.backend.hasHistory({ lock: lockInfo.lock }).then((res) => {
         lockInfo.onchain = res;
         return lockInfo;
@@ -110,7 +114,7 @@ export class ProbeTask {
 
   private async syncAllFullExternalLocksInfo(): Promise<void> {
     const locksAndPointer: FullLocksAndPointer = await getFullStorageData({ storage: this.storage });
-    let lockInfoLists = await syncAllByPath({
+    let lockInfoLists = await syncAllByParentPath({
       parentPath: FULL_EXTERNAL_PARENT_PATH,
       threshold: FULL_MAX_LOCK_GAP,
       keystoreService: this.keystoreService,
@@ -121,7 +125,7 @@ export class ProbeTask {
   }
   private async syncAllFullChangeLocksInfo(): Promise<void> {
     const locksAndPointer: FullLocksAndPointer = await getFullStorageData({ storage: this.storage });
-    let lockInfoLists = await syncAllByPath({
+    let lockInfoLists = await syncAllByParentPath({
       parentPath: FULL_CHANGE_PARENT_PATH,
       threshold: FULL_MAX_LOCK_GAP,
       keystoreService: this.keystoreService,
@@ -132,7 +136,7 @@ export class ProbeTask {
   }
   private async syncAllRuleBasedLocksInfo(): Promise<void> {
     const locksAndPointer: RuleBasedLocksAndPointer = await getRuleBasedStorageData({ storage: this.storage });
-    let lockInfoLists = await syncAllByPath({
+    let lockInfoLists = await syncAllByParentPath({
       parentPath: RULE_BASED_HARDENED_PATH,
       threshold: RULE_BASED_MAX_LOCK_GAP,
       keystoreService: this.keystoreService,
@@ -184,7 +188,7 @@ export class ProbeTask {
   }
 }
 
-export async function syncAllByPath(payload: {
+export async function syncAllByParentPath(payload: {
   parentPath: string;
   threshold: number;
   keystoreService: KeystoreService;

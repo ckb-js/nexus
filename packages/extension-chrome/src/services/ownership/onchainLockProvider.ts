@@ -45,7 +45,9 @@ export class DefaultOnChainLockProvider implements OnChainLockProvider {
  */
 function cursorComparator(lockInfo: LockInfo, cursor?: LockCursor): boolean {
   if (!cursor) return true;
-  return lockInfo.index > cursor!.index && lockInfo.parentPath >= cursor!.parentPath;
+  const largerIndexOnSameChain = lockInfo.index > cursor!.index && lockInfo.parentPath === cursor!.parentPath;
+  const onNextChain = lockInfo.parentPath > cursor!.parentPath;
+  return largerIndexOnSameChain || onNextChain;
 }
 /**
  * decides whether the lockInfo fits the filter

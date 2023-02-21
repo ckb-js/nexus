@@ -5,6 +5,8 @@ import { DebugMethods, WalletMethods, ServerParams } from './types';
 import { JSONRPCServer } from 'json-rpc-2.0';
 import { createServicesFactory } from '../services';
 import { whitelistMiddleware } from './middlewares/whitelistMiddleware';
+import { ProbeTask } from '../services/ownership/probeTask';
+import { BackendProvider } from '../services/ownership/backend';
 
 export const server = new JSONRPCServer<ServerParams>();
 server.applyMiddleware(whitelistMiddleware);
@@ -17,6 +19,20 @@ export function addMethod<K extends keyof (WalletMethods & DebugMethods)>(
 }
 
 let servicesFactory = createServicesFactory();
+void probeRun();
+
+async function probeRun() {
+  const keystoreService = createServicesFactory().get('keystoreService');
+  const storage = createServicesFactory().get('storage');
+  if (!keystoreService || !storage) return;
+  console.log('wallet already initialized, start probe task...');
+  ProbeTask.getInstance({
+    keystoreService,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    storage: storage as any,
+    backend: BackendProvider.getDefaultBackend(),
+  }).run();
+}
 
 export function createRpcServerParams(payload: { endpoint: Endpoint }): ServerParams {
   return {

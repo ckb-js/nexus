@@ -2,10 +2,9 @@ import { Paginate } from '@nexus-wallet/types';
 import { OutPoint } from '@ckb-lumos/base';
 import { Cell } from '@ckb-lumos/base';
 import { Script } from '@ckb-lumos/base';
-import { Indexer, TransactionCollector } from '@ckb-lumos/ckb-indexer';
+import { Indexer } from '@ckb-lumos/ckb-indexer';
 import { RPC } from '@ckb-lumos/rpc';
 import { RPC as IndexerRPC } from '@ckb-lumos/ckb-indexer/lib/rpc';
-import { GetLiveCellsResult } from '@ckb-lumos/ckb-indexer/lib/type';
 
 export interface Backend {
   nodeUri: string;
@@ -55,52 +54,92 @@ export class DefaultBackend implements Backend {
     };
   }): Promise<Paginate<Cell>> {
     const limit = `0x${payload.filter.limit.toString(16)}`;
-    let rpcResult: GetLiveCellsResult<true>;
-    if (payload.filter.indexerCursor) {
-      rpcResult = await this.indexerRPC.getCells(
-        { script: payload.lock, scriptType: 'lock' },
+    const requestParam = {
+      id: 0,
+      jsonrpc: '2.0',
+      method: 'get_cells',
+      params: [
+        {
+          script: {
+            code_hash: payload.lock.codeHash,
+            hash_type: payload.lock.hashType,
+            args: payload.lock.args,
+          },
+          script_type: 'lock',
+          filter: {},
+        },
         'asc',
         limit,
-        payload.filter.indexerCursor,
-      );
-    } else {
-      rpcResult = await this.indexerRPC.getCells({ script: payload.lock, scriptType: 'lock' }, 'asc', limit);
+        null,
+      ],
+    };
+    if (payload.filter.indexerCursor) {
+      requestParam.params[3] = payload.filter.indexerCursor;
     }
-    if (rpcResult.objects.length === 0) {
-      return {
-        objects: [],
-        cursor: '',
-      };
-    }
-    const result: Cell[] = rpcResult.objects.map((indexerCell) => {
+    const rawResult = await fetch(this.nodeUri, {
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestParam),
+      method: 'POST',
+    });
+    const content = await rawResult.json();
+    console.log('getNextLiveCellWithCursor content', content, payload);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result: Cell[] = content.result.objects.map((object: any) => {
       const cells: Cell = {
-        cellOutput: indexerCell.output,
-        data: indexerCell.outputData,
-        outPoint: indexerCell.outPoint,
-        blockNumber: indexerCell.blockNumber,
+        cellOutput: {
+          capacity: object.output.capacity,
+          lock: {
+            codeHash: object.output.lock.code_hash,
+            hashType: object.output.lock.hash_type,
+            args: object.output.lock.args,
+          },
+        },
+        data: object.output_data,
+        outPoint: {
+          txHash: object.out_point.tx_hash,
+          index: object.out_point.index,
+        },
+        blockNumber: object.block_number,
       };
       return cells;
     });
     return {
       objects: result,
-      cursor: rpcResult.lastCursor,
+      cursor: content.result.last_cursor,
     };
   }
 
   async hasHistory(payload: { lock: Script }): Promise<boolean> {
-    const txCollector = new TransactionCollector(
-      this.indexer,
-      {
-        lock: payload.lock,
+    const requestParam = {
+      id: 2,
+      jsonrpc: '2.0',
+      method: 'get_transactions',
+      params: [
+        {
+          script: {
+            code_hash: payload.lock.codeHash,
+            hash_type: payload.lock.hashType,
+            args: payload.lock.args,
+          },
+          script_type: 'lock',
+        },
+        'asc',
+        '0x1',
+      ],
+    };
+    const result = await fetch(this.nodeUri, {
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
       },
-      this.nodeUri,
-    );
-    let hasRecord = false;
-    for await (const _ of txCollector.collect()) {
-      hasRecord = true;
-      break;
-    }
-    return hasRecord;
+      body: JSON.stringify(requestParam),
+      method: 'POST',
+    });
+    const content = await result.json();
+    return content.result.objects.length > 0;
   }
 }
 

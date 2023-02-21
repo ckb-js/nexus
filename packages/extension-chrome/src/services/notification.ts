@@ -72,7 +72,7 @@ export function createNotificationService({ browser }: { browser: Browser }): No
       errors.unimplemented();
     },
     requestSignData() {
-      errors.unimplemented();
+      return Promise.resolve({ password: 'abcd1234' });
     },
   };
 }
