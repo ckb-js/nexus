@@ -20,5 +20,8 @@
     "@ckb-lumos/testkit",
     "@ckb-lumos/toolkit",
     "@ckb-lumos/transaction-manager"
-  ]
+  ],
+  "git-submodules": {
+    "enabled": true
+  }
 }

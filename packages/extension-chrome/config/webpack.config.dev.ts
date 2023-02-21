@@ -47,8 +47,5 @@ export const backgroundConfig = merge(common.backgroundConfig, {
     new InjectPlugin(() => {
       return backgroundReloadHelper;
     }),
-    new webpack.ProvidePlugin({
-      Buffer: ['buffer', 'Buffer'],
-    }),
   ],
 });
