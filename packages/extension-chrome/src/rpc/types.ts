@@ -9,7 +9,8 @@ export interface WalletMethods extends CallMap {
   wallet_getNetworkName: Call<void, string>;
 
   wallet_fullOwnership_getUnusedLocks: Call<void, Script[]>;
-  wallet_fullOwnership_signData: Call<{ data: BytesLike }, Promise<string>>;
+
+  wallet_fullOwnership_signData: Call<{ data: BytesLike | string }, Promise<string>>;
 }
 
 export interface DebugMethods extends CallMap {

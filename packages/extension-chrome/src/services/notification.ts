@@ -89,11 +89,15 @@ export function createNotificationService({ browser }: { browser: Browser }): No
     requestSignTransaction() {
       errors.unimplemented();
     },
+
     async requestSignData(payload) {
       const { notificationWindow, messenger } = await createNotificationWindow(browser, 'sign-data');
+      let { data } = payload;
 
       return new Promise((resolve, reject) => {
-        messenger.register('session_getUnsignedData', () => payload);
+        messenger.register('session_getUnsignedData', () => {
+          return { ...payload, data: data };
+        });
 
         messenger.register('session_approveSignData', () => {
           resolve({ password: 'mooooock data' });
