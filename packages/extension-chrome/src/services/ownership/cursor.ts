@@ -1,4 +1,4 @@
-import base64 from 'base-64';
+import { Base64 as base64 } from 'js-base64';
 export interface LockCursor {
   parentPath: string;
   index: number;

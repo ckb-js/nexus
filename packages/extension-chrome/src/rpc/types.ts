@@ -20,6 +20,12 @@ export interface WalletMethods extends CallMap {
   wallet_fullOwnership_getLiveCells: Call<GetLiveCellsPayload, Promise<Paginate<Cell>>>;
   wallet_fullOwnership_signData: Call<SignDataPayload, Promise<Signature>>;
   wallet_fullOwnership_signTransaction: Call<SignTransactionPayload, Promise<GroupedSignature>>;
+
+  wallet_ruleBasedOwnership_getOffChainLocks: Call<GetOffChainLocksPayload, Promise<Script[]>>;
+  wallet_ruleBasedOwnership_getOnChainLocks: Call<GetOnChainLocksPayload, Promise<Paginate<Script>>>;
+  wallet_ruleBasedOwnership_getLiveCells: Call<GetLiveCellsPayload, Promise<Paginate<Cell>>>;
+  wallet_ruleBasedOwnership_signData: Call<SignDataPayload, Promise<Signature>>;
+  wallet_ruleBasedOwnership_signTransaction: Call<SignTransactionPayload, Promise<GroupedSignature>>;
 }
 
 export interface DebugMethods extends CallMap {

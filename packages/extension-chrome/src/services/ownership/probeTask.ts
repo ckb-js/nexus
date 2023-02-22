@@ -11,6 +11,7 @@ import {
   maxExternalLockIndex,
 } from './full/utils';
 import { getRuleBasedStorageData, maxRuleBasedLockIndex, RULE_BASED_HARDENED_PATH } from './ruleBased/utils';
+import { createLogger } from '@nexus-wallet/utils/lib/logger';
 
 export const FULL_MAX_LOCK_GAP = 20;
 export const RULE_BASED_MAX_LOCK_GAP = 50;
@@ -47,6 +48,8 @@ export class ProbeTask {
   storage: Storage<LockInfoStorage>;
   keystoreService: KeystoreService;
   handler: unknown;
+
+  logger = createLogger();
   run(): void {
     if (this.running) {
       return;
@@ -69,7 +72,6 @@ export class ProbeTask {
 
   async syncFullWithCurrentState(): Promise<void> {
     const locksAndPointer: FullLocksAndPointer = await getFullStorageData({ storage: this.storage });
-    console.log('syncFullWithCurrentState start:', locksAndPointer);
 
     const updatedExternalLockInfoTasks = locksAndPointer.lockInfos.external.map((lockInfo) => {
       return this.backend.hasHistory({ lock: lockInfo.lock }).then((res) => {

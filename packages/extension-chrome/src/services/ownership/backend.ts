@@ -38,10 +38,40 @@ export class DefaultBackend implements Backend {
 
   getLiveCellFetcher() {
     return async (outPoint: OutPoint): Promise<Cell> => {
-      const txOutput = await this.rpc.getLiveCell(outPoint, false);
+      const requestParam = {
+        id: 42,
+        jsonrpc: '2.0',
+        method: 'get_live_cell',
+        params: [
+          {
+            index: outPoint.index,
+            tx_hash: outPoint.txHash,
+          },
+          true,
+        ],
+      };
+
+      const rawResult = await fetch(this.nodeUri, {
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestParam),
+        method: 'POST',
+      });
+      const content = await rawResult.json();
+      console.log('getLiveCell content', content, outPoint);
+
       return {
-        cellOutput: txOutput.cell.output,
-        data: txOutput.cell.data.content,
+        cellOutput: {
+          capacity: content.result.cell.output.capacity,
+          lock: {
+            codeHash: content.result.cell.output.lock.code_hash,
+            hashType: content.result.cell.output.lock.hash_type,
+            args: content.result.cell.output.lock.args,
+          },
+        },
+        data: content.result.cell.data.content,
       };
     };
   }

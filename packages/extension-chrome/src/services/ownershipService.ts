@@ -10,7 +10,7 @@ import {
   GetLiveCellsPayload,
   GetOnChainLocksPayload,
 } from '@nexus-wallet/types/lib/services/OwnershipService';
-import { asserts } from '@nexus-wallet/utils';
+import { asserts, createLogger } from '@nexus-wallet/utils';
 import { createTransactionSkeleton } from '@ckb-lumos/helpers';
 import { prepareSigningEntries } from '@ckb-lumos/common-scripts/lib/secp256k1_blake160';
 import { LocksManager } from './ownership/locksManager';
@@ -40,12 +40,12 @@ export function createOwnershipServices(config: ServiceProps): OwnershipServiceM
 }
 
 function createOwnershipService(config: CreateOwnershipServiceProps): OwnershipService {
+  const logger = createLogger('OwnershipService');
   return {
     //TODO try fetch 10 cells for now, will support `limit` filter in the future
     getLiveCells: async (payload?: GetLiveCellsPayload) => {
       const lockProvider: OnChainLockProvider = await getOnchainLockProvider(config);
       const payloadCursor = payload?.cursor ? DefaultLiveCellCursor.fromString(payload.cursor) : undefined;
-      console.log('payloadCursor', payloadCursor);
 
       const fetchCell = async (limit: number, lockCursor?: LockCursor): Promise<Paginate<Cell>> => {
         const lockInfoWithCursor = lockProvider.getNextLock({
@@ -64,11 +64,13 @@ function createOwnershipService(config: CreateOwnershipServiceProps): OwnershipS
           lock: lockInfo.lock,
           filter: { limit },
         });
+
         if (paginatedCells.objects.length < limit) {
           const moreCells = await fetchCell(
             limit - paginatedCells.objects.length,
             new DefaultLockCursor(lockInfo.parentPath, lockInfo.index),
           );
+
           return {
             cursor:
               moreCells.cursor ||
@@ -76,7 +78,11 @@ function createOwnershipService(config: CreateOwnershipServiceProps): OwnershipS
             objects: [...paginatedCells.objects, ...moreCells.objects],
           };
         }
-        return paginatedCells;
+
+        return {
+          cursor: new DefaultLiveCellCursor(lockInfo.parentPath, lockInfo.index, paginatedCells.cursor).encode(),
+          objects: paginatedCells.objects,
+        };
       };
 
       let result: Paginate<Cell> = {
@@ -106,7 +112,6 @@ function createOwnershipService(config: CreateOwnershipServiceProps): OwnershipS
           objects: [...result.objects, ...moreCells.objects],
         };
       }
-      console.log('getLiveCells result', result.objects, DefaultLiveCellCursor.fromString(result.cursor));
       return result;
     },
     getOffChainLocks: async (payload: GetOffChainLocksPayload) => {
@@ -131,6 +136,7 @@ function createOwnershipService(config: CreateOwnershipServiceProps): OwnershipS
     signTransaction: async (payload: SignTransactionPayload) => {
       const cellFetcher = config.backend.getLiveCellFetcher();
       let txSkeleton = await createTransactionSkeleton(payload.tx, cellFetcher);
+      logger.info('txSkeleton', txSkeleton);
       txSkeleton = prepareSigningEntries(txSkeleton);
       const inputLocks = txSkeleton
         .get('inputs')
@@ -142,7 +148,7 @@ function createOwnershipService(config: CreateOwnershipServiceProps): OwnershipS
       const signingEntries = txSkeleton.get('signingEntries').toArray();
       const password = (await config.notificationService.requestSignTransaction({ tx: payload.tx })).password;
       const result: GroupedSignature = [];
-
+      logger.info('signingEntries', signingEntries);
       for (let index = 0; index < signingEntries.length; index++) {
         const signingEntry = signingEntries[index];
         const lockInfo = allLockInfoList[signingEntry.index];

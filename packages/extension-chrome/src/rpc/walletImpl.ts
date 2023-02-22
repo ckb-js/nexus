@@ -45,14 +45,10 @@ addMethod('wallet_enable', async (_, { getRequesterAppInfo, resolveService }) =>
   probe.run();
 });
 
-addMethod('wallet_fullOwnership_getOffChainLocks', async (payload) => {
-  console.log('====================================');
-  console.log('wallet_fullOwnership_getOffChainLocks');
-  const servicesFactory = createServicesFactory();
-  const keystoreService = await servicesFactory.get('keystoreService');
-  const notificationService = await servicesFactory.get('notificationService');
-  const storage = await servicesFactory.get('storage');
-  console.log('storage', await storage.getItem('full' as never));
+addMethod('wallet_fullOwnership_getOffChainLocks', async (payload, { resolveService }) => {
+  const keystoreService = await resolveService('keystoreService');
+  const notificationService = await resolveService('notificationService');
+  const storage = await resolveService('storage');
   const backend = BackendProvider.getDefaultBackend();
 
   const { fullOwnershipService } = createOwnershipServices({
@@ -62,20 +58,14 @@ addMethod('wallet_fullOwnership_getOffChainLocks', async (payload) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     locksManager: new LocksManager({ storage: storage as any }),
   });
-  console.log('====================================');
   return await fullOwnershipService.getOffChainLocks(payload);
 });
 
-addMethod('wallet_fullOwnership_getOnChainLocks', async (payload) => {
-  console.log('====================================');
-  console.log('wallet_fullOwnership_getOnChainLocks');
-  const servicesFactory = createServicesFactory();
-  const keystoreService = await servicesFactory.get('keystoreService');
-  const notificationService = await servicesFactory.get('notificationService');
-  const storage = await servicesFactory.get('storage');
-  console.log('storage', await storage.getItem('full' as never));
+addMethod('wallet_fullOwnership_getOnChainLocks', async (payload, { resolveService }) => {
+  const keystoreService = await resolveService('keystoreService');
+  const notificationService = await resolveService('notificationService');
+  const storage = await resolveService('storage');
   const backend = BackendProvider.getDefaultBackend();
-  console.log('probe instance:', probe);
 
   const { fullOwnershipService } = createOwnershipServices({
     backend,
@@ -84,18 +74,13 @@ addMethod('wallet_fullOwnership_getOnChainLocks', async (payload) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     locksManager: new LocksManager({ storage: storage as any }),
   });
-  console.log('====================================');
   return await fullOwnershipService.getOnChainLocks(payload);
 });
 
-addMethod('wallet_fullOwnership_getLiveCells', async (payload) => {
-  console.log('====================================');
-  console.log('wallet_fullOwnership_getLiveCells', payload);
-  const servicesFactory = createServicesFactory();
-  const keystoreService = await servicesFactory.get('keystoreService');
-  const notificationService = await servicesFactory.get('notificationService');
-  const storage = await servicesFactory.get('storage');
-  console.log('storage', await storage.getItem('full' as never));
+addMethod('wallet_fullOwnership_getLiveCells', async (payload, { resolveService }) => {
+  const keystoreService = await resolveService('keystoreService');
+  const notificationService = await resolveService('notificationService');
+  const storage = await resolveService('storage');
   const backend = BackendProvider.getDefaultBackend();
 
   const { fullOwnershipService } = createOwnershipServices({
@@ -105,17 +90,12 @@ addMethod('wallet_fullOwnership_getLiveCells', async (payload) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     locksManager: new LocksManager({ storage: storage as any }),
   });
-  console.log('====================================');
   return await fullOwnershipService.getLiveCells(payload);
 });
-addMethod('wallet_fullOwnership_signData', async (payload) => {
-  console.log('====================================');
-  console.log('wallet_fullOwnership_getLiveCells', payload);
-  const servicesFactory = createServicesFactory();
-  const keystoreService = await servicesFactory.get('keystoreService');
-  const notificationService = await servicesFactory.get('notificationService');
-  const storage = await servicesFactory.get('storage');
-  console.log('storage', await storage.getItem('full' as never));
+addMethod('wallet_fullOwnership_signData', async (payload, { resolveService }) => {
+  const keystoreService = await resolveService('keystoreService');
+  const notificationService = await resolveService('notificationService');
+  const storage = await resolveService('storage');
   const backend = BackendProvider.getDefaultBackend();
 
   const { fullOwnershipService } = createOwnershipServices({
@@ -125,17 +105,12 @@ addMethod('wallet_fullOwnership_signData', async (payload) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     locksManager: new LocksManager({ storage: storage as any }),
   });
-  console.log('====================================');
   return await fullOwnershipService.signData(payload);
 });
-addMethod('wallet_fullOwnership_signTransaction', async (payload) => {
-  console.log('====================================');
-  console.log('wallet_fullOwnership_getLiveCells', payload);
-  const servicesFactory = createServicesFactory();
-  const keystoreService = await servicesFactory.get('keystoreService');
-  const notificationService = await servicesFactory.get('notificationService');
-  const storage = await servicesFactory.get('storage');
-  console.log('storage', await storage.getItem('full' as never));
+addMethod('wallet_fullOwnership_signTransaction', async (payload, { resolveService }) => {
+  const keystoreService = await resolveService('keystoreService');
+  const notificationService = await resolveService('notificationService');
+  const storage = await resolveService('storage');
   const backend = BackendProvider.getDefaultBackend();
 
   const { fullOwnershipService } = createOwnershipServices({
@@ -145,6 +120,83 @@ addMethod('wallet_fullOwnership_signTransaction', async (payload) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     locksManager: new LocksManager({ storage: storage as any }),
   });
-  console.log('====================================');
   return await fullOwnershipService.signTransaction(payload);
+});
+
+addMethod('wallet_ruleBasedOwnership_getOffChainLocks', async (payload, { resolveService }) => {
+  const keystoreService = await resolveService('keystoreService');
+  const notificationService = await resolveService('notificationService');
+  const storage = await resolveService('storage');
+  const backend = BackendProvider.getDefaultBackend();
+
+  const { ruleBasedOwnershipService } = createOwnershipServices({
+    backend,
+    keystoreService,
+    notificationService,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    locksManager: new LocksManager({ storage: storage as any }),
+  });
+  return await ruleBasedOwnershipService.getOffChainLocks(payload);
+});
+
+addMethod('wallet_ruleBasedOwnership_getOnChainLocks', async (payload, { resolveService }) => {
+  const keystoreService = await resolveService('keystoreService');
+  const notificationService = await resolveService('notificationService');
+  const storage = await resolveService('storage');
+  const backend = BackendProvider.getDefaultBackend();
+
+  const { ruleBasedOwnershipService } = createOwnershipServices({
+    backend,
+    keystoreService,
+    notificationService,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    locksManager: new LocksManager({ storage: storage as any }),
+  });
+  return await ruleBasedOwnershipService.getOnChainLocks(payload);
+});
+
+addMethod('wallet_ruleBasedOwnership_getLiveCells', async (payload, { resolveService }) => {
+  const keystoreService = await resolveService('keystoreService');
+  const notificationService = await resolveService('notificationService');
+  const storage = await resolveService('storage');
+  const backend = BackendProvider.getDefaultBackend();
+
+  const { ruleBasedOwnershipService } = createOwnershipServices({
+    backend,
+    keystoreService,
+    notificationService,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    locksManager: new LocksManager({ storage: storage as any }),
+  });
+  return await ruleBasedOwnershipService.getLiveCells(payload);
+});
+addMethod('wallet_ruleBasedOwnership_signData', async (payload, { resolveService }) => {
+  const keystoreService = await resolveService('keystoreService');
+  const notificationService = await resolveService('notificationService');
+  const storage = await resolveService('storage');
+  const backend = BackendProvider.getDefaultBackend();
+
+  const { ruleBasedOwnershipService } = createOwnershipServices({
+    backend,
+    keystoreService,
+    notificationService,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    locksManager: new LocksManager({ storage: storage as any }),
+  });
+  return await ruleBasedOwnershipService.signData(payload);
+});
+addMethod('wallet_ruleBasedOwnership_signTransaction', async (payload, { resolveService }) => {
+  const keystoreService = await resolveService('keystoreService');
+  const notificationService = await resolveService('notificationService');
+  const storage = await resolveService('storage');
+  const backend = BackendProvider.getDefaultBackend();
+
+  const { ruleBasedOwnershipService } = createOwnershipServices({
+    backend,
+    keystoreService,
+    notificationService,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    locksManager: new LocksManager({ storage: storage as any }),
+  });
+  return await ruleBasedOwnershipService.signTransaction(payload);
 });
