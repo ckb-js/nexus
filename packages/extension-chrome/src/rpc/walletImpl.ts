@@ -1,7 +1,6 @@
 import { createLogger, errors } from '@nexus-wallet/utils';
 import {} from '@ckb-lumos/codec';
 import { addMethod } from './server';
-// import { bytes } from '@ckb-lumos/codec';
 
 const logger = createLogger();
 
@@ -28,15 +27,8 @@ addMethod('wallet_enable', async (_, { getRequesterAppInfo, resolveService }) =>
   await configService.addWhitelistItem({ host: host, favicon: `${protocol}//${host}/favicon.ico` });
 });
 
-addMethod('wallet_fullOwnership_signData', async (payload, { getRequesterAppInfo, resolveService }) => {
+addMethod('wallet_fullOwnership_signData', async ({ data }, { getRequesterAppInfo, resolveService }) => {
   const notificationService = resolveService('notificationService');
-  let { data } = payload;
-
-  // if (typeof data === 'string') {
-  //   data = /0x[0-9a-f]{2}+/.test(data) ? bytes.bytifyRawString(data) : bytes.bytify(data);
-  // } else {
-  //   data = bytes.bytify(data);
-  // }
 
   const { url } = await getRequesterAppInfo();
 

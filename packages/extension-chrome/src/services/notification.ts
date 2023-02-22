@@ -23,7 +23,7 @@ export type SessionMethods = {
    * get bytes to be signed, the return data should detect if it can be converted to utf8 string,
    * if so, return the utf8 string, otherwise return the hex string
    */
-  session_getUnsignedData: Call<void, { data: HexString | string; url: string }>;
+  session_getUnsignedData: Call<void, { data: HexString; url: string }>;
   session_approveSignTransaction: Call<{ password: string }, void>;
 
   /**

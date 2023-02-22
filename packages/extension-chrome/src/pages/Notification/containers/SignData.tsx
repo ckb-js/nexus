@@ -13,12 +13,14 @@ import {
   Text,
   VStack,
 } from '@chakra-ui/react';
+import isUtf8 from 'is-utf8';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import React, { FC, useCallback } from 'react';
+import React, { FC, useCallback, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { WhiteAlphaBox } from '../../Components/WhiteAlphaBox';
 import { useCheckPassword } from '../../hooks/useCheckPassword';
 import { useSessionMessenger } from '../../hooks/useSessionMessenger';
+import { bytes } from '@ckb-lumos/codec/lib';
 
 export const SignData: FC = () => {
   const sessionManager = useSessionMessenger();
@@ -58,6 +60,18 @@ export const SignData: FC = () => {
     [checkPassword],
   );
 
+  const dataForSigning = useMemo(() => {
+    if (!unsignedDataQuery.data) return '';
+    const unsigned = bytes.bytify(unsignedDataQuery.data.data);
+
+    if (isUtf8(unsigned)) {
+      const decoder = new TextDecoder('utf-8');
+      return decoder.decode(new Uint8Array(unsigned));
+    } else {
+      return bytes.hexify(unsigned);
+    }
+  }, [unsignedDataQuery.data]);
+
   return (
     <Skeleton isLoaded={!!unsignedDataQuery.data}>
       <Heading fontSize="2xl" fontWeight="semibold" w="452px" mt="28px">
@@ -83,7 +97,7 @@ export const SignData: FC = () => {
           <Text fontSize="md" w="100%">
             link3.to wants you to sign in with your Nexus account:
             <br />
-            {unsignedDataQuery.data?.data}
+            {dataForSigning}
           </Text>
         </VStack>
         <FormControl isInvalid={!!formState.errors.password} pt="8px">

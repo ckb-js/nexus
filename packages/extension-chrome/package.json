@@ -49,6 +49,7 @@
     "react-hook-form": "7.43.1",
     "react-router-dom": "6.8.0",
     "react-use": "17.4.0",
+    "is-utf8": "0.2.1",
     "sanitize.css": "13.0.0",
     "webext-bridge": "5.0.5",
     "webextension-polyfill": "0.10.0",
@@ -57,6 +58,7 @@
   "devDependencies": {
     "@ckb-lumos/lumos": "*",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.10",
+    "@types/is-utf8": "0.2.1",
     "@svgr/webpack": "6.5.1",
     "@types/lodash.range": "3.2.7",
     "@types/lodash.shuffle": "4.2.7",
