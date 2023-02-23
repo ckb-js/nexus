@@ -2,14 +2,14 @@ import { createInternalService, FULL_OWNERSHIP_EXTERNAL_PARENT_PATH } from '../.
 import { createKeystoreService } from '../../src/services/keystore';
 import { createInMemoryStorage } from '../../src/services/storage';
 import { createConfigService } from '../../src/services/config';
+import { mockPlatformService } from '../helpers';
 
 test('internal service', async () => {
   const storage = createInMemoryStorage();
   const internalService = createInternalService({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    browser: {} as any,
     keystoreService: createKeystoreService({ storage }),
     configService: createConfigService({ storage }),
+    platformService: mockPlatformService,
   });
 
   await internalService.initWallet({

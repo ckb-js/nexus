@@ -1,35 +1,50 @@
-import { Endpoint } from 'webext-bridge';
-import browser from 'webextension-polyfill';
-import { errors } from '@nexus-wallet/utils';
-import { DebugMethods, WalletMethods, ServerParams } from './types';
+import { RpcMethods, ServerParams } from './types';
+import { ModulesFactory } from '../services';
 import { JSONRPCServer } from 'json-rpc-2.0';
-import { createServicesFactory } from '../services';
 import { whitelistMiddleware } from './middlewares/whitelistMiddleware';
+import { createLogger } from '@nexus-wallet/utils';
 
-export const server = new JSONRPCServer<ServerParams>();
-server.applyMiddleware(whitelistMiddleware);
+export const methods: Record<string, (...args: unknown[]) => unknown> = {};
+export const logger = createLogger();
 
-export function addMethod<K extends keyof (WalletMethods & DebugMethods)>(
+export function addMethod<K extends keyof RpcMethods>(
   method: K,
-  handler: (param: WalletMethods[K]['params'], context: ServerParams) => WalletMethods[K]['result'],
+  handler: (param: RpcMethods[K]['params'], context: ServerParams) => RpcMethods[K]['result'],
 ): void {
-  server.addMethod(String(method), handler);
+  Object.assign(methods, { [method]: handler });
 }
 
-let servicesFactory = createServicesFactory();
+/**
+ * this method should be called after all methods has been registered
+ * so if you want to createServer, you should call {@link addMethod} first
+ * @param factory
+ */
+export function createServer<Endpoint>(factory: ModulesFactory): {
+  server: JSONRPCServer<ServerParams>;
+  createServerParams: (endpoint: Endpoint) => ServerParams;
+} {
+  const server = new JSONRPCServer<ServerParams>();
+  server.applyMiddleware(whitelistMiddleware);
 
-export function createRpcServerParams(payload: { endpoint: Endpoint }): ServerParams {
+  logger.info('Methods has been registered: ', Object.keys(methods));
+
+  Object.entries(methods).forEach(([method, handler]) => server.addMethod(method, handler));
+  return { server, createServerParams: (endpoint) => createRpcServerParams({ endpoint, factory }) };
+}
+
+export function createRpcServerParams<Endpoint>({
+  endpoint,
+  factory,
+}: {
+  endpoint: Endpoint;
+  factory: ModulesFactory;
+}): ServerParams {
   return {
     getRequesterAppInfo: async () => {
-      const tab = await browser.tabs.get(payload.endpoint.tabId);
-      if (!tab.url || !tab.favIconUrl) {
-        errors.throwError(
-          'It seems that there is no permission for "permissions.tab", please check if the "permissions.tab" is disabled',
-        );
-      }
-      return { url: tab.url, favIconUrl: tab.favIconUrl };
+      const platform = factory.get('platformService');
+      return platform.getRequesterAppInfo(endpoint);
     },
 
-    resolveService: (k) => servicesFactory.get(k),
+    resolveService: (k) => factory.get(k),
   };
 }
