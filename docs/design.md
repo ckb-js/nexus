@@ -103,10 +103,10 @@ interface CkbProvider {
    *
    */
   getNetworkName(): Promise<Network>;
-  
+
   /**
-  * Get the current wallet's nickname for display puropose
-  */
+   * Get the current wallet's nickname for display puropose
+   */
   getNickname(): Promise<string>;
 
   fullOwnership: Ownership;
@@ -114,7 +114,7 @@ interface CkbProvider {
 }
 
 interface Ownership {
-  getOffChainLocks(options?: GetOffChainLocksOptions): Promise<Script[]>;
+  getOffChainLocks(options?: GetOffChainLocksPayload): Promise<Script[]>;
 
   getOnChainLocks(payload: GetOnChainLocksPayload): Promise<Paginate<Script>>;
 
@@ -142,15 +142,12 @@ export interface GetPaginateItemsPayload {
 }
 
 export interface OwnershipFilter {
-  change?: 'external' | 'internal'; 
+  change?: 'external' | 'internal';
 }
 
-export interface GetLiveCellsPayload extends OwnershipFilter, GetPaginateItemsPayload{}
+export interface GetLiveCellsPayload extends OwnershipFilter, GetPaginateItemsPayload {}
 export interface GetOnChainLocksPayload extends OwnershipFilter, GetPaginateItemsPayload {}
-export interface GetOffChainLocksPayload extends OwnershipFilter {};
-  // will be ignored in rule-based ownership
-  change?: boolean;
-};
+export interface GetOffChainLocksPayload extends OwnershipFilter {}
 
 interface Paginate<T> {
   objects: T[];
