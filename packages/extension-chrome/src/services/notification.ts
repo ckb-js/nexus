@@ -34,7 +34,7 @@ type NotificationPath = 'grant' | 'sign-data' | 'sign-transaction';
 async function createNotificationWindow(
   browser: Browser,
   path: NotificationPath,
-): Promise<{ messenger: SessionMessenger; notificationWindow: Windows.Window }> {
+): Promise<{ messenger: SessionMessenger<SessionMethods>; notificationWindow: Windows.Window }> {
   const lastFocused = await browser.windows.getLastFocused();
   const sessionId = nanoid();
   const window = await browser.windows.create({
@@ -47,7 +47,7 @@ async function createNotificationWindow(
     url: `notification.html#/${path}?sessionId=${sessionId}`,
   });
 
-  const messenger = createSessionMessenger({ adapter: browserExtensionAdapter, sessionId });
+  const messenger = createSessionMessenger<SessionMethods>({ adapter: browserExtensionAdapter, sessionId });
 
   return {
     notificationWindow: window,
@@ -93,8 +93,8 @@ export function createNotificationService({ browser }: { browser: Browser }): No
           return payload;
         });
 
-        messenger.register('session_approveSignData', () => {
-          resolve({ password: 'mooooock data' });
+        messenger.register('session_approveSignData', ({ password }) => {
+          resolve({ password });
         });
 
         messenger.register('session_rejectSignData', () => {

@@ -22,6 +22,7 @@ import { useCheckPassword } from '../../hooks/useCheckPassword';
 import { useSessionMessenger } from '../../hooks/useSessionMessenger';
 import { bytes } from '@ckb-lumos/codec/lib';
 
+type FormState = { password: string };
 export const SignData: FC = () => {
   const sessionManager = useSessionMessenger();
   const checkPassword = useCheckPassword();
@@ -32,20 +33,20 @@ export const SignData: FC = () => {
   });
 
   const sendSessionMutation = useMutation({
-    mutationFn: async (approve: boolean) => {
-      await sessionManager.send(approve ? 'session_approveSignData' : 'session_rejectSignData');
+    mutationFn: async (password: string) => {
+      await sessionManager.send('session_approveSignData', { password });
     },
   });
 
-  const { handleSubmit, register, formState, setValue } = useForm({
+  const { handleSubmit, register, formState, setValue } = useForm<FormState>({
     mode: 'onSubmit',
 
     // important, without this will take performance issue
     reValidateMode: 'onSubmit',
     defaultValues: { password: '' },
   });
-  const onSubmit = async () => {
-    await sendSessionMutation.mutateAsync(true);
+  const onSubmit = async ({ password }: FormState) => {
+    await sendSessionMutation.mutateAsync(password);
     window.close();
   };
 
@@ -73,7 +74,7 @@ export const SignData: FC = () => {
   }, [unsignedDataQuery.data]);
 
   const onReject = async () => {
-    await sendSessionMutation.mutateAsync(false);
+    await sessionManager.send('session_rejectSignData');
     window.close();
   };
 
