@@ -1,5 +1,4 @@
 import type { Call, NotificationService } from '@nexus-wallet/types';
-import { errors } from '@nexus-wallet/utils';
 import { TransactionSkeletonObject } from '@ckb-lumos/helpers';
 import type { HexString, Script } from '@ckb-lumos/base';
 import { createSessionMessenger } from '../messaging/session';
@@ -69,7 +68,7 @@ export function createNotificationService({ browser }: { browser: Browser }): No
       });
     },
     requestSignTransaction() {
-      errors.unimplemented();
+      return Promise.resolve({ password: 'abcd1234' });
     },
     requestSignData() {
       return Promise.resolve({ password: 'abcd1234' });

@@ -62,7 +62,8 @@ export class DefaultBackend implements Backend {
       const content = await rawResult.json();
       console.log('getLiveCell content', content, outPoint);
 
-      return {
+      const result: Cell = {
+        outPoint,
         cellOutput: {
           capacity: content.result.cell.output.capacity,
           lock: {
@@ -73,6 +74,9 @@ export class DefaultBackend implements Backend {
         },
         data: content.result.cell.data.content,
       };
+      console.log('live cell fetcher result', result);
+
+      return result;
     };
   }
 

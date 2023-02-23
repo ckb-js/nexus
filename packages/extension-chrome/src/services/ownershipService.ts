@@ -134,6 +134,7 @@ function createOwnershipService(config: CreateOwnershipServiceProps): OwnershipS
       };
     },
     signTransaction: async (payload: SignTransactionPayload) => {
+      console.log('ownership signTransaction', payload);
       const cellFetcher = config.backend.getLiveCellFetcher();
       let txSkeleton = await createTransactionSkeleton(payload.tx, cellFetcher);
       logger.info('txSkeleton', txSkeleton);

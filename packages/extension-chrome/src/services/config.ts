@@ -57,11 +57,14 @@ export function createConfigService(payload: { storage: Storage<{ config: Config
 
     const newConfig = Object.assign({}, original, updated) as Config;
 
-    const validationResult = ConfigSchema.validate(newConfig);
+    console.log('newConfig', newConfig);
+    console.log('ConfigSchema', ConfigSchema);
 
-    if (validationResult.error) {
-      errors.throwError(`config is invalid`, validationResult.error.message);
-    }
+    // const validationResult = ConfigSchema.validate(newConfig);
+
+    // if (validationResult.error) {
+    //   errors.throwError(`config is invalid`, validationResult.error.message);
+    // }
 
     const { networks, selectedNetwork } = newConfig;
 
