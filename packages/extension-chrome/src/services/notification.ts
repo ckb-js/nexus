@@ -30,7 +30,6 @@ export type SessionMethods = {
 const NOTIFICATION_WIDTH = 500;
 const NOTIFICATION_HEIGHT = 640;
 
-// TODO will rename to createPlatformService
 export function createBrowserExtensionPlatformService(): PlatformService<Endpoint> {
   return {
     async requestGrant({ url }) {
@@ -51,7 +50,6 @@ export function createBrowserExtensionPlatformService(): PlatformService<Endpoin
 
       return new Promise((resolve, reject) => {
         messenger.register('session_getRequesterAppInfo', () => {
-          // TODO: favicon from url
           return { url, favicon: `${new URL(url).origin}/favicon.ico` };
         });
 
