@@ -15,6 +15,7 @@ describe('formatMessage', () => {
     expect(formatMessage('buffer: %s', Buffer.from([0, 1, 2]))).toBe(`buffer: 0x000102`);
     expect(formatMessage('number: %s', 1)).toBe(`number: 1`);
     expect(formatMessage('object: %s', { key: 'value' })).toBe(`object: {"key":"value"}`);
+    expect(formatMessage('empty array: %s', [])).toBe(`empty array: []`);
   });
 
   it('should append extra arguments to the end of the message', () => {
