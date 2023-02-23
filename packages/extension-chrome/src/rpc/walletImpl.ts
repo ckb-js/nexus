@@ -1,5 +1,4 @@
 import { createLogger, errors } from '@nexus-wallet/utils';
-import {} from '@ckb-lumos/codec';
 import { addMethod } from './server';
 
 const logger = createLogger();

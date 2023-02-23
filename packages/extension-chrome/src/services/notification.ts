@@ -25,11 +25,6 @@ export type SessionMethods = {
    */
   session_getUnsignedData: Call<void, { data: HexString; url: string }>;
   session_approveSignTransaction: Call<{ password: string }, void>;
-
-  /**
-   * Check the password. `true` when password is correct
-   */
-  session_checkPassword: Call<{ password: string }, boolean>;
 };
 
 const NOTIFICATION_WIDTH = 500;

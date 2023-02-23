@@ -49,9 +49,9 @@ export const SignData: FC = () => {
     window.close();
   };
 
-  const onInvalid = () => {
+  const onInvalid = useCallback(() => {
     setValue('password', '');
-  };
+  }, [setValue]);
 
   const validatePassword = useCallback(
     (password: string) => {
@@ -71,6 +71,11 @@ export const SignData: FC = () => {
       return bytes.hexify(unsigned);
     }
   }, [unsignedDataQuery.data]);
+
+  const onReject = async () => {
+    await sendSessionMutation.mutateAsync(false);
+    window.close();
+  };
 
   return (
     <Skeleton isLoaded={!!unsignedDataQuery.data}>
@@ -95,7 +100,7 @@ export const SignData: FC = () => {
             Message:
           </Heading>
           <Text fontSize="md" w="100%">
-            link3.to wants you to sign in with your Nexus account:
+            {unsignedDataQuery.data?.url} wants you to sign in with your Nexus account:
             <br />
             {dataForSigning}
           </Text>
@@ -115,13 +120,7 @@ export const SignData: FC = () => {
         </FormControl>
 
         <ButtonGroup mt="32px" size="md">
-          <Button
-            isLoading={formState.isSubmitting}
-            onClick={() => window.close()}
-            w="220px"
-            color="gray.800"
-            colorScheme="gray"
-          >
+          <Button isLoading={formState.isSubmitting} onClick={onReject} w="220px" color="gray.800" colorScheme="gray">
             Reject
           </Button>
 
