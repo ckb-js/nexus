@@ -9,10 +9,6 @@ describe('rpc/middleware', () => {
   it('should request be baned when Nexus is not initialized', async () => {
     const { request } = createTestRpcServer({ storage: createInMemoryStorage });
 
-    jest.mock('../helpers/mockStorage', () => ({
-      mockStorage: createInMemoryStorage(),
-    }));
-
     await expect(request('unknown_method')).rejects.toThrowError(/Nexus is not initialized/);
     await expect(request('wallet_enable')).rejects.toThrowError(/Nexus is not initialized/);
   });
