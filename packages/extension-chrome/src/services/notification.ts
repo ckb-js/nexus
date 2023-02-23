@@ -87,11 +87,10 @@ export function createNotificationService({ browser }: { browser: Browser }): No
 
     async requestSignData(payload) {
       const { notificationWindow, messenger } = await createNotificationWindow(browser, 'sign-data');
-      let { data } = payload;
 
       return new Promise((resolve, reject) => {
         messenger.register('session_getUnsignedData', () => {
-          return { ...payload, data: data };
+          return payload;
         });
 
         messenger.register('session_approveSignData', () => {
