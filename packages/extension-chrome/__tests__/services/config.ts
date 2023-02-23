@@ -42,6 +42,58 @@ describe('ConfigService', () => {
     });
   });
 
+  it('should setConfig with localhost hostname', async () => {
+    await expect(
+      service.setConfig({
+        config: {
+          ...fakeConfig,
+          whitelist: [
+            {
+              favicon: 'http://localhost:9180/favicon.ico',
+              host: 'localhost',
+            },
+          ],
+        },
+      }),
+    );
+    await expect(service.getConfig()).resolves.toEqual({
+      ...fakeConfig,
+      whitelist: [
+        {
+          favicon: 'http://localhost:9180/favicon.ico',
+          host: 'localhost',
+        },
+      ],
+      version: LIB_VERSION,
+    });
+  });
+
+  it('should setConfig with localhost:port hostname', async () => {
+    await expect(
+      service.setConfig({
+        config: {
+          ...fakeConfig,
+          whitelist: [
+            {
+              favicon: 'http://example.com/favicon.ico',
+              host: 'localhost:9180',
+            },
+          ],
+        },
+      }),
+    );
+    await expect(service.getConfig()).resolves.toEqual({
+      ...fakeConfig,
+      whitelist: [
+        {
+          favicon: 'http://example.com/favicon.ico',
+          host: 'localhost:9180',
+        },
+      ],
+      version: LIB_VERSION,
+    });
+  });
+
   it('setConfig with callback', async () => {
     await service.setConfig({
       config: (draft) => {
@@ -56,6 +108,22 @@ describe('ConfigService', () => {
     await expect(
       service.setConfig({
         config: { ...fakeConfig, selectedNetwork: '2' },
+      }),
+    ).rejects.toThrowError();
+  });
+
+  it('should throw when setConfig with wrong hostname', async () => {
+    await expect(
+      service.setConfig({
+        config: {
+          ...fakeConfig,
+          whitelist: [
+            {
+              favicon: 'http://localhost:9180/favicon.ico',
+              host: 'localhost:123123123',
+            },
+          ],
+        },
       }),
     ).rejects.toThrowError();
   });
