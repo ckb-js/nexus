@@ -1,13 +1,10 @@
 import { BackendProvider } from './../services/ownership/backend';
 import { createLogger, errors } from '@nexus-wallet/utils';
-import { createServicesFactory } from '../services';
-import { ProbeTask } from '../services/ownership/probeTask';
 import { createOwnershipServices } from '../services/ownershipService';
 import { addMethod } from './server';
 import { LocksManager } from '../services/ownership/locksManager';
 
 const logger = createLogger();
-let probe: ProbeTask | undefined;
 
 addMethod('wallet_enable', async (_, { getRequesterAppInfo, resolveService }) => {
   const configService = await resolveService('configService');
@@ -30,19 +27,6 @@ addMethod('wallet_enable', async (_, { getRequesterAppInfo, resolveService }) =>
   }
 
   await configService.addWhitelistItem({ host: host, favicon: `${protocol}//${host}/favicon.ico` });
-  const servicesFactory = createServicesFactory();
-  const keystoreService = await servicesFactory.get('keystoreService');
-  const storage = await servicesFactory.get('storage');
-  const backend = BackendProvider.getDefaultBackend();
-
-  probe = ProbeTask.getInstance({
-    backend,
-    keystoreService,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    storage: storage as any,
-  });
-
-  probe.run();
 });
 
 addMethod('wallet_fullOwnership_getOffChainLocks', async (payload, { resolveService }) => {

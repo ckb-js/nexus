@@ -40,3 +40,5 @@ export interface ServerParams {
 
   getRequesterAppInfo(): Promise<{ url: string }>;
 }
+
+export interface RpcMethods extends WalletMethods, DebugMethods {}

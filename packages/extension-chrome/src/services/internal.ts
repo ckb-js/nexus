@@ -1,6 +1,5 @@
-import { ConfigService, KeystoreService } from '@nexus-wallet/types';
+import { ConfigService, KeystoreService, PlatformService } from '@nexus-wallet/types';
 import { NetworkConfig } from '@nexus-wallet/types/lib/services';
-import type { Browser } from 'webextension-polyfill';
 
 // full ownership with external chain
 export const FULL_OWNERSHIP_EXTERNAL_PARENT_PATH = `m/44'/309'/0'/0`;
@@ -25,9 +24,9 @@ export interface InternalService {
 export function createInternalService(payload: {
   keystoreService: KeystoreService;
   configService: ConfigService;
-  browser: Browser;
+  platformService: PlatformService;
 }): InternalService {
-  const { keystoreService, configService } = payload;
+  const { keystoreService, configService, platformService } = payload;
 
   const impl: InternalService = {
     initWallet: async (payload) => {
@@ -51,7 +50,7 @@ export function createInternalService(payload: {
     startInitIfNotInitialized: /* istanbul ignore next */ async () => {
       const initialized = await impl.isInitialized();
       if (initialized) return;
-      await payload.browser.tabs.create({ url: `walletManager.html` });
+      await platformService.navigateToInitWallet();
     },
   };
 

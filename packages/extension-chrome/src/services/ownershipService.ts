@@ -21,7 +21,7 @@ import { LockInfo } from './ownership/types';
 
 type ServiceProps = {
   keystoreService: KeystoreService;
-  notificationService: NotificationService;
+  notificationService: NotificationService<unknown>;
   locksManager: LocksManager;
   backend: Backend;
 };
