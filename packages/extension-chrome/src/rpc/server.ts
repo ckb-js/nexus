@@ -41,7 +41,7 @@ export function createServer<Sender>(factory: ModulesFactory): NexusRpcServer<Se
   };
 }
 
-async function probeRun(factory: ModulesFactory) {
+function probeRun(factory: ModulesFactory) {
   const keystoreService = factory.get('keystoreService');
   const storage = factory.get('storage');
   if (!keystoreService || !storage) return;
