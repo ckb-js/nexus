@@ -1,10 +1,6 @@
 import { createTestRpcServer } from './helper';
 import { createInMemoryStorage } from '../../src/services/storage';
 
-afterEach(() => {
-  jest.clearAllMocks();
-});
-
 describe('rpc/middleware', () => {
   it('should request be baned when Nexus is not initialized', async () => {
     const { request } = createTestRpcServer({ storage: createInMemoryStorage });
