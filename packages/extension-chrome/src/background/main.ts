@@ -2,7 +2,7 @@ import './patch';
 import '../rpc/walletImpl';
 import '../rpc/debugImpl';
 import { createLogger, LIB_VERSION } from '@nexus-wallet/utils';
-import { onMessage } from 'webext-bridge';
+import { Endpoint, onMessage } from 'webext-bridge';
 import { createServer } from '../rpc';
 import { makeBrowserExtensionModulesFactory } from '../services';
 
@@ -13,13 +13,13 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 const factory = makeBrowserExtensionModulesFactory();
-const { server, createServerParams } = createServer(factory);
+const server = createServer<Endpoint>(factory);
 
 // listen message from content script
 onMessage('rpc', async ({ data, sender }) => {
   logger.info(`RPC start`, data);
   try {
-    const result = await server.receive(data, createServerParams(sender));
+    const result = await server.handleRequest({ request: data, sender: sender });
     logger.info(`RPC end`, result);
     return result;
   } catch (error) {

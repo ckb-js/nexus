@@ -1,7 +1,7 @@
 import { BytesLike } from '@ckb-lumos/codec';
 import { Transaction } from '@ckb-lumos/lumos';
 
-export interface PlatformService<Requester = unknown> {
+export interface PlatformService<Sender = unknown> {
   /**
    * request user to approve for signing a transaction,
    * will return a password to decrypt keystore if user approved and input the correct password
@@ -23,7 +23,12 @@ export interface PlatformService<Requester = unknown> {
    */
   navigateToInitWallet(): Promise<void>;
 
-  getRequesterAppInfo(endpoint: Requester): Promise<{ url: string }>;
+  /**
+   * convert the requester's information into a URL,
+   * which can be used to identify whether the requester is in whitelist, etc.
+   * @param sender the requester's information, something like {@link https://developer.chrome.com/docs/extensions/reference/runtime/#type-MessageSender MessageSender} in Chrome extension
+   */
+  getRequesterAppInfo(sender: Sender): Promise<{ url: string }>;
 }
 
 /**

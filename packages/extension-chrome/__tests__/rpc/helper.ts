@@ -26,10 +26,10 @@ export function createTestRpcServer<S = any, P = any>(payload: Partial<ModulePro
   const storage = payload.storage || (() => mockStorage as Storage<S>);
   const platform = payload.platform || (() => mockPlatformService);
   const factory = createModulesFactory({ storage, platform });
-  const { server, createServerParams } = createServer(factory);
+  const server = createServer(factory);
 
   const client = new JSONRPCClient(async (req) => {
-    const response = await server.receive(req, createServerParams(null));
+    const response = await server.handleRequest({ request: req, sender: null });
     client.receive(response!);
   });
 
