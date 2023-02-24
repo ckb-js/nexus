@@ -1,11 +1,10 @@
 import type { Call, NotificationService } from '@nexus-wallet/types';
-import { errors } from '@nexus-wallet/utils';
-import { TransactionSkeletonObject } from '@ckb-lumos/helpers';
-import type { HexString, Script } from '@ckb-lumos/base';
+import { HexString, Script } from '@ckb-lumos/lumos';
 import { createSessionMessenger, SessionMessenger } from '../messaging/session';
 import { browserExtensionAdapter } from '../messaging/adapters';
 import { nanoid } from 'nanoid';
 import type { Browser, Windows } from 'webextension-polyfill';
+import { TransactionSkeletonObject } from '@ckb-lumos/helpers';
 
 export type SessionMethods = {
   session_getRequesterAppInfo: Call<void, { url: string; favicon: string }>;
@@ -25,6 +24,7 @@ export type SessionMethods = {
    */
   session_getUnsignedData: Call<void, { data: HexString; url: string }>;
   session_approveSignTransaction: Call<{ password: string }, void>;
+  session_rejectSignTransaction: Call<void, void>;
 };
 
 const NOTIFICATION_WIDTH = 500;
@@ -81,8 +81,33 @@ export function createNotificationService({ browser }: { browser: Browser }): No
         });
       });
     },
-    requestSignTransaction() {
-      errors.unimplemented();
+    async requestSignTransaction({ tx }) {
+      const { notificationWindow, messenger } = await createNotificationWindow(browser, 'sign-transaction');
+
+      return new Promise((resolve, reject) => {
+        messenger.register('session_getUnsignedTransaction', () => {
+          // TODO use REAL transaction from user
+          return {
+            tx,
+            ownedLocks: [],
+          };
+        });
+
+        messenger.register('session_approveSignTransaction', ({ password }) => {
+          resolve({ password });
+        });
+
+        messenger.register('session_rejectSignTransaction', () => {
+          reject();
+        });
+
+        browser.windows.onRemoved.addListener((windowId) => {
+          if (windowId === notificationWindow.id) {
+            messenger.destroy();
+            reject();
+          }
+        });
+      });
     },
 
     async requestSignData(payload) {
