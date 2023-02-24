@@ -77,12 +77,10 @@ export function createBrowserExtensionPlatformService(): PlatformService<Endpoin
     },
     getRequesterAppInfo: async (endpoint) => {
       const tab = await browser.tabs.get(endpoint.tabId);
-      if (!tab.url || !tab.favIconUrl) {
-        errors.throwError(
-          'It seems that there is no permission for "permissions.tab", please check if the "permissions.tab" is disabled',
-        );
+      if (!tab.url) {
+        errors.throwError(`Cannot get the site information from the request`);
       }
-      return { url: tab.url, favIconUrl: tab.favIconUrl };
+      return { url: tab.url };
     },
   };
 }
