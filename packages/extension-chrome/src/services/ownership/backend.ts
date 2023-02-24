@@ -62,17 +62,25 @@ export class DefaultBackend implements Backend {
       const content = await rawResult.json();
       console.log('getLiveCell content', content, outPoint);
 
+      const object = content.result.cell;
       const result: Cell = {
         outPoint,
         cellOutput: {
-          capacity: content.result.cell.output.capacity,
+          capacity: object.output.capacity,
           lock: {
-            codeHash: content.result.cell.output.lock.code_hash,
-            hashType: content.result.cell.output.lock.hash_type,
-            args: content.result.cell.output.lock.args,
+            codeHash: object.output.lock.code_hash,
+            hashType: object.output.lock.hash_type,
+            args: object.output.lock.args,
           },
+          type: object.output.type
+            ? {
+                codeHash: object.output.type.code_hash,
+                hashType: object.output.type.hash_type,
+                args: object.output.type.args,
+              }
+            : undefined,
         },
-        data: content.result.cell.data.content,
+        data: object.data.content,
       };
       console.log('live cell fetcher result', result);
 
@@ -130,6 +138,13 @@ export class DefaultBackend implements Backend {
             hashType: object.output.lock.hash_type,
             args: object.output.lock.args,
           },
+          type: object.output.type
+            ? {
+                codeHash: object.output.type.code_hash,
+                hashType: object.output.type.hash_type,
+                args: object.output.type.args,
+              }
+            : undefined,
         },
         data: object.output_data,
         outPoint: {
