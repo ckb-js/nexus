@@ -7,7 +7,7 @@ export interface WalletMethods extends CallMap {
   wallet_isEnabled: Call<void, boolean>;
   wallet_getNetworkName: Call<void, string>;
 
-  wallet_fullOwnership_getUnusedLocks: Call<void, Script[]>;
+  wallet_fullOwnership_getOffChainLocks: Call<void, Script[]>;
 }
 
 export interface DebugMethods extends CallMap {

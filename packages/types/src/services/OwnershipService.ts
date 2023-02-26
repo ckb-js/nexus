@@ -8,9 +8,9 @@ export interface OwnershipService {
   /**
    * get unused locks
    */
-  getUnusedLocks(payload: GetUnusedLocksPayload): Promise<Script[]>;
+  getOffChainLocks(payload: GetUnusedLocksPayload): Promise<Script[]>;
 
-  getUsedLocks(payload: GetUsedLocksPayload): Promise<Paginate<Script>>;
+  getOnChainLocks(payload: GetUsedLocksPayload): Promise<Paginate<Script>>;
 
   /**
    * sign a transaction, only the secp256k1_blake2b lock will be signed
@@ -30,7 +30,7 @@ interface GetPaginateItemsPayload {
 }
 
 interface GetUnusedLocksPayload {
-  change?: boolean;
+  change?: 'external' | 'internal';
 }
 
 interface GetUsedLocksPayload extends GetUnusedLocksPayload, GetPaginateItemsPayload {}
