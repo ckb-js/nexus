@@ -1,22 +1,12 @@
-import { Cell, Script } from '@ckb-lumos/lumos';
+import { Cell } from '@ckb-lumos/lumos';
+import { WellknownCellManager } from './WellkownCellManager';
 
-type CellParser = {
-  type: Script;
-  parseValue: (cell: Cell) => string;
-};
-
-const cellParsers: CellParser[] = [];
-
-// TODO: finish cell parser
 export function parseCellType(cell: Cell): string {
-  const { cellOutput } = cell;
-  if (!cellOutput.type) return '-';
-
-  const parser = cellParsers.find((parser) => parser.type === cellOutput.type);
-
-  if (parser) {
-    return parser.parseValue(cell);
+  const { type } = cell.cellOutput;
+  if (!type) {
+    return '-';
   }
+  const config = WellknownCellManager.query(type);
 
-  return '-';
+  return config?.parser(cell) ?? '-';
 }
