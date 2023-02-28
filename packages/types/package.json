@@ -21,7 +21,9 @@
     "start:webpack": "ts-node ./scripts/start.ts",
     "test": "jest",
     "build": "tsc",
-    "clean": "rimraf build/*"
+    "clean": "rimraf build/*",
+    "check": "npm run check:types",
+    "check:types": "tsc --noEmit"
   },
   "bugs": {
     "url": "https://github.com/ckb-js/nexus/issues"

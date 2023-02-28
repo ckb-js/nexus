@@ -20,7 +20,9 @@
     "start": "cross-env NODE_ENV=development npm run start:webpack",
     "start:webpack": "ts-node ./scripts/start.ts",
     "build": "npm run clean && webpack --config=config/webpack.config.prod.ts",
-    "clean": "rimraf build/*"
+    "clean": "rimraf build/*",
+    "check": "npm run check:types",
+    "check:types": "tsc --noEmit"
   },
   "bugs": {
     "url": "https://github.com/ckb-js/nexus/issues"
