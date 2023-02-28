@@ -1,8 +1,10 @@
 import * as awilix from 'awilix';
-import { ConfigService, KeystoreService, PlatformService, Storage } from '@nexus-wallet/types';
+import { ConfigService, KeystoreService, OwnershipService, PlatformService, Storage } from '@nexus-wallet/types';
 import { createConfigService } from '../config';
 import { createInternalService, InternalService } from '../internal';
 import { createKeystoreService } from '../keystore';
+import { createFullOwnershipService } from '../ownership';
+import { BackendProvider, createBackendProvider } from '../ownership/backend';
 
 export interface ModulesFactory {
   get<K extends keyof Modules>(name: K): Modules[K];
@@ -18,6 +20,8 @@ export interface Modules<S = unknown, P = unknown> {
   configService: ConfigService;
   internalService: InternalService;
   platformService: PlatformService<P>;
+  backendProvider: BackendProvider;
+  fullOwnershipService: OwnershipService;
 }
 
 export function createModulesFactory<S, P>({ storage, platform }: ModuleProviderMap<S, P>): ModulesFactory {
@@ -28,6 +32,8 @@ export function createModulesFactory<S, P>({ storage, platform }: ModuleProvider
     configService: awilix.asFunction(createConfigService).singleton(),
     internalService: awilix.asFunction(createInternalService).singleton(),
     keystoreService: awilix.asFunction(createKeystoreService).singleton(),
+    backendProvider: awilix.asFunction(createBackendProvider).singleton(),
+    fullOwnershipService: awilix.asFunction(createFullOwnershipService).singleton(),
     notificationService: platformResolover,
     platformService: platformResolover,
   });

@@ -7,6 +7,7 @@ import { BackendProvider } from './backend';
 import { HexString, Script, utils } from '@ckb-lumos/lumos';
 import { common } from '@ckb-lumos/common-scripts';
 import { Config } from '@ckb-lumos/config-manager';
+import { Signature, SignDataPayload } from '@nexus-wallet/types/lib/services/OwnershipService';
 
 export function createFullOwnershipService({
   storage,
@@ -114,8 +115,21 @@ export function createFullOwnershipService({
 
       return signatures;
     },
-    signData: async () => {
-      errors.unimplemented();
+    signData: async (payload: SignDataPayload): Promise<Signature> => {
+      const { password } = await platformService.requestSignData({ data: payload.data });
+      const db = await getDb();
+      const [info] = await db.filterByMatch({ scriptHash: utils.computeScriptHash(payload.lock) });
+      asserts.asserts(
+        info,
+        'Cannot find script info associated with lock %s, this error is unlikely to occur, have you changed the data in storage or have you manually built the data in storage?',
+        payload.lock,
+      );
+      const signature = await keystoreService.signMessage({
+        message: payload.data,
+        password,
+        path: `${info.parentPath}/${info.childIndex}`,
+      });
+      return signature;
     },
     getOffChainLocks: async ({ change }) => {
       const db = await getDb();

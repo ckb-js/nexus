@@ -8,7 +8,7 @@ export interface OwnershipService {
   /**
    * get unused locks
    */
-  getOffChainLocks(payload: GetUnusedLocksPayload): Promise<Script[]>;
+  getOffChainLocks(payload: GetOffChainLocksPayload): Promise<Script[]>;
 
   getOnChainLocks(payload: GetUsedLocksPayload): Promise<Paginate<Script>>;
 
@@ -25,17 +25,17 @@ export interface OwnershipService {
   signData(payload: SignDataPayload): Promise<Signature>;
 }
 
-interface GetPaginateItemsPayload {
+export interface GetPaginateItemsPayload {
   cursor?: string;
 }
 
-interface GetUnusedLocksPayload {
+export interface GetOffChainLocksPayload {
   change?: 'external' | 'internal';
 }
 
-interface GetUsedLocksPayload extends GetUnusedLocksPayload, GetPaginateItemsPayload {}
+export interface GetUsedLocksPayload extends GetOffChainLocksPayload, GetPaginateItemsPayload {}
 
-interface SignTransactionPayload {
+export interface SignTransactionPayload {
   tx: Transaction;
 }
 

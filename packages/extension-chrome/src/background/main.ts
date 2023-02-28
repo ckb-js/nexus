@@ -4,7 +4,9 @@ import '../rpc/debugImpl';
 import { createLogger, LIB_VERSION } from '@nexus-wallet/utils';
 import { Endpoint, onMessage } from 'webext-bridge';
 import { createServer } from '../rpc';
-import { makeBrowserExtensionModulesFactory } from '../services';
+import { makeBrowserExtensionModulesFactory, ModulesFactory } from '../services';
+import { createWatchtower } from '../services/ownership';
+import { createScriptInfoDb, OwnershipStorage } from '../services/ownership/storage';
 
 const logger = createLogger();
 logger.info(`Hi, this is Nexus@%s`, LIB_VERSION);
@@ -14,6 +16,7 @@ if (process.env.NODE_ENV === 'development') {
 
 const factory = makeBrowserExtensionModulesFactory();
 const server = createServer<Endpoint>(factory);
+void runWatchtower(factory);
 
 // listen message from content script
 onMessage('rpc', async ({ data, sender }) => {
@@ -26,3 +29,16 @@ onMessage('rpc', async ({ data, sender }) => {
     throw error;
   }
 });
+
+async function runWatchtower(factory: ModulesFactory) {
+  const configService = factory.get('configService');
+  const keystoreService = factory.get('keystoreService');
+  const backendProvider = factory.get('backendProvider');
+  const storage = factory.get('storage') as OwnershipStorage;
+
+  const selectedNetwork = await configService.getSelectedNetwork();
+  const db = createScriptInfoDb({ storage, networkId: selectedNetwork.id });
+
+  const watchtower = createWatchtower({ db, keystoreService, backend: await backendProvider.resolve() });
+  watchtower.run();
+}

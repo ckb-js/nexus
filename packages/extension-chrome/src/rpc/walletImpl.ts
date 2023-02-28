@@ -25,3 +25,28 @@ addMethod('wallet_enable', async (_, { getRequesterAppInfo, resolveService }) =>
 
   await configService.addWhitelistItem({ host: host, favicon: `${protocol}//${host}/favicon.ico` });
 });
+
+addMethod('wallet_fullOwnership_getOffChainLocks', async (payload, { resolveService }) => {
+  const fullOwnershipService = await resolveService('fullOwnershipService');
+  return await fullOwnershipService.getOffChainLocks(payload);
+});
+
+addMethod('wallet_fullOwnership_getOnChainLocks', async (payload, { resolveService }) => {
+  const fullOwnershipService = await resolveService('fullOwnershipService');
+  return await fullOwnershipService.getOnChainLocks(payload);
+});
+
+addMethod('wallet_fullOwnership_getLiveCells', async (payload, { resolveService }) => {
+  const fullOwnershipService = await resolveService('fullOwnershipService');
+  return await fullOwnershipService.getLiveCells(payload);
+});
+
+addMethod('wallet_fullOwnership_signData', async (payload, { resolveService }) => {
+  const fullOwnershipService = await resolveService('fullOwnershipService');
+  return await fullOwnershipService.signData(payload);
+});
+
+addMethod('wallet_fullOwnership_signTransaction', async (payload, { resolveService }) => {
+  const fullOwnershipService = await resolveService('fullOwnershipService');
+  return await fullOwnershipService.signTransaction(payload);
+});
