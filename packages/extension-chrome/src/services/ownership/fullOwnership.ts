@@ -118,6 +118,9 @@ export function createFullOwnershipService({
     signData: async (payload: SignDataPayload): Promise<Signature> => {
       const { password } = await platformService.requestSignData({ data: payload.data });
       const db = await getDb();
+      console.log('payload all', await db.getAll());
+      console.log('payload script hash', utils.computeScriptHash(payload.lock));
+
       const [info] = await db.filterByMatch({ scriptHash: utils.computeScriptHash(payload.lock) });
       asserts.asserts(
         info,
