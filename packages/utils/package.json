@@ -17,11 +17,13 @@
     "url": "git+https://github.com/ckb-js/nexus.git"
   },
   "scripts": {
+    "prepare": "node -p \"'export const LIB_VERSION = ' + JSON.stringify(require('./package.json').version) + ';'\" > src/version.ts && prettier --write src/version.ts",
     "start": "cross-env NODE_ENV=development npm run start:webpack",
     "start:webpack": "ts-node ./scripts/start.ts",
     "build": "tsc",
     "clean": "rimraf build/*",
-    "prepare": "node -p \"'export const LIB_VERSION = ' + JSON.stringify(require('./package.json').version) + ';'\" > src/version.ts && prettier --write src/version.ts"
+    "check": "npm run check:types",
+    "check:types": "tsc --noEmit"
   },
   "bugs": {
     "url": "https://github.com/ckb-js/nexus/issues"
