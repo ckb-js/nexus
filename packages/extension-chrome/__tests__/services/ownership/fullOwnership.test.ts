@@ -15,7 +15,7 @@ describe('FullOwnership', () => {
       const storage = createMockStorage();
       const configService = createConfigService({ storage });
       const keystoreService = createMockModule<KeystoreService>({
-        getPublicKeyByPath: () => bytes.hexify(Buffer.alloc(32)),
+        getPublicKeyByPath: () => bytes.hexify(Buffer.alloc(33)),
       });
       const ownershipService = createFullOwnershipService({
         configService,

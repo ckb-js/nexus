@@ -19,7 +19,7 @@ const INIT_LENGTH = FULL_OWNERSHIP_OFF_CHAIN_GAP + FULL_OWNERSHIP_OFF_CHAIN_GAP 
 const backend = mockBackend;
 
 const keystoreService = createMockModule<KeystoreService>({
-  getPublicKeyByPath: () => bytes.hexify(Buffer.alloc(32)),
+  getPublicKeyByPath: () => bytes.hexify(Buffer.alloc(33)),
 });
 
 describe('Watchtower', () => {
@@ -46,7 +46,7 @@ describe('Watchtower', () => {
     const db = createScriptInfoDb({ storage: createMockStorage(), networkId: 'mainnet' });
 
     const pubkeys = Array.from({ length: 100 }).map((_, i) => {
-      const buf = Buffer.alloc(32);
+      const buf = Buffer.alloc(33);
       buf.writeUint8(i);
       return bytes.hexify(buf);
     });
