@@ -115,7 +115,7 @@ export const SignData: FC = () => {
         </FormControl>
 
         <ButtonGroup mt="32px" size="md">
-          <Button isLoading={formState.isSubmitting} onClick={onReject} w="220px" color="gray.800" colorScheme="gray">
+          <Button isDisabled={formState.isSubmitting} onClick={onReject} w="220px" color="gray.800" colorScheme="gray">
             Reject
           </Button>
 
