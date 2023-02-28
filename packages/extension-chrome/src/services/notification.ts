@@ -86,9 +86,9 @@ export function createNotificationService({ browser }: { browser: Browser }): No
 
       return new Promise((resolve, reject) => {
         messenger.register('session_getUnsignedTransaction', () => {
-          // TODO use REAL transaction from user
           return {
             tx,
+            // TODO: get owned locks
             ownedLocks: [],
           };
         });

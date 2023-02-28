@@ -29,25 +29,27 @@ const TransactionIOList: FC<
   { type: 'inputs' | 'outputs'; tx: Pick<TransactionSkeletonObject, 'inputs' | 'outputs'> } & TableProps
 > = ({ type, tx, ...rest }) => {
   return (
-    <Table background="white" w="100%" color="blackAlpha.900" {...rest}>
+    <Table data-test-id={`transaction.${type}`} background="white" w="100%" color="blackAlpha.900" {...rest}>
       <Thead>
-        {[`${type}(${tx[type].length})`, 'Type', 'Capacity'].map((head) => (
-          //* due to Chakra UI limit, can not override table style via theme configuration
-          <Heading textTransform="capitalize" color="blackAlpha.900" p="12px 16px" as={Th} size="xs" key={head}>
-            {head}
-          </Heading>
-        ))}
+        <Tr>
+          {[`${type}(${tx[type].length})`, 'Type', 'Capacity'].map((head) => (
+            //* due to Chakra UI limit, can not override table style via theme configuration
+            <Heading textTransform="capitalize" color="blackAlpha.900" p="12px 16px" as={Th} size="xs" key={head}>
+              {head}
+            </Heading>
+          ))}
+        </Tr>
       </Thead>
       <Tbody>
         {tx[type].map((cell, index) => {
           const addr = encodeToAddress(cell.cellOutput.lock);
           return (
-            <Tr key={index}>
-              <Td maxW="150px">
+            <Tr key={index} data-test-id={`transaction.${type}[${index}]`}>
+              <Td maxW="150px" data-test-id={`transaction.${type}[${index}].address`}>
                 {addr.slice(0, 5)}...{addr.slice(-4)}
               </Td>
-              <Td>{parseCellType(cell)}</Td>
-              <Td>
+              <Td data-test-id={`transaction.${type}[${index}].type`}>{parseCellType(cell)}</Td>
+              <Td data-test-id={`transaction.${type}[${index}].capacity`}>
                 {BI.from(cell.cellOutput.capacity)
                   .div(10 ** 8)
                   .toString()}{' '}
@@ -109,17 +111,25 @@ export const SignTransaction: FC = () => {
             color="black"
             background="white"
             type="password"
+            data-test-id="password"
             {...register('password', { validate: checkPassword })}
           />
           <FormErrorMessage>Password Incorrect!</FormErrorMessage>
         </FormControl>
 
         <ButtonGroup mt="32px" size="md">
-          <Button isLoading={formState.isSubmitting} onClick={onReject} w="220px" color="gray.800" colorScheme="gray">
+          <Button
+            data-test-id="reject"
+            isLoading={formState.isSubmitting}
+            onClick={onReject}
+            w="220px"
+            color="gray.800"
+            colorScheme="gray"
+          >
             Reject
           </Button>
 
-          <Button w="220px" isLoading={formState.isSubmitting} type="submit">
+          <Button data-test-id="approve" w="220px" isLoading={formState.isSubmitting} type="submit">
             Approve
           </Button>
         </ButtonGroup>

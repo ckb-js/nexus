@@ -42,6 +42,7 @@ addMethod('wallet_fullOwnership_signData', async ({ data }, { getRequesterAppInf
   }
 });
 
+// TODO: use the password for signing transaction
 addMethod('wallet_fullOwnership_signTransaction', async ({ transaction }, { resolveService }) => {
   const notificationService = resolveService('notificationService');
   const configService = resolveService('configService');
@@ -58,7 +59,8 @@ addMethod('wallet_fullOwnership_signTransaction', async ({ transaction }, { reso
     });
     skeleton = helpers.transactionSkeletonToObject(_skeleton);
 
-    skeleton.inputs.some((it) => it === null) && errors.throwError('Can not fetch the cell.');
+    skeleton.inputs.some((it) => it === null) &&
+      errors.throwError('Can not fetch your input cells, please check they are all valid and live.');
   } catch (e) {
     errors.throwError(`Can not fetch the cell.`);
   }
