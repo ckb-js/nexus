@@ -3,6 +3,7 @@ import { ConfigService, KeystoreService, PlatformService, Storage } from '@nexus
 import { createConfigService } from '../config';
 import { createInternalService, InternalService } from '../internal';
 import { createKeystoreService } from '../keystore';
+import { createEventHub, EventHub } from '../event';
 
 export interface ModulesFactory {
   get<K extends keyof Modules>(name: K): Modules[K];
@@ -18,6 +19,7 @@ export interface Modules<S = unknown, P = unknown> {
   configService: ConfigService;
   internalService: InternalService;
   platformService: PlatformService<P>;
+  eventHub: EventHub;
 }
 
 export function createModulesFactory<S, P>({ storage, platform }: ModuleProviderMap<S, P>): ModulesFactory {
@@ -30,6 +32,7 @@ export function createModulesFactory<S, P>({ storage, platform }: ModuleProvider
     keystoreService: awilix.asFunction(createKeystoreService).singleton(),
     notificationService: platformResolover,
     platformService: platformResolover,
+    eventHub: awilix.asFunction(createEventHub).singleton(),
   });
 
   return {
