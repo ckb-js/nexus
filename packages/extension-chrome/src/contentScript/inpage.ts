@@ -2,7 +2,6 @@ import { isJSONRPCResponse, JSONRPCClient } from 'json-rpc-2.0';
 import { sendMessage } from '../messaging';
 import { CkbProvider, InjectedCkb } from '@nexus-wallet/types';
 import { asserts, LIB_VERSION } from '@nexus-wallet/utils';
-import { bytes } from '@ckb-lumos/codec';
 
 const client = new JSONRPCClient(async (req) => {
   const response = await sendMessage('contentAndInjected', req, 'content-script');
@@ -30,13 +29,7 @@ const injectedCkb: InjectedCkb = {
         },
 
         async signData(payload) {
-          let { data } = payload;
-          if (typeof data === 'string') {
-            data = /^0x([0-9a-fA-F][0-9a-fA-F])+$/i.test(data) ? data : bytes.hexify(bytes.bytifyRawString(data));
-          } else {
-            data = bytes.hexify(data);
-          }
-          return client.request('wallet_fullOwnership_signData', { ...payload, data });
+          return client.request('wallet_fullOwnership_signData', { ...payload });
         },
 
         async getUsedLocks(payload) {

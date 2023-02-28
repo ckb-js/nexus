@@ -26,6 +26,7 @@ addMethod('wallet_enable', async (_, { getRequesterAppInfo, resolveService }) =>
   await configService.addWhitelistItem({ host: host, favicon: `${protocol}//${host}/favicon.ico` });
 });
 
+// TODO: implement sign data using keystore service
 addMethod('wallet_fullOwnership_signData', async ({ data }, { getRequesterAppInfo, resolveService }) => {
   const notificationService = resolveService('notificationService');
 
