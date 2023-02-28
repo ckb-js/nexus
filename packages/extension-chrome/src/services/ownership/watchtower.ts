@@ -13,6 +13,7 @@ import {
   RULE_BASED_OFF_CHAIN_GAP,
   RULE_BASED_PARENT_PATH,
 } from './constants';
+import { publicKeyToBlake160 } from '@ckb-lumos/hd/lib/key';
 
 const logger = createLogger('Watchtower');
 const DEFAULT_SCAN_INTERVAL = 10_000;
@@ -61,7 +62,7 @@ export function createWatchtower({
     let currentChildIndex = startChildIndex;
     while (currentChildIndex < endChildIndex) {
       const publicKey = await keystoreService.getPublicKeyByPath({ path: `${parentPath}/${currentChildIndex}` });
-      const lock = { ...lockTemplate, args: utils.ckbHash(publicKey) };
+      const lock = { ...lockTemplate, args: publicKeyToBlake160(publicKey) };
       result.push({
         parentPath,
         childIndex: currentChildIndex,
