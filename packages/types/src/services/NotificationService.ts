@@ -1,5 +1,4 @@
-import { BytesLike } from '@ckb-lumos/codec';
-import { Transaction } from '@ckb-lumos/lumos';
+import { HexString, Transaction } from '@ckb-lumos/lumos';
 
 export interface NotificationService {
   /**
@@ -14,7 +13,7 @@ export interface NotificationService {
    * will return a password to decrypt keystore if user approved and input the correct password
    * @param payload
    */
-  requestSignData(payload: { data: BytesLike }): Promise<{ password: string }>;
+  requestSignData(payload: { data: HexString; url: string }): Promise<{ password: string }>;
 
   requestGrant(payload: { url: string }): Promise<void>;
 }
