@@ -64,13 +64,7 @@ export const SignData: FC = () => {
   const dataForSigning = useMemo(() => {
     if (!unsignedDataQuery.data) return '';
     const unsigned = bytes.bytify(unsignedDataQuery.data.data);
-
-    if (isUtf8(unsigned)) {
-      const decoder = new TextDecoder('utf-8');
-      return decoder.decode(new Uint8Array(unsigned));
-    } else {
-      return bytes.hexify(unsigned);
-    }
+    return isUtf8(unsigned) ? new TextDecoder('utf-8').decode(new Uint8Array(unsigned)) : bytes.hexify(unsigned);
   }, [unsignedDataQuery.data]);
 
   const onReject = async () => {
@@ -121,7 +115,7 @@ export const SignData: FC = () => {
         </FormControl>
 
         <ButtonGroup mt="32px" size="md">
-          <Button isLoading={formState.isSubmitting} onClick={onReject} w="220px" color="gray.800" colorScheme="gray">
+          <Button isDisabled={formState.isSubmitting} onClick={onReject} w="220px" color="gray.800" colorScheme="gray">
             Reject
           </Button>
 
