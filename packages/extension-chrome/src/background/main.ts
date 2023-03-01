@@ -31,14 +31,16 @@ onMessage('rpc', async ({ data, sender }) => {
 });
 
 async function runWatchtower(factory: ModulesFactory) {
-  const configService = factory.get('configService');
-  const keystoreService = factory.get('keystoreService');
-  const backendProvider = factory.get('backendProvider');
-  const storage = factory.get('storage') as OwnershipStorage;
-
-  const selectedNetwork = await configService.getSelectedNetwork();
-  const db = createScriptInfoDb({ storage, networkId: selectedNetwork.id });
-
-  const watchtower = createWatchtower({ db, keystoreService, backend: await backendProvider.resolve() });
-  watchtower.run();
+  try {
+    const configService = factory.get('configService');
+    const keystoreService = factory.get('keystoreService');
+    const backendProvider = factory.get('backendProvider');
+    const storage = factory.get('storage') as OwnershipStorage;
+    const selectedNetwork = await configService.getSelectedNetwork();
+    const db = createScriptInfoDb({ storage, networkId: selectedNetwork.id });
+    const watchtower = createWatchtower({ db, keystoreService, backend: await backendProvider.resolve() });
+    watchtower.run();
+  } catch (error) {
+    logger.info('main.ts: start watchtower failed', error);
+  }
 }

@@ -67,7 +67,7 @@ export function createBrowserExtensionPlatformService(): PlatformService<Endpoin
       });
     },
     requestSignTransaction() {
-      errors.unimplemented();
+      return Promise.resolve({ password: 'abcd1234' });
     },
     requestSignData() {
       errors.unimplemented();

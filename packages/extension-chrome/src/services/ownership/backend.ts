@@ -1,5 +1,4 @@
 import type { Cell, HashType, HexString, Script, Transaction } from '@ckb-lumos/lumos';
-import { RPC } from '@ckb-lumos/lumos';
 import type { ConfigService, Paginate, Promisable } from '@nexus-wallet/types';
 import { asserts } from '@nexus-wallet/utils';
 import { NetworkId } from './storage';
@@ -31,7 +30,8 @@ const _Secp256k1Blake160ScriptInfoCache = new Map<NetworkId, ScriptTemplate>();
 // TODO implement the backend
 /* istanbul ignore next */
 export function createBackend(_payload: { rpc: string }): Backend {
-  const rpc = new RPC(_payload.rpc);
+  // TODO use rpc to fetch onchain data when lumos rpc is ready to use in chrome extension
+  // const rpc = new RPC(_payload.rpc);
 
   return {
     getSecp256k1Blake160ScriptConfig: async (): Promise<ScriptConfig> => {
@@ -189,10 +189,49 @@ export function createBackend(_payload: { rpc: string }): Backend {
     },
     resolveTx: (tx) => {
       const fetcher: LiveCellFetcher = async (outPoint) => {
-        const res = await rpc.getLiveCell(outPoint, false);
-        if (!res) throwError(`Cannot find cell of %s`, outPoint);
-        const { cell } = res;
-        return { cellOutput: cell.output, data: cell.data.content, outPoint };
+        const requestParam = {
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'get_live_cell',
+          params: [
+            {
+              index: outPoint.index,
+              tx_hash: outPoint.txHash,
+            },
+            true,
+          ],
+        };
+        const rawResult = await fetch(_payload.rpc, {
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(requestParam),
+          method: 'POST',
+        });
+        const content = await rawResult.json();
+        if (!content) throwError(`Cannot find cell of %s`, outPoint);
+        const object = content.result.cell;
+        const cell: Cell = {
+          outPoint,
+          cellOutput: {
+            capacity: object.output.capacity,
+            lock: {
+              codeHash: object.output.lock.code_hash,
+              hashType: object.output.lock.hash_type,
+              args: object.output.lock.args,
+            },
+            type: object.output.type
+              ? {
+                  codeHash: object.output.type.code_hash,
+                  hashType: object.output.type.hash_type,
+                  args: object.output.type.args,
+                }
+              : undefined,
+          },
+          data: object.data.content,
+        };
+        return cell;
       };
 
       return createTransactionSkeleton(tx, fetcher);
