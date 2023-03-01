@@ -2,7 +2,14 @@ import { NetworkName } from '@nexus-wallet/types/lib/services';
 import { EventEmitter } from 'events';
 
 export interface EventMap {
+  /**
+   * available for all pages
+   * @param networkName
+   */
   networkChanged: (networkName: NetworkName) => void;
+  /**
+   * available only for extension
+   */
   walletInitialized: () => void;
 }
 
@@ -21,8 +28,8 @@ export function createEventHub(): EventHub {
   const emitter = new EventEmitter();
 
   return {
-    on: emitter.on,
-    emit: emitter.emit,
-    removeListener: emitter.removeListener,
+    on: emitter.on.bind(emitter),
+    emit: emitter.emit.bind(emitter),
+    removeListener: emitter.removeListener.bind(emitter),
   };
 }

@@ -2,6 +2,7 @@ import { createConfigService } from '../../src/services/config';
 import { createInMemoryStorage } from '../../src/services/storage';
 import { ConfigService } from '@nexus-wallet/types';
 import { LIB_VERSION } from '@nexus-wallet/utils';
+import { createEventHub } from '../../src/services/event';
 
 let service: ConfigService;
 const fakeConfig = {
@@ -12,7 +13,7 @@ const fakeConfig = {
 };
 
 beforeEach(async () => {
-  service = createConfigService({ storage: createInMemoryStorage() });
+  service = createConfigService({ storage: createInMemoryStorage(), eventHub: createEventHub() });
 });
 
 it('should throw when trying to get config before set', async () => {
