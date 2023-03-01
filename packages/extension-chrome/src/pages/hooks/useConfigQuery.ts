@@ -1,9 +1,9 @@
 import { Config } from '@nexus-wallet/types/lib/services';
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
-import { createServicesFactory } from '../../services';
+import { useService } from './useService';
 
 export function useConfigQuery(): UseQueryResult<Config, unknown> {
-  const configService = createServicesFactory().get('configService');
+  const configService = useService('configService');
 
   return useQuery({
     queryKey: ['config'],

@@ -6,13 +6,13 @@ import { useMutation } from '@tanstack/react-query';
 
 import { WhiteAlphaBox } from '../../../Components/WhiteAlphaBox';
 import { useConfigQuery } from '../../../hooks/useConfigQuery';
-import { createServicesFactory } from '../../../../services';
+import { useService } from '../../../hooks/useService';
 
 export const NetworkConfig: FC = () => {
   const configQuery = useConfigQuery();
+  const configService = useService('configService');
   const toggleNetworkMutation = useMutation({
     mutationFn: (id: string) => {
-      const configService = createServicesFactory().get('configService');
       return configService.setSelectedNetwork({ id }) as Promise<void>;
     },
   });

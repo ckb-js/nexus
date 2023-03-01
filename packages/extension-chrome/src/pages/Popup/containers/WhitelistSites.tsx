@@ -18,15 +18,15 @@ import { useMutation } from '@tanstack/react-query';
 
 import { WhiteAlphaBox } from '../../Components/WhiteAlphaBox';
 import { useConfigQuery } from '../../hooks/useConfigQuery';
-import { createServicesFactory } from '../../../services';
+import { useService } from '../../hooks/useService';
 
 export const WhitelistSites: FC = () => {
   const configQuery = useConfigQuery();
   const toast = useToast();
+  const configService = useService('configService');
 
   const removeWhitelistItemMutation = useMutation({
     mutationFn: (host: string) => {
-      const configService = createServicesFactory().get('configService');
       return configService.removeWhitelistItem({ host }) as Promise<void>;
     },
   });

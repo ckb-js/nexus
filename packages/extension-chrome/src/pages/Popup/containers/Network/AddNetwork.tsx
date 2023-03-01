@@ -6,8 +6,8 @@ import { useForm } from 'react-hook-form';
 import { nanoid } from 'nanoid';
 import { useMutation } from '@tanstack/react-query';
 
-import { createServicesFactory } from '../../../../services';
 import { WhiteAlphaBox } from '../../../Components/WhiteAlphaBox';
+import { useService } from '../../../hooks/useService';
 
 const HTTP_URL_PATTERN = /https?:\/\/[a-zA-Z_\-.~]+/;
 
@@ -18,6 +18,7 @@ type AddNetworkFormState = {
 
 export const AddNetwork: FC = () => {
   const navigate = useNavigate();
+  const configService = useService('configService');
 
   const { handleSubmit, register, formState } = useForm<AddNetworkFormState>();
 
@@ -30,7 +31,6 @@ export const AddNetwork: FC = () => {
 
   const addNetworkMutation = useMutation({
     mutationFn: ({ name, rpcUrl }: AddNetworkFormState) => {
-      const configService = createServicesFactory().get('configService');
       return configService.addNetwork({
         network: { displayName: name, rpcUrl, id: nanoid(), networkName: name },
       }) as Promise<void>;
