@@ -17,11 +17,11 @@ import { DeleteIcon, SearchIcon } from '@chakra-ui/icons';
 import { useMutation } from '@tanstack/react-query';
 
 import { WhiteAlphaBox } from '../../Components/WhiteAlphaBox';
-import { useConfig } from '../../hooks/useConfig';
+import { useConfigQuery } from '../../hooks/useConfigQuery';
 import { createServicesFactory } from '../../../services';
 
 export const WhitelistSites: FC = () => {
-  const configQuery = useConfig();
+  const configQuery = useConfigQuery();
   const toast = useToast();
 
   const removeWhitelistItemMutation = useMutation({

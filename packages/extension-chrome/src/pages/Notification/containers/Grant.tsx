@@ -5,7 +5,7 @@ import { WhiteAlphaBox } from '../../Components/WhiteAlphaBox';
 import { CheckCircleIcon } from '@chakra-ui/icons';
 import { useSessionMessenger } from '../../hooks/useSessionMessenger';
 import { useQuery } from '@tanstack/react-query';
-import { useConfig } from '../../hooks/useConfig';
+import { useConfigQuery } from '../../hooks/useConfigQuery';
 
 export const Grant: React.FC = () => {
   const messenger = useSessionMessenger();
@@ -14,7 +14,7 @@ export const Grant: React.FC = () => {
     queryFn: () => messenger.send('session_getRequesterAppInfo'),
   });
 
-  const configQuery = useConfig();
+  const configQuery = useConfigQuery();
 
   const { url, favicon } = requestAppInfoQuery.data || {};
   const permissions = ['View your addresses', 'Request approval for transactions'];

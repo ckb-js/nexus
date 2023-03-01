@@ -5,11 +5,11 @@ import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 
 import { WhiteAlphaBox } from '../../../Components/WhiteAlphaBox';
-import { useConfig } from '../../../hooks/useConfig';
+import { useConfigQuery } from '../../../hooks/useConfigQuery';
 import { createServicesFactory } from '../../../../services';
 
 export const NetworkConfig: FC = () => {
-  const configQuery = useConfig();
+  const configQuery = useConfigQuery();
   const toggleNetworkMutation = useMutation({
     mutationFn: (id: string) => {
       const configService = createServicesFactory().get('configService');
