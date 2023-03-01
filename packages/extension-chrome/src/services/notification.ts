@@ -27,23 +27,37 @@ export type SessionMethods = {
   session_rejectSignTransaction: Call<void, void>;
 };
 
-const NOTIFICATION_WIDTH = 500;
-const NOTIFICATION_HEIGHT = 640;
-
 type NotificationPath = 'grant' | 'sign-data' | 'sign-transaction';
+
+const NotificationWindowSizeMap: Record<NotificationPath, { w: number; h: number }> = {
+  grant: {
+    w: 500,
+    h: 600,
+  },
+  'sign-data': {
+    w: 500,
+    h: 772,
+  },
+  'sign-transaction': {
+    w: 500,
+    h: 772,
+  },
+};
+
 async function createNotificationWindow(
   browser: Browser,
   path: NotificationPath,
 ): Promise<{ messenger: SessionMessenger<SessionMethods>; notificationWindow: Windows.Window }> {
   const lastFocused = await browser.windows.getLastFocused();
   const sessionId = nanoid();
+  const windowSize = NotificationWindowSizeMap[path];
   const window = await browser.windows.create({
     type: 'popup',
     focused: true,
     top: lastFocused.top,
     left: lastFocused.left! + (lastFocused.width! - 360),
-    width: NOTIFICATION_WIDTH,
-    height: NOTIFICATION_HEIGHT,
+    width: windowSize.w,
+    height: windowSize.h + 40,
     url: `notification.html#/${path}?sessionId=${sessionId}`,
   });
 

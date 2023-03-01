@@ -16,6 +16,7 @@ import {
   Button,
   FormErrorMessage,
   Flex,
+  Spacer,
 } from '@chakra-ui/react';
 import { encodeToAddress, TransactionSkeletonObject } from '@ckb-lumos/helpers';
 import { BI } from '@ckb-lumos/lumos';
@@ -141,7 +142,7 @@ export const SignTransaction: FC = () => {
   };
 
   return (
-    <Skeleton isLoaded={!!transactionQuery.data} h="100%" w="100%">
+    <Skeleton as={Flex} flexDirection="column" isLoaded={!!transactionQuery.data} h="100%" w="100%">
       <Heading fontSize="2xl" fontWeight="semibold" mt="28px" mb="32px">
         Sign Transaction
       </Heading>
@@ -150,14 +151,17 @@ export const SignTransaction: FC = () => {
           sx={{
             '::-webkit-scrollbar': {
               backgroundColor: 'transparent',
-              width: '5px',
+              width: '4px',
             },
             '::-webkit-scrollbar-thumb': {
-              borderRadius: '20px',
-              border: '0px solid transparent',
+              transform: 'translateX(8px)',
+              borderRadius: '30px',
               backgroundColor: 'purple.500',
             },
           }}
+          borderRadius="8px"
+          mx="-4px"
+          px="4px"
           maxH="412px"
           overflow="auto"
         >
@@ -165,6 +169,7 @@ export const SignTransaction: FC = () => {
           <TransactionIOList type="outputs" tx={transactionQuery.data.tx} mt="12px" />
         </Box>
       )}
+      <Spacer />
       <Box mt="12px" as="form" onSubmit={handleSubmit(onSubmit, onInvalid)} flex={1}>
         <FormControl isInvalid={!!formState.errors.password}>
           <FormLabel>Password</FormLabel>
