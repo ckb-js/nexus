@@ -24,7 +24,6 @@ export const AddNetwork: FC = () => {
 
   const onSubmit = handleSubmit(async ({ name, rpcUrl }, e) => {
     e?.preventDefault();
-    e?.stopPropagation();
     await addNetworkMutation.mutateAsync({ name, rpcUrl });
     navigate('/network');
   });
