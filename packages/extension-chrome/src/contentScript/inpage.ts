@@ -29,7 +29,7 @@ const injectedCkb: InjectedCkb = {
         },
 
         async signData(payload) {
-          return client.request('wallet_fullOwnership_signData', payload);
+          return client.request('wallet_fullOwnership_signData', { ...payload });
         },
 
         async getUsedLocks(payload) {

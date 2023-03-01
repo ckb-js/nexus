@@ -1,4 +1,4 @@
-import { Cell, Script, Transaction } from '@ckb-lumos/lumos';
+import { Cell, HexString, Script, Transaction } from '@ckb-lumos/lumos';
 import { BytesLike } from '@ckb-lumos/codec';
 import { Paginate } from './base';
 
@@ -52,7 +52,7 @@ export type GroupedSignature = [Script, Signature][];
 export type Signature = string;
 
 export type SignDataPayload = {
-  data: BytesLike;
+  data: HexString;
   signer: LockLike;
 };
 

@@ -20,7 +20,9 @@
     "start": "cross-env NODE_ENV=development npm run start:webpack",
     "start:webpack": "ts-node ./scripts/start.ts",
     "build": "npm run clean && webpack --config=config/webpack.config.prod.ts",
-    "clean": "rimraf build/*"
+    "clean": "rimraf build/*",
+    "check": "npm run check:types",
+    "check:types": "tsc --noEmit"
   },
   "bugs": {
     "url": "https://github.com/ckb-js/nexus/issues"
@@ -37,6 +39,7 @@
     "@types/webextension-polyfill": "0.10.0",
     "awilix": "8.0.0",
     "immer": "9.0.19",
+    "is-utf8": "0.2.1",
     "joi": "17.7.1",
     "json-rpc-2.0": "1.4.2",
     "lodash.range": "3.2.0",
@@ -58,6 +61,7 @@
     "@ckb-lumos/lumos": "*",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.10",
     "@svgr/webpack": "6.5.1",
+    "@types/is-utf8": "0.2.1",
     "@types/lodash.range": "3.2.7",
     "@types/lodash.shuffle": "4.2.7",
     "@types/lodash.zip": "4.2.7",

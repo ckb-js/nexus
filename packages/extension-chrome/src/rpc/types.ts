@@ -1,4 +1,4 @@
-import { Script } from '@ckb-lumos/lumos';
+import { HexString, Script } from '@ckb-lumos/lumos';
 import { Modules } from '../services';
 import { Call, CallMap } from '@nexus-wallet/types';
 
@@ -8,6 +8,8 @@ export interface WalletMethods extends CallMap {
   wallet_getNetworkName: Call<void, string>;
 
   wallet_fullOwnership_getUnusedLocks: Call<void, Script[]>;
+
+  wallet_fullOwnership_signData: Call<{ data: HexString }, Promise<string>>;
 }
 
 export interface DebugMethods extends CallMap {
