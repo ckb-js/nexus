@@ -15,6 +15,7 @@ import {
   ButtonGroup,
   Button,
   FormErrorMessage,
+  Flex,
 } from '@chakra-ui/react';
 import { encodeToAddress, TransactionSkeletonObject } from '@ckb-lumos/helpers';
 import { BI } from '@ckb-lumos/lumos';
@@ -28,14 +29,53 @@ import { parseCellType } from '../utils/parseCellType';
 const TransactionIOList: FC<
   { type: 'inputs' | 'outputs'; tx: Pick<TransactionSkeletonObject, 'inputs' | 'outputs'> } & TableProps
 > = ({ type, tx, ...rest }) => {
+  const headers = [
+    {
+      title: `${type}(${tx[type].length})`,
+      width: '188px',
+    },
+    {
+      title: 'Type',
+      width: '128px',
+    },
+    {
+      title: 'Capacity',
+      width: '128px',
+    },
+  ];
+
   return (
-    <Table data-test-id={`transaction.${type}`} background="white" w="100%" color="blackAlpha.900" {...rest}>
+    <Table
+      borderRadius="8px"
+      data-test-id={`transaction.${type}`}
+      background="white"
+      w="100%"
+      color="blackAlpha.900"
+      colorScheme="gray"
+      sx={{
+        'td, th': {
+          borderColor: 'gray.300',
+        },
+        'tr:last-child td': {
+          borderBottom: 0,
+        },
+      }}
+      {...rest}
+    >
       <Thead>
         <Tr>
-          {[`${type}(${tx[type].length})`, 'Type', 'Capacity'].map((head) => (
+          {headers.map(({ title, width }) => (
             //* due to Chakra UI limit, can not override table style via theme configuration
-            <Heading textTransform="capitalize" color="blackAlpha.900" p="12px 16px" as={Th} size="xs" key={head}>
-              {head}
+            <Heading
+              textTransform="capitalize"
+              w={width}
+              color="blackAlpha.900"
+              p="12px 16px"
+              as={Th}
+              size="xs"
+              key={title}
+            >
+              {title}
             </Heading>
           ))}
         </Tr>
@@ -44,9 +84,16 @@ const TransactionIOList: FC<
         {tx[type].map((cell, index) => {
           const addr = encodeToAddress(cell.cellOutput.lock);
           return (
-            <Tr key={index} data-test-id={`transaction.${type}[${index}]`}>
-              <Td maxW="150px" data-test-id={`transaction.${type}[${index}].address`}>
-                {addr.slice(0, 5)}...{addr.slice(-4)}
+            <Tr h="50px" key={index} data-test-id={`transaction.${type}[${index}]`}>
+              <Td p="0" data-test-id={`transaction.${type}[${index}].address`}>
+                <Flex>
+                  <Box w="60px" p="16px">
+                    #{index + 1}
+                  </Box>
+                  <Box p="16px">
+                    {addr.slice(0, 5)}...{addr.slice(-4)}
+                  </Box>
+                </Flex>
               </Td>
               <Td data-test-id={`transaction.${type}[${index}].type`}>{parseCellType(cell)}</Td>
               <Td data-test-id={`transaction.${type}[${index}].capacity`}>
@@ -66,11 +113,11 @@ const TransactionIOList: FC<
 type FormState = { password: string };
 
 export const SignTransaction: FC = () => {
-  const messagener = useSessionMessenger();
+  const messenger = useSessionMessenger();
   const checkPassword = useCheckPassword();
   const transactionQuery = useQuery({
-    queryKey: ['transaction', messagener.sessionId()] as const,
-    queryFn: async () => messagener.send('session_getUnsignedTransaction'),
+    queryKey: ['transaction', messenger.sessionId()] as const,
+    queryFn: async () => messenger.send('session_getUnsignedTransaction'),
   });
 
   const { setValue, register, handleSubmit, formState } = useForm<FormState>({
@@ -81,7 +128,7 @@ export const SignTransaction: FC = () => {
     },
   });
   const onSubmit = async ({ password }: FormState) => {
-    await messagener.send('session_approveSignTransaction', { password });
+    await messenger.send('session_approveSignTransaction', { password });
     window.close();
   };
   const onInvalid = () => {
@@ -89,17 +136,31 @@ export const SignTransaction: FC = () => {
   };
 
   const onReject = async () => {
-    await messagener.send('session_rejectSignTransaction');
+    await messenger.send('session_rejectSignTransaction');
     window.close();
   };
 
   return (
-    <Skeleton isLoaded={!!transactionQuery.data} w="100%">
+    <Skeleton isLoaded={!!transactionQuery.data} h="100%" w="100%">
       <Heading fontSize="2xl" fontWeight="semibold" mt="28px" mb="32px">
         Sign Transaction
       </Heading>
       {!!transactionQuery.data && (
-        <Box maxH="320px" overflow="auto">
+        <Box
+          sx={{
+            '::-webkit-scrollbar': {
+              backgroundColor: 'transparent',
+              width: '5px',
+            },
+            '::-webkit-scrollbar-thumb': {
+              borderRadius: '20px',
+              border: '0px solid transparent',
+              backgroundColor: 'purple.500',
+            },
+          }}
+          maxH="412px"
+          overflow="auto"
+        >
           <TransactionIOList type="inputs" tx={transactionQuery.data.tx} />
           <TransactionIOList type="outputs" tx={transactionQuery.data.tx} mt="12px" />
         </Box>
