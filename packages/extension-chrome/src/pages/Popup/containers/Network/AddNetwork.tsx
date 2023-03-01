@@ -1,27 +1,40 @@
 import React, { FC } from 'react';
 import { Button, FormControl, FormLabel, Input, Flex, Spacer, VStack } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
-
-// TODO: use real service
-import configService from '../../../../mockServices/config';
-import { WhiteAlphaBox } from '../../../Components/WhiteAlphaBox';
 import { AddIcon } from '@chakra-ui/icons';
 import { useForm } from 'react-hook-form';
 import { nanoid } from 'nanoid';
+import { useMutation } from '@tanstack/react-query';
+
+import { createServicesFactory } from '../../../../services';
+import { WhiteAlphaBox } from '../../../Components/WhiteAlphaBox';
+
+const HTTP_URL_PATTERN = /https?:\/\/[a-zA-Z_\-.~]+/;
 
 type AddNetworkFormState = {
   name: string;
-  url: string;
+  rpcUrl: string;
 };
 
 export const AddNetwork: FC = () => {
   const navigate = useNavigate();
 
-  const { handleSubmit, register } = useForm<AddNetworkFormState>();
-  const onSubmit = handleSubmit(async ({ name, url }) => {
-    // TODO: align the type
-    await configService.addNetwork({ displayName: name, networkName: name, id: nanoid(), rpcUrl: url });
-    navigate(-1);
+  const { handleSubmit, register, formState } = useForm<AddNetworkFormState>();
+
+  const onSubmit = handleSubmit(async ({ name, rpcUrl }, e) => {
+    e?.preventDefault();
+    e?.stopPropagation();
+    await addNetworkMutation.mutateAsync({ name, rpcUrl });
+    navigate('/network');
+  });
+
+  const addNetworkMutation = useMutation({
+    mutationFn: ({ name, rpcUrl }: AddNetworkFormState) => {
+      const configService = createServicesFactory().get('configService');
+      return configService.addNetwork({
+        network: { displayName: name, rpcUrl, id: nanoid(), networkName: name },
+      }) as Promise<void>;
+    },
   });
 
   return (
@@ -44,18 +57,20 @@ export const AddNetwork: FC = () => {
             color="black"
             variant="outline"
             backgroundColor="white"
-            {...register('url', {
-              // pattern: /https:\/\/[a-zA-Z_-.~]+/
+            {...register('rpcUrl', {
+              required: true,
+              pattern: HTTP_URL_PATTERN,
             })}
           />
         </FormControl>
       </VStack>
       <Spacer />
-      <Flex as="form" direction="column" justifyContent="center">
+      <Flex direction="column" justifyContent="center">
         <Button
           data-test-id="add"
           size="lg"
           width="452px"
+          isDisabled={!formState.isValid}
           leftIcon={<AddIcon h="16px" w="16px" />}
           marginY="12px"
           type="submit"

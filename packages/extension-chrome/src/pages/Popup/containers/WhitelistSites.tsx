@@ -10,38 +10,46 @@ import {
   InputGroup,
   InputLeftElement,
   Highlight,
+  Skeleton,
+  useToast,
 } from '@chakra-ui/react';
 import { DeleteIcon, SearchIcon } from '@chakra-ui/icons';
+import { useMutation } from '@tanstack/react-query';
 
-// TODO: use real service
-import configService from '../../../mockServices/config';
-import { useMutation, useQuery } from '@tanstack/react-query';
 import { WhiteAlphaBox } from '../../Components/WhiteAlphaBox';
+import { useConfig } from '../../hooks/useConfig';
+import { createServicesFactory } from '../../../services';
 
 export const WhitelistSites: FC = () => {
-  const whitelistSiteQuery = useQuery({
-    queryKey: ['whitelist'],
-    queryFn: () => configService.getWhitelist(),
+  const configQuery = useConfig();
+  const toast = useToast();
+
+  const removeWhitelistItemMutation = useMutation({
+    mutationFn: (host: string) => {
+      const configService = createServicesFactory().get('configService');
+      return configService.removeWhitelistItem({ host }) as Promise<void>;
+    },
   });
 
-  const removeWhitelistSiteMutation = useMutation({
-    mutationFn: (url: string) => configService.removeWhitelistItem({ url: url }),
-  });
-
-  const removeSite = (site: string) => async () => {
-    await removeWhitelistSiteMutation.mutateAsync(site);
-    await whitelistSiteQuery.refetch();
+  const removeSite = (host: string) => async () => {
+    try {
+      await removeWhitelistItemMutation.mutateAsync(host);
+    } catch {
+      toast({ title: "Can't remove the site" });
+    } finally {
+      await configQuery.refetch();
+    }
   };
 
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredSites = useMemo(
-    () => whitelistSiteQuery.data?.filter((d) => d.url.includes(searchQuery)),
-    [whitelistSiteQuery.data, searchQuery],
+    () => configQuery.data?.whitelist.filter((d) => d.host.includes(searchQuery)),
+    [configQuery.data?.whitelist, searchQuery],
   );
 
   return (
-    <>
+    <Skeleton isLoaded={!!filteredSites}>
       <Text as={Box} fontSize="md" mb="20px" w="100%">
         Yan is connected to these sites. They can view your account address
       </Text>
@@ -77,13 +85,13 @@ export const WhitelistSites: FC = () => {
         flexDirection="column"
       >
         {filteredSites?.map((site, index) => (
-          <Flex data-test-id={`site[${index}]`} alignItems="center" h="48px" w="100%" key={site.url}>
+          <Flex data-test-id={`site[${index}]`} alignItems="center" h="48px" w="100%" key={site.host}>
             <Center w="48px" borderRadius="50%" padding="4px" h="48px" backgroundColor="whiteAlpha.300">
               <Image data-test-id={`site[${index}].favicon`} w="32px" h="32px" src={site.favicon} />
             </Center>
             <Flex ml="20px" data-test-id={`site[${index}].url`} flex={1} fontSize="lg" alignItems="center">
               <Highlight query={searchQuery} styles={{ bg: 'white' }}>
-                {site.url}
+                {site.host}
               </Highlight>
             </Flex>
             <DeleteIcon
@@ -91,11 +99,11 @@ export const WhitelistSites: FC = () => {
               cursor="pointer"
               w="20px"
               h="20px"
-              onClick={removeSite(site.url)}
+              onClick={removeSite(site.host)}
             />
           </Flex>
         ))}
       </VStack>
-    </>
+    </Skeleton>
   );
 };
