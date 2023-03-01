@@ -4,6 +4,7 @@ import { Call, CallMap, Paginate } from '@nexus-wallet/types';
 import {
   GetOffChainLocksPayload,
   GetPaginateItemsPayload,
+  GetUsedLocksPayload,
   GroupedSignature,
   Signature,
   SignDataPayload,
@@ -16,7 +17,7 @@ export interface WalletMethods extends CallMap {
   wallet_getNetworkName: Call<void, string>;
 
   wallet_fullOwnership_getOffChainLocks: Call<GetOffChainLocksPayload, Script[]>;
-  wallet_fullOwnership_getOnChainLocks: Call<GetOffChainLocksPayload, Paginate<Script>>;
+  wallet_fullOwnership_getOnChainLocks: Call<GetUsedLocksPayload, Paginate<Script>>;
   wallet_fullOwnership_getLiveCells: Call<GetPaginateItemsPayload, Paginate<Cell>>;
   wallet_fullOwnership_signData: Call<SignDataPayload, Signature>;
   wallet_fullOwnership_signTransaction: Call<SignTransactionPayload, GroupedSignature>;
