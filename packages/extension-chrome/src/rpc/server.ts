@@ -29,8 +29,14 @@ export function createServer<Sender>(factory: ModulesFactory): NexusRpcServer<Se
   const server = new JSONRPCServer<ServerParams>();
   server.applyMiddleware(whitelistMiddleware);
 
-  logger.info('Methods has been registered: ', Object.keys(methods));
-
+  const registered = Object.keys(methods);
+  logger.info('Methods has been registered: ', registered);
+  /* istanbul ignore if */
+  if (registered.length === 0) {
+    logger.warn(
+      'No methods has been registered, please check if you have imported rpc implementation modules, e.g. walletImpl, debugImpl, etc.',
+    );
+  }
   Object.entries(methods).forEach(([method, handler]) => server.addMethod(method, handler));
 
   return {

@@ -1,5 +1,4 @@
-import { BytesLike } from '@ckb-lumos/codec';
-import { Transaction } from '@ckb-lumos/lumos';
+import { HexString, Transaction } from '@ckb-lumos/lumos';
 
 export interface PlatformService<Sender = unknown> {
   /**
@@ -14,7 +13,7 @@ export interface PlatformService<Sender = unknown> {
    * will return a password to decrypt keystore if user approved and input the correct password
    * @param payload
    */
-  requestSignData(payload: { data: BytesLike }): Promise<{ password: string }>;
+  requestSignData(payload: { data: HexString; url: string }): Promise<{ password: string }>;
 
   requestGrant(payload: { url: string }): Promise<void>;
 
@@ -27,6 +26,7 @@ export interface PlatformService<Sender = unknown> {
    * convert the requester's information into a URL,
    * which can be used to identify whether the requester is in whitelist, etc.
    * @param sender the requester's information, something like {@link https://developer.chrome.com/docs/extensions/reference/runtime/#type-MessageSender MessageSender} in Chrome extension
+   * @throws if the Chrome extension permission is not granted, e.g. favicon
    */
   getRequesterAppInfo(sender: Sender): Promise<{ url: string }>;
 }

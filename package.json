@@ -42,7 +42,9 @@
     "build:lumos": "cd lumos && npm run build",
     "test": "jest",
     "start": "npm run start -w @nexus-wallet/extension-chrome",
-    "lint": "eslint 'packages/*/{src,__tests__}/**/*.{js,ts,jsx,tsx}'"
+    "lint": "eslint 'packages/*/{src,__tests__}/**/*.{js,ts,jsx,tsx}'",
+    "check": "npm run check:types",
+    "check:types": "npm run check:types -w @nexus-wallet/types -w @nexus-wallet/utils -w @nexus-wallet/extension-chrome"
   },
   "repository": {
     "type": "git",
