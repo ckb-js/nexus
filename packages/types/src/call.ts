@@ -6,3 +6,9 @@ export interface Call<Param, Result> {
   params: Param;
   result: Result;
 }
+
+export interface AsyncCall<Param, Result> {
+  params: Param;
+  result: PromiseLike<Result>;
+}
+export type AsyncCallMap = Record<string, AsyncCall<unknown, unknown>>;

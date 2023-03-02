@@ -1,6 +1,6 @@
-import { sendMessage } from 'webext-bridge';
 import { isJSONRPCRequest, isJSONRPCResponse, JSONRPCClient } from 'json-rpc-2.0';
-import { onMessage } from '../messaging';
+import * as bridgeMessenger from 'webext-bridge';
+import * as windowMessenger from '../messaging';
 import { errors } from '@nexus-wallet/utils';
 
 function injectScript(): void {
@@ -12,14 +12,21 @@ function injectScript(): void {
 }
 
 const client = new JSONRPCClient(async (req) => {
-  const response = await sendMessage('rpc', req, 'background');
+  // content script -> background service worker
+  const response = await bridgeMessenger.sendMessage('rpc', req, 'background');
   if (!isJSONRPCResponse(response)) {
     errors.throwError(`Invalid JSON-RPC response: ${response}`);
   }
   client.receive(response);
 });
 
-onMessage('contentAndInjected', (req) => {
+// background service worker -> content script
+bridgeMessenger.onMessage('event', ({ data }) => {
+  // content script -> injected script
+  void windowMessenger.sendMessage('event', data, 'website');
+});
+
+windowMessenger.onMessage('contentAndInjected', (req) => {
   if (!isJSONRPCRequest(req)) {
     errors.throwError(`Invalid JSON-RPC request: ${JSON.stringify(req)}`);
   }
