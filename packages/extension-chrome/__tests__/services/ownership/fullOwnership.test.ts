@@ -8,12 +8,13 @@ import { asyncSleep } from '../../helpers/utils';
 import { mockBackend } from './mockBackend';
 import { mockPlatformService } from '../../helpers';
 import { bytes } from '@ckb-lumos/codec';
+import { createEventHub } from '../../../src/services/event';
 
 describe('FullOwnership', () => {
   describe('getOffChainLocks', function () {
     it('should get the first 20 locks of the external full-ownership', async () => {
       const storage = createMockStorage();
-      const configService = createConfigService({ storage });
+      const configService = createConfigService({ storage, eventHub: createEventHub() });
       const keystoreService = createMockModule<KeystoreService>({
         getPublicKeyByPath: () => bytes.hexify(Buffer.alloc(32)),
       });
