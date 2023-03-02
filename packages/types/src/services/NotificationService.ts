@@ -26,6 +26,7 @@ export interface PlatformService<Sender = unknown> {
    * convert the requester's information into a URL,
    * which can be used to identify whether the requester is in whitelist, etc.
    * @param sender the requester's information, something like {@link https://developer.chrome.com/docs/extensions/reference/runtime/#type-MessageSender MessageSender} in Chrome extension
+   * @throws if the Chrome extension permission is not granted, e.g. favicon
    */
   getRequesterAppInfo(sender: Sender): Promise<{ url: string }>;
 }
