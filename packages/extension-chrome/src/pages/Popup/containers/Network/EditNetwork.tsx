@@ -11,25 +11,29 @@ import { useService } from '../../../hooks/useService';
 
 const HTTP_URL_PATTERN = /https?:\/\/[a-zA-Z_\-.~]+/;
 
-type AddNetworkFormState = {
+type EditNetworkFormState = {
   name: string;
   rpcUrl: string;
 };
 
-export const AddNetwork: FC = () => {
+type EditNetworkProps = {
+  mode: 'add' | 'edit';
+};
+
+export const EditNetwork: FC<EditNetworkProps> = () => {
   const navigate = useNavigate();
   const configService = useService('configService');
 
-  const { handleSubmit, register, formState } = useForm<AddNetworkFormState>();
+  const { handleSubmit, register, formState } = useForm<EditNetworkFormState>();
 
   const onSubmit = handleSubmit(async ({ name, rpcUrl }, e) => {
     e?.preventDefault();
-    await addNetworkMutation.mutateAsync({ name, rpcUrl });
+    await modifyNetworkMutation.mutateAsync({ name, rpcUrl });
     navigate('/network');
   });
 
-  const addNetworkMutation = useMutation({
-    mutationFn: ({ name, rpcUrl }: AddNetworkFormState) => {
+  const modifyNetworkMutation = useMutation({
+    mutationFn: ({ name, rpcUrl }: EditNetworkFormState) => {
       return configService.addNetwork({
         network: { displayName: name, rpcUrl, id: nanoid(), networkName: name },
       }) as Promise<void>;
