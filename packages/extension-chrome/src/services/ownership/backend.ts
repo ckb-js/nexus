@@ -1,4 +1,4 @@
-import type { Cell, HashType, HexString, Script, Transaction } from '@ckb-lumos/lumos';
+import { Cell, HashType, HexString, RPC, Script, Transaction, utils } from '@ckb-lumos/lumos';
 import type { ConfigService, Paginate, Promisable } from '@nexus-wallet/types';
 import { asserts } from '@nexus-wallet/utils';
 import { NetworkId } from './storage';
@@ -31,13 +31,15 @@ const _Secp256k1Blake160ScriptInfoCache = new Map<NetworkId, ScriptTemplate>();
 /* istanbul ignore next */
 export function createBackend(_payload: { rpc: string }): Backend {
   // TODO use rpc to fetch onchain data when lumos rpc is ready to use in chrome extension
-  // const rpc = new RPC(_payload.rpc);
+  const rpc = new RPC(_payload.rpc);
 
   return {
     getSecp256k1Blake160ScriptConfig: async (): Promise<ScriptConfig> => {
       const lumosConfig = getConfig();
-      const secp256k1Config = lumosConfig.SCRIPTS['SECP256K1_BLAKE160'];
-      asserts.asserts(secp256k1Config, 'SECP256K1_BLAKE160 script config not found');
+      let secp256k1Config = lumosConfig.SCRIPTS['SECP256K1_BLAKE160'];
+      if (!secp256k1Config) {
+        secp256k1Config = await loadSecp256k1ScriptDep(rpc);
+      }
       return Promise.resolve(secp256k1Config);
     },
     hasHistories: async (payload: { locks: Script[] }): Promise<boolean[]> => {
@@ -249,5 +251,23 @@ export function createBackendProvider({ configService }: { configService: Config
       const network = await configService.getSelectedNetwork();
       return createBackend({ rpc: network.rpcUrl });
     },
+  };
+}
+
+export async function loadSecp256k1ScriptDep(rpc: RPC): Promise<ScriptConfig> {
+  const genesisBlock = await rpc.getBlockByNumber('0x0');
+  if (!genesisBlock) throw new Error("can't load genesis block");
+  const secp256k1DepTxHash = genesisBlock.transactions[1].hash;
+  asserts.asserts(secp256k1DepTxHash, "can't load secp256k1 transaction");
+  const typeScript = genesisBlock.transactions[0].outputs[1].type;
+  asserts.asserts(typeScript, "can't load secp256k1 type script");
+  const secp256k1TypeHash = utils.computeScriptHash(typeScript);
+
+  return {
+    HASH_TYPE: 'type',
+    CODE_HASH: secp256k1TypeHash,
+    INDEX: '0x0',
+    TX_HASH: secp256k1DepTxHash,
+    DEP_TYPE: 'depGroup',
   };
 }
