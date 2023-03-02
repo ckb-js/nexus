@@ -2,20 +2,50 @@ import { Cell, HexString, Script, Transaction } from '@ckb-lumos/lumos';
 import { BytesLike } from '@ckb-lumos/codec';
 import { Paginate } from './base';
 
-export interface InjectedCkb {
+export interface RpcClient {
+  request(payload: { method: string; params: unknown }): PromiseLike<unknown>;
+}
+
+export interface EventClient {
+  on(eventName: string, listener: (...args: unknown[]) => void): void;
+  removeListener(eventName: string, listener: (...args: unknown[]) => void): void;
+}
+
+export interface InjectedCkb<R extends RpcClient = RpcClient, E extends EventClient = EventClient> {
   readonly version: string;
 
   /**
+   * send a JSON-RPC request to the wallet
+   */
+  request: R['request'];
+
+  /**
+   * subscribe to an event from the wallet
+   *
+   */
+  on: E['on'];
+
+  /**
+   * unsubscribe to an event from the wallet
+   */
+  removeListener: E['removeListener'];
+
+  /**
    * Enable the wallet for a dApp
+   * @deprecated please migrate to {@link InjectedCkb.request}
    */
   enable(): Promise<CkbProvider>;
 
   /**
    * Check the wallet is enabled for a dApp
+   * @deprecated please migrate to {@link InjectedCkb.request}
    */
   isEnabled(): Promise<boolean>;
 }
 
+/**
+ * @deprecated please migrate to {@link InjectedCkb.request}, e.g. `ckb.request({ method: "wallet_fullOwnership_getLiveCell", params: {} })`
+ */
 export interface CkbProvider {
   getNetworkName(): Promise<Network>;
 

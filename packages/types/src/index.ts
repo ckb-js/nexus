@@ -9,4 +9,4 @@ export type {
 } from './services';
 export type { Storage } from './storage';
 export type { Promisable, Paginate, Cursor } from './base';
-export type { Call, CallMap, CallResult, CallParam } from './call';
+export type { AsyncCall, AsyncCallMap, Call, CallMap, CallResult, CallParam } from './call';
