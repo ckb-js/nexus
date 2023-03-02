@@ -162,7 +162,6 @@ export const SignTransaction: FC = () => {
           borderRadius="8px"
           mx="-4px"
           px="4px"
-          maxH="412px"
           overflow="auto"
         >
           <TransactionIOList type="inputs" tx={transactionQuery.data.tx} />

@@ -100,7 +100,7 @@ export const SignData: FC = () => {
             {dataForSigning}
           </Text>
         </VStack>
-        <FormControl isInvalid={!!formState.errors.password} pt="8px">
+        <FormControl isInvalid={!!formState.errors.password} mt="12px">
           <FormLabel>Password</FormLabel>
           <Input
             type="password"

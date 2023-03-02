@@ -36,7 +36,7 @@ const NotificationWindowSizeMap: Record<NotificationPath, { w: number; h: number
   },
   'sign-data': {
     w: 500,
-    h: 772,
+    h: 640,
   },
   'sign-transaction': {
     w: 500,
@@ -57,7 +57,7 @@ async function createNotificationWindow(
     top: lastFocused.top,
     left: lastFocused.left! + (lastFocused.width! - 360),
     width: windowSize.w,
-    height: windowSize.h + 40,
+    height: windowSize.h + 32,
     url: `notification.html#/${path}?sessionId=${sessionId}`,
   });
 
