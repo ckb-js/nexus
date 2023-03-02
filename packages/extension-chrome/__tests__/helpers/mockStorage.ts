@@ -31,7 +31,7 @@ mockStorage.setAll({
         rpcUrl: 'https://testnet.ckb.dev',
       },
     ],
-    selectedNetwork: 'mainnet',
+    selectedNetwork: 'testnet',
   },
   keystore: {
     publicInfos: [
