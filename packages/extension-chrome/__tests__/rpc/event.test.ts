@@ -6,6 +6,8 @@ it('should the networkChanged fired when config has updated', async () => {
   const { ckb } = createTestRpcServer();
 
   const mockListener = jest.fn();
+  // make sure the network is mainnet at the beginning
+  await ckb.request({ method: 'debug_setConfig', params: { selectedNetwork: 'mainnet' } });
 
   ckb.on('networkChanged', mockListener);
   await ckb.request({ method: 'debug_setConfig', params: { selectedNetwork: 'testnet' } });
