@@ -1,3 +1,4 @@
+import { bytes } from '@ckb-lumos/codec';
 import { ConfigService, KeystoreService, OwnershipService, PlatformService } from '@nexus-wallet/types';
 import { createScriptInfoDb, OwnershipStorage, ScriptInfo, ScriptInfoDb } from './storage';
 import { asserts, errors } from '@nexus-wallet/utils';
@@ -126,7 +127,8 @@ export function createFullOwnershipService({
       return signatures;
     },
     signData: async (payload: SignDataPayload): Promise<Signature> => {
-      const { password } = await platformService.requestSignData({ data: payload.data });
+      // TODO how to get url?
+      const { password } = await platformService.requestSignData({ data: bytes.hexify(payload.data), url: '' });
       const db = await getDb();
       const [info] = await db.filterByMatch({ scriptHash: utils.computeScriptHash(payload.lock) });
       asserts.asserts(
