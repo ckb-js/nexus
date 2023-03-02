@@ -11,14 +11,15 @@ it('should the networkChanged fired when config has updated', async () => {
 
   ckb.on('networkChanged', mockListener);
   await ckb.request({ method: 'debug_setConfig', params: { selectedNetwork: 'testnet' } });
+  await ckb.request({ method: 'debug_setConfig', params: { selectedNetwork: 'testnet' } });
+  await ckb.request({ method: 'debug_setConfig', params: { selectedNetwork: 'testnet' } });
   await asyncSleep(50);
 
+  expect(mockListener).toHaveBeenCalledTimes(1);
   expect(mockListener).toHaveBeenCalledWith('ckb_testnet');
 });
 
 it('should the walletInitialized fired when wallet has initialized', async () => {
-  // crypto is a slow module, so we need to increase the timeout
-  jest.setTimeout(10_000);
   const { ckb } = createTestRpcServer({ storage: createInMemoryStorage });
 
   const mockListener = jest.fn();
@@ -28,4 +29,5 @@ it('should the walletInitialized fired when wallet has initialized', async () =>
   await asyncSleep(50);
 
   expect(mockListener).toHaveBeenCalled();
-});
+  // crypto is a slow module, so we need to increase the timeout
+}, 10_000);
