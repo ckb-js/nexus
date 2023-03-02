@@ -31,6 +31,7 @@ export function createServer<Sender>(factory: ModulesFactory): NexusRpcServer<Se
 
   const registered = Object.keys(methods);
   logger.info('Methods has been registered: ', registered);
+  /* istanbul ignore if */
   if (registered.length === 0) {
     logger.warn(
       'No methods has been registered, please check if you have imported rpc implementation modules, e.g. walletImpl, debugImpl, etc.',
