@@ -74,7 +74,11 @@ export function createBackend(_payload: { rpc: string }): Backend {
       const result = responses.map((response: any) => response.result.objects.length > 0);
       return result;
     },
-    getLiveCellsByLocks: async (payload: {
+    getLiveCellsByLocks: async ({
+      locks,
+      cursor,
+      limit = 20,
+    }: {
       locks: Script[];
       /**
        * the cursor is the ckb indexer cursor
@@ -154,12 +158,12 @@ export function createBackend(_payload: { rpc: string }): Backend {
 
       const chunkedRequests = [];
       // TODO make chunk size configurable, default to 20
-      for (let lockIndex = 0; lockIndex < payload.locks.length; lockIndex += 20) {
-        const chunkLocks = payload.locks?.slice(lockIndex, lockIndex + 20);
+      for (let lockIndex = 0; lockIndex < locks.length; lockIndex += 10) {
+        const chunkLocks = locks?.slice(lockIndex, lockIndex + 10);
         if (lockIndex === 0) {
           const currentChunkRequest = chunkLocks.map((lock, i) => {
             if (i === 0) {
-              return { lock, cursor: payload.cursor };
+              return { lock, cursor: cursor };
             }
             return { lock };
           });
@@ -180,9 +184,11 @@ export function createBackend(_payload: { rpc: string }): Backend {
         for (let j = 0; j < responses[i].length; j++) {
           const element: Paginate<Cell> = responses[i][j];
           result.objects.push(...element.objects);
-          result.cursor = element.cursor;
+          if (element.cursor) {
+            result.cursor = element.cursor;
+          }
         }
-        if (payload.limit && result.objects.length >= payload.limit) {
+        if (limit && result.objects.length >= limit) {
           break;
         }
       }
