@@ -11,10 +11,12 @@ const NetworkSchema = joi.object<NetworkConfig>({
   displayName: joi.string().required(),
 });
 
-const TrustedHostSchema = joi.object<TrustedHost>({
-  host: joi.string().hostname().required(),
-  favicon: joi.string().uri().required(),
-});
+const TrustedHostSchema = joi
+  .object<TrustedHost>({
+    host: [joi.string().hostname(), joi.string().pattern(new RegExp(`^localhost(:[0-9]{2,5})?$`))],
+    favicon: joi.string().uri().required(),
+  })
+  .with('favicon', 'host');
 
 const ConfigSchema = joi.object<Config>({
   nickname: joi.string().required(),

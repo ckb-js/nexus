@@ -2,6 +2,7 @@ import type { KeystoreService, Storage } from '@nexus-wallet/types';
 import { createInMemoryStorage } from '../../src/services/storage';
 import { assertDerivationPath, createKeystoreService } from '../../src/services/keystore';
 import hd from '@ckb-lumos/hd';
+import { MOCK_PLATFORM_PASSWORD } from '../helpers';
 
 describe('assertDerivationPath', () => {
   test('normal', () => {
@@ -63,7 +64,7 @@ describe('KeystoreService', () => {
       mnemonic: fixture.mnemonic,
       // parent path
       paths: [parent.path],
-      password: '123456',
+      password: MOCK_PLATFORM_PASSWORD,
     });
   });
 
@@ -76,7 +77,7 @@ describe('KeystoreService', () => {
       service.initKeystore({
         mnemonic: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
         paths: [`m/44'/309'/0'/0`],
-        password: '123456',
+        password: MOCK_PLATFORM_PASSWORD,
       }),
     ).rejects.toThrow();
   });
@@ -96,7 +97,12 @@ describe('KeystoreService', () => {
     mockedSign.mockReturnValueOnce(mockedSignature);
 
     const child = fixture.derived[1];
-    expect(await service.signMessage({ path: child.path, message: mockedMessage, password: '123456' }));
+    const signMessagePromise = service.signMessage({
+      path: child.path,
+      message: mockedMessage,
+      password: MOCK_PLATFORM_PASSWORD,
+    });
+    await expect(Promise.resolve(signMessagePromise)).resolves.not.toThrowError();
 
     expect(mockedSign.mock.calls[0][0]).toBe(mockedMessage);
     expect(mockedSign.mock.calls[0][1]).toBe(child.privateKey);
@@ -110,7 +116,7 @@ describe('KeystoreService', () => {
 
   test('check password should works', async () => {
     await expect(service.checkPassword({ password: 'wrong password' })).resolves.toBe(false);
-    await expect(service.checkPassword({ password: '123456' })).resolves.toBe(true);
+    await expect(service.checkPassword({ password: MOCK_PLATFORM_PASSWORD })).resolves.toBe(true);
   });
 
   test('storage should be empty after reset()', async () => {

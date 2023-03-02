@@ -2,9 +2,10 @@ import type { Call, PlatformService } from '@nexus-wallet/types';
 import { errors } from '@nexus-wallet/utils';
 import { TransactionSkeletonObject } from '@ckb-lumos/helpers';
 import type { HexString, Script } from '@ckb-lumos/base';
-import { createSessionMessenger } from '../messaging/session';
+import { createSessionMessenger, SessionMessenger } from '../messaging/session';
 import { browserExtensionAdapter } from '../messaging/adapters';
 import { nanoid } from 'nanoid';
+import type { Windows } from 'webextension-polyfill';
 import browser from 'webextension-polyfill';
 import { Endpoint } from 'webext-bridge';
 
@@ -18,35 +19,49 @@ export type SessionMethods = {
    */
   session_getUnsignedTransaction: Call<void, { tx: TransactionSkeletonObject; ownedLocks: Script[] }>;
   session_approveSignData: Call<{ password: string }, void>;
+  session_rejectSignData: Call<void, void>;
 
   /**
    * get bytes to be signed, the return data should detect if it can be converted to utf8 string,
    * if so, return the utf8 string, otherwise return the hex string
    */
-  session_getUnsignedData: Call<void, { data: HexString | string }>;
+  session_getUnsignedData: Call<void, { data: HexString; url: string }>;
   session_approveSignTransaction: Call<{ password: string }, void>;
 };
 
 const NOTIFICATION_WIDTH = 500;
 const NOTIFICATION_HEIGHT = 640;
 
+type NotificationPath = 'grant' | 'sign-data' | 'sign-transaction';
+async function createNotificationWindow(
+  path: NotificationPath,
+): Promise<{ messenger: SessionMessenger<SessionMethods>; notificationWindow: Windows.Window }> {
+  const lastFocused = await browser.windows.getLastFocused();
+  const sessionId = nanoid();
+  const window = await browser.windows.create({
+    type: 'popup',
+    focused: true,
+    top: lastFocused.top,
+    left: lastFocused.left! + (lastFocused.width! - 360),
+    width: NOTIFICATION_WIDTH,
+    height: NOTIFICATION_HEIGHT,
+    url: `notification.html#/${path}?sessionId=${sessionId}`,
+  });
+
+  const messenger = createSessionMessenger<SessionMethods>({ adapter: browserExtensionAdapter, sessionId });
+
+  return {
+    notificationWindow: window,
+    messenger,
+  };
+}
+
+// TODO this is a mocked notification service,
+//  just demonstrating how we organize the code
 export function createBrowserExtensionPlatformService(): PlatformService<Endpoint> {
   return {
     async requestGrant({ url }) {
-      const lastFocused = await browser.windows.getLastFocused();
-      const sessionId = nanoid();
-
-      const notification = await browser.windows.create({
-        type: 'popup',
-        focused: true,
-        top: lastFocused.top,
-        left: lastFocused.left! + (lastFocused.width! - 360),
-        width: NOTIFICATION_WIDTH,
-        height: NOTIFICATION_HEIGHT,
-        url: `notification.html#/grant?sessionId=${sessionId}`,
-      });
-
-      const messenger = createSessionMessenger<SessionMethods>({ adapter: browserExtensionAdapter, sessionId });
+      const { messenger, notificationWindow } = await createNotificationWindow('grant');
 
       return new Promise((resolve, reject) => {
         messenger.register('session_getRequesterAppInfo', () => {
@@ -59,7 +74,7 @@ export function createBrowserExtensionPlatformService(): PlatformService<Endpoin
         });
 
         browser.windows.onRemoved.addListener((windowId) => {
-          if (windowId === notification.id) {
+          if (windowId === notificationWindow.id) {
             messenger.destroy();
             reject();
           }
@@ -69,8 +84,30 @@ export function createBrowserExtensionPlatformService(): PlatformService<Endpoin
     requestSignTransaction() {
       return Promise.resolve({ password: 'abcd1234' });
     },
-    requestSignData() {
-      errors.unimplemented();
+
+    async requestSignData(payload) {
+      const { notificationWindow, messenger } = await createNotificationWindow('sign-data');
+
+      return new Promise((resolve, reject) => {
+        messenger.register('session_getUnsignedData', () => {
+          return payload;
+        });
+
+        messenger.register('session_approveSignData', ({ password }) => {
+          resolve({ password });
+        });
+
+        messenger.register('session_rejectSignData', () => {
+          reject();
+        });
+
+        browser.windows.onRemoved.addListener((windowId) => {
+          if (windowId === notificationWindow.id) {
+            messenger.destroy();
+            reject();
+          }
+        });
+      });
     },
     navigateToInitWallet: async () => {
       await browser.tabs.create({ url: `walletManager.html` });

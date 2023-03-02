@@ -7,7 +7,7 @@ import { Storage } from '@nexus-wallet/types';
  * {
  *     nickname: 'Nexus Dev',
  *     mnemonic: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
- *     password: '123456',
+ *     password: '12345678', // MOCK_PLATFORM_PASSWORD
  * }
  * </pre>
  * use it to avoid the need to init wallet in each test
@@ -37,7 +37,7 @@ export function createMockStorage(): Storage<any> {
           rpcUrl: 'https://testnet.ckb.dev',
         },
       ],
-      selectedNetwork: 'mainnet',
+      selectedNetwork: 'testnet',
     },
     keystore: {
       publicInfos: [
@@ -57,7 +57,7 @@ export function createMockStorage(): Storage<any> {
           chainCode: '0x8a6e51b51b16c304ee50daca76bef6b6cda970c5a7916eeb3f555f34ea82380d',
         },
       ],
-      wss: '{"version":3,"crypto":{"ciphertext":"b9ed25a10285b0739fc65aaa695a502e960c2278c0d29b7f7cc39230ae628ccf5c3fba4b989e1feb263a8469cf2f4b7aa22fed19a1d11a6673d9bbd83485cb69","cipherparams":{"iv":"2c3d74396d3621d5bd9e9f96b3192bc2"},"cipher":"aes-128-ctr","kdf":"scrypt","kdfparams":{"dklen":32,"salt":"961c1e3a6010a20094cc518d8966cfc0a9444cf244205554b304b62425968d96","n":262144,"r":8,"p":1},"mac":"307e9c6949935ed168c6f863a88a7284472972590986e1d347718607186e8f16"},"id":"bd1c4484-415c-4826-ace5-309fae4335a7"}',
+      wss: '{"version":3,"crypto":{"ciphertext":"9e2be7be3eeff3154e1c677f7ff96ca0f740a44a1d4c045cd25358734631597a13289d787ca6088205548bd306c1fcfa328a4d6ee67381690344b61195bc998f","cipherparams":{"iv":"3343a3ed7f49fc5a34af4a7e5f5015bb"},"cipher":"aes-128-ctr","kdf":"scrypt","kdfparams":{"dklen":32,"salt":"f96cd71b809d2d3ddf2e3957fe46f2c20dda388417af314b17a7bfcb2dbdf6c3","n":262144,"r":8,"p":1},"mac":"011743cb5fa963afaf30e199811e8a05e9a96c10102ac8adf5b1cc1e418e2bdc"},"id":"3be07a3b-01ca-46b6-910a-9d581475459d"}',
     },
   });
 

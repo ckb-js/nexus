@@ -4,7 +4,7 @@ import { addMethod } from './server';
 const logger = createLogger();
 
 addMethod('wallet_enable', async (_, { getRequesterAppInfo, resolveService }) => {
-  const configService = await resolveService('configService');
+  const configService = resolveService('configService');
 
   const { url } = await getRequesterAppInfo();
   const { host, protocol } = new URL(url);
@@ -17,7 +17,7 @@ addMethod('wallet_enable', async (_, { getRequesterAppInfo, resolveService }) =>
   if (isTrusted) return;
 
   try {
-    const notificationService = await resolveService('notificationService');
+    const notificationService = resolveService('notificationService');
     await notificationService.requestGrant({ url });
   } catch {
     errors.throwError('User has rejected');
