@@ -5,6 +5,7 @@ import { NetworkId } from './storage';
 import { createTransactionSkeleton, LiveCellFetcher, TransactionSkeletonType } from '@ckb-lumos/helpers';
 import { throwError } from '@nexus-wallet/utils/lib/error';
 import { ScriptConfig, getConfig } from '@ckb-lumos/config-manager';
+import chunk from 'lodash/chunk';
 
 export interface Backend {
   getSecp256k1Blake160ScriptConfig(): Promise<ScriptConfig>;
@@ -156,23 +157,23 @@ export function createBackend(_payload: { rpc: string }): Backend {
         return responses.map((response: any) => toPaginatedCells(response));
       };
 
-      const chunkedRequests = [];
-      // TODO make chunk size configurable, default to 20
-      for (let lockIndex = 0; lockIndex < locks.length; lockIndex += 10) {
-        const chunkLocks = locks?.slice(lockIndex, lockIndex + 10);
-        if (lockIndex === 0) {
-          const currentChunkRequest = chunkLocks.map((lock, i) => {
-            if (i === 0) {
-              return { lock, cursor: cursor };
-            }
-            return { lock };
-          });
-          chunkedRequests.push(currentChunkRequest);
-        } else {
-          const currentChunkRequest = chunkLocks.map((lock) => ({ lock }));
-          chunkedRequests.push(currentChunkRequest);
-        }
+      if (locks.length === 0) {
+        return {
+          objects: [],
+          cursor: '',
+        };
       }
+
+      const requets = locks.map((lock, i) => {
+        if (i === 0) {
+          // only first lock could use the cursor
+          return { lock, cursor };
+        }
+        return { lock };
+      });
+      // TODO make chunk size configurable, default to 10
+      const chunkedRequests = chunk(requets, 10);
+
       const responsePromises = chunkedRequests.map((chunkedRequest) => batchGetCells(chunkedRequest));
       const responses = await Promise.all(responsePromises);
 
