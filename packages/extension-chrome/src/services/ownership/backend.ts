@@ -237,7 +237,7 @@ export function createBackend(_payload: { rpc: string }): Backend {
         });
         const descSearchResult = toPaginatedCells(descSearchResp.json());
         asserts.asserts(
-          isEqual(descSearchResult.objects[-1], result.objects[limit - 1]),
+          isEqual(descSearchResult.objects.pop(), result.objects[limit - 1]),
           'desc search result not match',
         );
         result = {
