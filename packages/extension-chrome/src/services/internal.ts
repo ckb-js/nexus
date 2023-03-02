@@ -37,7 +37,7 @@ export function createInternalService(payload: {
         config: {
           nickname: payload.nickname,
           whitelist: [],
-          selectedNetwork: 'mainnet',
+          selectedNetwork: 'testnet',
           networks: DEFAULT_NETWORKS,
         },
       });

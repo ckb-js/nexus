@@ -6,7 +6,7 @@ if (process.env.NODE_ENV === 'development') {
     await internalService.initWallet({
       nickname: 'Nexus Dev',
       mnemonic: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
-      password: '123456',
+      password: '12345678',
     });
   });
 

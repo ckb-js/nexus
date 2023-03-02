@@ -1,7 +1,7 @@
 import { createInMemoryStorage } from '../../src/services/storage';
 import { FULL_OWNERSHIP_EXTERNAL_PARENT_PATH } from '../../src/services/internal';
 import { createModulesFactory } from '../../src/services/factory';
-import { mockPlatformService } from '../helpers';
+import { MOCK_PLATFORM_PASSWORD, mockPlatformService } from '../helpers';
 
 test('internal service', async () => {
   const factory = createModulesFactory({ storage: createInMemoryStorage, platform: () => mockPlatformService });
@@ -10,7 +10,7 @@ test('internal service', async () => {
   await internalService.initWallet({
     nickname: 'Nexus Dev',
     mnemonic: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
-    password: '123456',
+    password: MOCK_PLATFORM_PASSWORD,
   });
 
   const configService = factory.get('configService');
