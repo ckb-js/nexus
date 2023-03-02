@@ -1,7 +1,7 @@
 import { Storage } from '@nexus-wallet/types';
 import { errors } from '@nexus-wallet/utils';
 
-interface InMemoryStorage<S> extends Storage<S> {
+export interface InMemoryStorage<S> extends Storage<S> {
   getAll(): S | undefined;
 
   setAll(s: S): void;
