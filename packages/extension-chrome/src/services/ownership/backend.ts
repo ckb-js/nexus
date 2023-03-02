@@ -6,6 +6,7 @@ import { createTransactionSkeleton, LiveCellFetcher, TransactionSkeletonType } f
 import { throwError } from '@nexus-wallet/utils/lib/error';
 import { ScriptConfig, getConfig } from '@ckb-lumos/config-manager';
 import chunk from 'lodash/chunk';
+import isEqual from 'lodash/isEqual';
 
 export interface Backend {
   getSecp256k1Blake160ScriptConfig(): Promise<ScriptConfig>;
@@ -19,7 +20,7 @@ export interface Backend {
      */
     cursor?: string;
     limit?: number;
-  }): Promise<Paginate<Cell>>;
+  }): Promise<Paginate<Cell> & { lastLock?: Script }>;
 
   resolveTx(tx: Transaction): Promise<TransactionSkeletonType>;
 }
@@ -87,7 +88,7 @@ export function createBackend(_payload: { rpc: string }): Backend {
       cursor?: string;
       // TODO implement limit
       limit?: number;
-    }): Promise<Paginate<Cell>> => {
+    }): Promise<Paginate<Cell> & { lastLock?: Script }> => {
       const toRequestParam = (lock: Script, id: number, cursor?: string) => ({
         id,
         jsonrpc: '2.0',
@@ -177,21 +178,70 @@ export function createBackend(_payload: { rpc: string }): Backend {
       const responsePromises = chunkedRequests.map((chunkedRequest) => batchGetCells(chunkedRequest));
       const responses = await Promise.all(responsePromises);
 
-      const result: Paginate<Cell> = {
+      let result: Paginate<Cell> & { lastLock?: Script } = {
         objects: [],
         cursor: '',
       };
+      let fullFilledLimit = false;
       for (let i = 0; i < responses.length; i++) {
         for (let j = 0; j < responses[i].length; j++) {
           const element: Paginate<Cell> = responses[i][j];
           result.objects.push(...element.objects);
           if (element.cursor) {
             result.cursor = element.cursor;
+            result.lastLock = chunkedRequests[i][j].lock;
+          }
+          if (result.objects.length >= limit) {
+            fullFilledLimit = true;
+            break;
           }
         }
-        if (limit && result.objects.length >= limit) {
-          break;
-        }
+        if (fullFilledLimit) break;
+      }
+
+      // refetch cursor only when the result object length exceeds the limit
+      if (result.objects.length > limit) {
+        const searchOffset = result.objects.length - limit;
+        const lastCursor = result.cursor;
+        const lastLock = result.lastLock;
+        asserts.asserts(lastLock, 'lastLock not found');
+        asserts.asserts(lastCursor, 'lastCursor not found');
+        const descSearchParam = {
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'get_cells',
+          params: [
+            {
+              script: {
+                code_hash: lastLock.codeHash,
+                hash_type: lastLock.hashType,
+                args: lastLock.args,
+              },
+              script_type: 'lock',
+            },
+            'desc',
+            `0x${searchOffset.toString(16)}`,
+            lastCursor,
+          ],
+        };
+        const descSearchResp = await fetch(_payload.rpc, {
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(descSearchParam),
+          method: 'POST',
+        });
+        const descSearchResult = toPaginatedCells(descSearchResp.json());
+        asserts.asserts(
+          isEqual(descSearchResult.objects[-1], result.objects[limit - 1]),
+          'desc search result not match',
+        );
+        result = {
+          objects: result.objects.slice(0, limit),
+          cursor: descSearchResult.cursor,
+          lastLock,
+        };
       }
 
       return result;

@@ -2,7 +2,7 @@ import { ConfigService, KeystoreService, OwnershipService, PlatformService } fro
 import { createScriptInfoDb, OwnershipStorage, ScriptInfo, ScriptInfoDb } from './storage';
 import { asserts, errors } from '@nexus-wallet/utils';
 import { FULL_OWNERSHIP_EXTERNAL_PARENT_PATH, FULL_OWNERSHIP_INTERNAL_PARENT_PATH } from './constants';
-import { CellCursor, decodeCursor } from './cursor';
+import { CellCursor, decodeCursor, encodeCursor } from './cursor';
 import { BackendProvider } from './backend';
 import { HexString, Script, utils } from '@ckb-lumos/lumos';
 import { common } from '@ckb-lumos/common-scripts';
@@ -43,18 +43,28 @@ export function createFullOwnershipService({
 
       const infos = await db.getAll();
 
-      const cursor: CellCursor = encodedCursor ? decodeCursor(encodedCursor) : { indexerCursor: '', localId: 0 };
+      const queryCursor: CellCursor = encodedCursor ? decodeCursor(encodedCursor) : { indexerCursor: '', localId: 0 };
 
       const onChainLocks = infos
         .filter(
           (info) =>
             info.status === 'OnChain' &&
             // only fetch cells after or containing this lock
-            info.id >= cursor.localId,
+            info.id >= queryCursor.localId,
         )
         .map((info) => info.lock);
 
-      return backend.getLiveCellsByLocks({ locks: onChainLocks, cursor: cursor.indexerCursor });
+      const { objects, cursor, lastLock } = await backend.getLiveCellsByLocks({
+        locks: onChainLocks,
+        cursor: queryCursor.indexerCursor,
+      });
+      if (!lastLock) {
+        asserts.asserts(!objects.length, "Can't find last lock when cells are returned");
+        return { objects, cursor };
+      }
+      const lastLockInfo = infos.find((info) => info.scriptHash === utils.computeScriptHash(lastLock));
+      asserts.asserts(lastLockInfo, 'no lastLockInfo found');
+      return { objects, cursor: encodeCursor({ indexerCursor: cursor, localId: lastLockInfo.id }) };
     },
 
     getOnChainLocks: async ({ change, cursor: infoIdStr }) => {
