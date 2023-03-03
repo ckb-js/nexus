@@ -50,7 +50,12 @@ async function runWatchtower(factory: ModulesFactory) {
     const storage = factory.get('storage') as OwnershipStorage;
     const selectedNetwork = await configService.getSelectedNetwork();
     const db = createScriptInfoDb({ storage, networkId: selectedNetwork.id });
-    const watchtower = createWatchtower({ db, keystoreService, backend: await backendProvider.resolve() });
+    const watchtower = createWatchtower({
+      db,
+      keystoreService,
+      backend: await backendProvider.resolve(),
+      configService,
+    });
     watchtower.run();
   } catch (error) {
     logger.info('main.ts: start watchtower failed', error);
