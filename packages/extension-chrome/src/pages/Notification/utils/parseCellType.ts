@@ -9,5 +9,5 @@ export function parseCellType(cell: Cell): ReactNode {
   }
   const config = WellknownCellManager.query(type);
 
-  return config?.parser(cell) ?? '-';
+  return config?.parse(cell) ?? '-';
 }

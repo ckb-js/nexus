@@ -16,7 +16,7 @@ for (const cfg of Object.values(config.predefined)) {
       hashType: DAO.HASH_TYPE,
       args: '0x',
     },
-    parser(cell: Cell) {
+    parse(cell: Cell) {
       if (cell.data === DEPOSIT_CELL_DATA) {
         return 'DAO Diposit';
       } else {
@@ -31,7 +31,7 @@ for (const cfg of Object.values(config.predefined)) {
       hashType: SUDT.HASH_TYPE,
       args: '0x',
     },
-    parser(cell) {
+    parse(cell) {
       // TODO: SUDT value display
       return <Tooltip label={`Data: ${bytes.hexify(cell.data)}`}>SUDT</Tooltip>;
     },
@@ -41,7 +41,7 @@ for (const cfg of Object.values(config.predefined)) {
 type TypeConfig = {
   type: Script;
 
-  parser: (cell: Cell) => ReactNode;
+  parse: (cell: Cell) => ReactNode;
 };
 
 function hashTypeScript(script: Script): string {
