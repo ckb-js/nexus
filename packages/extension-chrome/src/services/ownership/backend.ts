@@ -31,9 +31,9 @@ const _Secp256k1Blake160ScriptInfoCache = new Map<NetworkId, ScriptTemplate>();
 
 // TODO implement the backend
 /* istanbul ignore next */
-export function createBackend(_payload: { rpc: string }): Backend {
+export function createBackend(_payload: { nodeUrl: string }): Backend {
   // TODO use rpc to fetch onchain data when lumos rpc is ready to use in chrome extension
-  const rpc = new RPC(_payload.rpc);
+  const rpc = new RPC(_payload.nodeUrl);
 
   return {
     getSecp256k1Blake160ScriptConfig: async (): Promise<ScriptConfig> => {
@@ -64,7 +64,7 @@ export function createBackend(_payload: { rpc: string }): Backend {
         ],
       });
       const requestParam = payload.locks.map(toRequestParam);
-      const rawResponse = await fetch(_payload.rpc, {
+      const rawResponse = await fetch(_payload.nodeUrl, {
         headers: {
           Accept: 'application/json',
           'Content-Type': 'application/json',
@@ -147,7 +147,7 @@ export function createBackend(_payload: { rpc: string }): Backend {
         const requestParam = params.map(({ lock, cursor }, id) => {
           return toRequestParam(lock, id, cursor);
         });
-        const rawResponse = await fetch(_payload.rpc, {
+        const rawResponse = await fetch(_payload.nodeUrl, {
           headers: {
             Accept: 'application/json',
             'Content-Type': 'application/json',
@@ -227,7 +227,7 @@ export function createBackend(_payload: { rpc: string }): Backend {
             lastCursor,
           ],
         };
-        const descSearchResp = await fetch(_payload.rpc, {
+        const descSearchResp = await fetch(_payload.nodeUrl, {
           headers: {
             Accept: 'application/json',
             'Content-Type': 'application/json',
@@ -235,7 +235,8 @@ export function createBackend(_payload: { rpc: string }): Backend {
           body: JSON.stringify(descSearchParam),
           method: 'POST',
         });
-        const descSearchResult = toPaginatedCells(descSearchResp.json());
+        const descSearchResult = toPaginatedCells(await descSearchResp.json());
+
         asserts.asserts(
           isEqual(descSearchResult.objects.pop(), result.objects[limit - 1]),
           'desc search result not match',
@@ -263,7 +264,7 @@ export function createBackend(_payload: { rpc: string }): Backend {
             true,
           ],
         };
-        const rawResult = await fetch(_payload.rpc, {
+        const rawResult = await fetch(_payload.nodeUrl, {
           headers: {
             Accept: 'application/json',
             'Content-Type': 'application/json',
@@ -309,7 +310,7 @@ export function createBackendProvider({ configService }: { configService: Config
   return {
     resolve: async () => {
       const network = await configService.getSelectedNetwork();
-      return createBackend({ rpc: network.rpcUrl });
+      return createBackend({ nodeUrl: network.rpcUrl });
     },
   };
 }

@@ -76,6 +76,7 @@
     "fork-ts-checker-webpack-plugin": "7.3.0",
     "html-loader": "4.2.0",
     "html-webpack-plugin": "5.5.0",
+    "jest-fetch-mock": "^3.0.3",
     "path-browserify": "1.0.1",
     "rimraf": "4.1.2",
     "source-map-loader": "4.0.1",

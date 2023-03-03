@@ -8,4 +8,5 @@ module.exports = {
     uuid: require.resolve('uuid'),
   },
   testMatch: ['**/__tests__/**/*.test.ts'],
+  setupFiles: ['./setupJest.js'],
 };
