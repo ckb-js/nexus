@@ -9,7 +9,7 @@ import { useMutation } from '@tanstack/react-query';
 import { WhiteAlphaBox } from '../../../Components/WhiteAlphaBox';
 import { useService } from '../../../hooks/useService';
 
-const HTTP_URL_PATTERN = /https?:\/\/[a-zA-Z_\-.~]+/;
+const HTTP_URL_PATTERN = /^https?:\/\/[a-zA-Z0-9-._]+(:\d+)?$/;
 
 type AddNetworkFormState = {
   name: string;
@@ -25,7 +25,7 @@ export const AddNetwork: FC = () => {
   const onSubmit = handleSubmit(async ({ name, rpcUrl }, e) => {
     e?.preventDefault();
     await addNetworkMutation.mutateAsync({ name, rpcUrl });
-    navigate('/network');
+    navigate(-1);
   });
 
   const addNetworkMutation = useMutation({
