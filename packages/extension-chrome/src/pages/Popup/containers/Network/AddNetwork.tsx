@@ -9,7 +9,7 @@ import { useMutation } from '@tanstack/react-query';
 import { WhiteAlphaBox } from '../../../Components/WhiteAlphaBox';
 import { useService } from '../../../hooks/useService';
 
-const HTTP_URL_PATTERN = /^https?:\/\/[a-zA-Z0-9-._]+(:\d+)?$/;
+const HTTP_URL_PATTERN = /^https?:\/\/[a-zA-Z0-9-._/]+(:\d+)?$/;
 
 type AddNetworkFormState = {
   name: string;
