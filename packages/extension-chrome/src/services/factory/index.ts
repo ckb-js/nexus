@@ -5,9 +5,10 @@ import { createInternalService, InternalService } from '../internal';
 import { createKeystoreService } from '../keystore';
 import { createFullOwnershipService } from '../ownership';
 import { BackendProvider, createBackendProvider } from '../ownership/backend';
+import { createEventHub, EventHub } from '../event';
 
-export interface ModulesFactory {
-  get<K extends keyof Modules>(name: K): Modules[K];
+export interface ModulesFactory<S = unknown, P = unknown> {
+  get<K extends keyof Modules>(name: K): Modules<S, P>[K];
 }
 
 export interface Modules<S = unknown, P = unknown> {
@@ -22,10 +23,16 @@ export interface Modules<S = unknown, P = unknown> {
   platformService: PlatformService<P>;
   backendProvider: BackendProvider;
   fullOwnershipService: OwnershipService;
+  eventHub: EventHub;
 }
 
-export function createModulesFactory<S, P>({ storage, platform }: ModuleProviderMap<S, P>): ModulesFactory {
-  const container = awilix.createContainer<Modules>();
+export function createModulesFactory<S, P>({
+  storage,
+  platform,
+  ...providers
+}: ModuleProviderMap<S, P>): ModulesFactory<S, P> {
+  const container = awilix.createContainer<Modules<S, P>>();
+
   const platformResolover = awilix.asFunction(platform).singleton();
   container.register({
     storage: awilix.asFunction(storage).singleton(),
@@ -36,6 +43,7 @@ export function createModulesFactory<S, P>({ storage, platform }: ModuleProvider
     fullOwnershipService: awilix.asFunction(createFullOwnershipService).singleton(),
     notificationService: platformResolover,
     platformService: platformResolover,
+    eventHub: awilix.asFunction(providers.eventHub || createEventHub).singleton(),
   });
 
   return {
@@ -44,8 +52,8 @@ export function createModulesFactory<S, P>({ storage, platform }: ModuleProvider
 }
 
 export type ModuleProvider<T> = (arg: unknown) => T;
-
+export type AsProvider<T> = { [key in keyof T]: ModuleProvider<T[key]> };
 export type ModuleProviderMap<S, P> = {
   storage: ModuleProvider<Storage<S>>;
   platform: ModuleProvider<PlatformService<P>>;
-};
+} & Partial<Omit<AsProvider<Modules<S, P>>, 'platformService' | 'storage'>>;

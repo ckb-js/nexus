@@ -1,5 +1,6 @@
 import { ConfigService, KeystoreService, PlatformService } from '@nexus-wallet/types';
 import { NetworkConfig } from '@nexus-wallet/types/lib/services';
+import { EventHub } from './event';
 import {
   FULL_OWNERSHIP_EXTERNAL_PARENT_PATH,
   FULL_OWNERSHIP_INTERNAL_PARENT_PATH,
@@ -21,8 +22,9 @@ export function createInternalService(payload: {
   keystoreService: KeystoreService;
   configService: ConfigService;
   platformService: PlatformService;
+  eventHub: EventHub;
 }): InternalService {
-  const { keystoreService, configService, platformService } = payload;
+  const { keystoreService, configService, platformService, eventHub } = payload;
 
   const impl: InternalService = {
     initWallet: async (payload) => {
@@ -40,6 +42,8 @@ export function createInternalService(payload: {
         mnemonic,
         paths: [FULL_OWNERSHIP_EXTERNAL_PARENT_PATH, FULL_OWNERSHIP_INTERNAL_PARENT_PATH, RULE_BASED_PARENT_PATH],
       });
+
+      eventHub.emit('walletInitialized');
     },
 
     isInitialized: () => Promise.resolve(keystoreService.hasInitialized()),

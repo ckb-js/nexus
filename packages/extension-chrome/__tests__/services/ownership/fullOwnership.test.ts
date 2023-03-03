@@ -19,13 +19,14 @@ import { mockPlatformService } from '../../helpers';
 import { bytes } from '@ckb-lumos/codec';
 import { Script, utils, Transaction } from '@ckb-lumos/lumos';
 import { common } from '@ckb-lumos/common-scripts';
+import { createEventHub } from '../../../src/services/event';
 
 describe('FullOwnership', () => {
   describe('getOffChainLocks', function () {
     let ownershipService: OwnershipService;
     beforeAll(async () => {
       const storage = createMockStorage();
-      const configService = createConfigService({ storage });
+      const configService = createConfigService({ storage, eventHub: createEventHub() });
       const keystoreService = createMockModule<KeystoreService>({
         getPublicKeyByPath: () => bytes.hexify(Buffer.alloc(33)),
       });
@@ -66,7 +67,7 @@ describe('FullOwnership', () => {
     ];
     beforeAll(async () => {
       const storage = createMockStorage();
-      const configService = createConfigService({ storage });
+      const configService = createConfigService({ storage, eventHub: createEventHub() });
       keystoreService = createMockModule<KeystoreService>({
         getPublicKeyByPath: () => bytes.hexify(Buffer.alloc(33)),
         signMessage: jest.fn().mockImplementation(() => Promise.resolve('0x')),

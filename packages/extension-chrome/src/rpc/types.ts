@@ -1,6 +1,6 @@
 import { Cell, Script } from '@ckb-lumos/lumos';
 import { Modules } from '../services';
-import { Call, CallMap, Paginate } from '@nexus-wallet/types';
+import { Paginate } from '@nexus-wallet/types';
 import {
   GetOffChainLocksPayload,
   GetPaginateItemsPayload,
@@ -10,21 +10,25 @@ import {
   SignDataPayload,
   SignTransactionPayload,
 } from '@nexus-wallet/types/lib/services/OwnershipService';
+import { Config as NexusConfig } from '@nexus-wallet/types/lib/services/ConfigService';
+import { AsyncCall, AsyncCallMap } from '@nexus-wallet/types/lib/call';
 
-export interface WalletMethods extends CallMap {
-  wallet_enable: Call<void, void>;
-  wallet_isEnabled: Call<void, boolean>;
-  wallet_getNetworkName: Call<void, string>;
+export interface WalletMethods extends AsyncCallMap {
+  wallet_enable: AsyncCall<void, void>;
+  wallet_isEnabled: AsyncCall<void, boolean>;
+  wallet_getNetworkName: AsyncCall<void, string>;
 
-  wallet_fullOwnership_getOffChainLocks: Call<GetOffChainLocksPayload, Script[]>;
-  wallet_fullOwnership_getOnChainLocks: Call<GetUsedLocksPayload, Paginate<Script>>;
-  wallet_fullOwnership_getLiveCells: Call<GetPaginateItemsPayload, Paginate<Cell>>;
-  wallet_fullOwnership_signData: Call<SignDataPayload, Signature>;
-  wallet_fullOwnership_signTransaction: Call<SignTransactionPayload, GroupedSignature>;
+  wallet_fullOwnership_getOffChainLocks: AsyncCall<GetOffChainLocksPayload, Script[]>;
+  wallet_fullOwnership_getOnChainLocks: AsyncCall<GetUsedLocksPayload, Paginate<Script>>;
+  wallet_fullOwnership_getLiveCells: AsyncCall<GetPaginateItemsPayload, Paginate<Cell>>;
+  wallet_fullOwnership_signData: AsyncCall<SignDataPayload, Signature>;
+  wallet_fullOwnership_signTransaction: AsyncCall<SignTransactionPayload, GroupedSignature>;
 }
 
-export interface DebugMethods extends CallMap {
-  debug_initWallet: Call<void, void>;
+export interface DebugMethods extends AsyncCallMap {
+  debug_initWallet: AsyncCall<void, void>;
+  debug_setConfig: AsyncCall<Partial<NexusConfig>, void>;
+  debug_getConfig: AsyncCall<void, NexusConfig>;
 }
 
 /**

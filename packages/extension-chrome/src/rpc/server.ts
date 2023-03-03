@@ -1,4 +1,3 @@
-import { Promisable } from '@nexus-wallet/types';
 import { RpcMethods, ServerParams } from './types';
 import { ModulesFactory } from '../services';
 import { JSONRPCRequest, JSONRPCResponse, JSONRPCServer } from 'json-rpc-2.0';
@@ -10,7 +9,7 @@ export const logger = createLogger();
 
 export function addMethod<K extends keyof RpcMethods>(
   method: K,
-  handler: (param: RpcMethods[K]['params'], context: ServerParams) => Promisable<RpcMethods[K]['result']>,
+  handler: (param: RpcMethods[K]['params'], context: ServerParams) => RpcMethods[K]['result'],
 ): void {
   Object.assign(methods, { [method]: handler });
 }
