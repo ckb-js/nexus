@@ -30,7 +30,6 @@ type ScriptTemplate = { codeHash: HexString; hashType: HashType };
 const _Secp256k1Blake160ScriptInfoCache = new Map<NetworkId, ScriptTemplate>();
 
 // TODO implement the backend
-/* istanbul ignore next */
 export function createBackend(_payload: { nodeUrl: string }): Backend {
   // TODO use rpc to fetch onchain data when lumos rpc is ready to use in chrome extension
   const rpc = new RPC(_payload.nodeUrl);
@@ -315,6 +314,7 @@ export function createBackendProvider({ configService }: { configService: Config
   };
 }
 
+/* istanbul ignore next */
 export async function loadSecp256k1ScriptDep(rpc: RPC): Promise<ScriptConfig> {
   const genesisBlock = await rpc.getBlockByNumber('0x0');
   if (!genesisBlock) throw new Error("can't load genesis block");

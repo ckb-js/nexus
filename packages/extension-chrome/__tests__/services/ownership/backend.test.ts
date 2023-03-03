@@ -1,6 +1,35 @@
+import { Transaction } from './../../../../../lumos/packages/base/src/api';
 import { Script } from '@ckb-lumos/lumos';
 import { createBackend } from '../../../src/services/ownership/backend';
 import fetchMock from 'jest-fetch-mock';
+
+describe('hasHistory', () => {
+  afterEach(() => {
+    fetchMock.resetMocks();
+  });
+  it('should get history by lock list', async () => {
+    fetchMock.mockResponse(mockFetchTransactionsResp);
+    const backend = createBackend({ nodeUrl: '' });
+    const results = await backend.hasHistories({
+      locks: [createLock(0), createLock(1), createLock(2)],
+    });
+    expect(results).toEqual([false, true, false]);
+  });
+});
+
+describe('resolveTx', () => {
+  afterEach(() => {
+    fetchMock.resetMocks();
+  });
+  it('should resolve tx to txSkeleton', async () => {
+    fetchMock.mockResponse(getMockFetchLiveCellResp(createLock(1)));
+    const backend = createBackend({ nodeUrl: '' });
+    const tx = getMockTx();
+    const results = await backend.resolveTx(tx);
+    expect(results.get('inputs').toArray()).toHaveLength(1);
+    expect(results.get('inputs').toArray()[0].cellOutput.lock).toEqual(createLock(1));
+  });
+});
 
 describe('getLiveCells', () => {
   afterEach(() => {
@@ -39,7 +68,7 @@ describe('getLiveCells', () => {
 
   it('should get limited live cells if rpc returns too many cells', async () => {
     const { scenario, scenarioAnswer, locks } = getSimpleScenario();
-    fetchMock.mockResponse(mockFetchResp(scenario));
+    fetchMock.mockResponse(getMockFetchLiveCellsResp(scenario));
     const backend = createBackend({ nodeUrl: '' });
     const { objects, cursor } = await backend.getLiveCellsByLocks({
       locks,
@@ -53,7 +82,7 @@ describe('getLiveCells', () => {
 
   it('should get limited live cells in complecated scenario situation', async () => {
     const { scenario, scenarioAnswer, locks } = getScenario();
-    fetchMock.mockResponse(mockFetchResp(scenario));
+    fetchMock.mockResponse(getMockFetchLiveCellsResp(scenario));
     const backend = createBackend({ nodeUrl: '' });
     const { objects, cursor } = await backend.getLiveCellsByLocks({
       locks,
@@ -121,6 +150,27 @@ function createMockResponseOfGetCells(
   };
 }
 
+const getMockTx = () => {
+  const tx: Transaction = {
+    version: '0x0',
+    cellDeps: [],
+    headerDeps: [],
+    inputs: [
+      {
+        previousOutput: {
+          txHash: '0x',
+          index: '0x0',
+        },
+        since: '0x0',
+      },
+    ],
+    outputs: [],
+    witnesses: [],
+    outputsData: [],
+  };
+  return tx;
+};
+
 // key: lock index
 // value: lock index has x live cells
 function getScenario() {
@@ -148,7 +198,7 @@ function getSimpleScenario() {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const mockFetchResp = (scenario: any) => (req: any) => {
+const getMockFetchLiveCellsResp = (scenario: any) => (req: Request) => {
   const reqBody = JSON.parse(req.body!.toString());
   if (Array.isArray(reqBody)) {
     const batchReqLen = reqBody.length;
@@ -182,4 +232,48 @@ const mockFetchResp = (scenario: any) => (req: any) => {
       JSON.stringify(createMockResponseOfGetCells(lock, cursorNumber - limit, cursorNumber, order)),
     );
   }
+};
+
+const mockFetchTransactionsResp = (req: Request) => {
+  const reqBody = JSON.parse(req.body!.toString());
+  const batchReqLen = reqBody.length;
+  return Promise.resolve(
+    JSON.stringify(
+      new Array(batchReqLen).fill(null).map((_, i) => {
+        return {
+          result: {
+            last_cursor: '',
+            objects: i % 2 === 0 ? [] : [{}],
+          },
+        };
+      }),
+    ),
+  );
+};
+
+const getMockFetchLiveCellResp = (lock: Script) => () => {
+  return Promise.resolve(
+    JSON.stringify({
+      jsonrpc: '2.0',
+      result: {
+        cell: {
+          data: {
+            content: '0x',
+            hash: '0x',
+          },
+          output: {
+            capacity: '0x1234',
+            lock: {
+              code_hash: lock.codeHash,
+              hash_type: lock.hashType,
+              args: lock.args,
+            },
+            type: null,
+          },
+        },
+        status: 'live',
+      },
+      id: 1,
+    }),
+  );
 };
