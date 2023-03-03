@@ -10,7 +10,7 @@ export interface WalletMethods extends AsyncCallMap {
 
   wallet_fullOwnership_getUnusedLocks: AsyncCall<void, Script[]>;
   wallet_fullOwnership_signData: AsyncCall<{ data: HexString }, HexString>;
-  wallet_fullOwnership_signTransaction: AsyncCall<{ transaction: Transaction }, Promise<string>>;
+  wallet_fullOwnership_signTransaction: AsyncCall<{ transaction: Transaction }, HexString>;
 }
 
 export interface DebugMethods extends AsyncCallMap {

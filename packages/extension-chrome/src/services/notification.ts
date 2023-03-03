@@ -95,7 +95,7 @@ export function createBrowserExtensionPlatformService(): PlatformService<Endpoin
       });
     },
     async requestSignTransaction({ tx }) {
-      const { notificationWindow, messenger } = await createNotificationWindow(browser, 'sign-transaction');
+      const { notificationWindow, messenger } = await createNotificationWindow('sign-transaction');
 
       return new Promise((resolve, reject) => {
         messenger.register('session_getUnsignedTransaction', () => {
