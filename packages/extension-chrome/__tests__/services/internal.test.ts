@@ -1,25 +1,20 @@
-import { createInternalService, FULL_OWNERSHIP_EXTERNAL_PARENT_PATH } from '../../src/services/internal';
-import { createKeystoreService } from '../../src/services/keystore';
 import { createInMemoryStorage } from '../../src/services/storage';
-import { createConfigService } from '../../src/services/config';
+import { FULL_OWNERSHIP_EXTERNAL_PARENT_PATH } from '../../src/services/internal';
+import { createModulesFactory } from '../../src/services/factory';
+import { MOCK_PLATFORM_PASSWORD, mockPlatformService } from '../helpers';
 
 test('internal service', async () => {
-  const storage = createInMemoryStorage();
-  const internalService = createInternalService({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    browser: {} as any,
-    keystoreService: createKeystoreService({ storage }),
-    configService: createConfigService({ storage }),
-  });
+  const factory = createModulesFactory({ storage: createInMemoryStorage, platform: () => mockPlatformService });
+  const internalService = factory.get('internalService');
 
   await internalService.initWallet({
     nickname: 'Nexus Dev',
     mnemonic: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
-    password: '123456',
+    password: MOCK_PLATFORM_PASSWORD,
   });
 
-  const configService = createConfigService({ storage });
-  const keystoreService = createKeystoreService({ storage });
+  const configService = factory.get('configService');
+  const keystoreService = factory.get('keystoreService');
 
   await expect(internalService.isInitialized()).resolves.toBe(true);
   await expect(Promise.resolve(keystoreService.hasInitialized())).resolves.toBe(true);

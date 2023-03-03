@@ -2,6 +2,7 @@ import { createConfigService } from '../../src/services/config';
 import { createInMemoryStorage } from '../../src/services/storage';
 import { ConfigService } from '@nexus-wallet/types';
 import { LIB_VERSION } from '@nexus-wallet/utils';
+import { createEventHub } from '../../src/services/event';
 
 let service: ConfigService;
 const fakeConfig = {
@@ -12,7 +13,7 @@ const fakeConfig = {
 };
 
 beforeEach(async () => {
-  service = createConfigService({ storage: createInMemoryStorage() });
+  service = createConfigService({ storage: createInMemoryStorage(), eventHub: createEventHub() });
 });
 
 it('should throw when trying to get config before set', async () => {
@@ -42,6 +43,58 @@ describe('ConfigService', () => {
     });
   });
 
+  it('should setConfig with localhost hostname', async () => {
+    await expect(
+      service.setConfig({
+        config: {
+          ...fakeConfig,
+          whitelist: [
+            {
+              favicon: 'http://localhost:9180/favicon.ico',
+              host: 'localhost',
+            },
+          ],
+        },
+      }),
+    );
+    await expect(service.getConfig()).resolves.toEqual({
+      ...fakeConfig,
+      whitelist: [
+        {
+          favicon: 'http://localhost:9180/favicon.ico',
+          host: 'localhost',
+        },
+      ],
+      version: LIB_VERSION,
+    });
+  });
+
+  it('should setConfig with localhost:port hostname', async () => {
+    await expect(
+      service.setConfig({
+        config: {
+          ...fakeConfig,
+          whitelist: [
+            {
+              favicon: 'http://example.com/favicon.ico',
+              host: 'localhost:9180',
+            },
+          ],
+        },
+      }),
+    );
+    await expect(service.getConfig()).resolves.toEqual({
+      ...fakeConfig,
+      whitelist: [
+        {
+          favicon: 'http://example.com/favicon.ico',
+          host: 'localhost:9180',
+        },
+      ],
+      version: LIB_VERSION,
+    });
+  });
+
   it('setConfig with callback', async () => {
     await service.setConfig({
       config: (draft) => {
@@ -56,6 +109,22 @@ describe('ConfigService', () => {
     await expect(
       service.setConfig({
         config: { ...fakeConfig, selectedNetwork: '2' },
+      }),
+    ).rejects.toThrowError();
+  });
+
+  it('should throw when setConfig with wrong hostname', async () => {
+    await expect(
+      service.setConfig({
+        config: {
+          ...fakeConfig,
+          whitelist: [
+            {
+              favicon: 'http://localhost:9180/favicon.ico',
+              host: 'localhost:123123123',
+            },
+          ],
+        },
       }),
     ).rejects.toThrowError();
   });
