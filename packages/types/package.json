@@ -21,6 +21,7 @@
     "start:webpack": "ts-node ./scripts/start.ts",
     "test": "jest",
     "build": "tsc",
+    "build:docs": "ts-node scripts/buildRpcDocs.ts",
     "clean": "rimraf build/*",
     "check": "npm run check:types",
     "check:types": "tsc --noEmit"
