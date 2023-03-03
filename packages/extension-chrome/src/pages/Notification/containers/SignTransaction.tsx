@@ -83,6 +83,7 @@ const TransactionIOList: FC<
       </Thead>
       <Tbody>
         {tx[type].map((cell, index) => {
+          // FIXME: need check if it's a testnet address or mainnet address
           const addr = encodeToAddress(cell.cellOutput.lock);
           return (
             <Tr h="50px" key={index} data-test-id={`transaction.${type}[${index}]`}>
@@ -137,7 +138,6 @@ export const SignTransaction: FC = () => {
   };
 
   const onReject = async () => {
-    await messenger.send('session_rejectSignTransaction');
     window.close();
   };
 
@@ -186,7 +186,7 @@ export const SignTransaction: FC = () => {
         <ButtonGroup mt="32px" size="md">
           <Button
             data-test-id="reject"
-            isLoading={formState.isSubmitting}
+            isDisabled={formState.isSubmitting}
             onClick={onReject}
             w="220px"
             color="gray.800"

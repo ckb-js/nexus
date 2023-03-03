@@ -16,7 +16,6 @@ export type SessionMethods = {
    */
   session_getUnsignedTransaction: Call<void, { tx: TransactionSkeletonObject; ownedLocks: Script[] }>;
   session_approveSignData: Call<{ password: string }, void>;
-  session_rejectSignData: Call<void, void>;
 
   /**
    * get bytes to be signed, the return data should detect if it can be converted to utf8 string,
@@ -24,7 +23,6 @@ export type SessionMethods = {
    */
   session_getUnsignedData: Call<void, { data: HexString; url: string }>;
   session_approveSignTransaction: Call<{ password: string }, void>;
-  session_rejectSignTransaction: Call<void, void>;
 };
 
 type NotificationPath = 'grant' | 'sign-data' | 'sign-transaction';
@@ -111,10 +109,6 @@ export function createNotificationService({ browser }: { browser: Browser }): No
           resolve({ password });
         });
 
-        messenger.register('session_rejectSignTransaction', () => {
-          reject();
-        });
-
         browser.windows.onRemoved.addListener((windowId) => {
           if (windowId === notificationWindow.id) {
             messenger.destroy();
@@ -134,10 +128,6 @@ export function createNotificationService({ browser }: { browser: Browser }): No
 
         messenger.register('session_approveSignData', ({ password }) => {
           resolve({ password });
-        });
-
-        messenger.register('session_rejectSignData', () => {
-          reject();
         });
 
         browser.windows.onRemoved.addListener((windowId) => {

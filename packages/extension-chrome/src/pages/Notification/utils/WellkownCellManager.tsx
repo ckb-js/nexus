@@ -1,8 +1,11 @@
+import React from 'react';
 import { config } from '@ckb-lumos/lumos';
-import { number } from '@ckb-lumos/codec';
+import { bytes } from '@ckb-lumos/codec';
 import { Cell, Script } from '@ckb-lumos/lumos';
+import { ReactNode } from 'react';
+import { Tooltip } from '@chakra-ui/react';
 
-const DIPOSIT_CELL_DATA = '0x0000000000000000';
+const DEPOSIT_CELL_DATA = '0x0000000000000000';
 const predefinedTypes: TypeConfig[] = [];
 
 for (const cfg of Object.values(config.predefined)) {
@@ -14,7 +17,7 @@ for (const cfg of Object.values(config.predefined)) {
       args: '0x',
     },
     parser(cell: Cell) {
-      if (cell.data === DIPOSIT_CELL_DATA) {
+      if (cell.data === DEPOSIT_CELL_DATA) {
         return 'DAO Diposit';
       } else {
         return 'DAO Withdraw';
@@ -29,8 +32,8 @@ for (const cfg of Object.values(config.predefined)) {
       args: '0x',
     },
     parser(cell) {
-      const val = number.Uint128LE.unpack(cell.data);
-      return `${val.div(10 ** 8).toString()} SUDT`;
+      // TODO: SUDT value display
+      return <Tooltip label={`Data: ${bytes.hexify(cell.data)}`}>SUDT</Tooltip>;
     },
   });
 }
@@ -38,7 +41,7 @@ for (const cfg of Object.values(config.predefined)) {
 type TypeConfig = {
   type: Script;
 
-  parser: (cell: Cell) => string;
+  parser: (cell: Cell) => ReactNode;
 };
 
 function hashTypeScript(script: Script): string {
