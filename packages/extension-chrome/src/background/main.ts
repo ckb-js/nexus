@@ -42,6 +42,7 @@ onMessage('rpc', async ({ data, sender }) => {
   }
 });
 
+// TODO: listen for `networkChanged` event and restart the watchtower
 async function runWatchtower(factory: ModulesFactory) {
   try {
     const configService = factory.get('configService');
