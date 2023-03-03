@@ -1,10 +1,11 @@
-import React, { FC } from 'react';
-import { Button, FormControl, FormLabel, Input, Flex, Spacer, VStack } from '@chakra-ui/react';
-import { useNavigate } from 'react-router-dom';
+import React, { FC, useEffect } from 'react';
+import { Button, FormControl, FormLabel, Input, Flex, Spacer, VStack, ButtonGroup } from '@chakra-ui/react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { AddIcon } from '@chakra-ui/icons';
 import { useForm } from 'react-hook-form';
 import { nanoid } from 'nanoid';
 import { useMutation } from '@tanstack/react-query';
+import produce from 'immer';
 
 import { WhiteAlphaBox } from '../../../Components/WhiteAlphaBox';
 import { useService } from '../../../hooks/useService';
@@ -17,22 +18,67 @@ type EditNetworkFormState = {
 };
 
 type EditNetworkProps = {
-  mode: 'add' | 'edit';
+  mode: 'add' | 'modify';
 };
 
-export const EditNetwork: FC<EditNetworkProps> = () => {
+export const EditNetwork: FC<EditNetworkProps> = ({ mode }) => {
   const navigate = useNavigate();
   const configService = useService('configService');
+  const { id } = useParams() as { id: string };
 
-  const { handleSubmit, register, formState } = useForm<EditNetworkFormState>();
+  const { handleSubmit, register, formState, setValue, trigger } = useForm<EditNetworkFormState>();
 
   const onSubmit = handleSubmit(async ({ name, rpcUrl }, e) => {
     e?.preventDefault();
-    await modifyNetworkMutation.mutateAsync({ name, rpcUrl });
+    if (mode === 'modify') {
+      await modifyNetworkMutation.mutateAsync({ name, rpcUrl, id });
+    }
+    if (mode === 'add') {
+      await addNetworkMutation.mutateAsync({ name, rpcUrl });
+    }
     navigate('/network');
   });
 
   const modifyNetworkMutation = useMutation({
+    mutationFn: async ({ name, rpcUrl, id }: EditNetworkFormState & { id: string }) => {
+      const networks = await configService.getNetworks();
+      const newNetworks = produce(networks, (draft) => {
+        for (const network of draft) {
+          if (network.id === id) {
+            network.displayName = name;
+            network.rpcUrl = rpcUrl;
+            network.networkName = name;
+            return;
+          }
+        }
+      });
+
+      return configService.setConfig({
+        config: {
+          networks: newNetworks,
+        },
+      });
+    },
+  });
+
+  useEffect(() => {
+    if (mode === 'modify') {
+      if (id) {
+        (async () => {
+          const networks = await configService.getNetworks();
+          const network = networks.find((network) => network.id === id);
+          if (network) {
+            setValue('name', network.networkName);
+            setValue('rpcUrl', network.rpcUrl);
+            // manually trigger validation
+            await trigger();
+          }
+        })().catch(() => {});
+      }
+    }
+  }, [mode, id, configService, setValue, trigger]);
+
+  const addNetworkMutation = useMutation({
     mutationFn: ({ name, rpcUrl }: EditNetworkFormState) => {
       return configService.addNetwork({
         network: { displayName: name, rpcUrl, id: nanoid(), networkName: name },
@@ -68,19 +114,32 @@ export const EditNetwork: FC<EditNetworkProps> = () => {
         </FormControl>
       </VStack>
       <Spacer />
-      <Flex direction="column" justifyContent="center">
-        <Button
-          data-test-id="add"
-          size="lg"
-          width="452px"
-          isDisabled={!formState.isValid}
-          leftIcon={<AddIcon h="16px" w="16px" />}
-          marginY="12px"
-          type="submit"
-        >
-          Add
-        </Button>
-      </Flex>
+
+      <ButtonGroup my="12px">
+        {mode === 'add' && (
+          <Button
+            data-test-id="add"
+            size="lg"
+            width="452px"
+            isDisabled={!formState.isValid}
+            leftIcon={<AddIcon h="16px" w="16px" />}
+            type="submit"
+          >
+            Add
+          </Button>
+        )}
+
+        {mode === 'modify' && (
+          <>
+            <Button colorScheme="gray" color="gray.800" data-test-id="add" width="220px">
+              Cancel
+            </Button>
+            <Button data-test-id="add" width="220px" isDisabled={!formState.isValid} type="submit">
+              Save
+            </Button>
+          </>
+        )}
+      </ButtonGroup>
     </Flex>
   );
 };

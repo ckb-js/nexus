@@ -26,7 +26,11 @@ const routeConfig: RouteObject[] = [
       },
       {
         path: '/network/add',
-        element: <EditNetwork />,
+        element: <EditNetwork mode="add" />,
+      },
+      {
+        path: '/network/edit/:id',
+        element: <EditNetwork mode="modify" />,
       },
       {
         path: '/network',

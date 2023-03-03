@@ -1,20 +1,30 @@
 import { ArrowBackIcon } from '@chakra-ui/icons';
 import { Box, Flex } from '@chakra-ui/react';
 import React, { FC } from 'react';
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { matchPath, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Logo } from '../../Components/Logo';
 
 const navigatorTitleMap: Record<string, string | undefined> = {
   '/whitelist-sites': 'Whitelist Sites',
   '/network': 'Networks',
   '/network/add': 'Networks',
+  '/network/edit/:id': 'Networks',
+};
+
+const getNavigatorTitle = (pathname: string) => {
+  for (const [pattern, title] of Object.entries(navigatorTitleMap)) {
+    if (matchPath(pattern, pathname)) {
+      return title;
+    }
+  }
 };
 
 export const PopupFrame: FC = () => {
   const { pathname } = useLocation();
+  getNavigatorTitle(pathname);
   const navigate = useNavigate();
   const isHomePage = pathname === '/';
-  const navigatorTitle = navigatorTitleMap[pathname];
+  const navigatorTitle = getNavigatorTitle(pathname);
   const goBack = () => {
     navigate(-1);
   };
