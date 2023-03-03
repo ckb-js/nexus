@@ -39,7 +39,7 @@ describe('FullOwnership', () => {
       });
 
       const db = createScriptInfoDb({ storage, networkId: (await configService.getSelectedNetwork()).id });
-      const watchtower = createWatchtower({ db, keystoreService, backend: mockBackend });
+      const watchtower = createWatchtower({ db, keystoreService, backend: mockBackend, configService });
 
       watchtower.run();
       await asyncSleep(100);

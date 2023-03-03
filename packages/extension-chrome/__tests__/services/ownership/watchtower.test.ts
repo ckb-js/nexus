@@ -13,6 +13,8 @@ import { createMockStorage } from '../../helpers/mockStorage';
 import { FULL_OWNERSHIP_OFF_CHAIN_GAP, RULE_BASED_OFF_CHAIN_GAP } from '../../../src/services/ownership/constants';
 import { asyncSleep } from '../../helpers/utils';
 import { mockBackend } from './mockBackend';
+import { createConfigService } from '../../../src/services/config';
+import { createEventHub } from '../../../src/services/event';
 
 const INIT_LENGTH = FULL_OWNERSHIP_OFF_CHAIN_GAP + FULL_OWNERSHIP_OFF_CHAIN_GAP + RULE_BASED_OFF_CHAIN_GAP;
 
@@ -25,7 +27,8 @@ const keystoreService = createMockModule<KeystoreService>({
 describe('Watchtower', () => {
   it('should init with GAP infos', async () => {
     const db = createScriptInfoDb({ storage: createMockStorage(), networkId: 'mainnet' });
-    const watchtower = createWatchtower({ keystoreService, backend, db });
+    const configService = createConfigService({ storage: createMockStorage(), eventHub: createEventHub() });
+    const watchtower = createWatchtower({ keystoreService, backend, db, configService });
 
     watchtower.run();
     await asyncSleep(100);
@@ -44,7 +47,7 @@ describe('Watchtower', () => {
 
   it('should update infos when backend has history', async () => {
     const db = createScriptInfoDb({ storage: createMockStorage(), networkId: 'mainnet' });
-
+    const configService = createConfigService({ storage: createMockStorage(), eventHub: createEventHub() });
     const pubkeys = Array.from({ length: 100 }).map((_, i) => {
       const buf = Buffer.alloc(33);
       buf.writeUint8(i);
@@ -63,7 +66,7 @@ describe('Watchtower', () => {
       },
     };
 
-    const watchtower = createWatchtower({ keystoreService, backend: newBackend, db });
+    const watchtower = createWatchtower({ keystoreService, backend: newBackend, db, configService });
 
     watchtower.run();
     await asyncSleep(100);

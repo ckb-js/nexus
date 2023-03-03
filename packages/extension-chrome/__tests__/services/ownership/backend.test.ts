@@ -1,5 +1,4 @@
-import { Transaction } from './../../../../../lumos/packages/base/src/api';
-import { Script } from '@ckb-lumos/lumos';
+import { Script, Transaction } from '@ckb-lumos/lumos';
 import { createBackend } from '../../../src/services/ownership/backend';
 import fetchMock from 'jest-fetch-mock';
 
@@ -171,10 +170,14 @@ const getMockTx = () => {
   return tx;
 };
 
+type LockIndex = number;
+type FetchedCellCount = number;
+type Scenario = Record<LockIndex, FetchedCellCount>;
+
 // key: lock index
 // value: lock index has x live cells
-function getScenario() {
-  const scenario: Record<number, number> = {
+function getScenario(): { scenario: Scenario; scenarioAnswer: string; locks: Script[] } {
+  const scenario: Scenario = {
     0: 3,
     1: 1,
     19: 1,
@@ -189,8 +192,8 @@ function getScenario() {
   return { scenario, scenarioAnswer: '0x20:0x03', locks };
 }
 
-function getSimpleScenario() {
-  const scenario: Record<number, number> = {
+function getSimpleScenario(): { scenario: Scenario; scenarioAnswer: string; locks: Script[] } {
+  const scenario: Scenario = {
     0: 22,
   };
   const locks = [createLock(0)];

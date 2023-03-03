@@ -30,10 +30,13 @@ export function createFullOwnershipService({
 
   async function getLumosConfig(): Promise<Config> {
     const backend = await backendProvider.resolve();
+    const selectedNetwork = await configService.getSelectedNetwork();
 
     return {
       PREFIX: 'ckb',
-      SCRIPTS: { SECP256K1_BLAKE160: await backend.getSecp256k1Blake160ScriptConfig() },
+      SCRIPTS: {
+        SECP256K1_BLAKE160: await backend.getSecp256k1Blake160ScriptConfig({ networkId: selectedNetwork.id }),
+      },
     } satisfies Config;
   }
 

@@ -1,15 +1,15 @@
-import { Cell, HashType, HexString, RPC, Script, Transaction, utils } from '@ckb-lumos/lumos';
+import { Cell, RPC, Script, Transaction, utils } from '@ckb-lumos/lumos';
 import type { ConfigService, Paginate, Promisable } from '@nexus-wallet/types';
 import { asserts } from '@nexus-wallet/utils';
 import { NetworkId } from './storage';
 import { createTransactionSkeleton, LiveCellFetcher, TransactionSkeletonType } from '@ckb-lumos/helpers';
 import { throwError } from '@nexus-wallet/utils/lib/error';
-import { ScriptConfig, getConfig } from '@ckb-lumos/config-manager';
+import { ScriptConfig } from '@ckb-lumos/config-manager';
 import chunk from 'lodash/chunk';
 import isEqual from 'lodash/isEqual';
 
 export interface Backend {
-  getSecp256k1Blake160ScriptConfig(): Promise<ScriptConfig>;
+  getSecp256k1Blake160ScriptConfig(payload: { networkId: string }): Promise<ScriptConfig>;
 
   hasHistories(payload: { locks: Script[] }): Promise<boolean[]>;
 
@@ -25,23 +25,22 @@ export interface Backend {
   resolveTx(tx: Transaction): Promise<TransactionSkeletonType>;
 }
 
-type ScriptTemplate = { codeHash: HexString; hashType: HashType };
+// TODO better make it persisted in localstorage/db
+const _Secp256k1Blake160ScriptInfoCache = new Map<NetworkId, ScriptConfig>();
 
-const _Secp256k1Blake160ScriptInfoCache = new Map<NetworkId, ScriptTemplate>();
-
-// TODO implement the backend
 export function createBackend(_payload: { nodeUrl: string }): Backend {
   // TODO use rpc to fetch onchain data when lumos rpc is ready to use in chrome extension
   const rpc = new RPC(_payload.nodeUrl);
 
   return {
-    getSecp256k1Blake160ScriptConfig: async (): Promise<ScriptConfig> => {
-      const lumosConfig = getConfig();
-      let secp256k1Config = lumosConfig.SCRIPTS['SECP256K1_BLAKE160'];
-      if (!secp256k1Config) {
-        secp256k1Config = await loadSecp256k1ScriptDep(rpc);
+    getSecp256k1Blake160ScriptConfig: async ({ networkId }): Promise<ScriptConfig> => {
+      let config = _Secp256k1Blake160ScriptInfoCache.get(networkId);
+      if (!config) {
+        const onChainConfig = await loadSecp256k1ScriptDep(rpc);
+        config = onChainConfig;
+        _Secp256k1Blake160ScriptInfoCache.set(networkId, onChainConfig);
       }
-      return Promise.resolve(secp256k1Config);
+      return config;
     },
     hasHistories: async (payload: { locks: Script[] }): Promise<boolean[]> => {
       const toRequestParam = (lock: Script, id: number) => ({
