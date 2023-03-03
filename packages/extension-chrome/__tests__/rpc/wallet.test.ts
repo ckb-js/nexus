@@ -1,4 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createTestRpcServer } from './helper';
+import * as helpers from '@ckb-lumos/helpers';
 
 jest.mock('@ckb-lumos/helpers', () =>
   Object.assign({}, jest.requireActual('@ckb-lumos/helpers'), {
@@ -36,15 +38,16 @@ describe('RPC wallet_fullOwnership_signData', () => {
       .spyOn(platformService, 'requestSignData')
       .mockImplementation(() => Promise.resolve({ password: 'Genshin Impact' }));
 
+    // TODO: to ownership developer, please add your test here
     await expect(request('wallet_fullOwnership_signData', { data })).resolves.toBe('mooooooock signed message');
   });
 });
 
 describe('RPC wallet_fullOwnership_signTransaction', () => {
-  const transactionSkeletonToObject: jest.Mock = require('@ckb-lumos/helpers').transactionSkeletonToObject;
-  const createTransactionSkeleton: jest.Mock = require('@ckb-lumos/helpers').createTransactionSkeleton;
+  const transactionSkeletonToObject = jest.spyOn(helpers, 'transactionSkeletonToObject').mockReturnValue({} as any);
+  const createTransactionSkeleton = jest.spyOn(helpers, 'createTransactionSkeleton').mockReturnValue({} as any);
   it('should works', async () => {
-    transactionSkeletonToObject.mockReturnValue({ inputs: [] });
+    transactionSkeletonToObject.mockReturnValue({ inputs: [] } as any);
     const { request, factory } = createTestRpcServer();
     const platformService = factory.get('platformService');
 
@@ -56,6 +59,7 @@ describe('RPC wallet_fullOwnership_signTransaction', () => {
       .spyOn(platformService, 'requestSignTransaction')
       .mockImplementation(() => Promise.resolve({ password: 'Genshin Impact' }));
 
+    // TODO: to ownership developer, please add your test here
     await expect(request('wallet_fullOwnership_signTransaction', {} as any)).resolves.toBe(
       'mooooock signed transaction witness',
     );
@@ -68,8 +72,8 @@ describe('RPC wallet_fullOwnership_signTransaction', () => {
       /Can not fetch the cell/,
     );
 
-    createTransactionSkeleton.mockResolvedValue({});
-    transactionSkeletonToObject.mockReturnValue({ inputs: [null] });
+    createTransactionSkeleton.mockResolvedValue({} as any);
+    transactionSkeletonToObject.mockReturnValue({ inputs: [null] } as any);
     await expect(request('wallet_fullOwnership_signTransaction', {} as any)).rejects.toThrowError(
       'Can not fetch your input cells, please check they are all valid and live.',
     );
