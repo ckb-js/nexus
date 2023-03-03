@@ -11,13 +11,11 @@ function formatArgs(arg: unknown): string {
     return arg;
   }
 
-  try {
-    // TODO check if arg is a valid BytesLike string first
-    //  instead of just try to convert it
+  if (arg instanceof Uint8Array) {
     return bytes.hexify(bytes.bytify(arg as BytesLike));
-  } catch {
-    return JSON.stringify(arg);
   }
+
+  return JSON.stringify(arg);
 }
 
 /**

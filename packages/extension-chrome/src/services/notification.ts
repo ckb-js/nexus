@@ -1,11 +1,13 @@
-import type { Call, NotificationService } from '@nexus-wallet/types';
+import type { Call, PlatformService } from '@nexus-wallet/types';
 import { errors } from '@nexus-wallet/utils';
 import { TransactionSkeletonObject } from '@ckb-lumos/helpers';
 import type { HexString, Script } from '@ckb-lumos/base';
 import { createSessionMessenger, SessionMessenger } from '../messaging/session';
 import { browserExtensionAdapter } from '../messaging/adapters';
 import { nanoid } from 'nanoid';
-import type { Browser, Windows } from 'webextension-polyfill';
+import type { Windows } from 'webextension-polyfill';
+import browser from 'webextension-polyfill';
+import { Endpoint } from 'webext-bridge';
 
 export type SessionMethods = {
   session_getRequesterAppInfo: Call<void, { url: string; favicon: string }>;
@@ -32,7 +34,6 @@ const NOTIFICATION_HEIGHT = 640;
 
 type NotificationPath = 'grant' | 'sign-data' | 'sign-transaction';
 async function createNotificationWindow(
-  browser: Browser,
   path: NotificationPath,
 ): Promise<{ messenger: SessionMessenger<SessionMethods>; notificationWindow: Windows.Window }> {
   const lastFocused = await browser.windows.getLastFocused();
@@ -57,14 +58,13 @@ async function createNotificationWindow(
 
 // TODO this is a mocked notification service,
 //  just demonstrating how we organize the code
-export function createNotificationService({ browser }: { browser: Browser }): NotificationService {
+export function createBrowserExtensionPlatformService(): PlatformService<Endpoint> {
   return {
     async requestGrant({ url }) {
-      const { messenger, notificationWindow } = await createNotificationWindow(browser, 'grant');
+      const { messenger, notificationWindow } = await createNotificationWindow('grant');
 
       return new Promise((resolve, reject) => {
         messenger.register('session_getRequesterAppInfo', () => {
-          // TODO: favicon from url
           return { url, favicon: `${new URL(url).origin}/favicon.ico` };
         });
 
@@ -86,7 +86,7 @@ export function createNotificationService({ browser }: { browser: Browser }): No
     },
 
     async requestSignData(payload) {
-      const { notificationWindow, messenger } = await createNotificationWindow(browser, 'sign-data');
+      const { notificationWindow, messenger } = await createNotificationWindow('sign-data');
 
       return new Promise((resolve, reject) => {
         messenger.register('session_getUnsignedData', () => {
@@ -109,5 +109,20 @@ export function createNotificationService({ browser }: { browser: Browser }): No
         });
       });
     },
+    navigateToInitWallet: async () => {
+      await browser.tabs.create({ url: `walletManager.html` });
+    },
+    getRequesterAppInfo: async (endpoint) => {
+      const tab = await browser.tabs.get(endpoint.tabId);
+      if (!tab.url) {
+        errors.throwError(`Cannot get the site information from the request`);
+      }
+      return { url: tab.url };
+    },
   };
 }
+
+/**
+ * @deprecated please migrate to {@link createBrowserExtensionPlatformService}
+ */
+export const createNotificationService = createBrowserExtensionPlatformService;

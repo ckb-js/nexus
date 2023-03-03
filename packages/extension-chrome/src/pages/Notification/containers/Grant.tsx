@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Box, Button, ButtonGroup, Flex, Image, Skeleton, VStack } from '@chakra-ui/react';
+import { CheckCircleIcon } from '@chakra-ui/icons';
+import { useQuery } from '@tanstack/react-query';
+
 import { ConnectStatusCard } from '../../Components/ConnectStatusCard';
 import { WhiteAlphaBox } from '../../Components/WhiteAlphaBox';
-import { CheckCircleIcon } from '@chakra-ui/icons';
 import { useSessionMessenger } from '../../hooks/useSessionMessenger';
-import { useQuery } from '@tanstack/react-query';
 import { useConfigQuery } from '../../hooks/useConfigQuery';
 
 export const Grant: React.FC = () => {
@@ -16,7 +17,13 @@ export const Grant: React.FC = () => {
 
   const configQuery = useConfigQuery();
 
-  const { url, favicon } = requestAppInfoQuery.data || {};
+  const { favicon } = requestAppInfoQuery.data || {};
+  const url = useMemo(() => {
+    if (!requestAppInfoQuery.data?.url) return '';
+    const url = new URL(requestAppInfoQuery.data?.url);
+    return url.hostname;
+  }, [requestAppInfoQuery.data?.url]);
+
   const permissions = ['View your addresses', 'Request approval for transactions'];
 
   return (
@@ -24,7 +31,6 @@ export const Grant: React.FC = () => {
       <ConnectStatusCard mt="44px" name={configQuery.data?.nickname!} />
 
       <Flex py="32px" alignItems="center" direction="column">
-        {/* TODO: wait implementation, the request website icon path should be provided in the future */}
         <Image data-test-id="requester.favicon" w="40px" mb="8px" h="40px" src={favicon} />
 
         <Box fontSize="md" data-test-id="requester.url" fontWeight="semibold">
