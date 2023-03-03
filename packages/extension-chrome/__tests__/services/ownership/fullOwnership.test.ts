@@ -65,6 +65,19 @@ describe('FullOwnership', () => {
       createScriptInfo(3, '0x03', 'internal', 'OffChain'),
       createScriptInfo(4, '0x04', 'internal', 'OnChain'),
     ];
+    const backend: Backend = {
+      resolveTx: () => {
+        return Promise.resolve({});
+      },
+      getSecp256k1Blake160ScriptConfig: () => {
+        return Promise.resolve(config.predefined.AGGRON4.SCRIPTS.SECP256K1_BLAKE160);
+      },
+      getLiveCellsByLocks: jest.fn().mockResolvedValue({
+        cursor: '',
+        objects: [],
+      }),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any;
     beforeAll(async () => {
       const storage = createMockStorage();
       const configService = createConfigService({ storage, eventHub: createEventHub() });
@@ -78,16 +91,7 @@ describe('FullOwnership', () => {
         platformService: mockPlatformService,
         storage,
         backendProvider: {
-          resolve: () =>
-            ({
-              resolveTx: () => {
-                return Promise.resolve({});
-              },
-              getSecp256k1Blake160ScriptConfig: () => {
-                return Promise.resolve(config.predefined.AGGRON4.SCRIPTS.SECP256K1_BLAKE160);
-              },
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            } as any as Backend),
+          resolve: () => backend,
         },
       });
       const db = createScriptInfoDb({ storage, networkId: (await configService.getSelectedNetwork()).id });
@@ -103,6 +107,14 @@ describe('FullOwnership', () => {
       await expect(ownershipService.getOnChainLocks({ change: 'internal' })).resolves.toEqual({
         cursor: '4',
         objects: [scriptInfos[3].lock],
+      });
+    });
+
+    it('should get live cells', async () => {
+      await ownershipService.getLiveCells({});
+      expect(backend.getLiveCellsByLocks).toBeCalledWith({
+        cursor: '',
+        locks: [scriptInfos[1].lock, scriptInfos[3].lock],
       });
     });
 
