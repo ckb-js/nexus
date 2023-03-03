@@ -59,3 +59,14 @@ export function isNexusMessage<T>(obj: unknown): obj is NexusMessage<T> {
   if (obj == null) return false;
   return NEXUS_MESSAGE_TYPE_KEY in obj;
 }
+
+type EventObject<Evt extends string, Params extends unknown[]> = { eventName: Evt; params?: Params };
+
+/* istanbul ignore next */
+export function isEventObject<Evt extends string, Params extends unknown[]>(
+  obj: unknown,
+): obj is EventObject<Evt, Params> {
+  if (typeof obj !== 'object') return false;
+  if (obj == null) return false;
+  return 'eventName' in obj;
+}
