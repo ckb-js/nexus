@@ -1,4 +1,4 @@
-import { Cell, RPC, Script, Transaction, utils } from '@ckb-lumos/lumos';
+import { Cell, Script, Transaction, utils } from '@ckb-lumos/lumos';
 import type { ConfigService, Paginate, Promisable } from '@nexus-wallet/types';
 import { asserts } from '@nexus-wallet/utils';
 import { NetworkId } from './storage';
@@ -30,13 +30,13 @@ const _Secp256k1Blake160ScriptInfoCache = new Map<NetworkId, ScriptConfig>();
 
 export function createBackend(_payload: { nodeUrl: string }): Backend {
   // TODO use rpc to fetch onchain data when lumos rpc is ready to use in chrome extension
-  const rpc = new RPC(_payload.nodeUrl);
+  // const rpc = new RPC(_payload.nodeUrl);
 
   return {
     getSecp256k1Blake160ScriptConfig: async ({ networkId }): Promise<ScriptConfig> => {
       let config = _Secp256k1Blake160ScriptInfoCache.get(networkId);
       if (!config) {
-        const onChainConfig = await loadSecp256k1ScriptDep(rpc);
+        const onChainConfig = await loadSecp256k1ScriptDep({ nodeUrl: _payload.nodeUrl });
         config = onChainConfig;
         _Secp256k1Blake160ScriptInfoCache.set(networkId, onChainConfig);
       }
@@ -314,13 +314,31 @@ export function createBackendProvider({ configService }: { configService: Config
 }
 
 /* istanbul ignore next */
-export async function loadSecp256k1ScriptDep(rpc: RPC): Promise<ScriptConfig> {
-  const genesisBlock = await rpc.getBlockByNumber('0x0');
+export async function loadSecp256k1ScriptDep(payload: { nodeUrl: string }): Promise<ScriptConfig> {
+  const rawResult = await fetch(payload.nodeUrl, {
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      id: 2,
+      jsonrpc: '2.0',
+      method: 'get_block_by_number',
+      params: ['0x0'],
+    }),
+    method: 'POST',
+  });
+  const genesisBlock = (await rawResult.json()).result;
   if (!genesisBlock) throw new Error("can't load genesis block");
   const secp256k1DepTxHash = genesisBlock.transactions[1].hash;
   asserts.asserts(secp256k1DepTxHash, "can't load secp256k1 transaction");
-  const typeScript = genesisBlock.transactions[0].outputs[1].type;
-  asserts.asserts(typeScript, "can't load secp256k1 type script");
+  const rawTypeScript = genesisBlock.transactions[0].outputs[1].type;
+  asserts.asserts(rawTypeScript, "can't load secp256k1 type script");
+  const typeScript: Script = {
+    codeHash: rawTypeScript.code_hash,
+    hashType: rawTypeScript.hash_type,
+    args: rawTypeScript.args,
+  };
   const secp256k1TypeHash = utils.computeScriptHash(typeScript);
 
   return {
