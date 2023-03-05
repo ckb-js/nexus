@@ -29,10 +29,10 @@ export const AddNetwork: FC = () => {
   });
 
   const addNetworkMutation = useMutation({
-    mutationFn: ({ name, rpcUrl }: AddNetworkFormState) => {
+    mutationFn: async ({ name, rpcUrl }: AddNetworkFormState) => {
       return configService.addNetwork({
         network: { displayName: name, rpcUrl, id: nanoid(), networkName: name },
-      }) as Promise<void>;
+      });
     },
   });
 
