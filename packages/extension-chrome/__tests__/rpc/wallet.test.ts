@@ -2,12 +2,6 @@
 import { createTestRpcServer } from './helper';
 import * as helpers from '@ckb-lumos/helpers';
 
-jest.mock('@ckb-lumos/helpers', () =>
-  Object.assign({}, jest.requireActual('@ckb-lumos/helpers'), {
-    createTransactionSkeleton: jest.fn(),
-    transactionSkeletonToObject: jest.fn(),
-  }),
-);
 describe('RPC wallet_enable', () => {
   it('should request be allowed when Nexus is initialized', async () => {
     const { request, factory } = createTestRpcServer();
