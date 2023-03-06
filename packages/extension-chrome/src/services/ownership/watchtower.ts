@@ -176,7 +176,6 @@ export function createWatchtower({
       if (stopCalled) {
         break;
       }
-
       try {
         await scanAndUpdate();
       } catch (e) {

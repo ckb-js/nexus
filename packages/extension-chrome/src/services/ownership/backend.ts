@@ -104,7 +104,7 @@ export function createBackend(_payload: { nodeUrl: string }): Backend {
           },
           'asc',
           '0x64',
-          cursor || null,
+          cursor && cursor !== '0x' ? cursor : null,
         ],
       });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -186,6 +186,7 @@ export function createBackend(_payload: { nodeUrl: string }): Backend {
       for (let i = 0; i < responses.length; i++) {
         for (let j = 0; j < responses[i].length; j++) {
           const element: Paginate<Cell> = responses[i][j];
+          if (!element.objects.length) continue;
           result.objects.push(...element.objects);
           if (element.cursor) {
             result.cursor = element.cursor;

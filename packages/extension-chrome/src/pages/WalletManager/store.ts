@@ -1,7 +1,6 @@
+import { createLogger } from '@nexus-wallet/utils/lib';
 import { create } from 'zustand';
-import { createServicesFactory } from '../../services';
-import { createWatchtower } from '../../services/ownership';
-import { OwnershipStorage, createScriptInfoDb } from '../../services/ownership/storage';
+import { makeBrowserExtensionModulesFactory } from '../../services';
 
 type State = {
   seed: string[];
@@ -14,7 +13,7 @@ type Actions = {
   reset: () => void;
   initWallet: () => Promise<void>;
 };
-
+const logger = createLogger('walletManger/store.ts');
 export const useWalletCreationStore = create<State & Actions>((setState, get) => ({
   seed: [],
   password: '',
@@ -30,29 +29,16 @@ export const useWalletCreationStore = create<State & Actions>((setState, get) =>
     });
   },
 
-  initWallet: () => {
-    const factory = createServicesFactory();
+  initWallet: async () => {
+    const factory = makeBrowserExtensionModulesFactory();
     const internalService = factory.get('internalService');
-    return internalService
-      .initWallet({
-        password: get().password,
-        nickname: get().username,
-        mnemonic: get().seed,
-      })
-      .then(async () => {
-        const configService = factory.get('configService');
-        const keystoreService = factory.get('keystoreService');
-        const backendProvider = factory.get('backendProvider');
-        const storage = factory.get('storage') as OwnershipStorage;
-        const selectedNetwork = await configService.getSelectedNetwork();
-        const db = createScriptInfoDb({ storage, networkId: selectedNetwork.id });
-        const watchtower = createWatchtower({
-          db,
-          keystoreService,
-          backend: await backendProvider.resolve(),
-          configService,
-        });
-        watchtower.run();
-      });
+    const eventHub = factory.get('eventHub');
+    await internalService.initWallet({
+      password: get().password,
+      nickname: get().username,
+      mnemonic: get().seed,
+    });
+    logger.info('init wallet done.', get().seed);
+    eventHub.emit('walletInitialized');
   },
 }));
