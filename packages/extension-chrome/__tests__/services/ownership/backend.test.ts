@@ -92,6 +92,20 @@ describe('getLiveCells', () => {
     expect(objects[objects.length - 1].outPoint?.txHash).toEqual(scenarioAnswer);
     expect(cursor).toBe(scenarioAnswer);
   });
+
+  it('should get limited live cells with cursor on last non-empty lock', async () => {
+    const { scenario, scenarioAnswer, locks } = getEmptyEndScenario();
+    fetchMock.mockResponse(getMockFetchLiveCellsResp(scenario));
+    const backend = createBackend({ nodeUrl: '' });
+    const { objects, cursor } = await backend.getLiveCellsByLocks({
+      locks,
+      cursor: '',
+    });
+    expect(objects).toHaveLength(18);
+    expect(objects[0].outPoint?.txHash).toEqual('0x00:0x00');
+    expect(objects[objects.length - 1].outPoint?.txHash).toEqual(scenarioAnswer);
+    expect(cursor).toBe(scenarioAnswer);
+  });
 });
 
 function createLock(i: number): Script {
@@ -190,6 +204,17 @@ function getScenario(): { scenario: Scenario; scenarioAnswer: string; locks: Scr
   const locks = new Array(42).fill(null).map((_, i) => createLock(i));
   // according to the scenario, finding 20 live cells, the cursor should be at 32th(0x20) lock, 4th(0x03) cell
   return { scenario, scenarioAnswer: '0x20:0x03', locks };
+}
+
+function getEmptyEndScenario(): { scenario: Scenario; scenarioAnswer: string; locks: Script[] } {
+  const scenario: Scenario = {
+    0: 9,
+    1: 9,
+    2: 0,
+    3: 0,
+  };
+  const locks = new Array(4).fill(null).map((_, i) => createLock(i));
+  return { scenario, scenarioAnswer: '0x01:0x08', locks };
 }
 
 function getSimpleScenario(): { scenario: Scenario; scenarioAnswer: string; locks: Script[] } {
