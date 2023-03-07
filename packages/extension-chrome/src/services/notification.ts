@@ -19,7 +19,6 @@ export type SessionMethods = {
    */
   session_getUnsignedTransaction: Call<void, { tx: TransactionSkeletonObject; ownedLocks: Script[] }>;
   session_approveSignData: Call<{ password: string }, void>;
-  session_rejectSignData: Call<void, void>;
 
   /**
    * get bytes to be signed, the return data should detect if it can be converted to utf8 string,
@@ -29,22 +28,36 @@ export type SessionMethods = {
   session_approveSignTransaction: Call<{ password: string }, void>;
 };
 
-const NOTIFICATION_WIDTH = 500;
-const NOTIFICATION_HEIGHT = 640;
-
 type NotificationPath = 'grant' | 'sign-data' | 'sign-transaction';
+
+const NotificationWindowSizeMap: Record<NotificationPath, { w: number; h: number }> = {
+  grant: {
+    w: 500,
+    h: 600,
+  },
+  'sign-data': {
+    w: 500,
+    h: 772,
+  },
+  'sign-transaction': {
+    w: 500,
+    h: 772,
+  },
+};
+
 async function createNotificationWindow(
   path: NotificationPath,
 ): Promise<{ messenger: SessionMessenger<SessionMethods>; notificationWindow: Windows.Window }> {
   const lastFocused = await browser.windows.getLastFocused();
   const sessionId = nanoid();
+  const windowSize = NotificationWindowSizeMap[path];
   const window = await browser.windows.create({
     type: 'popup',
     focused: true,
     top: lastFocused.top,
     left: lastFocused.left! + (lastFocused.width! - 360),
-    width: NOTIFICATION_WIDTH,
-    height: NOTIFICATION_HEIGHT,
+    width: windowSize.w,
+    height: windowSize.h + 40,
     url: `notification.html#/${path}?sessionId=${sessionId}`,
   });
 
@@ -81,8 +94,29 @@ export function createBrowserExtensionPlatformService(): PlatformService<Endpoin
         });
       });
     },
-    requestSignTransaction() {
-      errors.unimplemented();
+    async requestSignTransaction({ tx }) {
+      const { notificationWindow, messenger } = await createNotificationWindow('sign-transaction');
+
+      return new Promise((resolve, reject) => {
+        messenger.register('session_getUnsignedTransaction', () => {
+          return {
+            tx,
+            // TODO: get owned locks
+            ownedLocks: [],
+          };
+        });
+
+        messenger.register('session_approveSignTransaction', ({ password }) => {
+          resolve({ password });
+        });
+
+        browser.windows.onRemoved.addListener((windowId) => {
+          if (windowId === notificationWindow.id) {
+            messenger.destroy();
+            reject();
+          }
+        });
+      });
     },
 
     async requestSignData(payload) {
@@ -95,10 +129,6 @@ export function createBrowserExtensionPlatformService(): PlatformService<Endpoin
 
         messenger.register('session_approveSignData', ({ password }) => {
           resolve({ password });
-        });
-
-        messenger.register('session_rejectSignData', () => {
-          reject();
         });
 
         browser.windows.onRemoved.addListener((windowId) => {
