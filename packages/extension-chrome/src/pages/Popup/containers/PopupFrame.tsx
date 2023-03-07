@@ -1,20 +1,29 @@
 import { ArrowBackIcon } from '@chakra-ui/icons';
 import { Box, Flex } from '@chakra-ui/react';
-import React, { FC } from 'react';
+import React, { FC, useMemo } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Logo } from '../../Components/Logo';
 
-const navigatorTitleMap: Record<string, string | undefined> = {
-  '/whitelist-sites': 'Whitelist Sites',
-  '/network': 'Networks',
-  '/network/add': 'Networks',
+type RouteMetaConfig = {
+  path: string;
+  title?: string;
+  allowBack?: boolean;
 };
 
-export const PopupFrame: FC = () => {
+type DialogFrameProps = {
+  meta: RouteMetaConfig[];
+};
+
+export const PopupFrame: FC<DialogFrameProps> = ({ meta }) => {
+  const metaMap = useMemo(() => new Map<string, RouteMetaConfig>(meta.map((item) => [item.path, item])), [meta]);
+
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const isHomePage = pathname === '/';
-  const navigatorTitle = navigatorTitleMap[pathname];
+  const metaConfig = metaMap.get(pathname);
+  const allowBack = !!metaConfig?.allowBack;
+  const title = metaConfig?.title;
+
   const goBack = () => {
     navigate(-1);
   };
@@ -32,12 +41,16 @@ export const PopupFrame: FC = () => {
         pb="72px"
         color="white"
       >
-        {!isHomePage && (
+        {(title || allowBack) && (
           <Flex mb="32px" alignItems="center" w="100%">
-            <ArrowBackIcon data-test-id="back" onClick={goBack} mr="12px" cursor="pointer" w="24px" h="24px" />
-            <Box height="32px" fontSize="2xl" fontWeight="semibold">
-              {navigatorTitle}
-            </Box>
+            {allowBack && (
+              <ArrowBackIcon data-test-id="back" onClick={goBack} mr="12px" cursor="pointer" w="24px" h="24px" />
+            )}
+            {title && (
+              <Box height="32px" fontSize="2xl" fontWeight="semibold">
+                {title}
+              </Box>
+            )}
           </Flex>
         )}
         <Logo position="absolute" left="24px" bottom="20px" />

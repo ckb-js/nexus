@@ -15,22 +15,32 @@ import {
 } from '@chakra-ui/react';
 import isUtf8 from 'is-utf8';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import React, { FC, useCallback, useMemo } from 'react';
+import React, { FC, useCallback, useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
-import { WhiteAlphaBox } from '../../Components/WhiteAlphaBox';
-import { useCheckPassword } from '../../hooks/useCheckPassword';
-import { useSessionMessenger } from '../../hooks/useSessionMessenger';
+
+import { WhiteAlphaBox } from '../../../Components/WhiteAlphaBox';
+import { useCheckPassword } from '../../../hooks/useCheckPassword';
+import { useSessionMessenger } from '../../../hooks/useSessionMessenger';
 import { bytes } from '@ckb-lumos/codec/lib';
+import { useSigningData } from './useSigningData';
+import { Link as RouteLink } from 'react-router-dom';
 
 type FormState = { password: string };
+
 export const SignData: FC = () => {
+  // const navigate = useNavigate();
   const sessionManager = useSessionMessenger();
   const checkPassword = useCheckPassword();
+  const [, setSharedSigningData] = useSigningData();
 
   const unsignedDataQuery = useQuery({
     queryKey: ['unsignedData', sessionManager.sessionId()],
     queryFn: () => sessionManager.send('session_getUnsignedData'),
   });
+
+  useEffect(() => {
+    unsignedDataQuery.data && setSharedSigningData(unsignedDataQuery.data?.data);
+  }, [setSharedSigningData, unsignedDataQuery.data]);
 
   const sendSessionMutation = useMutation({
     mutationFn: async (password: string) => {
@@ -74,10 +84,6 @@ export const SignData: FC = () => {
 
   return (
     <Skeleton isLoaded={!!unsignedDataQuery.data}>
-      <Heading fontSize="2xl" fontWeight="semibold" w="452px" mt="28px">
-        Sign Message
-      </Heading>
-
       <WhiteAlphaBox mt="32px" p="16px 20px">
         <Link fontSize="sm">{unsignedDataQuery.data?.url}</Link>
       </WhiteAlphaBox>
@@ -97,7 +103,18 @@ export const SignData: FC = () => {
           <Text fontSize="md" w="100%">
             {unsignedDataQuery.data?.url} wants you to sign in with your Nexus account:
             <br />
-            {dataForSigning}
+            <Text
+              color="yellow.200"
+              as={RouteLink}
+              to="/sign-transaction/view-data"
+              cursor="pointer"
+              lineHeight="24px"
+              fontSize="md"
+              fontWeight="bold"
+              textDecorationLine="underline"
+            >
+              {dataForSigning}
+            </Text>
           </Text>
         </VStack>
         <FormControl isInvalid={!!formState.errors.password} mt="12px">
