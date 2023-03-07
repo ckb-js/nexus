@@ -1,4 +1,4 @@
-import { HexString, Script } from '@ckb-lumos/lumos';
+import { HexString, Script, Transaction } from '@ckb-lumos/lumos';
 import { Modules } from '../services';
 import { Config as NexusConfig } from '@nexus-wallet/types/lib/services/ConfigService';
 import { AsyncCall, AsyncCallMap } from '@nexus-wallet/types/lib/call';
@@ -10,6 +10,7 @@ export interface WalletMethods extends AsyncCallMap {
 
   wallet_fullOwnership_getUnusedLocks: AsyncCall<void, Script[]>;
   wallet_fullOwnership_signData: AsyncCall<{ data: HexString }, HexString>;
+  wallet_fullOwnership_signTransaction: AsyncCall<{ transaction: Transaction }, HexString>;
 }
 
 export interface DebugMethods extends AsyncCallMap {

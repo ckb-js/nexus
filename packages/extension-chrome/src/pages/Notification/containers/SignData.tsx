@@ -68,7 +68,6 @@ export const SignData: FC = () => {
   }, [unsignedDataQuery.data]);
 
   const onReject = async () => {
-    await sessionManager.send('session_rejectSignData');
     window.close();
   };
 
