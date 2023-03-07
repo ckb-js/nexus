@@ -36,11 +36,11 @@ export function createModulesFactory<S, P>({
   const platformResolover = awilix.asFunction(platform).singleton();
   container.register({
     storage: awilix.asFunction(storage).singleton(),
-    configService: awilix.asFunction(createConfigService).singleton(),
-    internalService: awilix.asFunction(createInternalService).singleton(),
-    keystoreService: awilix.asFunction(createKeystoreService).singleton(),
-    backendProvider: awilix.asFunction(createBackendProvider).singleton(),
-    fullOwnershipService: awilix.asFunction(createFullOwnershipService).singleton(),
+    configService: awilix.asFunction(providers.configService || createConfigService).singleton(),
+    internalService: awilix.asFunction(providers.internalService || createInternalService).singleton(),
+    keystoreService: awilix.asFunction(providers.keystoreService || createKeystoreService).singleton(),
+    backendProvider: awilix.asFunction(providers.backendProvider || createBackendProvider).singleton(),
+    fullOwnershipService: awilix.asFunction(providers.fullOwnershipService || createFullOwnershipService).singleton(),
     notificationService: platformResolover,
     platformService: platformResolover,
     eventHub: awilix.asFunction(providers.eventHub || createEventHub).singleton(),
