@@ -1,3 +1,4 @@
+import { transactionSkeletonToObject } from '@ckb-lumos/helpers';
 import { bytes } from '@ckb-lumos/codec';
 import { ConfigService, KeystoreService, OwnershipService, PlatformService } from '@nexus-wallet/types';
 import { createScriptInfoDb, OwnershipStorage, ScriptInfo, ScriptInfoDb } from './storage';
@@ -94,14 +95,15 @@ export function createFullOwnershipService({
       };
     },
     signTransaction: async ({ tx }) => {
-      const { password } = await platformService.requestSignTransaction({ tx });
-
       const backend = await backendProvider.resolve();
       const db = await getDb();
-
       let txSkeleton = await backend.resolveTx(tx);
-
       txSkeleton = common.prepareSigningEntries(txSkeleton, { config: await getLumosConfig() });
+
+      const { password } = await platformService.requestSignTransaction({
+        tx: transactionSkeletonToObject(txSkeleton),
+      });
+
       const signatures = await Promise.all(
         txSkeleton
           .get('signingEntries')

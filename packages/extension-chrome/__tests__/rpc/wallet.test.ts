@@ -1,4 +1,5 @@
 import { Transaction } from '@ckb-lumos/lumos';
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createTestRpcServer } from './helper';
 
 describe('RPC wallet_enable', () => {
