@@ -54,17 +54,19 @@ addMethod('wallet_fullOwnership_signTransaction', async ({ transaction }, { reso
 
   let skeleton: TransactionSkeletonObject;
   try {
+    // TODO: cover the RPC call with test
+    /* istanbul ignore next */
     const _skeleton = await helpers.createTransactionSkeleton(transaction, async (outpoint) => {
       const { cell } = await rpc.getLiveCell(outpoint, true);
       return { data: cell.data.content, outPoint: outpoint, cellOutput: cell.output };
     });
     skeleton = helpers.transactionSkeletonToObject(_skeleton);
-
-    skeleton.inputs.some((it) => it === null) &&
-      errors.throwError('Can not fetch your input cells, please check they are all valid and live.');
   } catch (e) {
     errors.throwError(`Can not fetch the cell.`);
   }
+
+  skeleton.inputs.some((it) => it === null) &&
+    errors.throwError('Can not fetch your input cells, please check they are all valid and live.');
 
   try {
     const { password: _password } = await notificationService.requestSignTransaction({

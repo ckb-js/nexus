@@ -1,76 +1,82 @@
 import { isJSONRPCResponse, JSONRPCClient } from 'json-rpc-2.0';
-import { sendMessage } from '../messaging';
-import { CkbProvider, InjectedCkb } from '@nexus-wallet/types';
-import { asserts, LIB_VERSION } from '@nexus-wallet/utils';
+import * as windowMessenger from '../messaging';
+import { asserts } from '@nexus-wallet/utils';
+import { EventEmitter } from 'eventemitter3';
+import { isEventObject } from '../messaging/internal';
+import { createInjectedCkb, TypedEventClient, TypedRpcClient } from '../injectedCkb';
 
 const client = new JSONRPCClient(async (req) => {
-  const response = await sendMessage('contentAndInjected', req, 'content-script');
+  const response = await windowMessenger.sendMessage('contentAndInjected', req, 'content-script');
   asserts.asserts(isJSONRPCResponse(response), `Invalid JSON-RPC response: ${response}`);
   client.receive(response);
 });
+const emitter = new EventEmitter();
 
-const injectedCkb: InjectedCkb = {
-  version: LIB_VERSION,
-  async enable(): Promise<CkbProvider> {
-    await client.request('wallet_enable', []);
-
-    return {
-      fullOwnership: {
-        async getLiveCells(payload) {
-          return client.request('wallet_fullOwnership_getLiveCells', payload);
-        },
-
-        async getUnusedLocks(payload) {
-          return client.request('wallet_fullOwnership_getUnusedLocks', payload);
-        },
-
-        async signTransaction(payload) {
-          return client.request('wallet_fullOwnership_signTransaction', payload);
-        },
-
-        async signData(payload) {
-          return client.request('wallet_fullOwnership_signData', { ...payload });
-        },
-
-        async getUsedLocks(payload) {
-          return client.request('wallet_fullOwnership_getUsedLocks', payload);
-        },
-      },
-      ruleBasedOwnership: {
-        async getLiveCells(payload) {
-          return client.request('wallet_ruleBasedOwnership_getLiveCells', payload);
-        },
-
-        async getUnusedLocks(payload) {
-          return client.request('wallet_ruleBasedOwnership_getUnusedLocks', payload);
-        },
-
-        async signTransaction(payload) {
-          return client.request('wallet_ruleBasedOwnership_signTransaction', payload);
-        },
-
-        async signData(payload) {
-          return client.request('wallet_ruleBasedOwnership_signData', payload);
-        },
-
-        async getUsedLocks(payload) {
-          return client.request('wallet_ruleBasedOwnership_getUsedLocks', payload);
-        },
-      },
-      async getNetworkName() {
-        return client.request('wallet_getNetworkName', []);
-      },
-    };
-  },
-  async isEnabled(): Promise<boolean> {
-    return client.request('wallet_isEnabled', null);
-  },
+const rpcClient: TypedRpcClient = {
+  request: async ({ method, params }) => client.request(String(method), params),
 };
 
-// additional properties, for development purpose
-Object.assign(injectedCkb, {
-  request: (payload: { method: string; params: unknown }) => client.request(payload.method, payload.params),
+// content script -> injected script
+windowMessenger.onMessage('event', (data) => {
+  if (isEventObject(data)) {
+    emitter.emit(data.eventName, ...(data.params ?? []));
+  }
 });
+
+const injectedCkb = createInjectedCkb({ rpcClient, eventClient: emitter as TypedEventClient });
+injectedCkb.enable = async () => {
+  console.warn('[DEPRECATED]: please migrate to ckb.request');
+
+  await client.request('wallet_enable', []);
+
+  return {
+    fullOwnership: {
+      async getLiveCells(payload) {
+        return client.request('wallet_fullOwnership_getLiveCells', payload);
+      },
+
+      async getUnusedLocks(payload) {
+        return client.request('wallet_fullOwnership_getUnusedLocks', payload);
+      },
+
+      async signTransaction(payload) {
+        return client.request('wallet_fullOwnership_signTransaction', payload);
+      },
+
+      async signData(payload) {
+        return client.request('wallet_fullOwnership_signData', { ...payload });
+      },
+
+      async getUsedLocks(payload) {
+        return client.request('wallet_fullOwnership_getUsedLocks', payload);
+      },
+    },
+    ruleBasedOwnership: {
+      async getLiveCells(payload) {
+        return client.request('wallet_ruleBasedOwnership_getLiveCells', payload);
+      },
+
+      async getUnusedLocks(payload) {
+        return client.request('wallet_ruleBasedOwnership_getUnusedLocks', payload);
+      },
+
+      async signTransaction(payload) {
+        return client.request('wallet_ruleBasedOwnership_signTransaction', payload);
+      },
+
+      async signData(payload) {
+        return client.request('wallet_ruleBasedOwnership_signData', payload);
+      },
+
+      async getUsedLocks(payload) {
+        return client.request('wallet_ruleBasedOwnership_getUsedLocks', payload);
+      },
+    },
+    async getNetworkName() {
+      return client.request('wallet_getNetworkName', []);
+    },
+  };
+};
 
 window.ckb = Object.freeze(injectedCkb);
 export {};
