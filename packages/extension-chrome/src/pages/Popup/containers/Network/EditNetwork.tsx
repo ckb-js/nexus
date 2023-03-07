@@ -10,7 +10,7 @@ import produce from 'immer';
 import { WhiteAlphaBox } from '../../../Components/WhiteAlphaBox';
 import { useService } from '../../../hooks/useService';
 
-const HTTP_URL_PATTERN = /https?:\/\/[a-zA-Z_\-.~]+/;
+const HTTP_URL_PATTERN = /^https?:\/\/[a-zA-Z0-9-._/]+(:\d+)?$/;
 
 type EditNetworkFormState = {
   name: string;

@@ -37,7 +37,7 @@ export const WhitelistSites: FC = () => {
     } catch {
       toast({ title: "Can't remove the site" });
     } finally {
-      await configQuery.refetch();
+      await configQuery.invalidate();
     }
   };
 
