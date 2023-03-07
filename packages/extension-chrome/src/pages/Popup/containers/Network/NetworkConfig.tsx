@@ -19,8 +19,9 @@ export const NetworkConfig: FC = () => {
 
   const currentNetwork = configQuery.data?.selectedNetwork;
 
-  const onToggle = (id: string) => {
-    toggleNetworkMutation.mutate(id);
+  const onToggle = async (id: string) => {
+    await toggleNetworkMutation.mutateAsync(id);
+    await configQuery.invalidate();
   };
   const navigate = useNavigate();
 
@@ -31,8 +32,8 @@ export const NetworkConfig: FC = () => {
       <WhiteAlphaBox p="16px 20px">
         <RadioGroup
           data-test-id="networkRadio"
+          value={currentNetwork}
           onChange={onToggle}
-          defaultValue={currentNetwork}
           display="flex"
           flexDirection="column"
         >
