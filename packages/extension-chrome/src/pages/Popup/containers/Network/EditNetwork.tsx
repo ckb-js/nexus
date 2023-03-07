@@ -131,7 +131,15 @@ export const EditNetwork: FC<EditNetworkProps> = ({ mode }) => {
 
         {mode === 'modify' && (
           <>
-            <Button colorScheme="gray" color="gray.800" data-test-id="add" width="220px">
+            <Button
+              onClick={() => {
+                navigate(-1);
+              }}
+              colorScheme="gray"
+              color="gray.800"
+              data-test-id="add"
+              width="220px"
+            >
               Cancel
             </Button>
             <Button data-test-id="add" width="220px" isDisabled={!formState.isValid} type="submit">

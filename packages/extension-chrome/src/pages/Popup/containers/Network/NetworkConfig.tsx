@@ -9,6 +9,7 @@ import { WhiteAlphaBox } from '../../../Components/WhiteAlphaBox';
 import { useConfigQuery } from '../../../hooks/useConfigQuery';
 import { useService } from '../../../hooks/useService';
 
+// TODO: add this to config service provider
 const PERSIST_IDS = new Set(['mainnet', 'testnet']);
 
 export const NetworkConfig: FC = () => {
@@ -22,8 +23,9 @@ export const NetworkConfig: FC = () => {
 
   const currentNetwork = configQuery.data?.selectedNetwork;
 
-  const onToggle = (id: string) => {
-    toggleNetworkMutation.mutate(id);
+  const onToggle = async (id: string) => {
+    await toggleNetworkMutation.mutateAsync(id);
+    await configQuery.invalidate();
   };
   const navigate = useNavigate();
 
@@ -35,12 +37,13 @@ export const NetworkConfig: FC = () => {
   const removeNetworkMutation = useMutation({
     mutationFn: async (id: string) => {
       const current = await configService.getSelectedNetwork();
-      await configService.removeNetwork({ id });
+      // if we want remove current network, we need to switch to mainnet
       if (current.id === id) {
         await configService.setSelectedNetwork({ id: 'mainnet' });
       }
+      await configService.removeNetwork({ id });
 
-      await configQuery.refetch();
+      await configQuery.invalidate();
     },
   });
 
@@ -48,9 +51,9 @@ export const NetworkConfig: FC = () => {
     <Skeleton h="100%" as={Flex} flexDirection="column" alignItems="center" isLoaded={!!networks}>
       <WhiteAlphaBox p="10px 20px">
         <RadioGroup
+          value={currentNetwork}
           data-test-id="networkRadio"
           onChange={onToggle}
-          defaultValue={currentNetwork}
           display="flex"
           w="100%"
           flexDirection="column"
@@ -83,8 +86,9 @@ export const NetworkConfig: FC = () => {
                   <Flex className="operations">
                     <Icon as={EditIcon} onClick={gotoEdit(network.id)} w="24px" h="24px" mr="20px" />
                     <DeleteIcon
-                      onClick={() => {
-                        removeNetworkMutation.mutate(network.id);
+                      onClick={async () => {
+                        await removeNetworkMutation.mutateAsync(network.id);
+                        await configQuery.invalidate();
                       }}
                       w="24px"
                       h="24px"
