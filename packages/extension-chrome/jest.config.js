@@ -10,4 +10,5 @@ module.exports = {
     '@vespaiach/axios-fetch-adapter': '<rootDir>/__mocks__/axiosAdapter.js',
   },
   testMatch: ['**/__tests__/**/*.test.ts'],
+  setupFiles: ['./setupJest.js'],
 };

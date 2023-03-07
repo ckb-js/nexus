@@ -1,7 +1,7 @@
 import { Backend } from './backend';
 import { createLogger } from '@nexus-wallet/utils';
 import { asserts } from '@nexus-wallet/utils/lib/asserts';
-import { KeystoreService } from '@nexus-wallet/types';
+import { KeystoreService, ConfigService } from '@nexus-wallet/types';
 import { utils } from '@ckb-lumos/lumos';
 import { ScriptInfo, ScriptInfoDb } from './storage';
 import zip from 'lodash.zip';
@@ -13,6 +13,7 @@ import {
   RULE_BASED_OFF_CHAIN_GAP,
   RULE_BASED_PARENT_PATH,
 } from './constants';
+import { publicKeyToBlake160 } from '@ckb-lumos/hd/lib/key';
 
 const logger = createLogger('Watchtower');
 const DEFAULT_SCAN_INTERVAL = 10_000;
@@ -32,12 +33,14 @@ interface WatchtowerOptions {
 export function createWatchtower({
   db,
   backend,
+  configService,
   keystoreService,
   options = {},
 }: {
   db: ScriptInfoDb;
   backend: Backend;
   keystoreService: KeystoreService;
+  configService: ConfigService;
   options?: WatchtowerOptions;
 }): Watchtower {
   /**
@@ -53,7 +56,8 @@ export function createWatchtower({
     startChildIndex: number,
     endChildIndex = startChildIndex + 1,
   ): Promise<ScriptInfo[]> {
-    const { CODE_HASH, HASH_TYPE } = await backend.getSecp256k1Blake160ScriptConfig();
+    const selectedNetwork = await configService.getSelectedNetwork();
+    const { CODE_HASH, HASH_TYPE } = await backend.getSecp256k1Blake160ScriptConfig({ networkId: selectedNetwork.id });
     const lockTemplate = { codeHash: CODE_HASH, hashType: HASH_TYPE };
 
     const result: ScriptInfo[] = [];
@@ -61,7 +65,7 @@ export function createWatchtower({
     let currentChildIndex = startChildIndex;
     while (currentChildIndex < endChildIndex) {
       const publicKey = await keystoreService.getPublicKeyByPath({ path: `${parentPath}/${currentChildIndex}` });
-      const lock = { ...lockTemplate, args: utils.ckbHash(publicKey) };
+      const lock = { ...lockTemplate, args: publicKeyToBlake160(publicKey) };
       result.push({
         parentPath,
         childIndex: currentChildIndex,
@@ -172,7 +176,6 @@ export function createWatchtower({
       if (stopCalled) {
         break;
       }
-
       try {
         await scanAndUpdate();
       } catch (e) {

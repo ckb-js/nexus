@@ -1,12 +1,15 @@
+import { transactionSkeletonToObject } from '@ckb-lumos/helpers';
+import { bytes } from '@ckb-lumos/codec';
 import { ConfigService, KeystoreService, OwnershipService, PlatformService } from '@nexus-wallet/types';
 import { createScriptInfoDb, OwnershipStorage, ScriptInfo, ScriptInfoDb } from './storage';
 import { asserts, errors } from '@nexus-wallet/utils';
 import { FULL_OWNERSHIP_EXTERNAL_PARENT_PATH, FULL_OWNERSHIP_INTERNAL_PARENT_PATH } from './constants';
-import { CellCursor, decodeCursor } from './cursor';
+import { CellCursor, decodeCursor, encodeCursor } from './cursor';
 import { BackendProvider } from './backend';
 import { HexString, Script, utils } from '@ckb-lumos/lumos';
 import { common } from '@ckb-lumos/common-scripts';
 import { Config } from '@ckb-lumos/config-manager';
+import { Signature, SignDataPayload } from '@nexus-wallet/types/lib/services/OwnershipService';
 
 export function createFullOwnershipService({
   storage,
@@ -28,10 +31,13 @@ export function createFullOwnershipService({
 
   async function getLumosConfig(): Promise<Config> {
     const backend = await backendProvider.resolve();
+    const selectedNetwork = await configService.getSelectedNetwork();
 
     return {
       PREFIX: 'ckb',
-      SCRIPTS: { SECP256K1_BLAKE160: await backend.getSecp256k1Blake160ScriptConfig() },
+      SCRIPTS: {
+        SECP256K1_BLAKE160: await backend.getSecp256k1Blake160ScriptConfig({ networkId: selectedNetwork.id }),
+      },
     } satisfies Config;
   }
 
@@ -42,18 +48,28 @@ export function createFullOwnershipService({
 
       const infos = await db.getAll();
 
-      const cursor: CellCursor = encodedCursor ? decodeCursor(encodedCursor) : { indexerCursor: '', localId: 0 };
+      const queryCursor: CellCursor = encodedCursor ? decodeCursor(encodedCursor) : { indexerCursor: '', localId: 0 };
 
       const onChainLocks = infos
         .filter(
           (info) =>
             info.status === 'OnChain' &&
             // only fetch cells after or containing this lock
-            info.id >= cursor.localId,
+            info.id >= queryCursor.localId,
         )
         .map((info) => info.lock);
 
-      return backend.getLiveCellsByLocks({ locks: onChainLocks, cursor: cursor.indexerCursor });
+      const { objects, cursor, lastLock } = await backend.getLiveCellsByLocks({
+        locks: onChainLocks,
+        cursor: queryCursor.indexerCursor,
+      });
+      if (!lastLock) {
+        asserts.asserts(!objects.length, "Can't find last lock when cells are returned");
+        return { objects, cursor };
+      }
+      const lastLockInfo = infos.find((info) => info.scriptHash === utils.computeScriptHash(lastLock));
+      asserts.asserts(lastLockInfo, 'no lastLockInfo found');
+      return { objects, cursor: encodeCursor({ indexerCursor: cursor, localId: lastLockInfo.id }) };
     },
 
     getOnChainLocks: async ({ change, cursor: infoIdStr }) => {
@@ -79,14 +95,15 @@ export function createFullOwnershipService({
       };
     },
     signTransaction: async ({ tx }) => {
-      const { password } = await platformService.requestSignTransaction({ tx });
-
       const backend = await backendProvider.resolve();
       const db = await getDb();
-
       let txSkeleton = await backend.resolveTx(tx);
-
       txSkeleton = common.prepareSigningEntries(txSkeleton, { config: await getLumosConfig() });
+
+      const { password } = await platformService.requestSignTransaction({
+        tx: transactionSkeletonToObject(txSkeleton),
+      });
+
       const signatures = await Promise.all(
         txSkeleton
           .get('signingEntries')
@@ -114,8 +131,22 @@ export function createFullOwnershipService({
 
       return signatures;
     },
-    signData: async () => {
-      errors.unimplemented();
+    signData: async (payload: SignDataPayload): Promise<Signature> => {
+      // TODO how to get url?
+      const { password } = await platformService.requestSignData({ data: bytes.hexify(payload.data), url: '' });
+      const db = await getDb();
+      const [info] = await db.filterByMatch({ scriptHash: utils.computeScriptHash(payload.lock) });
+      asserts.asserts(
+        info,
+        'Cannot find script info associated with lock %s, this error is unlikely to occur, have you changed the data in storage or have you manually built the data in storage?',
+        payload.lock,
+      );
+      const signature = await keystoreService.signMessage({
+        message: payload.data,
+        password,
+        path: `${info.parentPath}/${info.childIndex}`,
+      });
+      return signature;
     },
     getOffChainLocks: async ({ change }) => {
       const db = await getDb();
