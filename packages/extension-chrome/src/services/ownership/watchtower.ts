@@ -131,10 +131,13 @@ export function createWatchtower({
         return info;
       });
 
+    // if no new on-chain locks found, return
     if (newOnChainedInfos.length === 0) {
+      logger.info('No new on-chain locks found, skip');
       return 0;
     }
 
+    logger.info('New %s on-chain locks found: ', newOnChainedInfos.length);
     const newOnChainedInfoIds = newOnChainedInfos.map((info) => info.id);
     // update status
     infos.forEach((info) => {
