@@ -14,7 +14,7 @@ type DialogFrameProps = {
   meta: RouteMetaConfig[];
 };
 
-export const NotificationFrame: FC<DialogFrameProps> = ({ meta }) => {
+export const DialogFrame: FC<DialogFrameProps> = ({ meta }) => {
   const metaMap = useMemo(() => new Map<string, RouteMetaConfig>(meta.map((item) => [item.path, item])), [meta]);
 
   const { pathname } = useLocation();

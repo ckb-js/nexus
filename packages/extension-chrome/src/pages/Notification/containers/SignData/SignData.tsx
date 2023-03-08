@@ -84,7 +84,7 @@ export const SignData: FC = () => {
   const requesterHost = useMemo(() => {
     if (!unsignedDataQuery.data) return '';
     const url = new URL(unsignedDataQuery.data.url);
-    return `${url.protocol} //${url.host}`;
+    return `${url.protocol}//${url.host}`;
   }, [unsignedDataQuery.data]);
 
   return (

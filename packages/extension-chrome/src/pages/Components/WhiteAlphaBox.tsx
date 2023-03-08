@@ -2,7 +2,7 @@ import React, { FC } from 'react';
 
 import { Flex, FlexProps } from '@chakra-ui/react';
 
-export const WhiteAlphaBox: FC<FlexProps> = ({ children, ...props }) => {
+export const WhiteAlphaBox: FC<FlexProps> = ({ children, sx, ...props }) => {
   return (
     <Flex
       backgroundColor="whiteAlpha.200"
@@ -17,6 +17,8 @@ export const WhiteAlphaBox: FC<FlexProps> = ({ children, ...props }) => {
           borderRadius: '30px',
           backgroundColor: 'purple.500',
         },
+
+        ...sx,
       }}
       {...props}
     >
