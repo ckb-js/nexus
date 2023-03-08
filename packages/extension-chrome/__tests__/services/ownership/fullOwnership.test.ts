@@ -14,7 +14,7 @@ import { createScriptInfoDb, LockStatus, ScriptInfo } from '../../../src/service
 import { createConfigService } from '../../../src/services/config';
 import { createMockStorage } from '../../helpers/mockStorage';
 import { asyncSleep } from '../../helpers/utils';
-import { mockBackend } from './mockBackend';
+import { mockBackend } from '../../helpers/mockBackend';
 import { mockPlatformService } from '../../helpers';
 import { bytes } from '@ckb-lumos/codec';
 import { Script, utils, Transaction } from '@ckb-lumos/lumos';
@@ -39,7 +39,7 @@ describe('FullOwnership', () => {
       });
 
       const db = createScriptInfoDb({ storage, networkId: (await configService.getSelectedNetwork()).id });
-      const watchtower = createWatchtower({ db, keystoreService, backend: mockBackend, configService });
+      const watchtower = createWatchtower({ scriptInfoDb: db, keystoreService, backend: mockBackend, configService });
 
       watchtower.run();
       await asyncSleep(100);

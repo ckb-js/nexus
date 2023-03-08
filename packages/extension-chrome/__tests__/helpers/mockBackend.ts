@@ -1,5 +1,5 @@
 import { bytes } from '@ckb-lumos/codec';
-import { Backend } from '../../../src/services/ownership/backend';
+import { Backend } from '../../src/services/ownership/backend';
 import { errors } from '@nexus-wallet/utils';
 import type { Script } from '@ckb-lumos/lumos';
 import { Promisable } from '@nexus-wallet/types';

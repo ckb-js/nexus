@@ -12,7 +12,7 @@ import { bytes } from '@ckb-lumos/codec';
 import { createMockStorage } from '../../helpers/mockStorage';
 import { FULL_OWNERSHIP_OFF_CHAIN_GAP, RULE_BASED_OFF_CHAIN_GAP } from '../../../src/services/ownership/constants';
 import { asyncSleep } from '../../helpers/utils';
-import { mockBackend } from './mockBackend';
+import { mockBackend } from '../../helpers/mockBackend';
 import { createConfigService } from '../../../src/services/config';
 import { createEventHub } from '../../../src/services/event';
 
@@ -28,7 +28,7 @@ describe('Watchtower', () => {
   it('should init with GAP infos', async () => {
     const db = createScriptInfoDb({ storage: createMockStorage(), networkId: 'mainnet' });
     const configService = createConfigService({ storage: createMockStorage(), eventHub: createEventHub() });
-    const watchtower = createWatchtower({ keystoreService, backend, db, configService });
+    const watchtower = createWatchtower({ keystoreService, backend, scriptInfoDb: db, configService });
 
     watchtower.run();
     await asyncSleep(100);
@@ -66,7 +66,7 @@ describe('Watchtower', () => {
       },
     };
 
-    const watchtower = createWatchtower({ keystoreService, backend: newBackend, db, configService });
+    const watchtower = createWatchtower({ keystoreService, backend: newBackend, scriptInfoDb: db, configService });
 
     watchtower.run();
     await asyncSleep(100);

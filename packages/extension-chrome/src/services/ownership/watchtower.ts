@@ -31,13 +31,13 @@ interface WatchtowerOptions {
 }
 
 export function createWatchtower({
-  db,
+  scriptInfoDb,
   backend,
   configService,
   keystoreService,
   options = {},
 }: {
-  db: ScriptInfoDb;
+  scriptInfoDb: ScriptInfoDb;
   backend: Backend;
   keystoreService: KeystoreService;
   configService: ConfigService;
@@ -83,7 +83,7 @@ export function createWatchtower({
   }
 
   async function initIfNeeded(): Promise<void> {
-    const infos = await db.getAll();
+    const infos = await scriptInfoDb.getAll();
     if (infos.length > 0) return;
 
     const externalFullOwnershipInfos = await generateOffChainInfos(
@@ -105,13 +105,17 @@ export function createWatchtower({
       RULE_BASED_OFF_CHAIN_GAP,
     );
 
-    await db.setAll([...externalFullOwnershipInfos, ...internalFullOwnershipInfos, ...ruleBasedOwnershipInfos]);
+    await scriptInfoDb.setAll([
+      ...externalFullOwnershipInfos,
+      ...internalFullOwnershipInfos,
+      ...ruleBasedOwnershipInfos,
+    ]);
   }
 
   // update off-chain locks to on-chain locks if they are scanned on-chain
   async function scanAndUpdate(): Promise<number> {
     await initIfNeeded();
-    const infos = await db.getAll();
+    const infos = await scriptInfoDb.getAll();
 
     // get off-chain locks
     const offChainInfos = infos.filter((info) => info.status === 'OffChain');
@@ -164,7 +168,7 @@ export function createWatchtower({
       return result;
     })();
 
-    await db.setAll(infos.concat(newOffChainInfos));
+    await scriptInfoDb.setAll(infos.concat(newOffChainInfos));
 
     return newOnChainedInfos.length;
   }
