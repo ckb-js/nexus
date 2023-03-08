@@ -7,7 +7,7 @@ import { SignData } from './containers/SignData/SignData';
 import { SignTransaction } from './containers/SignTransaction';
 import { theme } from '../theme';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { PopupFrame } from '../Popup/containers/PopupFrame';
+import { NotificationFrame } from '../Components/NotificationFrame';
 import { ViewData } from './containers/SignData/ViewData';
 
 const container = window.document.querySelector('#root');
@@ -34,7 +34,7 @@ const meta = [
 
 const routes: RouteObject[] = [
   {
-    element: <PopupFrame meta={meta} />,
+    element: <NotificationFrame meta={meta} />,
     children: [
       {
         path: '/grant',

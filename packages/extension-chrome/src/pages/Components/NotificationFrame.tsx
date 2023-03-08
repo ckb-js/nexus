@@ -2,7 +2,7 @@ import { ArrowBackIcon } from '@chakra-ui/icons';
 import { Box, Flex } from '@chakra-ui/react';
 import React, { FC, useMemo } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Logo } from '../../Components/Logo';
+import { Logo } from './Logo';
 
 type RouteMetaConfig = {
   path: string;
@@ -14,7 +14,7 @@ type DialogFrameProps = {
   meta: RouteMetaConfig[];
 };
 
-export const PopupFrame: FC<DialogFrameProps> = ({ meta }) => {
+export const NotificationFrame: FC<DialogFrameProps> = ({ meta }) => {
   const metaMap = useMemo(() => new Map<string, RouteMetaConfig>(meta.map((item) => [item.path, item])), [meta]);
 
   const { pathname } = useLocation();

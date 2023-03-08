@@ -9,7 +9,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Home } from './containers/Home';
 import { AddNetwork } from './containers/Network/AddNetwork';
 import { theme } from '../theme';
-import { PopupFrame } from './containers/PopupFrame';
+import { NotificationFrame } from '../Components/NotificationFrame';
 import { useStartInitIfNotInitialized } from '../hooks/useStartInitIfNotInitialized';
 
 const routeMeta = [
@@ -35,7 +35,7 @@ const routeMeta = [
 
 const routeConfig: RouteObject[] = [
   {
-    element: <PopupFrame meta={routeMeta} />,
+    element: <NotificationFrame meta={routeMeta} />,
     children: [
       {
         path: '/',
