@@ -2,11 +2,11 @@ import React, { FC } from 'react';
 import { Flex, Spacer, Button, Radio, RadioGroup, VStack } from '@chakra-ui/react';
 import { AddIcon } from '@chakra-ui/icons';
 import { useNavigate } from 'react-router-dom';
+import { useMutation, useQuery } from '@tanstack/react-query';
 
 // TODO: use real service
 import configService from '../../../../mockServices/config';
 
-import { useMutation, useQuery } from '@tanstack/react-query';
 import { WhiteAlphaBox } from '../../../Components/WhiteAlphaBox';
 
 export const NetworkConfig: FC = () => {
@@ -39,7 +39,7 @@ export const NetworkConfig: FC = () => {
 
   return (
     <>
-      <WhiteAlphaBox p="16px 20px">
+      <WhiteAlphaBox overflowY="auto" maxH="500px" p="16px 20px">
         <RadioGroup
           data-test-id="networkRadio"
           onChange={onToggle}

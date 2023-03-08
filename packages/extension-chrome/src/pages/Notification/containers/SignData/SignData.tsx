@@ -10,6 +10,7 @@ import {
   Input,
   Link,
   Skeleton,
+  Spacer,
   Text,
   VStack,
 } from '@chakra-ui/react';
@@ -28,7 +29,6 @@ import { Link as RouteLink } from 'react-router-dom';
 type FormState = { password: string };
 
 export const SignData: FC = () => {
-  // const navigate = useNavigate();
   const sessionManager = useSessionMessenger();
   const checkPassword = useCheckPassword();
   const [, setSharedSigningData] = useSigningData();
@@ -81,18 +81,24 @@ export const SignData: FC = () => {
     window.close();
   };
 
+  const requesterHost = useMemo(() => {
+    if (!unsignedDataQuery.data) return '';
+    const url = new URL(unsignedDataQuery.data.url);
+    return `${url.protocol} //${url.host}`;
+  }, [unsignedDataQuery.data]);
+
   return (
-    <Skeleton isLoaded={!!unsignedDataQuery.data}>
-      <WhiteAlphaBox mt="32px" p="16px 20px">
-        <Link fontSize="sm">{unsignedDataQuery.data?.url}</Link>
+    <Skeleton display="flex" flexDir="column" h="100%" isLoaded={!!unsignedDataQuery.data}>
+      <WhiteAlphaBox p="16px 20px">
+        <Link fontSize="sm">{requesterHost}</Link>
       </WhiteAlphaBox>
 
       <Box mt="32px" fontWeight="semibold" fontSize="md">
         Only sign this message if you fully understand the content and trust the requesting site.
       </Box>
 
-      <Flex direction="column" as="form" onSubmit={handleSubmit(onSubmit, onInvalid)}>
-        <VStack as={WhiteAlphaBox} mt="32px" spacing="12px" alignItems="flex-start" direction="column" p="16px 20px">
+      <Flex flex="1" direction="column" as="form" onSubmit={handleSubmit(onSubmit, onInvalid)}>
+        <VStack as={WhiteAlphaBox} mt="32px" spacing="12px" alignItems="flex-start" direction="column" p="32px 20px">
           <Heading size="sm" as={Flex} w="100%" justifyContent="center">
             You are signing
           </Heading>
@@ -102,7 +108,10 @@ export const SignData: FC = () => {
           <Text fontSize="md" w="100%">
             {unsignedDataQuery.data?.url} wants you to sign in with your Nexus account:
             <br />
-            <Text
+            <Flex
+              maxW="100%"
+              overflow="hidden"
+              whiteSpace="nowrap"
               color="yellow.200"
               as={RouteLink}
               to="/sign-transaction/view-data"
@@ -112,10 +121,16 @@ export const SignData: FC = () => {
               fontWeight="bold"
               textDecorationLine="underline"
             >
-              {dataForSigning}
-            </Text>
+              <Box whiteSpace="nowrap" maxW="50%" textOverflow="ellipsis" overflow="hidden">
+                {dataForSigning.slice(0, dataForSigning.length - 19)}
+              </Box>
+              <Box whiteSpace="nowrap" overflow="hidden">
+                {dataForSigning.slice(dataForSigning.length - 19, dataForSigning.length)}
+              </Box>
+            </Flex>
           </Text>
         </VStack>
+        <Spacer />
         <FormControl isInvalid={!!formState.errors.password} mt="12px">
           <FormLabel>Password</FormLabel>
           <Input
