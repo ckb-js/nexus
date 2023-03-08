@@ -1,14 +1,16 @@
-import { daemonRunWatchtower } from '../../../src/services/ownership/watchtower/daemon';
+import { createDaemonWatchtower } from '../../../src/services/ownership/watchtower/daemon';
 import { createTestRpcServer } from '../../rpc/helper';
 import { createMockBackend } from '../../helpers/mockBackend';
 import { asyncSleep } from '@nexus-wallet/utils';
 import { createInMemoryStorage } from '../../../src/services/storage';
 import { setLogLevel } from '@nexus-wallet/utils/lib/logger';
+import { createMockModule } from '../../helpers/createMockModule';
+import { KeystoreService } from '@nexus-wallet/types';
 
 // disable log in this test
 setLogLevel(9999);
 
-describe('daemonRunWatchtower', () => {
+describe('daemonWatchtower', () => {
   it('should watchtower not launch if wallet is not initialized', async () => {
     const { factory } = createTestRpcServer({
       // init with empty storage
@@ -17,14 +19,21 @@ describe('daemonRunWatchtower', () => {
     });
 
     const onWatchtowerLaunched = jest.fn();
-    void daemonRunWatchtower(factory, { onWatchtowerLaunched });
+    const watchtower = createDaemonWatchtower(factory, { onWatchtowerLaunched });
+    watchtower.run();
+
     await asyncSleep(50);
     expect(onWatchtowerLaunched).not.toBeCalled();
+
+    watchtower.stop();
   });
 
   it('should watchtower launch if wallet is initialized', async () => {
     const { factory } = createTestRpcServer({
       backendProvider: () => ({ resolve: () => createMockBackend() }),
+      // speed up the test
+      keystoreService: () =>
+        createMockModule<KeystoreService>({ hasInitialized: () => true, getPublicKeyByPath: async () => '0x' }),
     });
 
     // make sure network is starts with mainnet
@@ -32,7 +41,9 @@ describe('daemonRunWatchtower', () => {
     await configService.setSelectedNetwork({ id: 'mainnet' });
 
     const onWatchtowerLaunched = jest.fn();
-    void daemonRunWatchtower(factory, { onWatchtowerLaunched, pollIntervalMs: 50 });
+    const watchtower = createDaemonWatchtower(factory, { onWatchtowerLaunched, pollIntervalMs: 50 });
+    watchtower.run();
+
     await asyncSleep(50);
     expect(onWatchtowerLaunched).toBeCalledTimes(1);
 
@@ -40,6 +51,7 @@ describe('daemonRunWatchtower', () => {
     await asyncSleep(50);
 
     expect(onWatchtowerLaunched).toBeCalledTimes(2);
-    // watchtower init will take some time
-  }, 20_000);
+
+    watchtower.stop();
+  });
 });

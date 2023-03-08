@@ -22,7 +22,7 @@ type RunnerOptions = {
  * @param factory
  * @param options
  */
-export async function daemonRunWatchtower(factory: ModulesFactory, options?: RunnerOptions): Promise<void> {
+export function createDaemonWatchtower(factory: ModulesFactory, options?: RunnerOptions): Watchtower {
   let watchtower: Watchtower | undefined;
   // a pub-sub to trigger state change
   const scopedPubSub = new EventEmitter<StateChanged>();
@@ -35,12 +35,16 @@ export async function daemonRunWatchtower(factory: ModulesFactory, options?: Run
   let selectedNetworkId: string | undefined;
   // last wallet initialized state
   // used to detect wallet initialized
-  let walletInitialized = await keystoreService.hasInitialized();
+  let walletInitialized = false;
 
   const pollIntervalMs = options?.pollIntervalMs ?? 3000;
   const onRestart = options?.onWatchtowerLaunched;
 
-  async function main() {
+  let stopped = false;
+
+  async function run() {
+    walletInitialized = await keystoreService.hasInitialized();
+
     // start listener to restart watchtower
     // 1. when network changed
     // 2. when wallet initialized
@@ -57,6 +61,9 @@ export async function daemonRunWatchtower(factory: ModulesFactory, options?: Run
     });
 
     while (1) {
+      if (stopped) {
+        return;
+      }
       try {
         await compareAndEmit();
         await asyncSleep(pollIntervalMs);
@@ -66,7 +73,13 @@ export async function daemonRunWatchtower(factory: ModulesFactory, options?: Run
       }
     }
   }
-  void main();
+
+  function stop() {
+    stopped = true;
+    if (watchtower) {
+      watchtower.stop();
+    }
+  }
 
   // restart the watchtower
   async function restart() {
@@ -109,4 +122,6 @@ export async function daemonRunWatchtower(factory: ModulesFactory, options?: Run
       scopedPubSub.emit('walletInitialized', initialized);
     }
   }
+
+  return { stop, run };
 }
