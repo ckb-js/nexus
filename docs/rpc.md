@@ -1,3 +1,4 @@
+
 <a name="rpcmethodsmd"></a>
 
 # Interface: RpcMethods
@@ -11,24 +12,24 @@ To communicate with the wallet, we use the `window.ckb.request` method.
 The `window.ckb` object is injected by the wallet
 
 ```js
-await window.ckb.request({ method: 'wallet_enable' });
+await window.ckb.request({ method: "wallet_enable" })
 ```
 
 ## Table of contents
 
 ### Methods
 
-- [debug_getConfig](#debug_getconfig)
-- [wallet_enable](#wallet_enable)
-- [wallet_fullOwnership_getLiveCells](#wallet_fullownership_getlivecells)
-- [wallet_fullOwnership_getOffChainLocks](#wallet_fullownership_getoffchainlocks)
-- [wallet_fullOwnership_getOnChainLocks](#wallet_fullownership_getonchainlocks)
-- [wallet_fullOwnership_signData](#wallet_fullownership_signdata)
-- [wallet_fullOwnership_signTransaction](#wallet_fullownership_signtransaction)
+- [debug\_getConfig](#debug_getconfig)
+- [wallet\_enable](#wallet_enable)
+- [wallet\_fullOwnership\_getLiveCells](#wallet_fullownership_getlivecells)
+- [wallet\_fullOwnership\_getOffChainLocks](#wallet_fullownership_getoffchainlocks)
+- [wallet\_fullOwnership\_getOnChainLocks](#wallet_fullownership_getonchainlocks)
+- [wallet\_fullOwnership\_signData](#wallet_fullownership_signdata)
+- [wallet\_fullOwnership\_signTransaction](#wallet_fullownership_signtransaction)
 
 ## Methods
 
-### debug_getConfig
+### debug\_getConfig
 
 ▸ **debug_getConfig**(): `Promise`<[`Config`](#configmd)\>
 
@@ -40,11 +41,11 @@ Get the wallet config
 
 #### Defined in
 
-[rpc/index.ts:90](https://github.com/ckb-js/nexus/blob/1c75fa8/packages/types/src/rpc/index.ts#L90)
+[rpc/index.ts:104](https://github.com/zhangyouxin/nexus/blob/c078f80/packages/types/src/rpc/index.ts#L104)
 
----
+___
 
-### wallet_enable
+### wallet\_enable
 
 ▸ **wallet_enable**(): `Promise`<`void`\>
 
@@ -58,11 +59,11 @@ After calling this method, we can see the dApp in the whitelist
 
 #### Defined in
 
-[rpc/index.ts:30](https://github.com/ckb-js/nexus/blob/1c75fa8/packages/types/src/rpc/index.ts#L30)
+[rpc/index.ts:44](https://github.com/zhangyouxin/nexus/blob/c078f80/packages/types/src/rpc/index.ts#L44)
 
----
+___
 
-### wallet_fullOwnership_getLiveCells
+### wallet\_fullOwnership\_getLiveCells
 
 ▸ **wallet_fullOwnership_getLiveCells**(`payload?`): `Promise`<`Paginate`<`Cell`\>\>
 
@@ -71,14 +72,14 @@ get live cells of which the wallet has full ownership
 **`Example`**
 
 ```js
-await window.ckb.request({ method: 'wallet_fullOwnership_getLiveCells', params: { cursor: '0:0x' } });
+await window.ckb.request({ method: 'wallet_fullOwnership_getLiveCells', params: {cursor: "0:0x" }})
 ```
 
 #### Parameters
 
-| Name       | Type                      | Description                                                                                                                                    |
-| :--------- | :------------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------- |
-| `payload?` | `GetPaginateItemsPayload` | the `change` field defaults to 'external', if the `cursor` is blank, it is equivalent to `"0:0x"` and will return the first page of live cells |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `payload?` | [`GetLiveCellsPayload`](#getlivecellspayloadmd) | the `change` field defaults to 'external', if the `cursor` is blank, it is equivalent to `"0:0x"` and will return the first page of live cells |
 
 #### Returns
 
@@ -88,11 +89,11 @@ live cells of current wallet with pagination info, the page size is 20
 
 #### Defined in
 
-[rpc/index.ts:63](https://github.com/ckb-js/nexus/blob/1c75fa8/packages/types/src/rpc/index.ts#L63)
+[rpc/index.ts:77](https://github.com/zhangyouxin/nexus/blob/c078f80/packages/types/src/rpc/index.ts#L77)
 
----
+___
 
-### wallet_fullOwnership_getOffChainLocks
+### wallet\_fullOwnership\_getOffChainLocks
 
 ▸ **wallet_fullOwnership_getOffChainLocks**(`payload`): `Promise`<`Script`[]\>
 
@@ -106,9 +107,9 @@ await window.ckb.request({ method: 'wallet_fullOwnership_getOffChainLocks', para
 
 #### Parameters
 
-| Name      | Type                      | Description                               |
-| :-------- | :------------------------ | :---------------------------------------- |
-| `payload` | `GetOffChainLocksPayload` | the `change` field defaults to 'external' |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `payload` | [`GetOffChainLocksPayload`](#getoffchainlockspayloadmd) | the `change` field defaults to 'external' |
 
 #### Returns
 
@@ -118,11 +119,11 @@ the off-chain locks of current wallet
 
 #### Defined in
 
-[rpc/index.ts:41](https://github.com/ckb-js/nexus/blob/1c75fa8/packages/types/src/rpc/index.ts#L41)
+[rpc/index.ts:55](https://github.com/zhangyouxin/nexus/blob/c078f80/packages/types/src/rpc/index.ts#L55)
 
----
+___
 
-### wallet_fullOwnership_getOnChainLocks
+### wallet\_fullOwnership\_getOnChainLocks
 
 ▸ **wallet_fullOwnership_getOnChainLocks**(`payload`): `Promise`<`Paginate`<`Script`\>\>
 
@@ -131,17 +132,14 @@ get used locks of which the wallet has full ownership
 **`Example`**
 
 ```js
-await window.ckb.request({
-  method: 'wallet_fullOwnership_getOnChainLocks',
-  params: { change: 'internal', cursor: '0' },
-});
+await window.ckb.request({ method: 'wallet_fullOwnership_getOnChainLocks', params: { change: "internal", cursor: "0" } });
 ```
 
 #### Parameters
 
-| Name      | Type                     | Description                                                                                                                                       |
-| :-------- | :----------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `payload` | `GetOnChainLocksPayload` | the `change` field defaults to `'external'`, if the `cursor` is blank, it is equivalent to `"0"` and will return the first page of on-chain locks |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `payload` | [`GetOnChainLocksPayload`](#getonchainlockspayloadmd) | the `change` field defaults to `'external'`, if the `cursor` is blank, it is equivalent to `"0"` and will return the first page of on-chain locks |
 
 #### Returns
 
@@ -151,11 +149,11 @@ on-chain locks of the current wallet with pagination info, the page size is 20
 
 #### Defined in
 
-[rpc/index.ts:52](https://github.com/ckb-js/nexus/blob/1c75fa8/packages/types/src/rpc/index.ts#L52)
+[rpc/index.ts:66](https://github.com/zhangyouxin/nexus/blob/c078f80/packages/types/src/rpc/index.ts#L66)
 
----
+___
 
-### wallet_fullOwnership_signData
+### wallet\_fullOwnership\_signData
 
 ▸ **wallet_fullOwnership_signData**(`payload`): `Promise`<`string`\>
 
@@ -169,9 +167,9 @@ await window.ckb.request({ method: 'wallet_fullOwnership_signData', params: { da
 
 #### Parameters
 
-| Name      | Type              | Description                                                                                       |
-| :-------- | :---------------- | :------------------------------------------------------------------------------------------------ |
-| `payload` | `SignDataPayload` | `data` you would like to sign, `lock` indicates which lock you would like to use to sign the data |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `payload` | [`SignDataPayload`](#signdatapayload) | `data` you would like to sign, `lock` indicates which lock you would like to use to sign the data |
 
 #### Returns
 
@@ -181,13 +179,13 @@ the signature of the data if the wallet has full ownership of the lock passed in
 
 #### Defined in
 
-[rpc/index.ts:85](https://github.com/ckb-js/nexus/blob/1c75fa8/packages/types/src/rpc/index.ts#L85)
+[rpc/index.ts:99](https://github.com/zhangyouxin/nexus/blob/c078f80/packages/types/src/rpc/index.ts#L99)
 
----
+___
 
-### wallet_fullOwnership_signTransaction
+### wallet\_fullOwnership\_signTransaction
 
-▸ **wallet_fullOwnership_signTransaction**(`payload`): `Promise`<`GroupedSignature`\>
+▸ **wallet_fullOwnership_signTransaction**(`payload`): `Promise`<[`GroupedSignature`](#groupedsignature)\>
 
 sign a transaction with the wallet
 
@@ -199,19 +197,20 @@ await window.ckb.request({ method: 'wallet_fullOwnership_signTransaction', param
 
 #### Parameters
 
-| Name      | Type                     | Description                  |
-| :-------- | :----------------------- | :--------------------------- |
-| `payload` | `SignTransactionPayload` | the `tx` is your transaction |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `payload` | [`SignTransactionPayload`](#signtransactionpayloadmd) | the `tx` is your transaction |
 
 #### Returns
 
-`Promise`<`GroupedSignature`\>
+`Promise`<[`GroupedSignature`](#groupedsignature)\>
 
 an array of [lock, signature] tuple
 
 #### Defined in
 
-[rpc/index.ts:74](https://github.com/ckb-js/nexus/blob/1c75fa8/packages/types/src/rpc/index.ts#L74)
+[rpc/index.ts:88](https://github.com/zhangyouxin/nexus/blob/c078f80/packages/types/src/rpc/index.ts#L88)
+
 
 <a name="configmd"></a>
 
@@ -237,9 +236,9 @@ a list of networks that the app can connect to
 
 #### Defined in
 
-[services/ConfigService.ts:83](https://github.com/ckb-js/nexus/blob/1c75fa8/packages/types/src/services/ConfigService.ts#L83)
+[services/ConfigService.ts:83](https://github.com/zhangyouxin/nexus/blob/c078f80/packages/types/src/services/ConfigService.ts#L83)
 
----
+___
 
 ### nickname
 
@@ -250,9 +249,9 @@ unlike other wallet, Nexus don't use a certain address as the identity of the us
 
 #### Defined in
 
-[services/ConfigService.ts:75](https://github.com/ckb-js/nexus/blob/1c75fa8/packages/types/src/services/ConfigService.ts#L75)
+[services/ConfigService.ts:75](https://github.com/zhangyouxin/nexus/blob/c078f80/packages/types/src/services/ConfigService.ts#L75)
 
----
+___
 
 ### selectedNetwork
 
@@ -262,9 +261,9 @@ the id of networks that is selected to connect
 
 #### Defined in
 
-[services/ConfigService.ts:79](https://github.com/ckb-js/nexus/blob/1c75fa8/packages/types/src/services/ConfigService.ts#L79)
+[services/ConfigService.ts:79](https://github.com/zhangyouxin/nexus/blob/c078f80/packages/types/src/services/ConfigService.ts#L79)
 
----
+___
 
 ### version
 
@@ -274,9 +273,9 @@ version of the current app
 
 #### Defined in
 
-[services/ConfigService.ts:70](https://github.com/ckb-js/nexus/blob/1c75fa8/packages/types/src/services/ConfigService.ts#L70)
+[services/ConfigService.ts:70](https://github.com/zhangyouxin/nexus/blob/c078f80/packages/types/src/services/ConfigService.ts#L70)
 
----
+___
 
 ### whitelist
 
@@ -286,7 +285,118 @@ a list of hosts that have been granted
 
 #### Defined in
 
-[services/ConfigService.ts:87](https://github.com/ckb-js/nexus/blob/1c75fa8/packages/types/src/services/ConfigService.ts#L87)
+[services/ConfigService.ts:87](https://github.com/zhangyouxin/nexus/blob/c078f80/packages/types/src/services/ConfigService.ts#L87)
+
+
+<a name="getlivecellspayloadmd"></a>
+
+# Interface: GetLiveCellsPayload
+
+## Hierarchy
+
+- `GetPaginateItemsPayload`
+
+  ↳ **`GetLiveCellsPayload`**
+
+## Table of contents
+
+### Properties
+
+- [cursor](#cursor)
+
+## Properties
+
+### cursor
+
+• `Optional` **cursor**: `string`
+
+#### Inherited from
+
+GetPaginateItemsPayload.cursor
+
+#### Defined in
+
+[services/OwnershipService.ts:29](https://github.com/zhangyouxin/nexus/blob/c078f80/packages/types/src/services/OwnershipService.ts#L29)
+
+
+<a name="getoffchainlockspayloadmd"></a>
+
+# Interface: GetOffChainLocksPayload
+
+## Hierarchy
+
+- `FilterPayload`
+
+  ↳ **`GetOffChainLocksPayload`**
+
+## Table of contents
+
+### Properties
+
+- [change](#change)
+
+## Properties
+
+### change
+
+• `Optional` **change**: ``"external"`` \| ``"internal"``
+
+#### Inherited from
+
+FilterPayload.change
+
+#### Defined in
+
+[services/OwnershipService.ts:33](https://github.com/zhangyouxin/nexus/blob/c078f80/packages/types/src/services/OwnershipService.ts#L33)
+
+
+<a name="getonchainlockspayloadmd"></a>
+
+# Interface: GetOnChainLocksPayload
+
+## Hierarchy
+
+- `GetPaginateItemsPayload`
+
+- `FilterPayload`
+
+  ↳ **`GetOnChainLocksPayload`**
+
+## Table of contents
+
+### Properties
+
+- [change](#change)
+- [cursor](#cursor)
+
+## Properties
+
+### change
+
+• `Optional` **change**: ``"external"`` \| ``"internal"``
+
+#### Inherited from
+
+FilterPayload.change
+
+#### Defined in
+
+[services/OwnershipService.ts:33](https://github.com/zhangyouxin/nexus/blob/c078f80/packages/types/src/services/OwnershipService.ts#L33)
+
+___
+
+### cursor
+
+• `Optional` **cursor**: `string`
+
+#### Inherited from
+
+GetPaginateItemsPayload.cursor
+
+#### Defined in
+
+[services/OwnershipService.ts:29](https://github.com/zhangyouxin/nexus/blob/c078f80/packages/types/src/services/OwnershipService.ts#L29)
+
 
 <a name="networkconfigmd"></a>
 
@@ -309,9 +419,9 @@ a list of hosts that have been granted
 
 #### Defined in
 
-[services/ConfigService.ts:97](https://github.com/ckb-js/nexus/blob/1c75fa8/packages/types/src/services/ConfigService.ts#L97)
+[services/ConfigService.ts:97](https://github.com/zhangyouxin/nexus/blob/c078f80/packages/types/src/services/ConfigService.ts#L97)
 
----
+___
 
 ### id
 
@@ -319,9 +429,9 @@ a list of hosts that have been granted
 
 #### Defined in
 
-[services/ConfigService.ts:96](https://github.com/ckb-js/nexus/blob/1c75fa8/packages/types/src/services/ConfigService.ts#L96)
+[services/ConfigService.ts:96](https://github.com/zhangyouxin/nexus/blob/c078f80/packages/types/src/services/ConfigService.ts#L96)
 
----
+___
 
 ### networkName
 
@@ -329,9 +439,9 @@ a list of hosts that have been granted
 
 #### Defined in
 
-[services/ConfigService.ts:98](https://github.com/ckb-js/nexus/blob/1c75fa8/packages/types/src/services/ConfigService.ts#L98)
+[services/ConfigService.ts:98](https://github.com/zhangyouxin/nexus/blob/c078f80/packages/types/src/services/ConfigService.ts#L98)
 
----
+___
 
 ### rpcUrl
 
@@ -339,7 +449,29 @@ a list of hosts that have been granted
 
 #### Defined in
 
-[services/ConfigService.ts:99](https://github.com/ckb-js/nexus/blob/1c75fa8/packages/types/src/services/ConfigService.ts#L99)
+[services/ConfigService.ts:99](https://github.com/zhangyouxin/nexus/blob/c078f80/packages/types/src/services/ConfigService.ts#L99)
+
+
+<a name="signtransactionpayloadmd"></a>
+
+# Interface: SignTransactionPayload
+
+## Table of contents
+
+### Properties
+
+- [tx](#tx)
+
+## Properties
+
+### tx
+
+• **tx**: `Transaction`
+
+#### Defined in
+
+[services/OwnershipService.ts:41](https://github.com/zhangyouxin/nexus/blob/c078f80/packages/types/src/services/OwnershipService.ts#L41)
+
 
 <a name="trustedhostmd"></a>
 
@@ -360,9 +492,9 @@ a list of hosts that have been granted
 
 #### Defined in
 
-[services/ConfigService.ts:92](https://github.com/ckb-js/nexus/blob/1c75fa8/packages/types/src/services/ConfigService.ts#L92)
+[services/ConfigService.ts:92](https://github.com/zhangyouxin/nexus/blob/c078f80/packages/types/src/services/ConfigService.ts#L92)
 
----
+___
 
 ### host
 
@@ -370,4 +502,4 @@ a list of hosts that have been granted
 
 #### Defined in
 
-[services/ConfigService.ts:91](https://github.com/ckb-js/nexus/blob/1c75fa8/packages/types/src/services/ConfigService.ts#L91)
+[services/ConfigService.ts:91](https://github.com/zhangyouxin/nexus/blob/c078f80/packages/types/src/services/ConfigService.ts#L91)

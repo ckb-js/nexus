@@ -3,7 +3,7 @@ import type { Cell, Script, Transaction } from '@ckb-lumos/lumos';
 import type { BytesLike } from '@ckb-lumos/codec';
 
 export interface OwnershipService {
-  getLiveCells(payload?: GetPaginateItemsPayload): Promise<Paginate<Cell>>;
+  getLiveCells(payload?: GetLiveCellsPayload): Promise<Paginate<Cell>>;
 
   /**
    * get unused locks
@@ -29,11 +29,13 @@ export interface GetPaginateItemsPayload {
   cursor?: string;
 }
 
-export interface GetOffChainLocksPayload {
+export interface FilterPayload {
   change?: 'external' | 'internal';
 }
 
-export interface GetOnChainLocksPayload extends GetOffChainLocksPayload, GetPaginateItemsPayload {}
+export interface GetOffChainLocksPayload extends FilterPayload {}
+export interface GetLiveCellsPayload extends GetPaginateItemsPayload {}
+export interface GetOnChainLocksPayload extends GetPaginateItemsPayload, FilterPayload {}
 
 export interface SignTransactionPayload {
   tx: Transaction;

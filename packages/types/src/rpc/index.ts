@@ -3,13 +3,27 @@ import { Config, NetworkConfig, TrustedHost } from '../services';
 import {
   GetOffChainLocksPayload,
   GetOnChainLocksPayload,
-  GetPaginateItemsPayload,
+  GetLiveCellsPayload,
   GroupedSignature,
   SignDataPayload,
   SignTransactionPayload,
   Signature,
 } from '../services/OwnershipService';
 import { Paginate } from '../base';
+
+/**
+ * re-export so that typedoc can generate the links to these type aliases
+ */
+export type {
+  GetOffChainLocksPayload,
+  GetOnChainLocksPayload,
+  GetLiveCellsPayload,
+  GroupedSignature,
+  SignDataPayload,
+  SignTransactionPayload,
+  Signature,
+};
+
 /**
  * Exposed RPC methods for the wallet, the `debug_` prefix is for development purpose only,
  * and will be removed in the production version
@@ -60,7 +74,7 @@ export interface RpcMethods {
    * @param payload  the `change` field defaults to 'external', if the `cursor` is blank, it is equivalent to `"0:0x"` and will return the first page of live cells
    * @returns live cells of current wallet with pagination info, the page size is 20
    */
-  wallet_fullOwnership_getLiveCells(payload?: GetPaginateItemsPayload): Promise<Paginate<Cell>>;
+  wallet_fullOwnership_getLiveCells(payload?: GetLiveCellsPayload): Promise<Paginate<Cell>>;
 
   /**
    * sign a transaction with the wallet
