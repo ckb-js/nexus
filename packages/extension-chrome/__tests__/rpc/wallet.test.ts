@@ -97,6 +97,7 @@ describe('RPC wallet_fullOwnership', () => {
     expect(fullOwnershipService.signData).toBeCalledWith({
       data: '0x1234',
       lock: { codeHash: '0x1234', hashType: 'type', args: '0x01' },
+      url: 'internal://nexus-wallet.io',
     });
     jest.clearAllMocks();
   });
@@ -107,7 +108,10 @@ describe('RPC wallet_fullOwnership', () => {
     jest.spyOn(fullOwnershipService, 'signTransaction').mockImplementation(() => Promise.resolve([]));
     await request('wallet_fullOwnership_signTransaction', { tx: createFakeTransaction() });
     expect(fullOwnershipService.signTransaction).toBeCalledTimes(1);
-    expect(fullOwnershipService.signTransaction).toBeCalledWith({ tx: createFakeTransaction() });
+    expect(fullOwnershipService.signTransaction).toBeCalledWith({
+      tx: createFakeTransaction(),
+      url: 'internal://nexus-wallet.io',
+    });
     jest.clearAllMocks();
   });
 });

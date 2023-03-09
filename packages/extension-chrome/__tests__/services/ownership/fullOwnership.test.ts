@@ -119,7 +119,7 @@ describe('FullOwnership', () => {
     });
 
     it('should signData by keystore service with proper params', async () => {
-      await ownershipService.signData({ data: '0x1234', lock: scriptInfos[0].lock });
+      await ownershipService.signData({ data: '0x1234', lock: scriptInfos[0].lock, url: 'internal://nexus-wallet.io' });
       expect(keystoreService.signMessage).toBeCalledWith({
         message: '0x1234',
         password: '12345678',
@@ -130,7 +130,7 @@ describe('FullOwnership', () => {
 
     it('should signTx by keystore service with proper params', async () => {
       jest.spyOn(common, 'prepareSigningEntries').mockImplementation(() => createMockTxSkeleton());
-      await ownershipService.signTransaction({ tx: {} as Transaction });
+      await ownershipService.signTransaction({ tx: {} as Transaction, url: 'internal://nexus-wallet.io' });
       expect(keystoreService.signMessage).toHaveBeenCalledTimes(2);
       expect(keystoreService.signMessage).nthCalledWith(1, {
         message: '0x1234',
