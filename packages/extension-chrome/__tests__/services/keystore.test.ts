@@ -82,9 +82,9 @@ describe('KeystoreService', () => {
     ).rejects.toThrow();
   });
 
-  test('getExtendedPublicKey should works', async () => {
+  test('getPublicKeyByPath should works', async () => {
     const child = fixture.derived[1];
-    const childPublicKey0 = await service.getExtendedPublicKey({ path: child.path });
+    const childPublicKey0 = await service.getPublicKeyByPath({ path: child.path });
 
     expect(childPublicKey0).toBe(child.publicKey);
   });

@@ -1,8 +1,10 @@
 import * as awilix from 'awilix';
-import { ConfigService, KeystoreService, PlatformService, Storage } from '@nexus-wallet/types';
+import { ConfigService, KeystoreService, OwnershipService, PlatformService, Storage } from '@nexus-wallet/types';
 import { createConfigService } from '../config';
 import { createInternalService, InternalService } from '../internal';
 import { createKeystoreService } from '../keystore';
+import { createFullOwnershipService } from '../ownership';
+import { BackendProvider, createBackendProvider } from '../ownership/backend';
 import { createEventHub, EventHub } from '../event';
 
 export interface ModulesFactory<S = unknown, P = unknown> {
@@ -19,6 +21,8 @@ export interface Modules<S = unknown, P = unknown> {
   configService: ConfigService;
   internalService: InternalService;
   platformService: PlatformService<P>;
+  backendProvider: BackendProvider;
+  fullOwnershipService: OwnershipService;
   eventHub: EventHub;
 }
 
@@ -32,12 +36,13 @@ export function createModulesFactory<S, P>({
   const platformResolover = awilix.asFunction(platform).singleton();
   container.register({
     storage: awilix.asFunction(storage).singleton(),
-    notificationService: platformResolover,
-    platformService: platformResolover,
-
     configService: awilix.asFunction(providers.configService || createConfigService).singleton(),
     internalService: awilix.asFunction(providers.internalService || createInternalService).singleton(),
     keystoreService: awilix.asFunction(providers.keystoreService || createKeystoreService).singleton(),
+    backendProvider: awilix.asFunction(providers.backendProvider || createBackendProvider).singleton(),
+    fullOwnershipService: awilix.asFunction(providers.fullOwnershipService || createFullOwnershipService).singleton(),
+    notificationService: platformResolover,
+    platformService: platformResolover,
     eventHub: awilix.asFunction(providers.eventHub || createEventHub).singleton(),
   });
 

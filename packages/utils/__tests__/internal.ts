@@ -22,4 +22,8 @@ describe('formatMessage', () => {
     expect(formatMessage('string: %s', 'message', 'extra')).toBe(`string: message extra`);
     expect(formatMessage('extra buffer', Buffer.from([0, 0, 0]))).toBe('extra buffer 0x000000');
   });
+
+  it('should format error', () => {
+    expect(formatMessage(new Error('error message'))).toMatch(/error message/);
+  });
 });

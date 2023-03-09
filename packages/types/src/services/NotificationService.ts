@@ -1,4 +1,5 @@
-import { HexString, Transaction } from '@ckb-lumos/lumos';
+import { TransactionSkeletonObject } from '@ckb-lumos/helpers';
+import { HexString } from '@ckb-lumos/lumos';
 
 export interface PlatformService<Sender = unknown> {
   /**
@@ -6,7 +7,7 @@ export interface PlatformService<Sender = unknown> {
    * will return a password to decrypt keystore if user approved and input the correct password
    * @param payload
    */
-  requestSignTransaction(payload: { tx: Transaction }): Promise<{ password: string }>;
+  requestSignTransaction(payload: { tx: TransactionSkeletonObject }): Promise<{ password: string }>;
 
   /**
    * request user to approve for signing binary data,
