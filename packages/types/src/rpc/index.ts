@@ -374,14 +374,14 @@ export interface RpcMethods {
    * sign a piece of @link BytesLike `BytesLike` data with the wallet
    * @example
    * ```js
+   * let locks = await window.ckb.request({
+   *  method: 'wallet_fullOwnership_getOffChainLocks',
+   *  params: { change: 'external' },
+   * });
    *  await window.ckb.request({
    *    method: 'wallet_fullOwnership_signData',
    *    params: {
-   *      lock: {
-   *        codeHash: '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
-   *        hashType: 'type',
-   *        args: '0x477de073e7ec94aeb74184b981670e843dcb0eb2',
-   *      },
+   *      lock: locks[0],
    *      data: '0xd194cc30c06b9f71fc7c474d2bb90fd2c4a7de66b121d0fdf5dcb2bcdd11c2a8a4f6d4ac5165fe013cdfb1',
    *    },
    *  });

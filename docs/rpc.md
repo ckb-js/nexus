@@ -41,7 +41,7 @@ Get the wallet config
 
 #### Defined in
 
-[packages/types/src/rpc/index.ts:402](https://github.com/zhangyouxin/nexus/blob/7034c97/packages/types/src/rpc/index.ts#L402)
+[packages/types/src/rpc/index.ts:402](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/rpc/index.ts#L402)
 
 ___
 
@@ -59,7 +59,7 @@ After calling this method, we can see the dApp in the whitelist
 
 #### Defined in
 
-[packages/types/src/rpc/index.ts:32](https://github.com/zhangyouxin/nexus/blob/7034c97/packages/types/src/rpc/index.ts#L32)
+[packages/types/src/rpc/index.ts:32](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/rpc/index.ts#L32)
 
 ___
 
@@ -184,7 +184,7 @@ live cells of current wallet with pagination info, the page size is 20
 
 #### Defined in
 
-[packages/types/src/rpc/index.ts:298](https://github.com/zhangyouxin/nexus/blob/7034c97/packages/types/src/rpc/index.ts#L298)
+[packages/types/src/rpc/index.ts:298](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/rpc/index.ts#L298)
 
 ___
 
@@ -319,7 +319,7 @@ the off-chain locks of current wallet
 
 #### Defined in
 
-[packages/types/src/rpc/index.ts:148](https://github.com/zhangyouxin/nexus/blob/7034c97/packages/types/src/rpc/index.ts#L148)
+[packages/types/src/rpc/index.ts:148](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/rpc/index.ts#L148)
 
 ___
 
@@ -382,7 +382,7 @@ on-chain locks of the current wallet with pagination info, the page size is 20
 
 #### Defined in
 
-[packages/types/src/rpc/index.ts:192](https://github.com/zhangyouxin/nexus/blob/7034c97/packages/types/src/rpc/index.ts#L192)
+[packages/types/src/rpc/index.ts:192](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/rpc/index.ts#L192)
 
 ___
 
@@ -399,14 +399,14 @@ BytesLike `BytesLike` data with the wallet
 **`Example`**
 
 ```js
+let locks = await window.ckb.request({
+ method: 'wallet_fullOwnership_getOffChainLocks',
+ params: { change: 'external' },
+});
  await window.ckb.request({
    method: 'wallet_fullOwnership_signData',
    params: {
-     lock: {
-       codeHash: '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
-       hashType: 'type',
-       args: '0x477de073e7ec94aeb74184b981670e843dcb0eb2',
-     },
+     lock: locks[0],
      data: '0xd194cc30c06b9f71fc7c474d2bb90fd2c4a7de66b121d0fdf5dcb2bcdd11c2a8a4f6d4ac5165fe013cdfb1',
    },
  });
@@ -431,7 +431,7 @@ the signature of the data if the wallet has full ownership of the lock passed in
 
 #### Defined in
 
-[packages/types/src/rpc/index.ts:397](https://github.com/zhangyouxin/nexus/blob/7034c97/packages/types/src/rpc/index.ts#L397)
+[packages/types/src/rpc/index.ts:397](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/rpc/index.ts#L397)
 
 ___
 
@@ -523,7 +523,7 @@ an array of [lock, signature] tuple
 
 #### Defined in
 
-[packages/types/src/rpc/index.ts:371](https://github.com/zhangyouxin/nexus/blob/7034c97/packages/types/src/rpc/index.ts#L371)
+[packages/types/src/rpc/index.ts:371](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/rpc/index.ts#L371)
 
 
 <a name="configmd"></a>
@@ -550,7 +550,7 @@ a list of networks that the app can connect to
 
 #### Defined in
 
-[packages/types/src/services/ConfigService.ts:83](https://github.com/zhangyouxin/nexus/blob/7034c97/packages/types/src/services/ConfigService.ts#L83)
+[packages/types/src/services/ConfigService.ts:83](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/services/ConfigService.ts#L83)
 
 ___
 
@@ -563,7 +563,7 @@ unlike other wallet, Nexus don't use a certain address as the identity of the us
 
 #### Defined in
 
-[packages/types/src/services/ConfigService.ts:75](https://github.com/zhangyouxin/nexus/blob/7034c97/packages/types/src/services/ConfigService.ts#L75)
+[packages/types/src/services/ConfigService.ts:75](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/services/ConfigService.ts#L75)
 
 ___
 
@@ -575,7 +575,7 @@ the id of networks that is selected to connect
 
 #### Defined in
 
-[packages/types/src/services/ConfigService.ts:79](https://github.com/zhangyouxin/nexus/blob/7034c97/packages/types/src/services/ConfigService.ts#L79)
+[packages/types/src/services/ConfigService.ts:79](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/services/ConfigService.ts#L79)
 
 ___
 
@@ -587,7 +587,7 @@ version of the current app
 
 #### Defined in
 
-[packages/types/src/services/ConfigService.ts:70](https://github.com/zhangyouxin/nexus/blob/7034c97/packages/types/src/services/ConfigService.ts#L70)
+[packages/types/src/services/ConfigService.ts:70](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/services/ConfigService.ts#L70)
 
 ___
 
@@ -599,7 +599,7 @@ a list of hosts that have been granted
 
 #### Defined in
 
-[packages/types/src/services/ConfigService.ts:87](https://github.com/zhangyouxin/nexus/blob/7034c97/packages/types/src/services/ConfigService.ts#L87)
+[packages/types/src/services/ConfigService.ts:87](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/services/ConfigService.ts#L87)
 
 
 <a name="getlivecellspayloadmd"></a>
@@ -630,7 +630,7 @@ GetPaginateItemsPayload.cursor
 
 #### Defined in
 
-[packages/types/src/services/OwnershipService.ts:29](https://github.com/zhangyouxin/nexus/blob/7034c97/packages/types/src/services/OwnershipService.ts#L29)
+[packages/types/src/services/OwnershipService.ts:29](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/services/OwnershipService.ts#L29)
 
 
 <a name="getoffchainlockspayloadmd"></a>
@@ -661,7 +661,7 @@ FilterPayload.change
 
 #### Defined in
 
-[packages/types/src/services/OwnershipService.ts:33](https://github.com/zhangyouxin/nexus/blob/7034c97/packages/types/src/services/OwnershipService.ts#L33)
+[packages/types/src/services/OwnershipService.ts:33](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/services/OwnershipService.ts#L33)
 
 
 <a name="getonchainlockspayloadmd"></a>
@@ -695,7 +695,7 @@ FilterPayload.change
 
 #### Defined in
 
-[packages/types/src/services/OwnershipService.ts:33](https://github.com/zhangyouxin/nexus/blob/7034c97/packages/types/src/services/OwnershipService.ts#L33)
+[packages/types/src/services/OwnershipService.ts:33](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/services/OwnershipService.ts#L33)
 
 ___
 
@@ -709,7 +709,7 @@ GetPaginateItemsPayload.cursor
 
 #### Defined in
 
-[packages/types/src/services/OwnershipService.ts:29](https://github.com/zhangyouxin/nexus/blob/7034c97/packages/types/src/services/OwnershipService.ts#L29)
+[packages/types/src/services/OwnershipService.ts:29](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/services/OwnershipService.ts#L29)
 
 
 <a name="networkconfigmd"></a>
@@ -733,7 +733,7 @@ GetPaginateItemsPayload.cursor
 
 #### Defined in
 
-[packages/types/src/services/ConfigService.ts:97](https://github.com/zhangyouxin/nexus/blob/7034c97/packages/types/src/services/ConfigService.ts#L97)
+[packages/types/src/services/ConfigService.ts:97](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/services/ConfigService.ts#L97)
 
 ___
 
@@ -743,7 +743,7 @@ ___
 
 #### Defined in
 
-[packages/types/src/services/ConfigService.ts:96](https://github.com/zhangyouxin/nexus/blob/7034c97/packages/types/src/services/ConfigService.ts#L96)
+[packages/types/src/services/ConfigService.ts:96](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/services/ConfigService.ts#L96)
 
 ___
 
@@ -753,7 +753,7 @@ ___
 
 #### Defined in
 
-[packages/types/src/services/ConfigService.ts:98](https://github.com/zhangyouxin/nexus/blob/7034c97/packages/types/src/services/ConfigService.ts#L98)
+[packages/types/src/services/ConfigService.ts:98](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/services/ConfigService.ts#L98)
 
 ___
 
@@ -763,7 +763,7 @@ ___
 
 #### Defined in
 
-[packages/types/src/services/ConfigService.ts:99](https://github.com/zhangyouxin/nexus/blob/7034c97/packages/types/src/services/ConfigService.ts#L99)
+[packages/types/src/services/ConfigService.ts:99](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/services/ConfigService.ts#L99)
 
 
 <a name="scriptmd"></a>
@@ -838,7 +838,7 @@ SignDataPayloadType.data
 
 #### Defined in
 
-[packages/types/src/services/OwnershipService.ts:45](https://github.com/zhangyouxin/nexus/blob/7034c97/packages/types/src/services/OwnershipService.ts#L45)
+[packages/types/src/services/OwnershipService.ts:45](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/services/OwnershipService.ts#L45)
 
 ___
 
@@ -852,7 +852,7 @@ SignDataPayloadType.lock
 
 #### Defined in
 
-[packages/types/src/services/OwnershipService.ts:46](https://github.com/zhangyouxin/nexus/blob/7034c97/packages/types/src/services/OwnershipService.ts#L46)
+[packages/types/src/services/OwnershipService.ts:46](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/services/OwnershipService.ts#L46)
 
 
 <a name="signtransactionpayloadmd"></a>
@@ -873,7 +873,7 @@ SignDataPayloadType.lock
 
 #### Defined in
 
-[packages/types/src/services/OwnershipService.ts:41](https://github.com/zhangyouxin/nexus/blob/7034c97/packages/types/src/services/OwnershipService.ts#L41)
+[packages/types/src/services/OwnershipService.ts:41](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/services/OwnershipService.ts#L41)
 
 
 <a name="trustedhostmd"></a>
@@ -895,7 +895,7 @@ SignDataPayloadType.lock
 
 #### Defined in
 
-[packages/types/src/services/ConfigService.ts:92](https://github.com/zhangyouxin/nexus/blob/7034c97/packages/types/src/services/ConfigService.ts#L92)
+[packages/types/src/services/ConfigService.ts:92](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/services/ConfigService.ts#L92)
 
 ___
 
@@ -905,4 +905,4 @@ ___
 
 #### Defined in
 
-[packages/types/src/services/ConfigService.ts:91](https://github.com/zhangyouxin/nexus/blob/7034c97/packages/types/src/services/ConfigService.ts#L91)
+[packages/types/src/services/ConfigService.ts:91](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/services/ConfigService.ts#L91)
