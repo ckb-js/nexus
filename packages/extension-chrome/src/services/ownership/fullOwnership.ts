@@ -100,9 +100,16 @@ export function createFullOwnershipService({
       let txSkeleton = await backend.resolveTx(tx);
       txSkeleton = common.prepareSigningEntries(txSkeleton, { config: await getLumosConfig() });
 
-      const { password } = await platformService.requestSignTransaction({
-        tx: transactionSkeletonToObject(txSkeleton),
-      });
+      let password: string;
+      try {
+        password = (
+          await platformService.requestSignTransaction({
+            tx: transactionSkeletonToObject(txSkeleton),
+          })
+        ).password;
+      } catch (e) {
+        errors.throwError('User has rejected');
+      }
 
       const signatures = await Promise.all(
         txSkeleton
@@ -132,8 +139,13 @@ export function createFullOwnershipService({
       return signatures;
     },
     signData: async (payload: SignDataPayload): Promise<Signature> => {
-      // TODO how to get url?
-      const { password } = await platformService.requestSignData({ data: bytes.hexify(payload.data), url: '' });
+      let password: string;
+      try {
+        password = (await platformService.requestSignData({ data: bytes.hexify(payload.data), url: '' })).password;
+      } catch (e) {
+        errors.throwError('User has rejected');
+      }
+
       const db = await getDb();
       const [info] = await db.filterByMatch({ scriptHash: utils.computeScriptHash(payload.lock) });
       asserts.asserts(
