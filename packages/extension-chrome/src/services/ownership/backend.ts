@@ -3,10 +3,13 @@ import type { ConfigService, Paginate, Promisable } from '@nexus-wallet/types';
 import { asserts } from '@nexus-wallet/utils';
 import { NetworkId } from './storage';
 import { createTransactionSkeleton, LiveCellFetcher, TransactionSkeletonType } from '@ckb-lumos/helpers';
-import { throwError } from '@nexus-wallet/utils/lib/error';
 import { ScriptConfig } from '@ckb-lumos/config-manager';
 import chunk from 'lodash/chunk';
 import isEqual from 'lodash/isEqual';
+import { JSONRPCRequest, JSONRPCResponse } from 'json-rpc-2.0';
+import { CKBComponents } from '@ckb-lumos/rpc/lib/types/api';
+import { throwNexusError } from '../../errors';
+import { throwError } from '@nexus-wallet/utils/lib/error';
 
 export interface Backend {
   getSecp256k1Blake160ScriptConfig(payload: { networkId: string }): Promise<ScriptConfig>;
@@ -29,8 +32,8 @@ export interface Backend {
 const _Secp256k1Blake160ScriptInfoCache = new Map<NetworkId, ScriptConfig>();
 
 export function createBackend(_payload: { nodeUrl: string }): Backend {
-  // TODO use rpc to fetch onchain data when lumos rpc is ready to use in chrome extension
-  // const rpc = new RPC(_payload.nodeUrl);
+  // TODO replace with batch client when batch client supported type
+  const client = createRpcClient(_payload.nodeUrl);
 
   return {
     getSecp256k1Blake160ScriptConfig: async ({ networkId }): Promise<ScriptConfig> => {
@@ -43,11 +46,9 @@ export function createBackend(_payload: { nodeUrl: string }): Backend {
       return config;
     },
     hasHistories: async (payload: { locks: Script[] }): Promise<boolean[]> => {
-      const toRequestParam = (lock: Script, id: number) => ({
-        id,
-        jsonrpc: '2.0',
-        method: 'get_transactions',
-        params: [
+      const responses = await client.batchRequest<CKBComponents.GetTransactionsResult>(
+        'get_transactions',
+        payload.locks.map((lock) => [
           {
             script: {
               code_hash: lock.codeHash,
@@ -59,20 +60,10 @@ export function createBackend(_payload: { nodeUrl: string }): Backend {
           },
           'asc',
           '0x1',
-        ],
-      });
-      const requestParam = payload.locks.map(toRequestParam);
-      const rawResponse = await fetch(_payload.nodeUrl, {
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestParam),
-        method: 'POST',
-      });
-      const responses = await rawResponse.json();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = responses.map((response: any) => response.result.objects.length > 0);
+        ]),
+      );
+
+      const result = responses.map((res) => res.objects.length > 0);
       return result;
     },
     getLiveCellsByLocks: async ({
@@ -272,7 +263,9 @@ export function createBackend(_payload: { nodeUrl: string }): Backend {
           method: 'POST',
         });
         const content = await rawResult.json();
-        if (!content) throwError(`Cannot find cell of %s`, outPoint);
+        if (!content?.result?.cell) {
+          throwNexusError('CellNotFound', outPoint);
+        }
         const object = content.result.cell;
         const cell: Cell = {
           outPoint,
@@ -349,4 +342,48 @@ export async function loadSecp256k1ScriptDep(payload: { nodeUrl: string }): Prom
     TX_HASH: secp256k1DepTxHash,
     DEP_TYPE: 'depGroup',
   };
+}
+
+let id = 0;
+function createRpcClient(url: string) {
+  async function _request(body: JSONRPCRequest | JSONRPCRequest[]): Promise<JSONRPCResponse | JSONRPCResponse[]> {
+    ++id;
+    const res = await fetch(url, {
+      method: 'POST',
+      body: JSON.stringify(body),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    if (res.status >= 300) {
+      throwNexusError('RequestCkbFailed', body);
+    }
+    return res.json();
+  }
+
+  async function request<Result = unknown, Params = unknown>(method: string, params: Params): Promise<Result> {
+    const res = await _request({ jsonrpc: '2.0', id, method: method, params: params });
+    asserts.asserts(!Array.isArray(res));
+    if (res.error !== undefined) {
+      throwError('Request CKB error:', method, res.error);
+    }
+    return res.result;
+  }
+
+  async function batchRequest<Result = unknown, Params = unknown>(
+    method: string,
+    batchParams: Params[],
+  ): Promise<Result[]> {
+    const res = await _request(batchParams.map((params) => ({ jsonrpc: '2.0', id, method, params: params })));
+    asserts.asserts(Array.isArray(res));
+
+    return res.map<Result>((res) => {
+      if (res.error !== undefined) {
+        throwError('Request CKB error:', method, res.error);
+      }
+      return res.result;
+    });
+  }
+
+  return { request, batchRequest };
 }
