@@ -54,8 +54,8 @@ export interface CkbProvider {
 }
 
 export interface Keyring {
-  getUnusedLocks(options?: GetUnusedLocksOptions): Promise<Script[]>;
-  getUsedLocks(payload?: { cursor?: string }): Promise<Paginate<Script>>;
+  getOffChainLocks(options?: GetUnusedLocksOptions): Promise<Script[]>;
+  getOnChainLocks(payload?: { cursor?: string }): Promise<Paginate<Script>>;
   getLiveCells(payload?: { cursor?: string }): Promise<Paginate<Cell>>;
   signTransaction(payload: { tx: Transaction }): Promise<GroupedSignature>;
 

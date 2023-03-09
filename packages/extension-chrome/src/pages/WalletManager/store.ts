@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { createServicesFactory } from '../../services';
+import { makeBrowserExtensionModulesFactory } from '../../services';
 
 type State = {
   seed: string[];
@@ -28,9 +28,11 @@ export const useWalletCreationStore = create<State & Actions>((setState, get) =>
     });
   },
 
-  initWallet: () => {
-    const internalService = createServicesFactory().get('internalService');
-    return internalService.initWallet({
+  initWallet: async () => {
+    // TODO - this is a temporary solution, we should use only one factory for all modules
+    const factory = makeBrowserExtensionModulesFactory();
+    const internalService = factory.get('internalService');
+    await internalService.initWallet({
       password: get().password,
       nickname: get().username,
       mnemonic: get().seed,
