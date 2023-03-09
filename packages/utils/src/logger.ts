@@ -1,4 +1,4 @@
-import { formatMessage } from './internal';
+import { formatMessageWithPrefix } from './internal';
 
 let adapter: Logger = console;
 let loglevel: LogLevel = 'info';
@@ -6,10 +6,16 @@ let loglevel: LogLevel = 'info';
 export function createLogger(module = 'Nexus'): Logger {
   const log =
     (method: keyof Logger) =>
-    (message?: string, ...args: unknown[]) => {
+    (...args: unknown[]) => {
       const currentLogLevel = typeof loglevel === 'string' ? LOG_LEVELS[loglevel] : loglevel;
-      if (LOG_LEVELS[method] < currentLogLevel || !message) return;
-      adapter[method](formatMessage(`[${module}]\t[${method.toUpperCase()}]\t${message}`, ...args));
+      if (LOG_LEVELS[method] < currentLogLevel || !args.length) return;
+
+      const log = adapter[method];
+
+      const level = method.toUpperCase();
+      const prefix = `[${module}]\t[${level}]\t`;
+
+      log(formatMessageWithPrefix(prefix, ...args));
     };
 
   return {
@@ -30,11 +36,11 @@ export function setLogger(newAdapter: Logger): void {
 }
 
 export interface Logger {
-  trace(message?: string, ...args: unknown[]): void;
-  debug(message?: string, ...args: unknown[]): void;
-  info(message?: string, ...args: unknown[]): void;
-  warn(message?: string, ...args: unknown[]): void;
-  error(message?: string, ...args: unknown[]): void;
+  trace(...args: unknown[]): void;
+  debug(...args: unknown[]): void;
+  info(...args: unknown[]): void;
+  warn(...args: unknown[]): void;
+  error(...args: unknown[]): void;
 }
 
 export type LogLevel = 'trace' | 'debug' | 'info' | 'warn' | 'error' | number;
