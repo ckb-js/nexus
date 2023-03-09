@@ -143,9 +143,6 @@ export const SignTransaction: FC = () => {
 
   return (
     <Skeleton as={Flex} flexDirection="column" isLoaded={!!transactionQuery.data} h="100%" w="100%">
-      <Heading fontSize="2xl" fontWeight="semibold" mt="28px" mb="32px">
-        Sign Transaction
-      </Heading>
       {!!transactionQuery.data && (
         <Box
           sx={{
