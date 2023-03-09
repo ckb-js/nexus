@@ -57,7 +57,7 @@ async function createNotificationWindow(
     top: lastFocused.top,
     left: lastFocused.left! + (lastFocused.width! - 360),
     width: windowSize.w,
-    height: windowSize.h,
+    height: windowSize.h + 28,
     url: `notification.html#/${path}?sessionId=${sessionId}`,
   });
 

@@ -19,7 +19,6 @@ export const DialogFrame: FC<DialogFrameProps> = ({ meta }) => {
 
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const isHomePage = pathname === '/';
   const metaConfig = metaMap.get(pathname);
   const allowBack = !!metaConfig?.allowBack;
   const title = metaConfig?.title;
@@ -36,7 +35,6 @@ export const DialogFrame: FC<DialogFrameProps> = ({ meta }) => {
         position="relative"
         maxW="500px"
         h="100vh"
-        pt={isHomePage ? '0' : '28px'}
         px="24px"
         pb="72px"
         color="white"
