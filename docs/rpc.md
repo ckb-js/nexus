@@ -21,6 +21,11 @@ await window.ckb.request({ method: "wallet_enable" })
 
 - [debug\_getConfig](#debug_getconfig)
 - [wallet\_enable](#wallet_enable)
+- [wallet\_fullOwnership\_getLiveCells](#wallet_fullownership_getlivecells)
+- [wallet\_fullOwnership\_getOffChainLocks](#wallet_fullownership_getoffchainlocks)
+- [wallet\_fullOwnership\_getOnChainLocks](#wallet_fullownership_getonchainlocks)
+- [wallet\_fullOwnership\_signData](#wallet_fullownership_signdata)
+- [wallet\_fullOwnership\_signTransaction](#wallet_fullownership_signtransaction)
 
 ## Methods
 
@@ -36,7 +41,7 @@ Get the wallet config
 
 #### Defined in
 
-[rpc/index.ts:25](https://github.com/ckb-js/nexus/blob/19af755/packages/types/src/rpc/index.ts#L25)
+[rpc/index.ts:90](https://github.com/zhangyouxin/nexus/blob/1c75fa8/packages/types/src/rpc/index.ts#L90)
 
 ___
 
@@ -54,7 +59,157 @@ After calling this method, we can see the dApp in the whitelist
 
 #### Defined in
 
-[rpc/index.ts:20](https://github.com/ckb-js/nexus/blob/19af755/packages/types/src/rpc/index.ts#L20)
+[rpc/index.ts:30](https://github.com/zhangyouxin/nexus/blob/1c75fa8/packages/types/src/rpc/index.ts#L30)
+
+___
+
+### wallet\_fullOwnership\_getLiveCells
+
+▸ **wallet_fullOwnership_getLiveCells**(`payload?`): `Promise`<`Paginate`<`Cell`\>\>
+
+get live cells of which the wallet has full ownership
+
+**`Example`**
+
+```js
+await window.ckb.request({ method: 'wallet_fullOwnership_getLiveCells', params: {cursor: "0:0x" }})
+```
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `payload?` | `GetPaginateItemsPayload` | the `change` field defaults to 'external', if the `cursor` is blank, it is equivalent to `"0:0x"` and will return the first page of live cells |
+
+#### Returns
+
+`Promise`<`Paginate`<`Cell`\>\>
+
+live cells of current wallet with pagination info, the page size is 20
+
+#### Defined in
+
+[rpc/index.ts:63](https://github.com/zhangyouxin/nexus/blob/1c75fa8/packages/types/src/rpc/index.ts#L63)
+
+___
+
+### wallet\_fullOwnership\_getOffChainLocks
+
+▸ **wallet_fullOwnership_getOffChainLocks**(`payload`): `Promise`<`Script`[]\>
+
+get unused locks of which the wallet has full ownership
+
+**`Example`**
+
+```js
+await window.ckb.request({ method: 'wallet_fullOwnership_getOffChainLocks', params: { change: 'external' } });
+```
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `payload` | `GetOffChainLocksPayload` | the `change` field defaults to 'external' |
+
+#### Returns
+
+`Promise`<`Script`[]\>
+
+the off-chain locks of current wallet
+
+#### Defined in
+
+[rpc/index.ts:41](https://github.com/zhangyouxin/nexus/blob/1c75fa8/packages/types/src/rpc/index.ts#L41)
+
+___
+
+### wallet\_fullOwnership\_getOnChainLocks
+
+▸ **wallet_fullOwnership_getOnChainLocks**(`payload`): `Promise`<`Paginate`<`Script`\>\>
+
+get used locks of which the wallet has full ownership
+
+**`Example`**
+
+```js
+await window.ckb.request({ method: 'wallet_fullOwnership_getOnChainLocks', params: { change: "internal", cursor: "0" } });
+```
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `payload` | `GetOnChainLocksPayload` | the `change` field defaults to `'external'`, if the `cursor` is blank, it is equivalent to `"0"` and will return the first page of on-chain locks |
+
+#### Returns
+
+`Promise`<`Paginate`<`Script`\>\>
+
+on-chain locks of the current wallet with pagination info, the page size is 20
+
+#### Defined in
+
+[rpc/index.ts:52](https://github.com/zhangyouxin/nexus/blob/1c75fa8/packages/types/src/rpc/index.ts#L52)
+
+___
+
+### wallet\_fullOwnership\_signData
+
+▸ **wallet_fullOwnership_signData**(`payload`): `Promise`<`string`\>
+
+sign a transaction with the wallet
+
+**`Example`**
+
+```js
+await window.ckb.request({ method: 'wallet_fullOwnership_signData', params: { data: '0x1234', lock: <YOUR_LOCK> }})
+```
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `payload` | `SignDataPayload` | `data` you would like to sign, `lock` indicates which lock you would like to use to sign the data |
+
+#### Returns
+
+`Promise`<`string`\>
+
+the signature of the data if the wallet has full ownership of the lock passed in
+
+#### Defined in
+
+[rpc/index.ts:85](https://github.com/zhangyouxin/nexus/blob/1c75fa8/packages/types/src/rpc/index.ts#L85)
+
+___
+
+### wallet\_fullOwnership\_signTransaction
+
+▸ **wallet_fullOwnership_signTransaction**(`payload`): `Promise`<`GroupedSignature`\>
+
+sign a transaction with the wallet
+
+**`Example`**
+
+```js
+await window.ckb.request({ method: 'wallet_fullOwnership_signTransaction', params: { tx: <YOUR_TRANSACTION> }})
+```
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `payload` | `SignTransactionPayload` | the `tx` is your transaction |
+
+#### Returns
+
+`Promise`<`GroupedSignature`\>
+
+an array of [lock, signature] tuple
+
+#### Defined in
+
+[rpc/index.ts:74](https://github.com/zhangyouxin/nexus/blob/1c75fa8/packages/types/src/rpc/index.ts#L74)
 
 
 <a name="configmd"></a>
@@ -81,7 +236,7 @@ a list of networks that the app can connect to
 
 #### Defined in
 
-[services/ConfigService.ts:83](https://github.com/ckb-js/nexus/blob/19af755/packages/types/src/services/ConfigService.ts#L83)
+[services/ConfigService.ts:83](https://github.com/zhangyouxin/nexus/blob/1c75fa8/packages/types/src/services/ConfigService.ts#L83)
 
 ___
 
@@ -94,7 +249,7 @@ unlike other wallet, Nexus don't use a certain address as the identity of the us
 
 #### Defined in
 
-[services/ConfigService.ts:75](https://github.com/ckb-js/nexus/blob/19af755/packages/types/src/services/ConfigService.ts#L75)
+[services/ConfigService.ts:75](https://github.com/zhangyouxin/nexus/blob/1c75fa8/packages/types/src/services/ConfigService.ts#L75)
 
 ___
 
@@ -106,7 +261,7 @@ the id of networks that is selected to connect
 
 #### Defined in
 
-[services/ConfigService.ts:79](https://github.com/ckb-js/nexus/blob/19af755/packages/types/src/services/ConfigService.ts#L79)
+[services/ConfigService.ts:79](https://github.com/zhangyouxin/nexus/blob/1c75fa8/packages/types/src/services/ConfigService.ts#L79)
 
 ___
 
@@ -118,7 +273,7 @@ version of the current app
 
 #### Defined in
 
-[services/ConfigService.ts:70](https://github.com/ckb-js/nexus/blob/19af755/packages/types/src/services/ConfigService.ts#L70)
+[services/ConfigService.ts:70](https://github.com/zhangyouxin/nexus/blob/1c75fa8/packages/types/src/services/ConfigService.ts#L70)
 
 ___
 
@@ -130,7 +285,7 @@ a list of hosts that have been granted
 
 #### Defined in
 
-[services/ConfigService.ts:87](https://github.com/ckb-js/nexus/blob/19af755/packages/types/src/services/ConfigService.ts#L87)
+[services/ConfigService.ts:87](https://github.com/zhangyouxin/nexus/blob/1c75fa8/packages/types/src/services/ConfigService.ts#L87)
 
 
 <a name="networkconfigmd"></a>
@@ -154,7 +309,7 @@ a list of hosts that have been granted
 
 #### Defined in
 
-[services/ConfigService.ts:97](https://github.com/ckb-js/nexus/blob/19af755/packages/types/src/services/ConfigService.ts#L97)
+[services/ConfigService.ts:97](https://github.com/zhangyouxin/nexus/blob/1c75fa8/packages/types/src/services/ConfigService.ts#L97)
 
 ___
 
@@ -164,7 +319,7 @@ ___
 
 #### Defined in
 
-[services/ConfigService.ts:96](https://github.com/ckb-js/nexus/blob/19af755/packages/types/src/services/ConfigService.ts#L96)
+[services/ConfigService.ts:96](https://github.com/zhangyouxin/nexus/blob/1c75fa8/packages/types/src/services/ConfigService.ts#L96)
 
 ___
 
@@ -174,7 +329,7 @@ ___
 
 #### Defined in
 
-[services/ConfigService.ts:98](https://github.com/ckb-js/nexus/blob/19af755/packages/types/src/services/ConfigService.ts#L98)
+[services/ConfigService.ts:98](https://github.com/zhangyouxin/nexus/blob/1c75fa8/packages/types/src/services/ConfigService.ts#L98)
 
 ___
 
@@ -184,7 +339,7 @@ ___
 
 #### Defined in
 
-[services/ConfigService.ts:99](https://github.com/ckb-js/nexus/blob/19af755/packages/types/src/services/ConfigService.ts#L99)
+[services/ConfigService.ts:99](https://github.com/zhangyouxin/nexus/blob/1c75fa8/packages/types/src/services/ConfigService.ts#L99)
 
 
 <a name="trustedhostmd"></a>
@@ -206,7 +361,7 @@ ___
 
 #### Defined in
 
-[services/ConfigService.ts:92](https://github.com/ckb-js/nexus/blob/19af755/packages/types/src/services/ConfigService.ts#L92)
+[services/ConfigService.ts:92](https://github.com/zhangyouxin/nexus/blob/1c75fa8/packages/types/src/services/ConfigService.ts#L92)
 
 ___
 
@@ -216,4 +371,4 @@ ___
 
 #### Defined in
 
-[services/ConfigService.ts:91](https://github.com/ckb-js/nexus/blob/19af755/packages/types/src/services/ConfigService.ts#L91)
+[services/ConfigService.ts:91](https://github.com/zhangyouxin/nexus/blob/1c75fa8/packages/types/src/services/ConfigService.ts#L91)
