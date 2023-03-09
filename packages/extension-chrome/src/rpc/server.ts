@@ -3,6 +3,7 @@ import { ModulesFactory } from '../services';
 import { JSONRPCRequest, JSONRPCResponse, JSONRPCServer } from 'json-rpc-2.0';
 import { whitelistMiddleware } from './middlewares/whitelistMiddleware';
 import { createLogger } from '@nexus-wallet/utils';
+import { getMethodSchema } from './schema';
 
 export const methods: Record<string, (...args: unknown[]) => unknown> = {};
 export const logger = createLogger();
@@ -11,7 +12,8 @@ export function addMethod<K extends keyof RpcMethods>(
   method: K,
   handler: (param: RpcMethods[K]['params'], context: ServerParams) => RpcMethods[K]['result'],
 ): void {
-  Object.assign(methods, { [method]: handler });
+  const schema = getMethodSchema(method);
+  Object.assign(methods, { [method]: !!schema ? schema.implement(handler) : handler });
 }
 
 interface NexusRpcServer<Sender> {
