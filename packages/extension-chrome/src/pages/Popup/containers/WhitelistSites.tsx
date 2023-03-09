@@ -27,7 +27,7 @@ export const WhitelistSites: FC = () => {
 
   const removeWhitelistItemMutation = useMutation({
     mutationFn: (host: string) => {
-      return configService.removeWhitelistItem({ host }) as Promise<void>;
+      return Promise.resolve(configService.removeWhitelistItem({ host }));
     },
   });
 
