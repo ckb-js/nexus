@@ -28,7 +28,7 @@ export const Grant: React.FC = () => {
 
   return (
     <Skeleton colorScheme="purple" isLoaded={!requestAppInfoQuery.isLoading && !configQuery.isLoading}>
-      <ConnectStatusCard mt="44px" name={configQuery.data?.nickname!} />
+      <ConnectStatusCard name={configQuery.data?.nickname!} />
 
       <Flex py="32px" alignItems="center" direction="column">
         <Image data-test-id="requester.favicon" w="40px" mb="8px" h="40px" src={favicon} />

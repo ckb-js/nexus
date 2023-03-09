@@ -41,7 +41,7 @@ export const Home: FC = () => {
 
   return (
     <Flex flexDir="column" h="100%">
-      <ConnectStatusCard name={config?.nickname!} connected mt="44px" />
+      <ConnectStatusCard name={config?.nickname!} connected />
 
       <WhiteAlphaBox direction="column" mt="20px">
         {entries.map(({ title, icon, onClick, testId }) => (

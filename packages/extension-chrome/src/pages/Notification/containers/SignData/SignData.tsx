@@ -38,10 +38,6 @@ export const SignData: FC = () => {
     queryFn: () => sessionManager.send('session_getUnsignedData'),
   });
 
-  useEffect(() => {
-    unsignedDataQuery.data && setSharedSigningData(unsignedDataQuery.data?.data);
-  }, [setSharedSigningData, unsignedDataQuery.data]);
-
   const sendSessionMutation = useMutation({
     mutationFn: async (password: string) => {
       await sessionManager.send('session_approveSignData', { password });
@@ -76,6 +72,10 @@ export const SignData: FC = () => {
     const unsigned = bytes.bytify(unsignedDataQuery.data.data);
     return isUtf8(unsigned) ? new TextDecoder('utf-8').decode(new Uint8Array(unsigned)) : bytes.hexify(unsigned);
   }, [unsignedDataQuery.data]);
+
+  useEffect(() => {
+    dataForSigning && setSharedSigningData(dataForSigning);
+  }, [setSharedSigningData, dataForSigning]);
 
   const onReject = async () => {
     window.close();

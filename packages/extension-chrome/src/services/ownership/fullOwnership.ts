@@ -9,7 +9,6 @@ import { BackendProvider } from './backend';
 import { HexString, Script, utils } from '@ckb-lumos/lumos';
 import { common } from '@ckb-lumos/common-scripts';
 import { Config } from '@ckb-lumos/config-manager';
-import { Signature, SignDataPayload } from '@nexus-wallet/types/lib/services/OwnershipService';
 
 export function createFullOwnershipService({
   storage,
@@ -131,9 +130,12 @@ export function createFullOwnershipService({
 
       return signatures;
     },
-    signData: async (payload: SignDataPayload): Promise<Signature> => {
+    signData: async (payload) => {
       // TODO how to get url?
-      const { password } = await platformService.requestSignData({ data: bytes.hexify(payload.data), url: '' });
+      const { password } = await platformService.requestSignData({
+        data: bytes.hexify(payload.data),
+        url: payload.url,
+      });
       const db = await getDb();
       const [info] = await db.filterByMatch({ scriptHash: utils.computeScriptHash(payload.lock) });
       asserts.asserts(

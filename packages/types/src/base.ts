@@ -14,3 +14,7 @@ export type Cursor = string;
  *
  */
 export type Bytes = string;
+
+export type RequesterInfo = {
+  url: string;
+};
