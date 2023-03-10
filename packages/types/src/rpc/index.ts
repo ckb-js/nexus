@@ -41,6 +41,7 @@ export interface RpcMethods {
    * @returns the off-chain locks of current wallet
     <details>
      <summary>show return data example</summary>
+
      ```json
       [
         {
@@ -159,6 +160,7 @@ export interface RpcMethods {
    * @returns on-chain locks of the current wallet with pagination info, the page size is 20
     <details>
      <summary>show return data example</summary>
+
     ```json
       {
         "cursor": "125",
@@ -212,6 +214,7 @@ export interface RpcMethods {
    * @returns live cells of current wallet with pagination info, the page size is 20
     <details>
       <summary>show return data example</summary>
+
       ```json
       {
         "objects": [
@@ -361,6 +364,7 @@ export interface RpcMethods {
    * @returns an array of [lock, signature] tuple
     <details>
      <summary>show return data example</summary>
+
       ```json
         [
           [
@@ -398,6 +402,7 @@ export interface RpcMethods {
    * @returns the signature of the data if the wallet has full ownership of the lock passed in
     <details>
      <summary>show return data example</summary>
+     
       ```json
         "0xa05fcab1955bb1aaf5d6733a5ae9ff932b5c8183532c682c1d3c735e75c2e2e6690d19ad664773ac1f438051a6c47b4aafb9e914292904fe9fe83d59906e827b00"
       ```

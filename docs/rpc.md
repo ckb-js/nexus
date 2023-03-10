@@ -41,7 +41,7 @@ Get the wallet config
 
 #### Defined in
 
-[packages/types/src/rpc/index.ts:411](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/rpc/index.ts#L411)
+[packages/types/src/rpc/index.ts:416](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/rpc/index.ts#L416)
 
 ___
 
@@ -59,7 +59,7 @@ After calling this method, we can see the dApp in the whitelist
 
 #### Defined in
 
-[packages/types/src/rpc/index.ts:32](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/rpc/index.ts#L32)
+[packages/types/src/rpc/index.ts:32](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/rpc/index.ts#L32)
 
 ___
 
@@ -95,6 +95,7 @@ await window.ckb.request({
 live cells of current wallet with pagination info, the page size is 20
  <details>
    <summary>show return data example</summary>
+
    ```json
    {
      "objects": [
@@ -186,7 +187,7 @@ live cells of current wallet with pagination info, the page size is 20
 
 #### Defined in
 
-[packages/types/src/rpc/index.ts:304](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/rpc/index.ts#L304)
+[packages/types/src/rpc/index.ts:307](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/rpc/index.ts#L307)
 
 ___
 
@@ -215,6 +216,7 @@ await window.ckb.request({ method: 'wallet_fullOwnership_getOffChainLocks', para
 the off-chain locks of current wallet
  <details>
   <summary>show return data example</summary>
+
   ```json
    [
      {
@@ -323,7 +325,7 @@ the off-chain locks of current wallet
 
 #### Defined in
 
-[packages/types/src/rpc/index.ts:150](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/rpc/index.ts#L150)
+[packages/types/src/rpc/index.ts:151](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/rpc/index.ts#L151)
 
 ___
 
@@ -352,6 +354,7 @@ await window.ckb.request({ method: 'wallet_fullOwnership_getOnChainLocks', param
 on-chain locks of the current wallet with pagination info, the page size is 20
  <details>
   <summary>show return data example</summary>
+
  ```json
    {
      "cursor": "125",
@@ -388,7 +391,7 @@ on-chain locks of the current wallet with pagination info, the page size is 20
 
 #### Defined in
 
-[packages/types/src/rpc/index.ts:196](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/rpc/index.ts#L196)
+[packages/types/src/rpc/index.ts:198](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/rpc/index.ts#L198)
 
 ___
 
@@ -431,6 +434,7 @@ let locks = await window.ckb.request({
 the signature of the data if the wallet has full ownership of the lock passed in
  <details>
   <summary>show return data example</summary>
+  
    ```json
      "0xa05fcab1955bb1aaf5d6733a5ae9ff932b5c8183532c682c1d3c735e75c2e2e6690d19ad664773ac1f438051a6c47b4aafb9e914292904fe9fe83d59906e827b00"
    ```
@@ -438,7 +442,7 @@ the signature of the data if the wallet has full ownership of the lock passed in
 
 #### Defined in
 
-[packages/types/src/rpc/index.ts:406](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/rpc/index.ts#L406)
+[packages/types/src/rpc/index.ts:411](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/rpc/index.ts#L411)
 
 ___
 
@@ -515,6 +519,7 @@ sign a transaction with the wallet
 an array of [lock, signature] tuple
  <details>
   <summary>show return data example</summary>
+
    ```json
      [
        [
@@ -531,7 +536,7 @@ an array of [lock, signature] tuple
 
 #### Defined in
 
-[packages/types/src/rpc/index.ts:378](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/rpc/index.ts#L378)
+[packages/types/src/rpc/index.ts:382](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/rpc/index.ts#L382)
 
 
 <a name="configmd"></a>
@@ -558,7 +563,7 @@ a list of networks that the app can connect to
 
 #### Defined in
 
-[packages/types/src/services/ConfigService.ts:83](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/services/ConfigService.ts#L83)
+[packages/types/src/services/ConfigService.ts:83](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/services/ConfigService.ts#L83)
 
 ___
 
@@ -571,7 +576,7 @@ unlike other wallet, Nexus don't use a certain address as the identity of the us
 
 #### Defined in
 
-[packages/types/src/services/ConfigService.ts:75](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/services/ConfigService.ts#L75)
+[packages/types/src/services/ConfigService.ts:75](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/services/ConfigService.ts#L75)
 
 ___
 
@@ -583,7 +588,7 @@ the id of networks that is selected to connect
 
 #### Defined in
 
-[packages/types/src/services/ConfigService.ts:79](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/services/ConfigService.ts#L79)
+[packages/types/src/services/ConfigService.ts:79](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/services/ConfigService.ts#L79)
 
 ___
 
@@ -595,7 +600,7 @@ version of the current app
 
 #### Defined in
 
-[packages/types/src/services/ConfigService.ts:70](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/services/ConfigService.ts#L70)
+[packages/types/src/services/ConfigService.ts:70](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/services/ConfigService.ts#L70)
 
 ___
 
@@ -607,7 +612,7 @@ a list of hosts that have been granted
 
 #### Defined in
 
-[packages/types/src/services/ConfigService.ts:87](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/services/ConfigService.ts#L87)
+[packages/types/src/services/ConfigService.ts:87](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/services/ConfigService.ts#L87)
 
 
 <a name="getlivecellspayloadmd"></a>
@@ -638,7 +643,7 @@ GetPaginateItemsPayload.cursor
 
 #### Defined in
 
-[packages/types/src/services/OwnershipService.ts:29](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/services/OwnershipService.ts#L29)
+[packages/types/src/services/OwnershipService.ts:29](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/services/OwnershipService.ts#L29)
 
 
 <a name="getoffchainlockspayloadmd"></a>
@@ -669,7 +674,7 @@ FilterPayload.change
 
 #### Defined in
 
-[packages/types/src/services/OwnershipService.ts:33](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/services/OwnershipService.ts#L33)
+[packages/types/src/services/OwnershipService.ts:33](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/services/OwnershipService.ts#L33)
 
 
 <a name="getonchainlockspayloadmd"></a>
@@ -703,7 +708,7 @@ FilterPayload.change
 
 #### Defined in
 
-[packages/types/src/services/OwnershipService.ts:33](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/services/OwnershipService.ts#L33)
+[packages/types/src/services/OwnershipService.ts:33](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/services/OwnershipService.ts#L33)
 
 ___
 
@@ -717,7 +722,7 @@ GetPaginateItemsPayload.cursor
 
 #### Defined in
 
-[packages/types/src/services/OwnershipService.ts:29](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/services/OwnershipService.ts#L29)
+[packages/types/src/services/OwnershipService.ts:29](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/services/OwnershipService.ts#L29)
 
 
 <a name="networkconfigmd"></a>
@@ -741,7 +746,7 @@ GetPaginateItemsPayload.cursor
 
 #### Defined in
 
-[packages/types/src/services/ConfigService.ts:97](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/services/ConfigService.ts#L97)
+[packages/types/src/services/ConfigService.ts:97](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/services/ConfigService.ts#L97)
 
 ___
 
@@ -751,7 +756,7 @@ ___
 
 #### Defined in
 
-[packages/types/src/services/ConfigService.ts:96](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/services/ConfigService.ts#L96)
+[packages/types/src/services/ConfigService.ts:96](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/services/ConfigService.ts#L96)
 
 ___
 
@@ -761,7 +766,7 @@ ___
 
 #### Defined in
 
-[packages/types/src/services/ConfigService.ts:98](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/services/ConfigService.ts#L98)
+[packages/types/src/services/ConfigService.ts:98](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/services/ConfigService.ts#L98)
 
 ___
 
@@ -771,7 +776,7 @@ ___
 
 #### Defined in
 
-[packages/types/src/services/ConfigService.ts:99](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/services/ConfigService.ts#L99)
+[packages/types/src/services/ConfigService.ts:99](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/services/ConfigService.ts#L99)
 
 
 <a name="paginatemd"></a>
@@ -799,7 +804,7 @@ ___
 
 #### Defined in
 
-[packages/types/src/base.ts:4](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/base.ts#L4)
+[packages/types/src/base.ts:4](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/base.ts#L4)
 
 ___
 
@@ -809,7 +814,7 @@ ___
 
 #### Defined in
 
-[packages/types/src/base.ts:5](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/base.ts#L5)
+[packages/types/src/base.ts:5](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/base.ts#L5)
 
 
 <a name="scriptmd"></a>
@@ -884,7 +889,7 @@ SignDataPayloadType.data
 
 #### Defined in
 
-[packages/types/src/services/OwnershipService.ts:45](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/services/OwnershipService.ts#L45)
+[packages/types/src/services/OwnershipService.ts:45](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/services/OwnershipService.ts#L45)
 
 ___
 
@@ -898,7 +903,7 @@ SignDataPayloadType.lock
 
 #### Defined in
 
-[packages/types/src/services/OwnershipService.ts:46](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/services/OwnershipService.ts#L46)
+[packages/types/src/services/OwnershipService.ts:46](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/services/OwnershipService.ts#L46)
 
 
 <a name="signtransactionpayloadmd"></a>
@@ -919,7 +924,7 @@ SignDataPayloadType.lock
 
 #### Defined in
 
-[packages/types/src/services/OwnershipService.ts:41](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/services/OwnershipService.ts#L41)
+[packages/types/src/services/OwnershipService.ts:41](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/services/OwnershipService.ts#L41)
 
 
 <a name="trustedhostmd"></a>
@@ -941,7 +946,7 @@ SignDataPayloadType.lock
 
 #### Defined in
 
-[packages/types/src/services/ConfigService.ts:92](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/services/ConfigService.ts#L92)
+[packages/types/src/services/ConfigService.ts:92](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/services/ConfigService.ts#L92)
 
 ___
 
@@ -951,4 +956,4 @@ ___
 
 #### Defined in
 
-[packages/types/src/services/ConfigService.ts:91](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/services/ConfigService.ts#L91)
+[packages/types/src/services/ConfigService.ts:91](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/services/ConfigService.ts#L91)
