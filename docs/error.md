@@ -1,21 +1,41 @@
-# Debug
+# Error Handling
 
-## Debugging the RPC request
+Errors can occur in the Nexus wallet browser extension, but we've made efforts to make them user-friendly for both
+developers and end-users. Whenever an error occurs, an instance of the `Error` object is thrown, which has the following
+structure:
 
-When the RPC request fails, the error message will be printed in the console if we are not catching the error.
-But sometimes, we may want to know more details about the error, such as the error data, to debug the error,
-we can check if there is an `data` field in the error object, if so, we can print the `data` field to get more details.
+```ts
+interface Error {
+  message: string;
+  data?: any;
+}
+```
 
-### Example
+The `message` field is designed to be easy for dApps to display to end-users, while the optional `data` field provides
+more detailed information about the error.
 
-Here is an example of how to debug the error.
-We will request to sign a transaction with a non-live cell as the input.
-The error message will be
+To display the error message, we recommend using the following format:
 
-> Cannot resolve the cell, please check if the network is correct or if the cell is still live
+```markdown
+<details>
+  <summary>${error.message}</summary>
+  <pre>${error.data && JSON.stringify(error.data, null, 2)}</pre>
+</details>;
+```
 
-And if we want to know more details about the error, we can print the `data` field of the error object. The data will
-tell us which cell is resolved failed
+This format allows developers to debug the error by displaying more details in the `data` field if it exists.
+
+## Debugging RPC Requests
+
+When an RPC request fails, the error message will be printed to the console if it's not caught. If more detailed
+information is needed to debug the error, the `data` field of the error object can be checked.
+
+For example, if a request to sign a transaction fails due to a non-live cell input, the error message will be:
+
+> Cannot resolve the cell, please check if the network is correct or if the cell is still live.
+
+If more details about the error are needed, the `data` field of the error object can be printed. The data will indicate
+which cell was resolved incorrectly, like this:
 
 ```json
 {
@@ -79,7 +99,8 @@ await window.ckb
       },
     },
   })
-  .then(console.log, (e) => {
-    console.log(e.message, e.data);
+  .catch((error) => {
+    console.log(error.message);
+    console.log(error.data);
   });
 ```
