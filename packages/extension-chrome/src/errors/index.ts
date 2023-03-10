@@ -1,2 +1,2 @@
 export { NexusError } from './NexusError';
-export { throwNexusError } from './errors';
+export { NexusCommonErrors } from './list';

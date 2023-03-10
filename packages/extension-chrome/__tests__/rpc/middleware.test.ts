@@ -2,7 +2,7 @@ import { createTestRpcServer } from './helper';
 import { createInMemoryStorage } from '../../src/services/storage';
 import { errorMiddleware } from '../../src/rpc/middlewares/errorMiddleware';
 import { createJSONRPCRequest, JSONRPCServer } from 'json-rpc-2.0';
-import { throwNexusError } from '../../src/errors';
+import { NexusCommonErrors, NexusError } from '../../src/errors';
 
 describe('Middlewares#whitelistMiddleware', () => {
   it('should request be baned when Nexus is not initialized', async () => {
@@ -30,14 +30,18 @@ describe('Middlewares#errorMiddleware', () => {
     const server = new JSONRPCServer();
 
     server.applyMiddleware(errorMiddleware);
-    server.addMethod('unknown', () => throwNexusError('Unknown', null));
+    server.addMethod('unknown', () => {
+      throw NexusError.create('Unknown');
+    });
 
     const res = await server.receive(createJSONRPCRequest(0, 'unknown'));
     expect(res?.error?.message).toMatch(/Unknown/);
 
-    server.addMethod('object', () => throwNexusError('Something wrong', { key: 'value' }));
+    server.addMethod('object', () => {
+      throw NexusCommonErrors.RequestCkbFailed({ method: 'some_method', params: [] });
+    });
     const res2 = await server.receive(createJSONRPCRequest(0, 'object'));
-    expect(res2?.error?.message).toMatch(/Something wrong/);
-    expect(res2?.error?.data).toMatchObject({ key: 'value' });
+    expect(res2?.error?.message).toMatch(/request.*failed/i);
+    expect(res2?.error?.data).toMatchObject({ method: 'some_method', params: [] });
   });
 });

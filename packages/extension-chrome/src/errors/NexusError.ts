@@ -6,14 +6,18 @@ export class NexusError<T = unknown> extends Error {
   code: number;
   data?: unknown;
 
-  constructor({ code = -1, message, data }: { code?: number; message?: string; data?: T }) {
+  private constructor({ code, message, data }: { code: number; message: string; data?: T }) {
     super(message);
     this.code = code;
     this.data = data;
   }
 
-  static create<T>({ code = -1, message, data }: { code?: number; message?: string; data?: T }): NexusError<T> {
-    return new NexusError({ code, message, data });
+  static create<T>(opt: { code?: number; message: string; data?: T } | string): NexusError<T> {
+    if (typeof opt === 'string') {
+      return new NexusError({ code: -1, message: opt });
+    }
+
+    return new NexusError({ code: opt.code ?? -1, message: opt.message, data: opt.data });
   }
 
   static isNexusError(error: unknown): error is NexusError {

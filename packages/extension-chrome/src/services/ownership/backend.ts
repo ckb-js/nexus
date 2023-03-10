@@ -8,8 +8,7 @@ import chunk from 'lodash/chunk';
 import isEqual from 'lodash/isEqual';
 import { JSONRPCRequest, JSONRPCResponse } from 'json-rpc-2.0';
 import { CKBComponents } from '@ckb-lumos/rpc/lib/types/api';
-import { throwNexusError } from '../../errors';
-import { throwError } from '@nexus-wallet/utils/lib/error';
+import { NexusCommonErrors } from '../../errors';
 
 export interface Backend {
   getSecp256k1Blake160ScriptConfig(payload: { networkId: string }): Promise<ScriptConfig>;
@@ -264,7 +263,7 @@ export function createBackend(_payload: { nodeUrl: string }): Backend {
         });
         const content = await rawResult.json();
         if (!content?.result?.cell) {
-          throwNexusError('CellNotFound', outPoint);
+          throw NexusCommonErrors.CellNotFound(outPoint);
         }
         const object = content.result.cell;
         const cell: Cell = {
@@ -344,10 +343,12 @@ export async function loadSecp256k1ScriptDep(payload: { nodeUrl: string }): Prom
   };
 }
 
-let id = 0;
 function createRpcClient(url: string) {
+  // auto-increment id
+  let jsonRpcId = 0;
+
   async function _request(body: JSONRPCRequest | JSONRPCRequest[]): Promise<JSONRPCResponse | JSONRPCResponse[]> {
-    ++id;
+    ++jsonRpcId;
     const res = await fetch(url, {
       method: 'POST',
       body: JSON.stringify(body),
@@ -356,16 +357,16 @@ function createRpcClient(url: string) {
       },
     });
     if (res.status >= 300) {
-      throwNexusError('RequestCkbFailed', body);
+      throw NexusCommonErrors.RequestCkbFailed(res);
     }
     return res.json();
   }
 
   async function request<Result = unknown, Params = unknown>(method: string, params: Params): Promise<Result> {
-    const res = await _request({ jsonrpc: '2.0', id, method: method, params: params });
+    const res = await _request({ jsonrpc: '2.0', id: jsonRpcId, method: method, params: params });
     asserts.asserts(!Array.isArray(res));
     if (res.error !== undefined) {
-      throwError('Request CKB error:', method, res.error);
+      throw NexusCommonErrors.RequestCkbFailed(res);
     }
     return res.result;
   }
@@ -374,12 +375,19 @@ function createRpcClient(url: string) {
     method: string,
     batchParams: Params[],
   ): Promise<Result[]> {
-    const res = await _request(batchParams.map((params) => ({ jsonrpc: '2.0', id, method, params: params })));
+    const res = await _request(
+      batchParams.map((params) => ({
+        jsonrpc: '2.0',
+        id: jsonRpcId,
+        method,
+        params: params,
+      })),
+    );
     asserts.asserts(Array.isArray(res));
 
     return res.map<Result>((res) => {
       if (res.error !== undefined) {
-        throwError('Request CKB error:', method, res.error);
+        throw NexusCommonErrors.RequestCkbFailed(res);
       }
       return res.result;
     });
