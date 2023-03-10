@@ -14,14 +14,22 @@ const OUTPUT_MD_PATH = path.join(__dirname, '../../../docs/rpc.md');
 
 async function main() {
   execSync(
-    `npx typedoc --entryPoints ${RPC_DECL_ENTRYPOINT} --plugin typedoc-plugin-markdown --hideBreadcrumbs --readme none --out ${TMP_OUTPUT_DIR}`,
+    `npx typedoc \
+    --entryPoints "${RPC_DECL_ENTRYPOINT}" \
+    --out "${TMP_OUTPUT_DIR}" \
+    --hideMembersSymbol \
+    --sort source-order \
+    --disableSources \
+    --plugin typedoc-plugin-markdown \
+    --hideBreadcrumbs \
+    --readme none`,
   );
 
   const rpcMd = concatMdSync(TMP_OUTPUT_INTERFACE_DIR, {
     toc: false,
     sorter: (a, b) => {
-      if (a.includes('RpcMethods.md')) return -1;
-      if (b.includes('RpcMethods.md')) return 1;
+      if (a.includes('RpcMethods')) return -1;
+      if (b.includes('RpcMethods')) return 1;
       return a.localeCompare(b);
     },
   });
