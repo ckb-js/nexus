@@ -41,7 +41,7 @@ Get the wallet config
 
 #### Defined in
 
-[packages/types/src/rpc/index.ts:396](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/rpc/index.ts#L396)
+[packages/types/src/rpc/index.ts:411](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/rpc/index.ts#L411)
 
 ___
 
@@ -59,13 +59,13 @@ After calling this method, we can see the dApp in the whitelist
 
 #### Defined in
 
-[packages/types/src/rpc/index.ts:32](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/rpc/index.ts#L32)
+[packages/types/src/rpc/index.ts:32](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/rpc/index.ts#L32)
 
 ___
 
 ### wallet\_fullOwnership\_getLiveCells
 
-▸ **wallet_fullOwnership_getLiveCells**(`payload?`): `Promise`<`Paginate`<`Cell`\>\>
+▸ **wallet_fullOwnership_getLiveCells**(`payload?`): `Promise`<[`Paginate`](#paginatemd)<`Cell`\>\>
 
 get live cells of which the wallet has full ownership
 
@@ -90,100 +90,103 @@ await window.ckb.request({
 
 #### Returns
 
-`Promise`<`Paginate`<`Cell`\>\>
+`Promise`<[`Paginate`](#paginatemd)<`Cell`\>\>
 
-live cells of current wallet with pagination info, the page size is 20, e.g.
-```js
-{
-"objects": [
+live cells of current wallet with pagination info, the page size is 20
+ <details>
+   <summary>show return data example</summary>
+   ```json
    {
-       "cellOutput": {
-           "capacity": "0x14ace47800",
-           "lock": {
-               "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-               "hashType": "type",
-               "args": "0xe570f6b1cf07ecafe86583ff9543bfcfca585a45"
+     "objects": [
+         {
+               "cellOutput": {
+                   "capacity": "0x14ace47800",
+                   "lock": {
+                       "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+                       "hashType": "type",
+                       "args": "0xe570f6b1cf07ecafe86583ff9543bfcfca585a45"
+                   }
+               },
+               "data": "0x",
+               "outPoint": {
+                   "txHash": "0xb9db307671e53ef75976c2ec8b3f501c2151998787581858eb84e95174dd9b5a",
+                   "index": "0x0"
+               },
+               "blockNumber": "0x81d587"
+           },
+           {
+               "cellOutput": {
+                   "capacity": "0xe8d4a51000",
+                   "lock": {
+                       "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+                       "hashType": "type",
+                       "args": "0x74444a85fba9efcd2df6bade767200aab8fee58c"
+                   }
+               },
+               "data": "0x",
+               "outPoint": {
+                   "txHash": "0x9368614003637ea0c547335567a3c72e263d4fe395ec7fa263cbd52609f30dae",
+                   "index": "0x3"
+               },
+               "blockNumber": "0x82a31d"
+           },
+           {
+               "cellOutput": {
+                   "capacity": "0x1a13b8600",
+                   "lock": {
+                       "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+                       "hashType": "type",
+                       "args": "0x5b6c1bb6757ebeef96181fc100cca7e4e962388e"
+                   }
+               },
+               "data": "0x",
+               "outPoint": {
+                   "txHash": "0xa041511f830955439a9b93c0fac6db8376d43d7de56054bc7dc8c51bda27741d",
+                   "index": "0x0"
+               },
+               "blockNumber": "0x82a327"
+           },
+           {
+               "cellOutput": {
+                   "capacity": "0xe8d4a51000",
+                   "lock": {
+                       "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+                       "hashType": "type",
+                       "args": "0x193824fe5fecf4d30871237911e79096b4ca9cbb"
+                   }
+               },
+               "data": "0x",
+               "outPoint": {
+                   "txHash": "0x82be78c691ae1e7d4aafa4491cdba54c33dd1ca075ba5e8f3dd3497283bde849",
+                   "index": "0x0"
+               },
+               "blockNumber": "0x82a328"
+           },
+           {
+               "cellOutput": {
+                   "capacity": "0x5d21dba000",
+                   "lock": {
+                       "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+                       "hashType": "type",
+                       "args": "0xfd822396937dab6ff35a04852b2b48c212384a3f"
+                   }
+               },
+               "data": "0x",
+               "outPoint": {
+                   "txHash": "0x4971ebab12b40c3662a5be6e984e27272e574bd13e9b6ffffb313d6bab453bcd",
+                   "index": "0x0"
+               },
+               "blockNumber": "0x82aa99"
            }
-       },
-       "data": "0x",
-       "outPoint": {
-           "txHash": "0xb9db307671e53ef75976c2ec8b3f501c2151998787581858eb84e95174dd9b5a",
-           "index": "0x0"
-       },
-       "blockNumber": "0x81d587"
-   },
-   {
-       "cellOutput": {
-           "capacity": "0xe8d4a51000",
-           "lock": {
-               "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-               "hashType": "type",
-               "args": "0x74444a85fba9efcd2df6bade767200aab8fee58c"
-           }
-       },
-       "data": "0x",
-       "outPoint": {
-           "txHash": "0x9368614003637ea0c547335567a3c72e263d4fe395ec7fa263cbd52609f30dae",
-           "index": "0x3"
-       },
-       "blockNumber": "0x82a31d"
-   },
-   {
-       "cellOutput": {
-           "capacity": "0x1a13b8600",
-           "lock": {
-               "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-               "hashType": "type",
-               "args": "0x5b6c1bb6757ebeef96181fc100cca7e4e962388e"
-           }
-       },
-       "data": "0x",
-       "outPoint": {
-           "txHash": "0xa041511f830955439a9b93c0fac6db8376d43d7de56054bc7dc8c51bda27741d",
-           "index": "0x0"
-       },
-       "blockNumber": "0x82a327"
-   },
-   {
-       "cellOutput": {
-           "capacity": "0xe8d4a51000",
-           "lock": {
-               "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-               "hashType": "type",
-               "args": "0x193824fe5fecf4d30871237911e79096b4ca9cbb"
-           }
-       },
-       "data": "0x",
-       "outPoint": {
-           "txHash": "0x82be78c691ae1e7d4aafa4491cdba54c33dd1ca075ba5e8f3dd3497283bde849",
-           "index": "0x0"
-       },
-       "blockNumber": "0x82a328"
-   },
-   {
-       "cellOutput": {
-           "capacity": "0x5d21dba000",
-           "lock": {
-               "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-               "hashType": "type",
-               "args": "0xfd822396937dab6ff35a04852b2b48c212384a3f"
-           }
-       },
-       "data": "0x",
-       "outPoint": {
-           "txHash": "0x4971ebab12b40c3662a5be6e984e27272e574bd13e9b6ffffb313d6bab453bcd",
-           "index": "0x0"
-       },
-       "blockNumber": "0x82aa99"
-   }
-],
-"cursor": "125:0x409bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce801fd822396937dab6ff35a04852b2b48c212384a3f000000000082aa990000000500000000"
-}
-```
+       ],
+       "cursor": "125:0x409bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce801fd822396937dab6ff35a04852b2b48c212384a3f000000000082aa990000000500000000"
+     }
+   ```
+ </details>
 
 #### Defined in
 
-[packages/types/src/rpc/index.ts:295](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/rpc/index.ts#L295)
+[packages/types/src/rpc/index.ts:304](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/rpc/index.ts#L304)
 
 ___
 
@@ -209,121 +212,124 @@ await window.ckb.request({ method: 'wallet_fullOwnership_getOffChainLocks', para
 
 `Promise`<[`Script`](#scriptmd)[]\>
 
-the off-chain locks of current wallet, e.g.
-```js
-[
-   {
-       "args": "0xc05b4506ab74c69a5ea38ec4f0e7ce4ab540bc44",
-       "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-       "hashType": "type"
-   },
-   {
-       "args": "0xbfed0b63e97e2022a348126c75b50f7c9f4364df",
-       "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-       "hashType": "type"
-   },
-   {
-       "args": "0x1830521b4d4cf93711f671d44f205f6eec606766",
-       "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-       "hashType": "type"
-   },
-   {
-       "args": "0x6b9bae12909f9c7eeea6a2bc8bab76f5b7835d2c",
-       "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-       "hashType": "type"
-   },
-   {
-       "args": "0xe502d73d571c0a87720b38fdf81a51d03e99f48f",
-       "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-       "hashType": "type"
-   },
-   {
-       "args": "0x82f6699f1e563d5e9fcec280da90982c6645c160",
-       "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-       "hashType": "type"
-   },
-   {
-       "args": "0x80b71195dc38de6fbf044d18a308cd0650e79ffb",
-       "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-       "hashType": "type"
-   },
-   {
-       "args": "0xe1bcaec77cfbada45e4afc44a8f3f43e64e9ac2d",
-       "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-       "hashType": "type"
-   },
-   {
-       "args": "0xb4efa0c3a6267a5173bc8cd671453333753376b4",
-       "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-       "hashType": "type"
-   },
-   {
-       "args": "0x0ac738d446c33278d5ac908c387c70265078bed7",
-       "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-       "hashType": "type"
-   },
-   {
-       "args": "0x8261878431542e549843c2feda68384569f80733",
-       "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-       "hashType": "type"
-   },
-   {
-       "args": "0x122ca47c5125cce520170901bec659cef2586150",
-       "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-       "hashType": "type"
-   },
-   {
-       "args": "0xc58ceee0c38eed98fd1ab8da05ba0ec05c456b4a",
-       "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-       "hashType": "type"
-   },
-   {
-       "args": "0x1dd233a6f5c3d52d4102d2eb4a5ba89b71fd26de",
-       "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-       "hashType": "type"
-   },
-   {
-       "args": "0xd601a6c4327142ecc1b88d5d3ff51a8fb0a66ec3",
-       "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-       "hashType": "type"
-   },
-   {
-       "args": "0x43a0bb1729b250681c64f310312af404be402164",
-       "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-       "hashType": "type"
-   },
-   {
-       "args": "0x2682db25239951d9943b4e469eb38a1a6ddd1ab8",
-       "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-       "hashType": "type"
-   },
-   {
-       "args": "0x40a4ef24f0611b2cf93927c80177e50e87f19ec2",
-       "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-       "hashType": "type"
-   },
-   {
-       "args": "0x078313f8a5f03cd5570f3293848223d8a49fc71e",
-       "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-       "hashType": "type"
-   },
-   {
-       "args": "0x51cc96d3e509d73fd037faae2653dece708d1acd",
-       "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-       "hashType": "type"
-   }
-]
-```
+the off-chain locks of current wallet
+ <details>
+  <summary>show return data example</summary>
+  ```json
+   [
+     {
+         "args": "0xc05b4506ab74c69a5ea38ec4f0e7ce4ab540bc44",
+         "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+         "hashType": "type"
+     },
+     {
+         "args": "0xbfed0b63e97e2022a348126c75b50f7c9f4364df",
+         "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+         "hashType": "type"
+     },
+     {
+         "args": "0x1830521b4d4cf93711f671d44f205f6eec606766",
+         "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+         "hashType": "type"
+     },
+     {
+         "args": "0x6b9bae12909f9c7eeea6a2bc8bab76f5b7835d2c",
+         "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+         "hashType": "type"
+     },
+     {
+         "args": "0xe502d73d571c0a87720b38fdf81a51d03e99f48f",
+         "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+         "hashType": "type"
+     },
+     {
+         "args": "0x82f6699f1e563d5e9fcec280da90982c6645c160",
+         "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+         "hashType": "type"
+     },
+     {
+         "args": "0x80b71195dc38de6fbf044d18a308cd0650e79ffb",
+         "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+         "hashType": "type"
+     },
+     {
+         "args": "0xe1bcaec77cfbada45e4afc44a8f3f43e64e9ac2d",
+         "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+         "hashType": "type"
+     },
+     {
+         "args": "0xb4efa0c3a6267a5173bc8cd671453333753376b4",
+         "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+         "hashType": "type"
+     },
+     {
+         "args": "0x0ac738d446c33278d5ac908c387c70265078bed7",
+         "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+         "hashType": "type"
+     },
+     {
+         "args": "0x8261878431542e549843c2feda68384569f80733",
+         "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+         "hashType": "type"
+     },
+     {
+         "args": "0x122ca47c5125cce520170901bec659cef2586150",
+         "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+         "hashType": "type"
+     },
+     {
+         "args": "0xc58ceee0c38eed98fd1ab8da05ba0ec05c456b4a",
+         "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+         "hashType": "type"
+     },
+     {
+         "args": "0x1dd233a6f5c3d52d4102d2eb4a5ba89b71fd26de",
+         "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+         "hashType": "type"
+     },
+     {
+         "args": "0xd601a6c4327142ecc1b88d5d3ff51a8fb0a66ec3",
+         "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+         "hashType": "type"
+     },
+     {
+         "args": "0x43a0bb1729b250681c64f310312af404be402164",
+         "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+         "hashType": "type"
+     },
+     {
+         "args": "0x2682db25239951d9943b4e469eb38a1a6ddd1ab8",
+         "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+         "hashType": "type"
+     },
+     {
+         "args": "0x40a4ef24f0611b2cf93927c80177e50e87f19ec2",
+         "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+         "hashType": "type"
+     },
+     {
+         "args": "0x078313f8a5f03cd5570f3293848223d8a49fc71e",
+         "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+         "hashType": "type"
+     },
+     {
+         "args": "0x51cc96d3e509d73fd037faae2653dece708d1acd",
+         "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+         "hashType": "type"
+     }
+   ]
+   ```
+ </details>
 
 #### Defined in
 
-[packages/types/src/rpc/index.ts:147](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/rpc/index.ts#L147)
+[packages/types/src/rpc/index.ts:150](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/rpc/index.ts#L150)
 
 ___
 
 ### wallet\_fullOwnership\_getOnChainLocks
 
-▸ **wallet_fullOwnership_getOnChainLocks**(`payload`): `Promise`<`Paginate`<[`Script`](#scriptmd)\>\>
+▸ **wallet_fullOwnership_getOnChainLocks**(`payload`): `Promise`<[`Paginate`](#paginatemd)<[`Script`](#scriptmd)\>\>
 
 get used locks of which the wallet has full ownership
 
@@ -341,45 +347,48 @@ await window.ckb.request({ method: 'wallet_fullOwnership_getOnChainLocks', param
 
 #### Returns
 
-`Promise`<`Paginate`<[`Script`](#scriptmd)\>\>
+`Promise`<[`Paginate`](#paginatemd)<[`Script`](#scriptmd)\>\>
 
-on-chain locks of the current wallet with pagination info, the page size is 20, e.g.
-```js
-{
-   "cursor": "125",
-   "objects": [
-       {
-           "args": "0xe570f6b1cf07ecafe86583ff9543bfcfca585a45",
-           "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-           "hashType": "type"
-       },
-       {
-           "args": "0x74444a85fba9efcd2df6bade767200aab8fee58c",
-           "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-           "hashType": "type"
-       },
-       {
-           "args": "0x5b6c1bb6757ebeef96181fc100cca7e4e962388e",
-           "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-           "hashType": "type"
-       },
-       {
-           "args": "0x193824fe5fecf4d30871237911e79096b4ca9cbb",
-           "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-           "hashType": "type"
-       },
-       {
-           "args": "0xfd822396937dab6ff35a04852b2b48c212384a3f",
-           "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-           "hashType": "type"
-       }
-   ]
-}
-```
+on-chain locks of the current wallet with pagination info, the page size is 20
+ <details>
+  <summary>show return data example</summary>
+ ```json
+   {
+     "cursor": "125",
+     "objects": [
+         {
+             "args": "0xe570f6b1cf07ecafe86583ff9543bfcfca585a45",
+             "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+             "hashType": "type"
+         },
+         {
+             "args": "0x74444a85fba9efcd2df6bade767200aab8fee58c",
+             "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+             "hashType": "type"
+         },
+         {
+             "args": "0x5b6c1bb6757ebeef96181fc100cca7e4e962388e",
+             "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+             "hashType": "type"
+         },
+         {
+             "args": "0x193824fe5fecf4d30871237911e79096b4ca9cbb",
+             "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+             "hashType": "type"
+         },
+         {
+             "args": "0xfd822396937dab6ff35a04852b2b48c212384a3f",
+             "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+             "hashType": "type"
+         }
+     ]
+   }
+ ```
+ </details>
 
 #### Defined in
 
-[packages/types/src/rpc/index.ts:190](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/rpc/index.ts#L190)
+[packages/types/src/rpc/index.ts:196](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/rpc/index.ts#L196)
 
 ___
 
@@ -419,14 +428,17 @@ let locks = await window.ckb.request({
 
 `Promise`<`string`\>
 
-the signature of the data if the wallet has full ownership of the lock passed in, e.g.
-```js
-"0xa05fcab1955bb1aaf5d6733a5ae9ff932b5c8183532c682c1d3c735e75c2e2e6690d19ad664773ac1f438051a6c47b4aafb9e914292904fe9fe83d59906e827b00"
-```
+the signature of the data if the wallet has full ownership of the lock passed in
+ <details>
+  <summary>show return data example</summary>
+   ```json
+     "0xa05fcab1955bb1aaf5d6733a5ae9ff932b5c8183532c682c1d3c735e75c2e2e6690d19ad664773ac1f438051a6c47b4aafb9e914292904fe9fe83d59906e827b00"
+   ```
+ </details>
 
 #### Defined in
 
-[packages/types/src/rpc/index.ts:391](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/rpc/index.ts#L391)
+[packages/types/src/rpc/index.ts:406](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/rpc/index.ts#L406)
 
 ___
 
@@ -500,23 +512,26 @@ sign a transaction with the wallet
 
 `Promise`<`GroupedSignature`\>
 
-an array of [lock, signature] tuple, e.g.
-```js
-[
-   [
-       {
-           "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-           "hashType": "type",
-           "args": "0x477de073e7ec94aeb74184b981670e843dcb0eb2"
-       },
-       "0x38e4312aec9b93da8d66742af8ddfdfab8794bfb579c7ad05962c17530713e9452d04880d567b7c310bc4b18b1afe2aaecf4e573f8e751af6f60f8b6022e086e00"
-   ]
-]
-```
+an array of [lock, signature] tuple
+ <details>
+  <summary>show return data example</summary>
+   ```json
+     [
+       [
+         {
+             "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+             "hashType": "type",
+             "args": "0x477de073e7ec94aeb74184b981670e843dcb0eb2"
+         },
+         "0x38e4312aec9b93da8d66742af8ddfdfab8794bfb579c7ad05962c17530713e9452d04880d567b7c310bc4b18b1afe2aaecf4e573f8e751af6f60f8b6022e086e00"
+       ]
+     ]
+   ```
+ </details>
 
 #### Defined in
 
-[packages/types/src/rpc/index.ts:366](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/rpc/index.ts#L366)
+[packages/types/src/rpc/index.ts:378](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/rpc/index.ts#L378)
 
 
 <a name="configmd"></a>
@@ -543,7 +558,7 @@ a list of networks that the app can connect to
 
 #### Defined in
 
-[packages/types/src/services/ConfigService.ts:83](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/services/ConfigService.ts#L83)
+[packages/types/src/services/ConfigService.ts:83](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/services/ConfigService.ts#L83)
 
 ___
 
@@ -556,7 +571,7 @@ unlike other wallet, Nexus don't use a certain address as the identity of the us
 
 #### Defined in
 
-[packages/types/src/services/ConfigService.ts:75](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/services/ConfigService.ts#L75)
+[packages/types/src/services/ConfigService.ts:75](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/services/ConfigService.ts#L75)
 
 ___
 
@@ -568,7 +583,7 @@ the id of networks that is selected to connect
 
 #### Defined in
 
-[packages/types/src/services/ConfigService.ts:79](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/services/ConfigService.ts#L79)
+[packages/types/src/services/ConfigService.ts:79](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/services/ConfigService.ts#L79)
 
 ___
 
@@ -580,7 +595,7 @@ version of the current app
 
 #### Defined in
 
-[packages/types/src/services/ConfigService.ts:70](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/services/ConfigService.ts#L70)
+[packages/types/src/services/ConfigService.ts:70](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/services/ConfigService.ts#L70)
 
 ___
 
@@ -592,7 +607,7 @@ a list of hosts that have been granted
 
 #### Defined in
 
-[packages/types/src/services/ConfigService.ts:87](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/services/ConfigService.ts#L87)
+[packages/types/src/services/ConfigService.ts:87](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/services/ConfigService.ts#L87)
 
 
 <a name="getlivecellspayloadmd"></a>
@@ -623,7 +638,7 @@ GetPaginateItemsPayload.cursor
 
 #### Defined in
 
-[packages/types/src/services/OwnershipService.ts:29](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/services/OwnershipService.ts#L29)
+[packages/types/src/services/OwnershipService.ts:29](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/services/OwnershipService.ts#L29)
 
 
 <a name="getoffchainlockspayloadmd"></a>
@@ -654,7 +669,7 @@ FilterPayload.change
 
 #### Defined in
 
-[packages/types/src/services/OwnershipService.ts:33](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/services/OwnershipService.ts#L33)
+[packages/types/src/services/OwnershipService.ts:33](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/services/OwnershipService.ts#L33)
 
 
 <a name="getonchainlockspayloadmd"></a>
@@ -688,7 +703,7 @@ FilterPayload.change
 
 #### Defined in
 
-[packages/types/src/services/OwnershipService.ts:33](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/services/OwnershipService.ts#L33)
+[packages/types/src/services/OwnershipService.ts:33](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/services/OwnershipService.ts#L33)
 
 ___
 
@@ -702,7 +717,7 @@ GetPaginateItemsPayload.cursor
 
 #### Defined in
 
-[packages/types/src/services/OwnershipService.ts:29](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/services/OwnershipService.ts#L29)
+[packages/types/src/services/OwnershipService.ts:29](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/services/OwnershipService.ts#L29)
 
 
 <a name="networkconfigmd"></a>
@@ -726,7 +741,7 @@ GetPaginateItemsPayload.cursor
 
 #### Defined in
 
-[packages/types/src/services/ConfigService.ts:97](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/services/ConfigService.ts#L97)
+[packages/types/src/services/ConfigService.ts:97](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/services/ConfigService.ts#L97)
 
 ___
 
@@ -736,7 +751,7 @@ ___
 
 #### Defined in
 
-[packages/types/src/services/ConfigService.ts:96](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/services/ConfigService.ts#L96)
+[packages/types/src/services/ConfigService.ts:96](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/services/ConfigService.ts#L96)
 
 ___
 
@@ -746,7 +761,7 @@ ___
 
 #### Defined in
 
-[packages/types/src/services/ConfigService.ts:98](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/services/ConfigService.ts#L98)
+[packages/types/src/services/ConfigService.ts:98](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/services/ConfigService.ts#L98)
 
 ___
 
@@ -756,7 +771,45 @@ ___
 
 #### Defined in
 
-[packages/types/src/services/ConfigService.ts:99](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/services/ConfigService.ts#L99)
+[packages/types/src/services/ConfigService.ts:99](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/services/ConfigService.ts#L99)
+
+
+<a name="paginatemd"></a>
+
+# Interface: Paginate<T\>
+
+## Type parameters
+
+| Name |
+| :------ |
+| `T` |
+
+## Table of contents
+
+### Properties
+
+- [cursor](#cursor)
+- [objects](#objects)
+
+## Properties
+
+### cursor
+
+• **cursor**: `string`
+
+#### Defined in
+
+[packages/types/src/base.ts:4](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/base.ts#L4)
+
+___
+
+### objects
+
+• **objects**: `T`[]
+
+#### Defined in
+
+[packages/types/src/base.ts:5](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/base.ts#L5)
 
 
 <a name="scriptmd"></a>
@@ -831,7 +884,7 @@ SignDataPayloadType.data
 
 #### Defined in
 
-[packages/types/src/services/OwnershipService.ts:45](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/services/OwnershipService.ts#L45)
+[packages/types/src/services/OwnershipService.ts:45](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/services/OwnershipService.ts#L45)
 
 ___
 
@@ -845,7 +898,7 @@ SignDataPayloadType.lock
 
 #### Defined in
 
-[packages/types/src/services/OwnershipService.ts:46](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/services/OwnershipService.ts#L46)
+[packages/types/src/services/OwnershipService.ts:46](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/services/OwnershipService.ts#L46)
 
 
 <a name="signtransactionpayloadmd"></a>
@@ -866,7 +919,7 @@ SignDataPayloadType.lock
 
 #### Defined in
 
-[packages/types/src/services/OwnershipService.ts:41](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/services/OwnershipService.ts#L41)
+[packages/types/src/services/OwnershipService.ts:41](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/services/OwnershipService.ts#L41)
 
 
 <a name="trustedhostmd"></a>
@@ -888,7 +941,7 @@ SignDataPayloadType.lock
 
 #### Defined in
 
-[packages/types/src/services/ConfigService.ts:92](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/services/ConfigService.ts#L92)
+[packages/types/src/services/ConfigService.ts:92](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/services/ConfigService.ts#L92)
 
 ___
 
@@ -898,4 +951,4 @@ ___
 
 #### Defined in
 
-[packages/types/src/services/ConfigService.ts:91](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/services/ConfigService.ts#L91)
+[packages/types/src/services/ConfigService.ts:91](https://github.com/zhangyouxin/nexus/blob/05c9611/packages/types/src/services/ConfigService.ts#L91)
