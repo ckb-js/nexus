@@ -32,9 +32,9 @@ export interface RpcTestHelper {
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createTestRpcServer<S = any, P = any>(payload: Partial<ModuleProviderMap<S, P>> = {}): RpcTestHelper {
-  const storage = payload.storage || (() => mockStorage as Storage<S>);
-  const platform = payload.platform || (() => mockPlatformService);
-  const factory = createModulesFactory({ storage, platform });
+  const { storage = () => mockStorage as Storage<S>, platform = () => mockPlatformService, ...modules } = payload;
+
+  const factory = createModulesFactory({ storage, platform, ...modules });
   const server = createServer(factory);
   const eventHub = factory.get('eventHub');
 

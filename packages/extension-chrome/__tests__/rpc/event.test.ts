@@ -1,6 +1,6 @@
 import { createTestRpcServer } from './helper';
-import { asyncSleep } from '@ckb-lumos/e2e-test/src/utils';
 import { createInMemoryStorage } from '../../src/services/storage';
+import { asyncSleep } from '@nexus-wallet/utils';
 
 it('should the networkChanged fired when config has updated', async () => {
   const { ckb } = createTestRpcServer();

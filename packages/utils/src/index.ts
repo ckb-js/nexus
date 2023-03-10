@@ -4,3 +4,4 @@ export * as asserts from './asserts';
 export { resolveProvider, formatMessage } from './internal';
 export * as logger from './logger';
 export { createLogger } from './logger';
+export { asyncSleep } from './asyncSleep';

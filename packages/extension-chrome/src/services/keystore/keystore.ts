@@ -55,7 +55,7 @@ export function createKeystoreService(config: { storage: Storage<KeystoreData> }
       await storage.setItem('keystore', { publicInfos, wss });
     },
 
-    getExtendedPublicKey: async (payload: GetExtendedPublicKeyPayload): Promise<string> => {
+    getPublicKeyByPath: async (payload: GetExtendedPublicKeyPayload): Promise<string> => {
       const { path } = payload;
 
       assertDerivationPath(path);

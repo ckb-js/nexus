@@ -1,5 +1,15 @@
-import { HexString, Script } from '@ckb-lumos/lumos';
+import { Cell, Script } from '@ckb-lumos/lumos';
 import { Modules } from '../services';
+import { Paginate } from '@nexus-wallet/types';
+import {
+  GetOffChainLocksPayload,
+  GetPaginateItemsPayload,
+  GetUsedLocksPayload,
+  GroupedSignature,
+  Signature,
+  SignDataPayload,
+  SignTransactionPayload,
+} from '@nexus-wallet/types/lib/services/OwnershipService';
 import { Config as NexusConfig } from '@nexus-wallet/types/lib/services/ConfigService';
 import { AsyncCall, AsyncCallMap } from '@nexus-wallet/types/lib/call';
 
@@ -8,8 +18,11 @@ export interface WalletMethods extends AsyncCallMap {
   wallet_isEnabled: AsyncCall<void, boolean>;
   wallet_getNetworkName: AsyncCall<void, string>;
 
-  wallet_fullOwnership_getUnusedLocks: AsyncCall<void, Script[]>;
-  wallet_fullOwnership_signData: AsyncCall<{ data: HexString }, HexString>;
+  wallet_fullOwnership_getOffChainLocks: AsyncCall<GetOffChainLocksPayload, Script[]>;
+  wallet_fullOwnership_getOnChainLocks: AsyncCall<GetUsedLocksPayload, Paginate<Script>>;
+  wallet_fullOwnership_getLiveCells: AsyncCall<GetPaginateItemsPayload, Paginate<Cell>>;
+  wallet_fullOwnership_signData: AsyncCall<SignDataPayload, Signature>;
+  wallet_fullOwnership_signTransaction: AsyncCall<SignTransactionPayload, GroupedSignature>;
 }
 
 export interface DebugMethods extends AsyncCallMap {
