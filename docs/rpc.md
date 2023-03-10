@@ -41,7 +41,7 @@ Get the wallet config
 
 #### Defined in
 
-[packages/types/src/rpc/index.ts:402](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/rpc/index.ts#L402)
+[packages/types/src/rpc/index.ts:396](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/rpc/index.ts#L396)
 
 ___
 
@@ -59,7 +59,7 @@ After calling this method, we can see the dApp in the whitelist
 
 #### Defined in
 
-[packages/types/src/rpc/index.ts:32](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/rpc/index.ts#L32)
+[packages/types/src/rpc/index.ts:32](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/rpc/index.ts#L32)
 
 ___
 
@@ -81,7 +81,18 @@ await window.ckb.request({
  },
 });
 ```
-returns:
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `payload?` | [`GetLiveCellsPayload`](#getlivecellspayloadmd) | the `change` field defaults to 'external', if the `cursor` is blank, it is equivalent to `"0:0x"` and will return the first page of live cells |
+
+#### Returns
+
+`Promise`<`Paginate`<`Cell`\>\>
+
+live cells of current wallet with pagination info, the page size is 20, e.g.
 ```js
 {
 "objects": [
@@ -170,21 +181,9 @@ returns:
 }
 ```
 
-#### Parameters
-
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `payload?` | [`GetLiveCellsPayload`](#getlivecellspayloadmd) | the `change` field defaults to 'external', if the `cursor` is blank, it is equivalent to `"0:0x"` and will return the first page of live cells |
-
-#### Returns
-
-`Promise`<`Paginate`<`Cell`\>\>
-
-live cells of current wallet with pagination info, the page size is 20
-
 #### Defined in
 
-[packages/types/src/rpc/index.ts:298](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/rpc/index.ts#L298)
+[packages/types/src/rpc/index.ts:295](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/rpc/index.ts#L295)
 
 ___
 
@@ -199,7 +198,18 @@ get unused locks of which the wallet has full ownership
 ```js
 await window.ckb.request({ method: 'wallet_fullOwnership_getOffChainLocks', params: { change: 'external' } });
 ```
-returns:
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `payload` | [`GetOffChainLocksPayload`](#getoffchainlockspayloadmd) | the `change` field defaults to 'external' |
+
+#### Returns
+
+`Promise`<[`Script`](#scriptmd)[]\>
+
+the off-chain locks of current wallet, e.g.
 ```js
 [
    {
@@ -305,21 +315,9 @@ returns:
 ]
 ```
 
-#### Parameters
-
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `payload` | [`GetOffChainLocksPayload`](#getoffchainlockspayloadmd) | the `change` field defaults to 'external' |
-
-#### Returns
-
-`Promise`<[`Script`](#scriptmd)[]\>
-
-the off-chain locks of current wallet
-
 #### Defined in
 
-[packages/types/src/rpc/index.ts:148](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/rpc/index.ts#L148)
+[packages/types/src/rpc/index.ts:147](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/rpc/index.ts#L147)
 
 ___
 
@@ -334,7 +332,18 @@ get used locks of which the wallet has full ownership
 ```js
 await window.ckb.request({ method: 'wallet_fullOwnership_getOnChainLocks', params: { change: "internal", cursor: "8" } });
 ```
-returns:
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `payload` | [`GetOnChainLocksPayload`](#getonchainlockspayloadmd) | the `change` field defaults to `'external'`, if the `cursor` is blank, it is equivalent to `"0"` and will return the first page of on-chain locks |
+
+#### Returns
+
+`Promise`<`Paginate`<[`Script`](#scriptmd)\>\>
+
+on-chain locks of the current wallet with pagination info, the page size is 20, e.g.
 ```js
 {
    "cursor": "125",
@@ -368,21 +377,9 @@ returns:
 }
 ```
 
-#### Parameters
-
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `payload` | [`GetOnChainLocksPayload`](#getonchainlockspayloadmd) | the `change` field defaults to `'external'`, if the `cursor` is blank, it is equivalent to `"0"` and will return the first page of on-chain locks |
-
-#### Returns
-
-`Promise`<`Paginate`<[`Script`](#scriptmd)\>\>
-
-on-chain locks of the current wallet with pagination info, the page size is 20
-
 #### Defined in
 
-[packages/types/src/rpc/index.ts:192](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/rpc/index.ts#L192)
+[packages/types/src/rpc/index.ts:190](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/rpc/index.ts#L190)
 
 ___
 
@@ -412,11 +409,6 @@ let locks = await window.ckb.request({
  });
 ```
 
-returns:
-```js
-"0xa05fcab1955bb1aaf5d6733a5ae9ff932b5c8183532c682c1d3c735e75c2e2e6690d19ad664773ac1f438051a6c47b4aafb9e914292904fe9fe83d59906e827b00"
-```
-
 #### Parameters
 
 | Name | Type | Description |
@@ -427,11 +419,14 @@ returns:
 
 `Promise`<`string`\>
 
-the signature of the data if the wallet has full ownership of the lock passed in
+the signature of the data if the wallet has full ownership of the lock passed in, e.g.
+```js
+"0xa05fcab1955bb1aaf5d6733a5ae9ff932b5c8183532c682c1d3c735e75c2e2e6690d19ad664773ac1f438051a6c47b4aafb9e914292904fe9fe83d59906e827b00"
+```
 
 #### Defined in
 
-[packages/types/src/rpc/index.ts:397](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/rpc/index.ts#L397)
+[packages/types/src/rpc/index.ts:391](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/rpc/index.ts#L391)
 
 ___
 
@@ -494,8 +489,18 @@ sign a transaction with the wallet
    },
  });
 ```
-returns:
 
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `payload` | [`SignTransactionPayload`](#signtransactionpayloadmd) | the `tx` is your [[Transaction](https://github.com/nervosnetwork/rfcs/blob/master/rfcs/0019-data-structures/0019-data-structures.md#Transaction)](../README.md) |
+
+#### Returns
+
+`Promise`<`GroupedSignature`\>
+
+an array of [lock, signature] tuple, e.g.
 ```js
 [
    [
@@ -509,21 +514,9 @@ returns:
 ]
 ```
 
-#### Parameters
-
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `payload` | [`SignTransactionPayload`](#signtransactionpayloadmd) | the `tx` is your [[Transaction](https://github.com/nervosnetwork/rfcs/blob/master/rfcs/0019-data-structures/0019-data-structures.md#Transaction)](../README.md) |
-
-#### Returns
-
-`Promise`<`GroupedSignature`\>
-
-an array of [lock, signature] tuple
-
 #### Defined in
 
-[packages/types/src/rpc/index.ts:371](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/rpc/index.ts#L371)
+[packages/types/src/rpc/index.ts:366](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/rpc/index.ts#L366)
 
 
 <a name="configmd"></a>
@@ -550,7 +543,7 @@ a list of networks that the app can connect to
 
 #### Defined in
 
-[packages/types/src/services/ConfigService.ts:83](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/services/ConfigService.ts#L83)
+[packages/types/src/services/ConfigService.ts:83](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/services/ConfigService.ts#L83)
 
 ___
 
@@ -563,7 +556,7 @@ unlike other wallet, Nexus don't use a certain address as the identity of the us
 
 #### Defined in
 
-[packages/types/src/services/ConfigService.ts:75](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/services/ConfigService.ts#L75)
+[packages/types/src/services/ConfigService.ts:75](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/services/ConfigService.ts#L75)
 
 ___
 
@@ -575,7 +568,7 @@ the id of networks that is selected to connect
 
 #### Defined in
 
-[packages/types/src/services/ConfigService.ts:79](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/services/ConfigService.ts#L79)
+[packages/types/src/services/ConfigService.ts:79](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/services/ConfigService.ts#L79)
 
 ___
 
@@ -587,7 +580,7 @@ version of the current app
 
 #### Defined in
 
-[packages/types/src/services/ConfigService.ts:70](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/services/ConfigService.ts#L70)
+[packages/types/src/services/ConfigService.ts:70](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/services/ConfigService.ts#L70)
 
 ___
 
@@ -599,7 +592,7 @@ a list of hosts that have been granted
 
 #### Defined in
 
-[packages/types/src/services/ConfigService.ts:87](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/services/ConfigService.ts#L87)
+[packages/types/src/services/ConfigService.ts:87](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/services/ConfigService.ts#L87)
 
 
 <a name="getlivecellspayloadmd"></a>
@@ -630,7 +623,7 @@ GetPaginateItemsPayload.cursor
 
 #### Defined in
 
-[packages/types/src/services/OwnershipService.ts:29](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/services/OwnershipService.ts#L29)
+[packages/types/src/services/OwnershipService.ts:29](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/services/OwnershipService.ts#L29)
 
 
 <a name="getoffchainlockspayloadmd"></a>
@@ -661,7 +654,7 @@ FilterPayload.change
 
 #### Defined in
 
-[packages/types/src/services/OwnershipService.ts:33](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/services/OwnershipService.ts#L33)
+[packages/types/src/services/OwnershipService.ts:33](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/services/OwnershipService.ts#L33)
 
 
 <a name="getonchainlockspayloadmd"></a>
@@ -695,7 +688,7 @@ FilterPayload.change
 
 #### Defined in
 
-[packages/types/src/services/OwnershipService.ts:33](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/services/OwnershipService.ts#L33)
+[packages/types/src/services/OwnershipService.ts:33](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/services/OwnershipService.ts#L33)
 
 ___
 
@@ -709,7 +702,7 @@ GetPaginateItemsPayload.cursor
 
 #### Defined in
 
-[packages/types/src/services/OwnershipService.ts:29](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/services/OwnershipService.ts#L29)
+[packages/types/src/services/OwnershipService.ts:29](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/services/OwnershipService.ts#L29)
 
 
 <a name="networkconfigmd"></a>
@@ -733,7 +726,7 @@ GetPaginateItemsPayload.cursor
 
 #### Defined in
 
-[packages/types/src/services/ConfigService.ts:97](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/services/ConfigService.ts#L97)
+[packages/types/src/services/ConfigService.ts:97](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/services/ConfigService.ts#L97)
 
 ___
 
@@ -743,7 +736,7 @@ ___
 
 #### Defined in
 
-[packages/types/src/services/ConfigService.ts:96](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/services/ConfigService.ts#L96)
+[packages/types/src/services/ConfigService.ts:96](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/services/ConfigService.ts#L96)
 
 ___
 
@@ -753,7 +746,7 @@ ___
 
 #### Defined in
 
-[packages/types/src/services/ConfigService.ts:98](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/services/ConfigService.ts#L98)
+[packages/types/src/services/ConfigService.ts:98](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/services/ConfigService.ts#L98)
 
 ___
 
@@ -763,7 +756,7 @@ ___
 
 #### Defined in
 
-[packages/types/src/services/ConfigService.ts:99](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/services/ConfigService.ts#L99)
+[packages/types/src/services/ConfigService.ts:99](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/services/ConfigService.ts#L99)
 
 
 <a name="scriptmd"></a>
@@ -838,7 +831,7 @@ SignDataPayloadType.data
 
 #### Defined in
 
-[packages/types/src/services/OwnershipService.ts:45](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/services/OwnershipService.ts#L45)
+[packages/types/src/services/OwnershipService.ts:45](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/services/OwnershipService.ts#L45)
 
 ___
 
@@ -852,7 +845,7 @@ SignDataPayloadType.lock
 
 #### Defined in
 
-[packages/types/src/services/OwnershipService.ts:46](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/services/OwnershipService.ts#L46)
+[packages/types/src/services/OwnershipService.ts:46](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/services/OwnershipService.ts#L46)
 
 
 <a name="signtransactionpayloadmd"></a>
@@ -873,7 +866,7 @@ SignDataPayloadType.lock
 
 #### Defined in
 
-[packages/types/src/services/OwnershipService.ts:41](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/services/OwnershipService.ts#L41)
+[packages/types/src/services/OwnershipService.ts:41](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/services/OwnershipService.ts#L41)
 
 
 <a name="trustedhostmd"></a>
@@ -895,7 +888,7 @@ SignDataPayloadType.lock
 
 #### Defined in
 
-[packages/types/src/services/ConfigService.ts:92](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/services/ConfigService.ts#L92)
+[packages/types/src/services/ConfigService.ts:92](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/services/ConfigService.ts#L92)
 
 ___
 
@@ -905,4 +898,4 @@ ___
 
 #### Defined in
 
-[packages/types/src/services/ConfigService.ts:91](https://github.com/zhangyouxin/nexus/blob/f8c103b/packages/types/src/services/ConfigService.ts#L91)
+[packages/types/src/services/ConfigService.ts:91](https://github.com/ckb-js/nexus/blob/607e92c/packages/types/src/services/ConfigService.ts#L91)

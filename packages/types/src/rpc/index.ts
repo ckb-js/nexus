@@ -37,7 +37,8 @@ export interface RpcMethods {
    * ```js
    * await window.ckb.request({ method: 'wallet_fullOwnership_getOffChainLocks', params: { change: 'external' } });
    * ```
-   * returns:
+   * @param payload  the `change` field defaults to 'external'
+   * @returns the off-chain locks of current wallet, e.g.
    * ```js
    * [
    *    {
@@ -142,8 +143,6 @@ export interface RpcMethods {
    *    }
    *]
    * ```
-   * @param payload  the `change` field defaults to 'external'
-   * @returns the off-chain locks of current wallet
    */
   wallet_fullOwnership_getOffChainLocks(payload: GetOffChainLocksPayload): Promise<Script[]>;
 
@@ -153,7 +152,8 @@ export interface RpcMethods {
    * ```js
    * await window.ckb.request({ method: 'wallet_fullOwnership_getOnChainLocks', params: { change: "internal", cursor: "8" } });
    * ```
-   * returns:
+   * @param payload  the `change` field defaults to `'external'`, if the `cursor` is blank, it is equivalent to `"0"` and will return the first page of on-chain locks
+   * @returns on-chain locks of the current wallet with pagination info, the page size is 20, e.g.
    * ```js
    * {
    *    "cursor": "125",
@@ -186,8 +186,6 @@ export interface RpcMethods {
    *    ]
    *}
    * ```
-   * @param payload  the `change` field defaults to `'external'`, if the `cursor` is blank, it is equivalent to `"0"` and will return the first page of on-chain locks
-   * @returns on-chain locks of the current wallet with pagination info, the page size is 20
    */
   wallet_fullOwnership_getOnChainLocks(payload: GetOnChainLocksPayload): Promise<Paginate<Script>>;
 
@@ -204,7 +202,8 @@ export interface RpcMethods {
    *  },
    * });
    * ```
-   * returns:
+   * @param payload  the `change` field defaults to 'external', if the `cursor` is blank, it is equivalent to `"0:0x"` and will return the first page of live cells
+   * @returns live cells of current wallet with pagination info, the page size is 20, e.g.
    * ```js
    * {
    *"objects": [
@@ -292,8 +291,6 @@ export interface RpcMethods {
    *"cursor": "125:0x409bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce801fd822396937dab6ff35a04852b2b48c212384a3f000000000082aa990000000500000000"
    *}
    * ```
-   * @param payload  the `change` field defaults to 'external', if the `cursor` is blank, it is equivalent to `"0:0x"` and will return the first page of live cells
-   * @returns live cells of current wallet with pagination info, the page size is 20
    */
   wallet_fullOwnership_getLiveCells(payload?: GetLiveCellsPayload): Promise<Paginate<Cell>>;
 
@@ -351,8 +348,8 @@ export interface RpcMethods {
    *    },
    *  });
    * ```
-   * returns:
-   *
+   * @param payload  the `tx` is your {@link [Transaction](https://github.com/nervosnetwork/rfcs/blob/master/rfcs/0019-data-structures/0019-data-structures.md#Transaction)}
+   * @returns an array of [lock, signature] tuple, e.g.
    * ```js
    * [
    *    [
@@ -365,8 +362,6 @@ export interface RpcMethods {
    *    ]
    *]
    * ```
-   * @param payload  the `tx` is your {@link [Transaction](https://github.com/nervosnetwork/rfcs/blob/master/rfcs/0019-data-structures/0019-data-structures.md#Transaction)}
-   * @returns an array of [lock, signature] tuple
    */
   wallet_fullOwnership_signTransaction(payload: SignTransactionPayload): Promise<GroupedSignature>;
 
@@ -387,12 +382,11 @@ export interface RpcMethods {
    *  });
    * ```
    *
-   * returns:
+   * @param payload  `data` you would like to sign, `lock` indicates which lock you would like to use to sign the data
+   * @returns the signature of the data if the wallet has full ownership of the lock passed in, e.g.
    * ```js
    * "0xa05fcab1955bb1aaf5d6733a5ae9ff932b5c8183532c682c1d3c735e75c2e2e6690d19ad664773ac1f438051a6c47b4aafb9e914292904fe9fe83d59906e827b00"
    * ```
-   * @param payload  `data` you would like to sign, `lock` indicates which lock you would like to use to sign the data
-   * @returns the signature of the data if the wallet has full ownership of the lock passed in
    */
   wallet_fullOwnership_signData(payload: SignDataPayload): Promise<Signature>;
 
