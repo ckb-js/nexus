@@ -48,12 +48,9 @@ export const Transaction = z.object({
   headerDeps: z.array(Hash),
   inputs: z.array(Input),
   outputs: z.array(Output),
-  // outputsData: z.array(HexString),
-  outputsData: z.any(),
-  // version: HexNumber,
-  version: z.any(),
-  // witnesses: z.array(HexString),
-  witnesses: z.any(),
+  outputsData: z.array(HexString),
+  version: HexNumber,
+  witnesses: z.array(HexString),
 });
 
 export const Cell = z.object({
