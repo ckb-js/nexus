@@ -7,7 +7,7 @@ export const PackedSince = HexNumber;
 
 export const HashType = z.union([z.literal('type'), z.literal('data'), z.literal('data1')]);
 
-const Script = z.object({
+export const Script = z.object({
   codeHash: Hash,
   hashType: HashType,
   args: HexString,

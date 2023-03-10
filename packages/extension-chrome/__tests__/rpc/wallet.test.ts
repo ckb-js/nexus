@@ -1,6 +1,10 @@
-import { Transaction } from '@ckb-lumos/lumos';
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { Transaction } from '@ckb-lumos/lumos';
 import { createTestRpcServer } from './helper';
+
+jest.mock('../../src/rpc/schema', () => ({
+  bindSchemaValidator: jest.fn().mockImplementation((_, handler) => handler),
+}));
 
 describe('RPC wallet_enable', () => {
   it('should request be allowed when Nexus is initialized', async () => {
@@ -18,6 +22,7 @@ describe('RPC wallet_enable', () => {
     await expect(request('wallet_enable')).resolves.not.toThrowError();
   });
 });
+
 describe('RPC wallet_fullOwnership', () => {
   it('should request wallet_fullOwnership_getOffChainLocks call ownership service with default parameter', async () => {
     const { request, factory } = createTestRpcServer();
