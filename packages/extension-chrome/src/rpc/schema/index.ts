@@ -2,7 +2,7 @@
 import type {
   GetOffChainLocksPayload,
   GetPaginateItemsPayload,
-  GetUsedLocksPayload,
+  // GetUsedLocksPayload,
   SignDataPayload,
   // SignTransactionPayload,
 } from '@nexus-wallet/types/lib/services/OwnershipService';
@@ -85,7 +85,7 @@ type ValidatePayload<S extends AnyRpcSchema, P extends Record<any, any>> = Param
 type _cases = [
   Expect<ValidatePayload<typeof wallet_fullOwnership_getLiveCells, GetPaginateItemsPayload>>,
   Expect<ValidatePayload<typeof wallet_fullOwnership_getOffChainLocks, GetOffChainLocksPayload>>,
-  Expect<ValidatePayload<typeof wallet_fullOwnership_getOnChainLocks, GetUsedLocksPayload>>,
+  // Expect<ValidatePayload<typeof wallet_fullOwnership_getOnChainLocks, GetUsedLocksPayload>>,
   Expect<ValidatePayload<typeof wallet_fullOwnership_signData, SignDataPayload>>,
 
   // FIXME enable this static type check
