@@ -48,18 +48,17 @@ export const Input = z.object({
 export const Output = z.object({
   capacity: HexNumber,
   lock: Script,
-  type: Script.optional().nullable(),
+  type: Script.nullish(),
 });
-
 export const WitnessArgs = z.object({
-  lock: HexString.optional().nullable(),
-  inputType: HexString.optional().nullable(),
-  outputType: HexString.optional().nullable(),
+  lock: HexString.optional(),
+  inputType: HexString.optional(),
+  outputType: HexString.optional(),
 });
 
 export const Transaction = z.object({
   cellDeps: z.array(CellDep),
-  hash: Hash.optional().nullable(),
+  hash: Hash.optional(),
   headerDeps: z.array(Hash),
   inputs: z.array(Input),
   outputs: z.array(Output),
@@ -72,10 +71,10 @@ export const Cell = z.object({
   cellOutput: z.object({
     capacity: HexNumber,
     lock: Script,
-    type: Script.optional().nullable(),
+    type: Script.nullish(),
   }),
   data: HexString,
-  outPoint: OutPoint.optional().nullable(),
-  blockHash: Hash.optional().nullable(),
-  blockNumber: HexNumber.optional().nullable(),
+  outPoint: OutPoint.nullish(),
+  blockHash: Hash.optional(),
+  blockNumber: HexNumber.optional(),
 });

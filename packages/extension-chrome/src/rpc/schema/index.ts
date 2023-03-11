@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {
+import type {
   GetOffChainLocksPayload,
   GetPaginateItemsPayload,
   GetUsedLocksPayload,
@@ -88,6 +88,6 @@ type _cases = [
   Expect<ValidatePayload<typeof wallet_fullOwnership_getOnChainLocks, GetUsedLocksPayload>>,
   Expect<ValidatePayload<typeof wallet_fullOwnership_signData, SignDataPayload>>,
 
-  // FIXME, for some reason, it is not equal
-  // Expect<ValidatePayload<typeof wallet_fullOwnership_signTransaction, SignTransactionPayload>>
+  // FIXME enable this static type check
+  // Expect<ValidatePayload<typeof wallet_fullOwnership_signTransaction, SignTransactionPayload>>,
 ];
