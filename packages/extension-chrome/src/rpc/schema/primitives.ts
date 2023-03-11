@@ -1,5 +1,20 @@
 import { z } from 'zod';
 
+const ArrayLikeNumber = z.custom<ArrayLike<number>>((value) => {
+  return (
+    typeof typeof value === 'object' &&
+    value !== null &&
+    value !== undefined &&
+    'length' in (value as ArrayLike<number>) &&
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    typeof (value as ArrayLike<number>)[Symbol.iterator as any] === 'function'
+  );
+});
+
+const ZArrayBuffer = z.custom<ArrayBuffer>((value) => value instanceof ArrayBuffer);
+
+export const BytesLike = ArrayLikeNumber.or(ZArrayBuffer).or(z.string());
+
 export const HexString = z.string().regex(/^0x([0-9a-fA-F][0-9a-fA-F])*$/, { message: 'Invalid hex string' });
 export const Hash = HexString;
 export const HexNumber = z.string().regex(/^0x([0-9a-fA-F])+$/);
