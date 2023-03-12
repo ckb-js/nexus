@@ -1,0 +1,159 @@
+import { Cell, HexNumber, OutPoint, Script, utils } from '@ckb-lumos/lumos';
+import type { Paginate } from '@nexus-wallet/types';
+import { asserts } from '@nexus-wallet/utils';
+import { ScriptConfig } from '@ckb-lumos/config-manager';
+import { JSONRPCRequest, JSONRPCResponse } from 'json-rpc-2.0';
+import { RPC as RPCType } from '@ckb-lumos/rpc/lib/types/rpc';
+import { NexusCommonErrors } from '../../../errors';
+
+export type Order = 'asc' | 'desc';
+export type Limit = HexNumber;
+export type CursorType = HexNumber | null;
+export type RPCQueryType = [
+  {
+    script: RPCType.Script;
+    script_type: 'lock' | 'type';
+    search_type: 'exact' | 'prefix';
+  },
+  Order,
+  Limit,
+  CursorType?,
+];
+export type GetLiveCellsResult = Paginate<Cell> & { lastLock?: Script };
+
+export const toQueryParam = (payload: {
+  lock: Script;
+  cursor?: CursorType;
+  order?: Order;
+  limit?: HexNumber;
+}): RPCQueryType => [
+  {
+    script: {
+      code_hash: payload.lock.codeHash,
+      hash_type: payload.lock.hashType,
+      args: payload.lock.args,
+    },
+    script_type: 'lock',
+    search_type: 'exact',
+  },
+  payload.order ?? 'asc',
+  payload.limit ?? '0x64',
+  payload.cursor || null,
+];
+
+export const toScript = (rpcScript: RPCType.Script): Script => ({
+  codeHash: rpcScript.code_hash,
+  hashType: rpcScript.hash_type,
+  args: rpcScript.args,
+});
+
+export const toOutPoint = (rpcOutPoint: RPCType.OutPoint): OutPoint => ({
+  txHash: rpcOutPoint.tx_hash,
+  index: rpcOutPoint.index,
+});
+
+export const toCell = (rpcIndexerCell: RPCType.IndexerCell): Cell => ({
+  cellOutput: {
+    capacity: rpcIndexerCell.output.capacity,
+    lock: toScript(rpcIndexerCell.output.lock),
+    type: rpcIndexerCell.output.type ? toScript(rpcIndexerCell.output.type) : undefined,
+  },
+  data: rpcIndexerCell.output_data,
+  outPoint: toOutPoint(rpcIndexerCell.out_point),
+  blockNumber: rpcIndexerCell.block_number,
+});
+
+/* istanbul ignore next */
+export async function loadSecp256k1ScriptDep(payload: { nodeUrl: string }): Promise<ScriptConfig> {
+  const rawResult = await fetch(payload.nodeUrl, {
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      id: 2,
+      jsonrpc: '2.0',
+      method: 'get_block_by_number',
+      params: ['0x0'],
+    }),
+    method: 'POST',
+  });
+  const genesisBlock = (await rawResult.json()).result;
+  if (!genesisBlock) throw new Error("can't load genesis block");
+  const secp256k1DepTxHash = genesisBlock.transactions[1].hash;
+  asserts.asserts(secp256k1DepTxHash, "can't load secp256k1 transaction");
+  const rawTypeScript = genesisBlock.transactions[0].outputs[1].type;
+  asserts.asserts(rawTypeScript, "can't load secp256k1 type script");
+  const typeScript: Script = {
+    codeHash: rawTypeScript.code_hash,
+    hashType: rawTypeScript.hash_type,
+    args: rawTypeScript.args,
+  };
+  const secp256k1TypeHash = utils.computeScriptHash(typeScript);
+
+  return {
+    HASH_TYPE: 'type',
+    CODE_HASH: secp256k1TypeHash,
+    INDEX: '0x0',
+    TX_HASH: secp256k1DepTxHash,
+    DEP_TYPE: 'depGroup',
+  };
+}
+
+type RpcClient = {
+  request: <Result = unknown, Params = unknown>(method: string, params: Params) => Promise<Result>;
+  batchRequest: <Result = unknown, Params = unknown>(method: string, batchParams: Params[]) => Promise<Result[]>;
+};
+
+export function createRpcClient(url: string): RpcClient {
+  // auto-increment id
+  let jsonRpcId = 0;
+
+  async function _request(body: JSONRPCRequest | JSONRPCRequest[]): Promise<JSONRPCResponse | JSONRPCResponse[]> {
+    ++jsonRpcId;
+    const res = await fetch(url, {
+      method: 'POST',
+      body: JSON.stringify(body),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    if (res.status >= 300) {
+      throw NexusCommonErrors.RequestCkbFailed(res);
+    }
+    return res.json();
+  }
+
+  async function request<Result = unknown, Params = unknown>(method: string, params: Params): Promise<Result> {
+    const res = await _request({ jsonrpc: '2.0', id: jsonRpcId, method: method, params: params });
+    asserts.asserts(!Array.isArray(res));
+    if (res.error !== undefined) {
+      throw NexusCommonErrors.RequestCkbFailed(res);
+    }
+    return res.result;
+  }
+
+  async function batchRequest<Result = unknown, Params = unknown>(
+    method: string,
+    batchParams: Params[],
+  ): Promise<Result[]> {
+    const res = await _request(
+      batchParams.map((params) => ({
+        jsonrpc: '2.0',
+        id: jsonRpcId,
+        method,
+        params: params,
+      })),
+    );
+    asserts.asserts(Array.isArray(res));
+
+    return res.map<Result>((res) => {
+      if (res.error !== undefined) {
+        throw NexusCommonErrors.RequestCkbFailed(res);
+      }
+      return res.result;
+    });
+  }
+
+  return { request, batchRequest };
+}
