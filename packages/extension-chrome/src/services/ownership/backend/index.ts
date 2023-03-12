@@ -42,7 +42,6 @@ export function createBackend(_payload: { nodeUrl: string }): Backend {
   const client = createRpcClient(_payload.nodeUrl);
 
   return {
-    /* istanbul ignore next */
     getSecp256k1Blake160ScriptConfig: async ({ networkId }): Promise<ScriptConfig> => {
       let config = _Secp256k1Blake160ScriptInfoCache.get(networkId);
       if (!config) {

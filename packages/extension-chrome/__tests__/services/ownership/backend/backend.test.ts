@@ -1,40 +1,20 @@
 import { Script, Transaction } from '@ckb-lumos/lumos';
-import { createBackend } from '../../../src/services/ownership/backend';
+import { createBackend } from '../../../../src/services/ownership/backend';
+import * as backendUtils from '../../../../src/services/ownership/backend/backendUtils';
 import fetchMock from 'jest-fetch-mock';
-import { createRpcClient } from '../../../src/services/ownership/backend/backendUtils';
 
-describe('rpcClient', () => {
-  afterEach(() => {
-    fetchMock.resetMocks();
-  });
-  it('should not throw error when JSONRpc returns objects', async () => {
-    fetchMock.mockResponse(() =>
-      Promise.resolve(
-        JSON.stringify({
-          id: 0,
-          jsonrpc: '2.0',
-          objects: [],
-        }),
-      ),
-    );
-    const backend = createRpcClient('');
-    await expect(backend.request('some_method', {})).resolves.not.toThrow();
-  });
-  it('should throw error when JSONRpc returns error', async () => {
-    fetchMock.mockResponse(() =>
-      Promise.resolve(
-        JSON.stringify({
-          id: 0,
-          jsonrpc: '2.0',
-          error: {
-            code: -32602,
-            message: 'Invalid params.',
-          },
-        }),
-      ),
-    );
-    const backend = createRpcClient('');
-    await expect(backend.request('some_method', {})).rejects.toThrow(/Request CKB node failed/);
+describe('load secp256k1 cellDeps', () => {
+  it('should backend utils be called with correct params', async () => {
+    const mockUrl = 'mockUrl';
+    const backend = createBackend({ nodeUrl: mockUrl });
+    jest.spyOn(backendUtils, 'loadSecp256k1ScriptDep').mockResolvedValue({
+      CODE_HASH: '0x',
+      HASH_TYPE: 'type',
+      TX_HASH: '0x',
+      INDEX: '0x0',
+      DEP_TYPE: 'code',
+    });
+    await expect(backend.getSecp256k1Blake160ScriptConfig({ networkId: 'someId' })).resolves.not.toThrow();
   });
 });
 

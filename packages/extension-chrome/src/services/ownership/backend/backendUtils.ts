@@ -63,22 +63,8 @@ export const toCell = (rpcIndexerCell: RPCType.IndexerCell): Cell => ({
   blockNumber: rpcIndexerCell.block_number,
 });
 
-/* istanbul ignore next */
 export async function loadSecp256k1ScriptDep(payload: { nodeUrl: string }): Promise<ScriptConfig> {
-  const rawResult = await fetch(payload.nodeUrl, {
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      id: 2,
-      jsonrpc: '2.0',
-      method: 'get_block_by_number',
-      params: ['0x0'],
-    }),
-    method: 'POST',
-  });
-  const genesisBlock = (await rawResult.json()).result;
+  const genesisBlock = await createRpcClient(payload.nodeUrl).request<RPCType.Block>('get_block_by_number', ['0x0']);
   if (!genesisBlock) throw new Error("can't load genesis block");
   const secp256k1DepTxHash = genesisBlock.transactions[1].hash;
   asserts.asserts(secp256k1DepTxHash, "can't load secp256k1 transaction");
