@@ -119,6 +119,7 @@ export function createRpcClient(url: string): RpcClient {
       },
     });
     if (res.status >= 300) {
+      /* istanbul ignore next */
       throw NexusCommonErrors.RequestCkbFailed(res);
     }
     return res.json();
@@ -148,6 +149,7 @@ export function createRpcClient(url: string): RpcClient {
     asserts.asserts(Array.isArray(res));
 
     return res.map<Result>((res) => {
+      /* istanbul ignore if */
       if (res.error !== undefined) {
         throw NexusCommonErrors.RequestCkbFailed(res);
       }

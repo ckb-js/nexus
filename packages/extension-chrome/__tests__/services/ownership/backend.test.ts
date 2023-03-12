@@ -1,6 +1,42 @@
 import { Script, Transaction } from '@ckb-lumos/lumos';
 import { createBackend } from '../../../src/services/ownership/backend';
 import fetchMock from 'jest-fetch-mock';
+import { createRpcClient } from '../../../src/services/ownership/backend/backendUtils';
+
+describe('rpcClient', () => {
+  afterEach(() => {
+    fetchMock.resetMocks();
+  });
+  it('should not throw error when JSONRpc returns objects', async () => {
+    fetchMock.mockResponse(() =>
+      Promise.resolve(
+        JSON.stringify({
+          id: 0,
+          jsonrpc: '2.0',
+          objects: [],
+        }),
+      ),
+    );
+    const backend = createRpcClient('');
+    await expect(backend.request('some_method', {})).resolves.not.toThrow();
+  });
+  it('should throw error when JSONRpc returns error', async () => {
+    fetchMock.mockResponse(() =>
+      Promise.resolve(
+        JSON.stringify({
+          id: 0,
+          jsonrpc: '2.0',
+          error: {
+            code: -32602,
+            message: 'Invalid params.',
+          },
+        }),
+      ),
+    );
+    const backend = createRpcClient('');
+    await expect(backend.request('some_method', {})).rejects.toThrow(/Request CKB node failed/);
+  });
+});
 
 describe('hasHistory', () => {
   afterEach(() => {
