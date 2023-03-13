@@ -10,7 +10,7 @@ import browser from 'webextension-polyfill';
 import { Endpoint } from 'webext-bridge';
 
 export type SessionMethods = {
-  session_getRequesterAppInfo: Call<void, { url: string; favicon: string }>;
+  session_getRequesterAppInfo: Call<void, { url: string }>;
   session_approveEnableWallet: Call<void, void>;
 
   /**

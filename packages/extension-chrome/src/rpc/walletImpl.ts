@@ -7,7 +7,7 @@ addMethod('wallet_enable', async (_, { getRequesterAppInfo, resolveService }) =>
   const configService = resolveService('configService');
 
   const { url } = await getRequesterAppInfo();
-  const { host, protocol } = new URL(url);
+  const { host } = new URL(url);
 
   logger.info(`wallet_enable: %s`, url);
 
@@ -23,7 +23,7 @@ addMethod('wallet_enable', async (_, { getRequesterAppInfo, resolveService }) =>
     errors.throwError('User has rejected');
   }
 
-  await configService.addWhitelistItem({ host: host, favicon: `${protocol}//${host}/favicon.ico` });
+  await configService.addWhitelistItem({ host: host });
 });
 
 addMethod('wallet_fullOwnership_getOffChainLocks', async (payload, { resolveService }) => {

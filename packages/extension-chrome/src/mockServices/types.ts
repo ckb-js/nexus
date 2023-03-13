@@ -24,5 +24,4 @@ export type NetworkName = 'ckb' | 'ckb_testnet' | string;
 
 export type Whitelist = {
   url: string;
-  favicon: string;
 };

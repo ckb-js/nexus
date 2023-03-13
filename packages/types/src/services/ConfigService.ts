@@ -89,7 +89,6 @@ export interface Config {
 
 export interface TrustedHost {
   host: string;
-  favicon: string;
 }
 
 export interface NetworkConfig {
