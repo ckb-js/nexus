@@ -16,7 +16,7 @@ export const NotificationFrame: FC = () => {
       color="white"
     >
       <Logo position="absolute" left="24px" bottom="20px" />
-      <Flex px="24px" alignItems="center" maxW="500px" direction="column" h="100%">
+      <Flex px="24px" alignItems="center" w="500px" direction="column" h="100%">
         <Outlet />
       </Flex>
     </Flex>

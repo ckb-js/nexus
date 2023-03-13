@@ -53,6 +53,7 @@ export const NetworkConfig: FC = () => {
         <RadioGroup
           value={currentNetwork}
           data-test-id="networkRadio"
+          value={currentNetwork}
           onChange={onToggle}
           display="flex"
           w="100%"

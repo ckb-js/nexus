@@ -26,17 +26,27 @@ addMethod('wallet_enable', async (_, { getRequesterAppInfo, resolveService }) =>
   await configService.addWhitelistItem({ host: host, favicon: `${protocol}//${host}/favicon.ico` });
 });
 
-// TODO: implement sign data using keystore service
-addMethod('wallet_fullOwnership_signData', async ({ data }, { getRequesterAppInfo, resolveService }) => {
-  const notificationService = resolveService('notificationService');
+addMethod('wallet_fullOwnership_getOffChainLocks', async (payload, { resolveService }) => {
+  const fullOwnershipService = await resolveService('fullOwnershipService');
+  return await fullOwnershipService.getOffChainLocks(payload);
+});
 
-  const { url } = await getRequesterAppInfo();
+addMethod('wallet_fullOwnership_getOnChainLocks', async (payload, { resolveService }) => {
+  const fullOwnershipService = await resolveService('fullOwnershipService');
+  return await fullOwnershipService.getOnChainLocks(payload);
+});
 
-  try {
-    const { password: _password } = await notificationService.requestSignData({ data, url });
-    return 'mooooooock signed message';
-    // return keystoreService.signMessage({  })
-  } catch {
-    errors.throwError('User has rejected');
-  }
+addMethod('wallet_fullOwnership_getLiveCells', async (payload, { resolveService }) => {
+  const fullOwnershipService = await resolveService('fullOwnershipService');
+  return await fullOwnershipService.getLiveCells(payload);
+});
+
+addMethod('wallet_fullOwnership_signData', async (payload, { resolveService }) => {
+  const fullOwnershipService = await resolveService('fullOwnershipService');
+  return await fullOwnershipService.signData(payload);
+});
+
+addMethod('wallet_fullOwnership_signTransaction', async (payload, { resolveService }) => {
+  const fullOwnershipService = await resolveService('fullOwnershipService');
+  return await fullOwnershipService.signTransaction(payload);
 });

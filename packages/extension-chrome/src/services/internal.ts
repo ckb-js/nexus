@@ -1,15 +1,11 @@
 import { ConfigService, KeystoreService, PlatformService } from '@nexus-wallet/types';
 import { NetworkConfig } from '@nexus-wallet/types/lib/services';
 import { EventHub } from './event';
-
-// full ownership with external chain
-export const FULL_OWNERSHIP_EXTERNAL_PARENT_PATH = `m/44'/309'/0'/0`;
-// full ownership with internal chain
-export const FULL_OWNERSHIP_INTERNAL_PARENT_PATH = `m/44'/309'/0'/1`;
-// rule-based ownership
-// 4410179 === 0x434b42 + 1  => (CKB) in hex
-// m / ckb_purpose 1'/ 0' / index
-export const RULE_BASED_PARENT_PATH = `m/4410179'/0'`;
+import {
+  FULL_OWNERSHIP_EXTERNAL_PARENT_PATH,
+  FULL_OWNERSHIP_INTERNAL_PARENT_PATH,
+  RULE_BASED_PARENT_PATH,
+} from './ownership';
 
 const DEFAULT_NETWORKS: NetworkConfig[] = [
   { id: 'mainnet', networkName: 'ckb', displayName: 'Mainnet', rpcUrl: 'https://mainnet.ckb.dev' },

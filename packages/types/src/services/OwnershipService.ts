@@ -3,14 +3,14 @@ import type { Cell, Script, Transaction } from '@ckb-lumos/lumos';
 import type { BytesLike } from '@ckb-lumos/codec';
 
 export interface OwnershipService {
-  getLiveCells(payload?: GetPaginateItemsPayload): Promise<Paginate<Cell>>;
+  getLiveCells(payload?: GetLiveCellsPayload): Promise<Paginate<Cell>>;
 
   /**
    * get unused locks
    */
-  getUnusedLocks(payload: GetUnusedLocksPayload): Promise<Script[]>;
+  getOffChainLocks(payload: GetOffChainLocksPayload): Promise<Script[]>;
 
-  getUsedLocks(payload: GetUsedLocksPayload): Promise<Paginate<Script>>;
+  getOnChainLocks(payload: GetOnChainLocksPayload): Promise<Paginate<Script>>;
 
   /**
    * sign a transaction, only the secp256k1_blake2b lock will be signed
@@ -25,17 +25,19 @@ export interface OwnershipService {
   signData(payload: SignDataPayload): Promise<Signature>;
 }
 
-interface GetPaginateItemsPayload {
+export interface GetPaginateItemsPayload {
   cursor?: string;
 }
 
-interface GetUnusedLocksPayload {
-  change?: boolean;
+export interface FilterPayload {
+  change?: 'external' | 'internal';
 }
 
-interface GetUsedLocksPayload extends GetUnusedLocksPayload, GetPaginateItemsPayload {}
+export interface GetOffChainLocksPayload extends FilterPayload {}
+export interface GetLiveCellsPayload extends GetPaginateItemsPayload {}
+export interface GetOnChainLocksPayload extends GetPaginateItemsPayload, FilterPayload {}
 
-interface SignTransactionPayload {
+export interface SignTransactionPayload {
   tx: Transaction;
 }
 

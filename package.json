@@ -20,6 +20,7 @@
     "@types/lodash.times": "4.3.7",
     "@typescript-eslint/eslint-plugin": "5.49.0",
     "@typescript-eslint/parser": "5.49.0",
+    "concat-md": "0.5.1",
     "concurrently": "7.6.0",
     "cross-env": "7.0.3",
     "eslint": "8.32.0",
@@ -33,6 +34,8 @@
     "rimraf": "4.1.2",
     "ts-jest": "29.0.5",
     "ts-node": "10.9.1",
+    "typedoc": "0.23.26",
+    "typedoc-plugin-markdown": "3.14.0",
     "typescript": "4.9.4"
   },
   "scripts": {
@@ -62,6 +65,10 @@
     ],
     "**/*.{js,jsx,ts,tsx}": [
       "npx eslint"
+    ],
+    "packages/types/src/rpc/**/*": [
+      "npm run build:docs -w @nexus-wallet/types",
+      "git add docs/rpc.md"
     ]
   },
   "dependencies": {
