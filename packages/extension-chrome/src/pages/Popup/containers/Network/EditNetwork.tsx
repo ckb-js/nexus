@@ -36,7 +36,7 @@ export const EditNetwork: FC<EditNetworkProps> = ({ mode }) => {
     if (mode === 'add') {
       await addNetworkMutation.mutateAsync({ name, rpcUrl });
     }
-    navigate('/network');
+    navigate(-1);
   });
 
   const modifyNetworkMutation = useMutation({
