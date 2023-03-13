@@ -131,7 +131,6 @@ export function createFullOwnershipService({
       return signatures;
     },
     signData: async (payload) => {
-      // TODO how to get url?
       const { password } = await platformService.requestSignData({
         data: bytes.hexify(payload.data),
         url: payload.url,
