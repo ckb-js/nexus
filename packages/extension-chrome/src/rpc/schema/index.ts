@@ -58,6 +58,8 @@ export function bindSchemaValidator<T extends keyof RpcMethods>(
       return await impl(param, context);
     } catch (e) {
       if (e instanceof ZodError) {
+        // TODO: waiting for merging of https://github.com/ckb-js/nexus/pull/112
+        // use `NexusError` instead of `errors.throwError`
         errors.throwError('Invalid params', e.message);
       }
       throw e;
