@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import { Flex, Spacer, Button, Radio, RadioGroup, Skeleton, Icon } from '@chakra-ui/react';
+import { Flex, Spacer, Button, Radio, RadioGroup, Skeleton, Icon, useToast } from '@chakra-ui/react';
 import { AddIcon, DeleteIcon } from '@chakra-ui/icons';
 import EditIcon from '../../../Components/icons/edit.svg';
 import { useNavigate } from 'react-router-dom';
@@ -15,6 +15,7 @@ const PERSIST_IDS = new Set(['mainnet', 'testnet']);
 export const NetworkConfig: FC = () => {
   const configQuery = useConfigQuery();
   const configService = useService('configService');
+  const toast = useToast();
   const toggleNetworkMutation = useMutation({
     mutationFn: (id: string) => {
       return configService.setSelectedNetwork({ id }) as Promise<void>;
@@ -31,6 +32,14 @@ export const NetworkConfig: FC = () => {
 
   const networks = configQuery.data?.networks;
   const gotoEdit = (id: string) => () => {
+    if (currentNetwork === id) {
+      toast({
+        title: 'You can not edit the current network',
+        status: 'warning',
+        position: 'top',
+      });
+      return;
+    }
     navigate(`/network/edit/${id}`);
   };
 
