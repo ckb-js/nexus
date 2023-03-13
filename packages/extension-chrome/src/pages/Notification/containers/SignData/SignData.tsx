@@ -10,22 +10,28 @@ import {
   Input,
   Link,
   Skeleton,
+  Spacer,
   Text,
   VStack,
 } from '@chakra-ui/react';
 import isUtf8 from 'is-utf8';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import React, { FC, useCallback, useMemo } from 'react';
+import React, { FC, useCallback, useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
-import { WhiteAlphaBox } from '../../Components/WhiteAlphaBox';
-import { useCheckPassword } from '../../hooks/useCheckPassword';
-import { useSessionMessenger } from '../../hooks/useSessionMessenger';
+
+import { WhiteAlphaBox } from '../../../Components/WhiteAlphaBox';
+import { useCheckPassword } from '../../../hooks/useCheckPassword';
+import { useSessionMessenger } from '../../../hooks/useSessionMessenger';
 import { bytes } from '@ckb-lumos/codec/lib';
+import { useSigningData } from './useSigningData';
+import { Link as RouteLink } from 'react-router-dom';
 
 type FormState = { password: string };
+
 export const SignData: FC = () => {
   const sessionManager = useSessionMessenger();
   const checkPassword = useCheckPassword();
+  const [, setSharedSigningData] = useSigningData();
 
   const unsignedDataQuery = useQuery({
     queryKey: ['unsignedData', sessionManager.sessionId()],
@@ -67,26 +73,32 @@ export const SignData: FC = () => {
     return isUtf8(unsigned) ? new TextDecoder('utf-8').decode(new Uint8Array(unsigned)) : bytes.hexify(unsigned);
   }, [unsignedDataQuery.data]);
 
+  useEffect(() => {
+    dataForSigning && setSharedSigningData(dataForSigning);
+  }, [setSharedSigningData, dataForSigning]);
+
   const onReject = async () => {
     window.close();
   };
 
-  return (
-    <Skeleton isLoaded={!!unsignedDataQuery.data}>
-      <Heading fontSize="2xl" fontWeight="semibold" w="452px" mt="28px">
-        Sign Message
-      </Heading>
+  const requesterHost = useMemo(() => {
+    if (!unsignedDataQuery.data) return '';
+    const url = new URL(unsignedDataQuery.data.url);
+    return `${url.protocol}//${url.host}`;
+  }, [unsignedDataQuery.data]);
 
-      <WhiteAlphaBox mt="32px" p="16px 20px">
-        <Link fontSize="sm">{unsignedDataQuery.data?.url}</Link>
+  return (
+    <Skeleton display="flex" flexDir="column" h="100%" isLoaded={!!unsignedDataQuery.data}>
+      <WhiteAlphaBox p="16px 20px">
+        <Link fontSize="sm">{requesterHost}</Link>
       </WhiteAlphaBox>
 
       <Box mt="32px" fontWeight="semibold" fontSize="md">
         Only sign this message if you fully understand the content and trust the requesting site.
       </Box>
 
-      <Flex direction="column" as="form" onSubmit={handleSubmit(onSubmit, onInvalid)}>
-        <VStack as={WhiteAlphaBox} mt="32px" spacing="12px" alignItems="flex-start" direction="column" p="16px 20px">
+      <Flex flex="1" direction="column" as="form" onSubmit={handleSubmit(onSubmit, onInvalid)}>
+        <VStack as={WhiteAlphaBox} mt="32px" spacing="12px" alignItems="flex-start" direction="column" p="32px 20px">
           <Heading size="sm" as={Flex} w="100%" justifyContent="center">
             You are signing
           </Heading>
@@ -96,10 +108,30 @@ export const SignData: FC = () => {
           <Text fontSize="md" w="100%">
             {unsignedDataQuery.data?.url} wants you to sign in with your Nexus account:
             <br />
-            {dataForSigning}
+            <Flex
+              maxW="100%"
+              overflow="hidden"
+              whiteSpace="nowrap"
+              color="yellow.200"
+              as={RouteLink}
+              to="/sign-transaction/view-data"
+              cursor="pointer"
+              lineHeight="24px"
+              fontSize="md"
+              fontWeight="bold"
+              textDecorationLine="underline"
+            >
+              <Box whiteSpace="nowrap" maxW="50%" textOverflow="ellipsis" overflow="hidden">
+                {dataForSigning.slice(0, dataForSigning.length - 19)}
+              </Box>
+              <Box whiteSpace="nowrap" overflow="hidden">
+                {dataForSigning.slice(dataForSigning.length - 19, dataForSigning.length)}
+              </Box>
+            </Flex>
           </Text>
         </VStack>
-        <FormControl isInvalid={!!formState.errors.password} pt="8px">
+        <Spacer />
+        <FormControl isInvalid={!!formState.errors.password} mt="12px">
           <FormLabel>Password</FormLabel>
           <Input
             type="password"

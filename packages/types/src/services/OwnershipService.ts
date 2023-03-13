@@ -1,4 +1,4 @@
-import type { Bytes, Paginate } from '../base';
+import type { Bytes, Paginate, RequesterInfo } from '../base';
 import type { Cell, Script, Transaction } from '@ckb-lumos/lumos';
 import type { BytesLike } from '@ckb-lumos/codec';
 
@@ -16,13 +16,13 @@ export interface OwnershipService {
    * sign a transaction, only the secp256k1_blake2b lock will be signed
    * @param payload
    */
-  signTransaction(payload: SignTransactionPayload): Promise<GroupedSignature>;
+  signTransaction(payload: SignTransactionPayload & RequesterInfo): Promise<GroupedSignature>;
 
   /**
    * sign binary data
    * @param payload
    */
-  signData(payload: SignDataPayload): Promise<Signature>;
+  signData(payload: SignDataPayload & RequesterInfo): Promise<Signature>;
 }
 
 export interface GetPaginateItemsPayload {
