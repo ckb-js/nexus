@@ -56,8 +56,8 @@ export function createConfigService(payload: {
 
     const updated = (() => {
       if (typeof configOrUpdate === 'function') {
-        return produce(oldConfig, () => {
-          configOrUpdate(oldConfig);
+        return produce(oldConfig, (draft) => {
+          configOrUpdate(draft);
         });
       }
       return configOrUpdate;
