@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import { Flex, Spacer, Button, Radio, RadioGroup, Skeleton, Icon, useToast } from '@chakra-ui/react';
+import { Flex, Spacer, Button, Radio, RadioGroup, Skeleton, Icon, useToast, VStack } from '@chakra-ui/react';
 import { AddIcon, DeleteIcon } from '@chakra-ui/icons';
 import EditIcon from '../../../Components/icons/edit.svg';
 import { useNavigate } from 'react-router-dom';
@@ -58,7 +58,7 @@ export const NetworkConfig: FC = () => {
 
   return (
     <Skeleton h="100%" as={Flex} flexDirection="column" alignItems="center" isLoaded={!!networks}>
-      <WhiteAlphaBox overflowY="auto" maxH="500px" p="16px 20px">
+      <WhiteAlphaBox overflowY="auto" maxH="500px" p="20px">
         <RadioGroup
           value={currentNetwork}
           data-test-id="networkRadio"
@@ -67,7 +67,7 @@ export const NetworkConfig: FC = () => {
           w="100%"
           flexDirection="column"
         >
-          <Flex flexDir="column">
+          <VStack spacing="20px" flexDir="column">
             {networks?.map((network, index) => (
               <Flex
                 sx={{
@@ -81,7 +81,6 @@ export const NetworkConfig: FC = () => {
                     },
                   },
                 }}
-                padding="10px"
                 key={network.id}
                 w="100%"
                 alignItems="center"
@@ -107,7 +106,7 @@ export const NetworkConfig: FC = () => {
                 )}
               </Flex>
             ))}
-          </Flex>
+          </VStack>
         </RadioGroup>
       </WhiteAlphaBox>
       <Spacer />
