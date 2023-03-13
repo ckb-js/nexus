@@ -624,10 +624,6 @@ GetPaginateItemsPayload.cursor
 
 `Optional` **change**: `"external"` \| `"internal"`
 
-**`See`**
-
-[BIP44 Change](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki#change)
-
 #### Inherited from
 
 FilterPayload.change
@@ -666,10 +662,6 @@ GetPaginateItemsPayload.cursor
 ### change
 
 `Optional` **change**: `"external"` \| `"internal"`
-
-**`See`**
-
-[BIP44 Change](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki#change)
 
 #### Inherited from
 
