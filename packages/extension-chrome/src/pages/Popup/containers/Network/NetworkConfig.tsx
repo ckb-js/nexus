@@ -1,54 +1,44 @@
 import React, { FC } from 'react';
-import { Flex, Spacer, Button, Radio, RadioGroup, VStack } from '@chakra-ui/react';
+import { Flex, Spacer, Button, Radio, RadioGroup, VStack, Skeleton } from '@chakra-ui/react';
 import { AddIcon } from '@chakra-ui/icons';
 import { useNavigate } from 'react-router-dom';
-import { useMutation, useQuery } from '@tanstack/react-query';
-
-// TODO: use real service
-import configService from '../../../../mockServices/config';
+import { useMutation } from '@tanstack/react-query';
 
 import { WhiteAlphaBox } from '../../../Components/WhiteAlphaBox';
+import { useConfigQuery } from '../../../hooks/useConfigQuery';
+import { useService } from '../../../hooks/useService';
 
 export const NetworkConfig: FC = () => {
-  const networkQuery = useQuery({
-    queryKey: ['networks'],
-    queryFn: async () => {
-      const [networks, selectedNetwork] = await Promise.all([
-        configService.getNetworks(),
-        configService.getSelectedNetwork(),
-      ]);
-      return {
-        networks,
-        selectedNetwork,
-      };
+  const configQuery = useConfigQuery();
+  const configService = useService('configService');
+  const toggleNetworkMutation = useMutation({
+    mutationFn: (id: string) => {
+      return configService.setSelectedNetwork({ id }) as Promise<void>;
     },
   });
 
-  const currentNetwork = networkQuery.data?.selectedNetwork;
-  const toggleNetworkMutation = useMutation({
-    mutationFn: (id: string) => configService.setSelectedNetwork({ id }),
-  });
+  const currentNetwork = configQuery.data?.selectedNetwork;
 
-  const onToggle = (nextValue: string) => {
-    const networkId = networkQuery.data?.networks.find((network) => network.id === nextValue)?.id;
-    if (networkId) {
-      toggleNetworkMutation.mutate(networkId);
-    }
+  const onToggle = async (id: string) => {
+    await toggleNetworkMutation.mutateAsync(id);
+    await configQuery.invalidate();
   };
   const navigate = useNavigate();
 
+  const networks = configQuery.data?.networks;
+
   return (
-    <>
+    <Skeleton h="100%" as={Flex} flexDirection="column" alignItems="center" isLoaded={!!networks}>
       <WhiteAlphaBox overflowY="auto" maxH="500px" p="16px 20px">
         <RadioGroup
           data-test-id="networkRadio"
+          value={currentNetwork}
           onChange={onToggle}
-          defaultValue={currentNetwork}
           display="flex"
           flexDirection="column"
         >
           <VStack spacing="20px">
-            {networkQuery.data?.networks.map((network, index) => (
+            {networks?.map((network, index) => (
               <Flex key={network.id} w="100%" alignItems="center">
                 <Radio colorScheme="cyan" data-test-id={`networkRadio[${index}]`} ml="32px" value={network.id}>
                   {network.displayName}
@@ -71,6 +61,6 @@ export const NetworkConfig: FC = () => {
       >
         Add Network
       </Button>
-    </>
+    </Skeleton>
   );
 };

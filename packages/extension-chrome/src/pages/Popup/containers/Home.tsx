@@ -6,7 +6,7 @@ import TerminalIcon from '../../Components/icons/Terminal.svg';
 import NetworkIcon from '../../Components/icons/Network.svg';
 import { WhiteAlphaBox } from '../../Components/WhiteAlphaBox';
 import { ConnectStatusCard } from '../../Components/ConnectStatusCard';
-import { useConfig } from '../../hooks/useConfig';
+import { useConfigQuery } from '../../hooks/useConfigQuery';
 
 const FeedbackButton: FC<ButtonProps> = (props) => {
   return (
@@ -18,7 +18,7 @@ const FeedbackButton: FC<ButtonProps> = (props) => {
 
 export const Home: FC = () => {
   const navigate = useNavigate();
-  const { data: config } = useConfig();
+  const { data: config } = useConfigQuery();
 
   const entries = [
     {
