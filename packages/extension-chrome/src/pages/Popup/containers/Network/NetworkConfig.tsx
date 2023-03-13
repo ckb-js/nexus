@@ -29,7 +29,7 @@ export const NetworkConfig: FC = () => {
 
   return (
     <Skeleton h="100%" as={Flex} flexDirection="column" alignItems="center" isLoaded={!!networks}>
-      <WhiteAlphaBox p="16px 20px">
+      <WhiteAlphaBox overflowY="auto" maxH="500px" p="16px 20px">
         <RadioGroup
           data-test-id="networkRadio"
           value={currentNetwork}

@@ -12,6 +12,7 @@ import {
 } from '@nexus-wallet/types/lib/services/OwnershipService';
 import { Config as NexusConfig } from '@nexus-wallet/types/lib/services/ConfigService';
 import { AsyncCall, AsyncCallMap } from '@nexus-wallet/types/lib/call';
+import { RequesterInfo } from '@nexus-wallet/types/lib/base';
 
 export interface WalletMethods extends AsyncCallMap {
   wallet_enable: AsyncCall<void, void>;
@@ -37,7 +38,7 @@ export interface DebugMethods extends AsyncCallMap {
 export interface ServerParams {
   resolveService<K extends keyof Modules>(name: K): Modules[K];
 
-  getRequesterAppInfo(): Promise<{ url: string }>;
+  getRequesterAppInfo(): Promise<RequesterInfo>;
 }
 
 export type RPCMethodHandler<T extends keyof RpcMethods> = (

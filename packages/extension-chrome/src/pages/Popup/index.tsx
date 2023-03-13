@@ -9,16 +9,38 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Home } from './containers/Home';
 import { AddNetwork } from './containers/Network/AddNetwork';
 import { theme } from '../theme';
-import { PopupFrame } from './containers/PopupFrame';
+import { DialogFrame } from '../Components/DialogFrame';
 import { useStartInitIfNotInitialized } from '../hooks/useStartInitIfNotInitialized';
+
+const routeMeta = [
+  {
+    path: '/',
+  },
+  {
+    path: '/whitelist-sites',
+    title: 'Whitelist Sites',
+    allowBack: true,
+  },
+  {
+    path: '/network',
+    title: 'Networks',
+    allowBack: true,
+  },
+  {
+    path: '/network/add',
+    title: 'Networks',
+    allowBack: true,
+  },
+];
 
 const routeConfig: RouteObject[] = [
   {
-    element: <PopupFrame />,
+    element: <DialogFrame meta={routeMeta} />,
     children: [
       {
         path: '/',
         element: <Home />,
+        index: true,
       },
       {
         path: '/whitelist-sites',

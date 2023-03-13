@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Transaction } from '@ckb-lumos/lumos';
+import { MOCK_PLATFORM_URL } from '../helpers';
 import { createTestRpcServer } from './helper';
 
 jest.mock('../../src/rpc/schema', () => ({
@@ -102,6 +103,7 @@ describe('RPC wallet_fullOwnership', () => {
     expect(fullOwnershipService.signData).toBeCalledWith({
       data: '0x1234',
       lock: { codeHash: '0x1234', hashType: 'type', args: '0x01' },
+      url: MOCK_PLATFORM_URL,
     });
     jest.clearAllMocks();
   });
@@ -112,7 +114,10 @@ describe('RPC wallet_fullOwnership', () => {
     jest.spyOn(fullOwnershipService, 'signTransaction').mockImplementation(() => Promise.resolve([]));
     await request('wallet_fullOwnership_signTransaction', { tx: createFakeTransaction() });
     expect(fullOwnershipService.signTransaction).toBeCalledTimes(1);
-    expect(fullOwnershipService.signTransaction).toBeCalledWith({ tx: createFakeTransaction() });
+    expect(fullOwnershipService.signTransaction).toBeCalledWith({
+      tx: createFakeTransaction(),
+      url: MOCK_PLATFORM_URL,
+    });
     jest.clearAllMocks();
   });
 });

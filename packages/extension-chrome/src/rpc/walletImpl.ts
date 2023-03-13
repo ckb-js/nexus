@@ -41,12 +41,14 @@ addMethod('wallet_fullOwnership_getLiveCells', async (payload, { resolveService 
   return await fullOwnershipService.getLiveCells(payload);
 });
 
-addMethod('wallet_fullOwnership_signData', async (payload, { resolveService }) => {
+addMethod('wallet_fullOwnership_signData', async (payload, { getRequesterAppInfo, resolveService }) => {
+  const requesterInfo = await getRequesterAppInfo();
   const fullOwnershipService = await resolveService('fullOwnershipService');
-  return await fullOwnershipService.signData(payload);
+  return await fullOwnershipService.signData({ ...payload, ...requesterInfo });
 });
 
-addMethod('wallet_fullOwnership_signTransaction', async (payload, { resolveService }) => {
+addMethod('wallet_fullOwnership_signTransaction', async (payload, { getRequesterAppInfo, resolveService }) => {
+  const requesterInfo = await getRequesterAppInfo();
   const fullOwnershipService = await resolveService('fullOwnershipService');
-  return await fullOwnershipService.signTransaction(payload);
+  return await fullOwnershipService.signTransaction({ ...payload, ...requesterInfo });
 });
