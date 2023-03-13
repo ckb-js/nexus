@@ -4,7 +4,7 @@ import type {
   GetOnChainLocksPayload,
   GetLiveCellsPayload,
   SignDataPayload,
-  // SignTransactionPayload,
+  SignTransactionPayload,
 } from '@nexus-wallet/types/lib/services/OwnershipService';
 import { errors } from '@nexus-wallet/utils/lib';
 import { z, ZodError } from 'zod';
@@ -87,10 +87,6 @@ type _cases = [
   Expect<ValidatePayload<typeof wallet_fullOwnership_getOffChainLocks, GetOffChainLocksPayload>>,
   Expect<ValidatePayload<typeof wallet_fullOwnership_getOnChainLocks, GetOnChainLocksPayload>>,
   Expect<ValidatePayload<typeof wallet_fullOwnership_signData, SignDataPayload>>,
-  /**
-   * FIXME enable this static type check
-   * because type `transaction` is nullish object.
-   * But in Lumos it's optional(Not include null)
-   */
-  // Expect<ValidatePayload<typeof wallet_fullOwnership_signTransaction, SignTransactionPayload>>,
+
+  Expect<ValidatePayload<typeof wallet_fullOwnership_signTransaction, SignTransactionPayload>>,
 ];

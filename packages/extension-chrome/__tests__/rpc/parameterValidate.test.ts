@@ -74,7 +74,6 @@ describe('Parameter validation', () => {
             hashType: 'type',
             args: '0x69b1d6d0b6f40b007d01f19bb165a4c099840913',
           },
-          type: null,
           capacity: '0x1718c73e6',
         },
       ],

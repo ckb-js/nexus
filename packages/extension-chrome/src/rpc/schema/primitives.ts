@@ -48,7 +48,7 @@ export const ZInput = z.object({
 export const ZOutput = z.object({
   capacity: ZHexNumber,
   lock: ZScript,
-  type: ZScript.nullish(),
+  type: ZScript.optional(),
 });
 export const ZWitnessArgs = z.object({
   lock: ZHexString.optional(),
