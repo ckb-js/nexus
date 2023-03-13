@@ -4,11 +4,12 @@ import type {
   GetOnChainLocksPayload,
   GetLiveCellsPayload,
   SignDataPayload,
+  // SignTransactionPayload,
 } from '@nexus-wallet/types/lib/services/OwnershipService';
 import { errors } from '@nexus-wallet/utils/lib';
 import { z, ZodError } from 'zod';
 import { RPCMethodHandler, RpcMethods } from '../types';
-import { Transaction, Script, BytesLike } from './primitives';
+import { ZTransaction, ZScript, ZBytesLike } from './primitives';
 
 function createRPCMethodSchema<TArg extends z.AnyZodObject | z.ZodUndefined>(arg: TArg) {
   return z.function().args(arg, z.any()).returns(z.promise(z.any()));
@@ -22,12 +23,11 @@ const ZFilterPayload = z.object({ change: z.enum(['external', 'internal']).optio
 const ZGetOffChainLocksPayload = ZFilterPayload;
 const ZGetLiveCellsPayload = ZGetPaginateItemsPayload;
 const ZGetOnChainLocksPayload = ZGetPaginateItemsPayload.merge(ZFilterPayload);
-
 // If we need validate parameter for wallet_enable, we can use this schema
 // const wallet_enable = createRPCMethodSchema(z.undefined(), z.void());
 
-const wallet_fullOwnership_signData = createRPCMethodSchema(z.object({ data: BytesLike, lock: Script }));
-const wallet_fullOwnership_signTransaction = createRPCMethodSchema(z.object({ tx: Transaction }));
+const wallet_fullOwnership_signData = createRPCMethodSchema(z.object({ data: ZBytesLike, lock: ZScript }));
+const wallet_fullOwnership_signTransaction = createRPCMethodSchema(z.object({ tx: ZTransaction }));
 
 const wallet_fullOwnership_getLiveCells = createRPCMethodSchema(ZGetLiveCellsPayload);
 const wallet_fullOwnership_getOffChainLocks = createRPCMethodSchema(ZGetOffChainLocksPayload);

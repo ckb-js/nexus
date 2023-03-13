@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-const ArrayLikeNumber = z.custom<ArrayLike<number>>((value) => {
+const ZArrayLikeNumber = z.custom<ArrayLike<number>>((value) => {
   return (
     typeof typeof value === 'object' &&
     value !== null &&
@@ -13,68 +13,56 @@ const ArrayLikeNumber = z.custom<ArrayLike<number>>((value) => {
 
 const ZArrayBuffer = z.custom<ArrayBuffer>((value) => value instanceof ArrayBuffer);
 
-export const BytesLike = ArrayLikeNumber.or(ZArrayBuffer).or(z.string());
+export const ZBytesLike = ZArrayLikeNumber.or(ZArrayBuffer).or(z.string());
 
-export const HexString = z.string().regex(/^0x([0-9a-fA-F][0-9a-fA-F])*$/, { message: 'Invalid hex string' });
-export const Hash = HexString;
-export const HexNumber = z.string().regex(/^0x([0-9a-fA-F])+$/);
-export const PackedSince = HexNumber;
+export const ZHexString = z.string().regex(/^0x([0-9a-fA-F][0-9a-fA-F])*$/, { message: 'Invalid hex string' });
+export const ZHash = ZHexString;
+export const ZHexNumber = z.string().regex(/^0x([0-9a-fA-F])+$/);
+export const ZPackedSince = ZHexNumber;
 
-export const HashType = z.union([z.literal('type'), z.literal('data'), z.literal('data1')]);
+export const ZHashType = z.union([z.literal('type'), z.literal('data'), z.literal('data1')]);
 
-export const Script = z.object({
-  codeHash: Hash,
-  hashType: HashType,
-  args: HexString,
+export const ZScript = z.object({
+  codeHash: ZHash,
+  hashType: ZHashType,
+  args: ZHexString,
 });
 
-const OutPoint = z.object({
-  txHash: Hash,
-  index: HexNumber,
+const ZOutPoint = z.object({
+  txHash: ZHash,
+  index: ZHexNumber,
 });
 
-export const DepType = z.union([z.literal('depGroup'), z.literal('code')]);
+export const ZDepType = z.union([z.literal('depGroup'), z.literal('code')]);
 
-export const CellDep = z.object({
-  outPoint: OutPoint,
-  depType: DepType,
+export const ZCellDep = z.object({
+  outPoint: ZOutPoint,
+  depType: ZDepType,
 });
 
-export const Input = z.object({
-  previousOutput: OutPoint,
-  since: PackedSince,
+export const ZInput = z.object({
+  previousOutput: ZOutPoint,
+  since: ZPackedSince,
 });
 
-export const Output = z.object({
-  capacity: HexNumber,
-  lock: Script,
-  type: Script.nullish(),
+export const ZOutput = z.object({
+  capacity: ZHexNumber,
+  lock: ZScript,
+  type: ZScript.nullish(),
 });
-export const WitnessArgs = z.object({
-  lock: HexString.optional(),
-  inputType: HexString.optional(),
-  outputType: HexString.optional(),
-});
-
-export const Transaction = z.object({
-  cellDeps: z.array(CellDep),
-  hash: Hash.optional(),
-  headerDeps: z.array(Hash),
-  inputs: z.array(Input),
-  outputs: z.array(Output),
-  outputsData: z.array(HexString),
-  version: HexNumber,
-  witnesses: z.array(HexString),
+export const ZWitnessArgs = z.object({
+  lock: ZHexString.optional(),
+  inputType: ZHexString.optional(),
+  outputType: ZHexString.optional(),
 });
 
-export const Cell = z.object({
-  cellOutput: z.object({
-    capacity: HexNumber,
-    lock: Script,
-    type: Script.nullish(),
-  }),
-  data: HexString,
-  outPoint: OutPoint.nullish(),
-  blockHash: Hash.optional(),
-  blockNumber: HexNumber.optional(),
+export const ZTransaction = z.object({
+  cellDeps: z.array(ZCellDep),
+  hash: ZHash.optional(),
+  headerDeps: z.array(ZHash),
+  inputs: z.array(ZInput),
+  outputs: z.array(ZOutput),
+  outputsData: z.array(ZHexString),
+  version: ZHexNumber,
+  witnesses: z.array(ZHexString),
 });
