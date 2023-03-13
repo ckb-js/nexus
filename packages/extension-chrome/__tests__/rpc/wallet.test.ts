@@ -1,5 +1,6 @@
-import { Transaction } from '@ckb-lumos/lumos';
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { Transaction } from '@ckb-lumos/lumos';
+import { MOCK_PLATFORM_URL } from '../helpers';
 import { createTestRpcServer } from './helper';
 
 describe('RPC wallet_enable', () => {
@@ -97,7 +98,7 @@ describe('RPC wallet_fullOwnership', () => {
     expect(fullOwnershipService.signData).toBeCalledWith({
       data: '0x1234',
       lock: { codeHash: '0x1234', hashType: 'type', args: '0x01' },
-      url: 'internal://nexus-wallet.io',
+      url: MOCK_PLATFORM_URL,
     });
     jest.clearAllMocks();
   });
@@ -110,7 +111,7 @@ describe('RPC wallet_fullOwnership', () => {
     expect(fullOwnershipService.signTransaction).toBeCalledTimes(1);
     expect(fullOwnershipService.signTransaction).toBeCalledWith({
       tx: createFakeTransaction(),
-      url: 'internal://nexus-wallet.io',
+      url: MOCK_PLATFORM_URL,
     });
     jest.clearAllMocks();
   });
