@@ -28,19 +28,19 @@ After installing the Nexus extension, you can open the Nexus Wallet and initiali
 
 Firstly, you can pin the Nexus Wallet to the Chrome taskbar by clicking the pin icon on the top right corner of the browser.
 
-![pin](./assets/pin-extension.png)
+<img src="./assets/pin-extension.png"  height="200" />
 
 Then you can open the Nexus Wallet initialization page by clicking the Nexus icon on the Chrome taskbar.
 
-![click](./assets/click-extension.png)
+<img src="./assets/click-extension.png"  height="200" />
 
 By clicking the Nexus icon, you will be navigated to the Nexus Wallet welcome page.
 
-![welcome](./assets/welcome-extension.png)
+<img src="./assets/welcome-extension.png"  height="200" />
 
 Then you have a set of mnemonics, click `Import Wallet` button, otherwise, click the `Create a Wallet` button. Follow the instructions on the page to initialize the Nexus Wallet, when you see the page below, now you are all set.
 
-![init-done](./assets/init-done.png)
+<img src="./assets/init-done.png"  height="200" />
 
 ---
 
@@ -50,11 +50,11 @@ Then you have a set of mnemonics, click `Import Wallet` button, otherwise, click
 
 What you can do next is to go to your favorite dApp and try it out. Or click the Nexus icon on the Chrome taskbar to open the Nexus Wallet and view your profile.
 
-![profile](./assets/profile.png)
+<img src="./assets/profile.png"  height="200" />
 
 A [Dapp Demo](https://demo-nexus.vercel.app/) which supports Nexus is also available.
 
-![demo](./assets/demo.png)
+<img src="./assets/demo.png"  height="200" />
 
 ---
 
