@@ -42,7 +42,6 @@ const walletMethodSchemas = {
   wallet_fullOwnership_signTransaction,
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyRpcSchema = z.ZodFunction<z.ZodTuple<any, any>, z.ZodTypeAny>;
 
 export function bindSchemaValidator<T extends keyof RpcMethods>(
