@@ -1,10 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type {
   GetOffChainLocksPayload,
-  GetPaginateItemsPayload,
-  // GetUsedLocksPayload,
+  GetOnChainLocksPayload,
+  GetLiveCellsPayload,
   SignDataPayload,
-  // SignTransactionPayload,
 } from '@nexus-wallet/types/lib/services/OwnershipService';
 import { errors } from '@nexus-wallet/utils/lib';
 import { z, ZodError } from 'zod';
@@ -15,12 +14,14 @@ function createRPCMethodSchema<TArg extends z.AnyZodObject | z.ZodUndefined>(arg
   return z.function().args(arg, z.any()).returns(z.promise(z.any()));
 }
 
-const getPaginateItemsPayload = z.object({
+const ZGetPaginateItemsPayload = z.object({
   cursor: z.string().optional(),
 });
+const ZFilterPayload = z.object({ change: z.enum(['external', 'internal']).optional() });
 
-const getOffChainLocksPayload = z.object({ change: z.enum(['external', 'internal']).optional() });
-const getUsedLocksPayload = getOffChainLocksPayload.merge(getPaginateItemsPayload);
+const ZGetOffChainLocksPayload = ZFilterPayload;
+const ZGetLiveCellsPayload = ZGetPaginateItemsPayload;
+const ZGetOnChainLocksPayload = ZGetPaginateItemsPayload.merge(ZFilterPayload);
 
 // If we need validate parameter for wallet_enable, we can use this schema
 // const wallet_enable = createRPCMethodSchema(z.undefined(), z.void());
@@ -28,9 +29,9 @@ const getUsedLocksPayload = getOffChainLocksPayload.merge(getPaginateItemsPayloa
 const wallet_fullOwnership_signData = createRPCMethodSchema(z.object({ data: BytesLike, lock: Script }));
 const wallet_fullOwnership_signTransaction = createRPCMethodSchema(z.object({ tx: Transaction }));
 
-const wallet_fullOwnership_getLiveCells = createRPCMethodSchema(getPaginateItemsPayload);
-const wallet_fullOwnership_getOffChainLocks = createRPCMethodSchema(getOffChainLocksPayload);
-const wallet_fullOwnership_getOnChainLocks = createRPCMethodSchema(getUsedLocksPayload);
+const wallet_fullOwnership_getLiveCells = createRPCMethodSchema(ZGetLiveCellsPayload);
+const wallet_fullOwnership_getOffChainLocks = createRPCMethodSchema(ZGetOffChainLocksPayload);
+const wallet_fullOwnership_getOnChainLocks = createRPCMethodSchema(ZGetOnChainLocksPayload);
 
 const walletMethodSchemas = {
   // wallet_enable,
@@ -83,11 +84,14 @@ type SchemaFirstParameter<S extends AnyRpcSchema> = Parameters<z.infer<S>>[0];
 
 type ValidatePayload<S extends AnyRpcSchema, P extends Record<any, any>> = ParameterEqual<SchemaFirstParameter<S>, P>;
 type _cases = [
-  Expect<ValidatePayload<typeof wallet_fullOwnership_getLiveCells, GetPaginateItemsPayload>>,
+  Expect<ValidatePayload<typeof wallet_fullOwnership_getLiveCells, GetLiveCellsPayload>>,
   Expect<ValidatePayload<typeof wallet_fullOwnership_getOffChainLocks, GetOffChainLocksPayload>>,
-  // Expect<ValidatePayload<typeof wallet_fullOwnership_getOnChainLocks, GetUsedLocksPayload>>,
+  Expect<ValidatePayload<typeof wallet_fullOwnership_getOnChainLocks, GetOnChainLocksPayload>>,
   Expect<ValidatePayload<typeof wallet_fullOwnership_signData, SignDataPayload>>,
-
-  // FIXME enable this static type check
+  /**
+   * FIXME enable this static type check
+   * because type `transaction` is nullish object.
+   * But in Lumos it's optional(Not include null)
+   */
   // Expect<ValidatePayload<typeof wallet_fullOwnership_signTransaction, SignTransactionPayload>>,
 ];
