@@ -19,35 +19,19 @@ await window.ckb.request({ method: "wallet_enable" })
 
 ### Methods
 
-- [debug\_getConfig](#debug_getconfig)
 - [wallet\_enable](#wallet_enable)
-- [wallet\_fullOwnership\_getLiveCells](#wallet_fullownership_getlivecells)
 - [wallet\_fullOwnership\_getOffChainLocks](#wallet_fullownership_getoffchainlocks)
 - [wallet\_fullOwnership\_getOnChainLocks](#wallet_fullownership_getonchainlocks)
-- [wallet\_fullOwnership\_signData](#wallet_fullownership_signdata)
+- [wallet\_fullOwnership\_getLiveCells](#wallet_fullownership_getlivecells)
 - [wallet\_fullOwnership\_signTransaction](#wallet_fullownership_signtransaction)
+- [wallet\_fullOwnership\_signData](#wallet_fullownership_signdata)
+- [debug\_getConfig](#debug_getconfig)
 
 ## Methods
 
-### debug\_getConfig
-
-▸ **debug_getConfig**(): `Promise`<[`Config`](#configmd)\>
-
-Get the wallet config
-
-#### Returns
-
-`Promise`<[`Config`](#configmd)\>
-
-#### Defined in
-
-[packages/types/src/rpc/index.ts:416](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/rpc/index.ts#L416)
-
-___
-
 ### wallet\_enable
 
-▸ **wallet_enable**(): `Promise`<`void`\>
+**wallet_enable**(): `Promise`<`void`\>
 
 If a dApp is the first time to connect to the wallet,
 it needs to call this method to enable the wallet for the dApp.
@@ -57,143 +41,11 @@ After calling this method, we can see the dApp in the whitelist
 
 `Promise`<`void`\>
 
-#### Defined in
-
-[packages/types/src/rpc/index.ts:32](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/rpc/index.ts#L32)
-
-___
-
-### wallet\_fullOwnership\_getLiveCells
-
-▸ **wallet_fullOwnership_getLiveCells**(`payload?`): `Promise`<[`Paginate`](#paginatemd)<`Cell`\>\>
-
-get live cells of which the wallet has full ownership
-
-**`Example`**
-
-```js
-await window.ckb.request({
- method: 'wallet_fullOwnership_getLiveCells',
- params: {
-   cursor:
-     '99:0x409bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce801dafb7ea1dd60616fb9e9088332e5f975a68ac28e000000000082a3220000000700000000',
-   change: 'external',
- },
-});
-```
-
-#### Parameters
-
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `payload?` | [`GetLiveCellsPayload`](#getlivecellspayloadmd) | the `change` field defaults to 'external', if the `cursor` is blank, it is equivalent to `"0:0x"` and will return the first page of live cells |
-
-#### Returns
-
-`Promise`<[`Paginate`](#paginatemd)<`Cell`\>\>
-
-live cells of current wallet with pagination info, the page size is 20
- <details>
-   <summary>show return data example</summary>
-
-   ```json
-   {
-     "objects": [
-         {
-               "cellOutput": {
-                   "capacity": "0x14ace47800",
-                   "lock": {
-                       "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                       "hashType": "type",
-                       "args": "0xe570f6b1cf07ecafe86583ff9543bfcfca585a45"
-                   }
-               },
-               "data": "0x",
-               "outPoint": {
-                   "txHash": "0xb9db307671e53ef75976c2ec8b3f501c2151998787581858eb84e95174dd9b5a",
-                   "index": "0x0"
-               },
-               "blockNumber": "0x81d587"
-           },
-           {
-               "cellOutput": {
-                   "capacity": "0xe8d4a51000",
-                   "lock": {
-                       "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                       "hashType": "type",
-                       "args": "0x74444a85fba9efcd2df6bade767200aab8fee58c"
-                   }
-               },
-               "data": "0x",
-               "outPoint": {
-                   "txHash": "0x9368614003637ea0c547335567a3c72e263d4fe395ec7fa263cbd52609f30dae",
-                   "index": "0x3"
-               },
-               "blockNumber": "0x82a31d"
-           },
-           {
-               "cellOutput": {
-                   "capacity": "0x1a13b8600",
-                   "lock": {
-                       "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                       "hashType": "type",
-                       "args": "0x5b6c1bb6757ebeef96181fc100cca7e4e962388e"
-                   }
-               },
-               "data": "0x",
-               "outPoint": {
-                   "txHash": "0xa041511f830955439a9b93c0fac6db8376d43d7de56054bc7dc8c51bda27741d",
-                   "index": "0x0"
-               },
-               "blockNumber": "0x82a327"
-           },
-           {
-               "cellOutput": {
-                   "capacity": "0xe8d4a51000",
-                   "lock": {
-                       "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                       "hashType": "type",
-                       "args": "0x193824fe5fecf4d30871237911e79096b4ca9cbb"
-                   }
-               },
-               "data": "0x",
-               "outPoint": {
-                   "txHash": "0x82be78c691ae1e7d4aafa4491cdba54c33dd1ca075ba5e8f3dd3497283bde849",
-                   "index": "0x0"
-               },
-               "blockNumber": "0x82a328"
-           },
-           {
-               "cellOutput": {
-                   "capacity": "0x5d21dba000",
-                   "lock": {
-                       "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                       "hashType": "type",
-                       "args": "0xfd822396937dab6ff35a04852b2b48c212384a3f"
-                   }
-               },
-               "data": "0x",
-               "outPoint": {
-                   "txHash": "0x4971ebab12b40c3662a5be6e984e27272e574bd13e9b6ffffb313d6bab453bcd",
-                   "index": "0x0"
-               },
-               "blockNumber": "0x82aa99"
-           }
-       ],
-       "cursor": "125:0x409bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce801fd822396937dab6ff35a04852b2b48c212384a3f000000000082aa990000000500000000"
-     }
-   ```
- </details>
-
-#### Defined in
-
-[packages/types/src/rpc/index.ts:307](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/rpc/index.ts#L307)
-
 ___
 
 ### wallet\_fullOwnership\_getOffChainLocks
 
-▸ **wallet_fullOwnership_getOffChainLocks**(`payload`): `Promise`<[`Script`](#scriptmd)[]\>
+**wallet_fullOwnership_getOffChainLocks**(`payload`): `Promise`<[`Script`](#scriptmd)[]\>
 
 get unused locks of which the wallet has full ownership
 
@@ -323,15 +175,11 @@ the off-chain locks of current wallet
    ```
  </details>
 
-#### Defined in
-
-[packages/types/src/rpc/index.ts:151](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/rpc/index.ts#L151)
-
 ___
 
 ### wallet\_fullOwnership\_getOnChainLocks
 
-▸ **wallet_fullOwnership_getOnChainLocks**(`payload`): `Promise`<[`Paginate`](#paginatemd)<[`Script`](#scriptmd)\>\>
+**wallet_fullOwnership_getOnChainLocks**(`payload`): `Promise`<[`Paginate`](#paginatemd)<[`Script`](#scriptmd)\>\>
 
 get used locks of which the wallet has full ownership
 
@@ -389,66 +237,135 @@ on-chain locks of the current wallet with pagination info, the page size is 20
  ```
  </details>
 
-#### Defined in
-
-[packages/types/src/rpc/index.ts:198](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/rpc/index.ts#L198)
-
 ___
 
-### wallet\_fullOwnership\_signData
+### wallet\_fullOwnership\_getLiveCells
 
-▸ **wallet_fullOwnership_signData**(`payload`): `Promise`<`string`\>
+**wallet_fullOwnership_getLiveCells**(`payload?`): `Promise`<[`Paginate`](#paginatemd)<`Cell`\>\>
 
-sign a piece of
-
-**`Link`**
-
-BytesLike `BytesLike` data with the wallet
+get live cells of which the wallet has full ownership
 
 **`Example`**
 
 ```js
-let locks = await window.ckb.request({
- method: 'wallet_fullOwnership_getOffChainLocks',
- params: { change: 'external' },
+await window.ckb.request({
+ method: 'wallet_fullOwnership_getLiveCells',
+ params: {
+   cursor:
+     '99:0x409bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce801dafb7ea1dd60616fb9e9088332e5f975a68ac28e000000000082a3220000000700000000',
+   change: 'external',
+ },
 });
- await window.ckb.request({
-   method: 'wallet_fullOwnership_signData',
-   params: {
-     lock: locks[0],
-     data: '0xd194cc30c06b9f71fc7c474d2bb90fd2c4a7de66b121d0fdf5dcb2bcdd11c2a8a4f6d4ac5165fe013cdfb1',
-   },
- });
 ```
 
 #### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `payload` | [`SignDataPayload`](#signdatapayloadmd) | `data` you would like to sign, `lock` indicates which lock you would like to use to sign the data |
+| `payload?` | [`GetLiveCellsPayload`](#getlivecellspayloadmd) | the `change` field defaults to 'external', if the `cursor` is blank, it is equivalent to `"0:0x"` and will return the first page of live cells |
 
 #### Returns
 
-`Promise`<`string`\>
+`Promise`<[`Paginate`](#paginatemd)<`Cell`\>\>
 
-the signature of the data if the wallet has full ownership of the lock passed in
+live cells of current wallet with pagination info, the page size is 20
  <details>
-  <summary>show return data example</summary>
-  
+   <summary>show return data example</summary>
+
    ```json
-     "0xa05fcab1955bb1aaf5d6733a5ae9ff932b5c8183532c682c1d3c735e75c2e2e6690d19ad664773ac1f438051a6c47b4aafb9e914292904fe9fe83d59906e827b00"
+   {
+     "objects": [
+         {
+               "cellOutput": {
+                   "capacity": "0x14ace47800",
+                   "lock": {
+                       "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+                       "hashType": "type",
+                       "args": "0xe570f6b1cf07ecafe86583ff9543bfcfca585a45"
+                   }
+               },
+               "data": "0x",
+               "outPoint": {
+                   "txHash": "0xb9db307671e53ef75976c2ec8b3f501c2151998787581858eb84e95174dd9b5a",
+                   "index": "0x0"
+               },
+               "blockNumber": "0x81d587"
+           },
+           {
+               "cellOutput": {
+                   "capacity": "0xe8d4a51000",
+                   "lock": {
+                       "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+                       "hashType": "type",
+                       "args": "0x74444a85fba9efcd2df6bade767200aab8fee58c"
+                   }
+               },
+               "data": "0x",
+               "outPoint": {
+                   "txHash": "0x9368614003637ea0c547335567a3c72e263d4fe395ec7fa263cbd52609f30dae",
+                   "index": "0x3"
+               },
+               "blockNumber": "0x82a31d"
+           },
+           {
+               "cellOutput": {
+                   "capacity": "0x1a13b8600",
+                   "lock": {
+                       "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+                       "hashType": "type",
+                       "args": "0x5b6c1bb6757ebeef96181fc100cca7e4e962388e"
+                   }
+               },
+               "data": "0x",
+               "outPoint": {
+                   "txHash": "0xa041511f830955439a9b93c0fac6db8376d43d7de56054bc7dc8c51bda27741d",
+                   "index": "0x0"
+               },
+               "blockNumber": "0x82a327"
+           },
+           {
+               "cellOutput": {
+                   "capacity": "0xe8d4a51000",
+                   "lock": {
+                       "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+                       "hashType": "type",
+                       "args": "0x193824fe5fecf4d30871237911e79096b4ca9cbb"
+                   }
+               },
+               "data": "0x",
+               "outPoint": {
+                   "txHash": "0x82be78c691ae1e7d4aafa4491cdba54c33dd1ca075ba5e8f3dd3497283bde849",
+                   "index": "0x0"
+               },
+               "blockNumber": "0x82a328"
+           },
+           {
+               "cellOutput": {
+                   "capacity": "0x5d21dba000",
+                   "lock": {
+                       "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+                       "hashType": "type",
+                       "args": "0xfd822396937dab6ff35a04852b2b48c212384a3f"
+                   }
+               },
+               "data": "0x",
+               "outPoint": {
+                   "txHash": "0x4971ebab12b40c3662a5be6e984e27272e574bd13e9b6ffffb313d6bab453bcd",
+                   "index": "0x0"
+               },
+               "blockNumber": "0x82aa99"
+           }
+       ],
+       "cursor": "125:0x409bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce801fd822396937dab6ff35a04852b2b48c212384a3f000000000082aa990000000500000000"
+     }
    ```
  </details>
-
-#### Defined in
-
-[packages/types/src/rpc/index.ts:411](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/rpc/index.ts#L411)
 
 ___
 
 ### wallet\_fullOwnership\_signTransaction
 
-▸ **wallet_fullOwnership_signTransaction**(`payload`): `Promise`<`GroupedSignature`\>
+**wallet_fullOwnership_signTransaction**(`payload`): `Promise`<`GroupedSignature`\>
 
 sign a transaction with the wallet
 
@@ -534,9 +451,64 @@ an array of [lock, signature] tuple
    ```
  </details>
 
-#### Defined in
+___
 
-[packages/types/src/rpc/index.ts:382](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/rpc/index.ts#L382)
+### wallet\_fullOwnership\_signData
+
+**wallet_fullOwnership_signData**(`payload`): `Promise`<`string`\>
+
+sign a piece of
+
+**`Link`**
+
+BytesLike `BytesLike` data with the wallet
+
+**`Example`**
+
+```js
+let locks = await window.ckb.request({
+ method: 'wallet_fullOwnership_getOffChainLocks',
+ params: { change: 'external' },
+});
+ await window.ckb.request({
+   method: 'wallet_fullOwnership_signData',
+   params: {
+     lock: locks[0],
+     data: '0xd194cc30c06b9f71fc7c474d2bb90fd2c4a7de66b121d0fdf5dcb2bcdd11c2a8a4f6d4ac5165fe013cdfb1',
+   },
+ });
+```
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `payload` | [`SignDataPayload`](#signdatapayloadmd) | `data` you would like to sign, `lock` indicates which lock you would like to use to sign the data |
+
+#### Returns
+
+`Promise`<`string`\>
+
+the signature of the data if the wallet has full ownership of the lock passed in
+ <details>
+  <summary>show return data example</summary>
+  
+   ```json
+     "0xa05fcab1955bb1aaf5d6733a5ae9ff932b5c8183532c682c1d3c735e75c2e2e6690d19ad664773ac1f438051a6c47b4aafb9e914292904fe9fe83d59906e827b00"
+   ```
+ </details>
+
+___
+
+### debug\_getConfig
+
+**debug_getConfig**(): `Promise`<[`Config`](#configmd)\>
+
+Get the wallet config
+
+#### Returns
+
+`Promise`<[`Config`](#configmd)\>
 
 
 <a name="configmd"></a>
@@ -547,72 +519,52 @@ an array of [lock, signature] tuple
 
 ### Properties
 
-- [networks](#networks)
+- [version](#version)
 - [nickname](#nickname)
 - [selectedNetwork](#selectednetwork)
-- [version](#version)
+- [networks](#networks)
 - [whitelist](#whitelist)
 
 ## Properties
 
-### networks
+### version
 
-• **networks**: [`NetworkConfig`](#networkconfigmd)[]
+ **version**: `string`
 
-a list of networks that the app can connect to
-
-#### Defined in
-
-[packages/types/src/services/ConfigService.ts:83](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/services/ConfigService.ts#L83)
+version of the current app
 
 ___
 
 ### nickname
 
-• **nickname**: `string`
+ **nickname**: `string`
 
 the nickname of the current user, for display purpose.
 unlike other wallet, Nexus don't use a certain address as the identity of the user
-
-#### Defined in
-
-[packages/types/src/services/ConfigService.ts:75](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/services/ConfigService.ts#L75)
 
 ___
 
 ### selectedNetwork
 
-• **selectedNetwork**: `string`
+ **selectedNetwork**: `string`
 
 the id of networks that is selected to connect
 
-#### Defined in
-
-[packages/types/src/services/ConfigService.ts:79](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/services/ConfigService.ts#L79)
-
 ___
 
-### version
+### networks
 
-• **version**: `string`
+ **networks**: [`NetworkConfig`](#networkconfigmd)[]
 
-version of the current app
-
-#### Defined in
-
-[packages/types/src/services/ConfigService.ts:70](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/services/ConfigService.ts#L70)
+a list of networks that the app can connect to
 
 ___
 
 ### whitelist
 
-• **whitelist**: [`TrustedHost`](#trustedhostmd)[]
+ **whitelist**: [`TrustedHost`](#trustedhostmd)[]
 
 a list of hosts that have been granted
-
-#### Defined in
-
-[packages/types/src/services/ConfigService.ts:87](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/services/ConfigService.ts#L87)
 
 
 <a name="getlivecellspayloadmd"></a>
@@ -635,15 +587,11 @@ a list of hosts that have been granted
 
 ### cursor
 
-• `Optional` **cursor**: `string`
+ `Optional` **cursor**: `string`
 
 #### Inherited from
 
 GetPaginateItemsPayload.cursor
-
-#### Defined in
-
-[packages/types/src/services/OwnershipService.ts:29](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/services/OwnershipService.ts#L29)
 
 
 <a name="getoffchainlockspayloadmd"></a>
@@ -666,15 +614,11 @@ GetPaginateItemsPayload.cursor
 
 ### change
 
-• `Optional` **change**: ``"external"`` \| ``"internal"``
+ `Optional` **change**: ``"external"`` \| ``"internal"``
 
 #### Inherited from
 
 FilterPayload.change
-
-#### Defined in
-
-[packages/types/src/services/OwnershipService.ts:33](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/services/OwnershipService.ts#L33)
 
 
 <a name="getonchainlockspayloadmd"></a>
@@ -693,36 +637,28 @@ FilterPayload.change
 
 ### Properties
 
-- [change](#change)
 - [cursor](#cursor)
+- [change](#change)
 
 ## Properties
 
-### change
-
-• `Optional` **change**: ``"external"`` \| ``"internal"``
-
-#### Inherited from
-
-FilterPayload.change
-
-#### Defined in
-
-[packages/types/src/services/OwnershipService.ts:33](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/services/OwnershipService.ts#L33)
-
-___
-
 ### cursor
 
-• `Optional` **cursor**: `string`
+ `Optional` **cursor**: `string`
 
 #### Inherited from
 
 GetPaginateItemsPayload.cursor
 
-#### Defined in
+___
 
-[packages/types/src/services/OwnershipService.ts:29](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/services/OwnershipService.ts#L29)
+### change
+
+ `Optional` **change**: ``"external"`` \| ``"internal"``
+
+#### Inherited from
+
+FilterPayload.change
 
 
 <a name="networkconfigmd"></a>
@@ -733,50 +669,34 @@ GetPaginateItemsPayload.cursor
 
 ### Properties
 
-- [displayName](#displayname)
 - [id](#id)
+- [displayName](#displayname)
 - [networkName](#networkname)
 - [rpcUrl](#rpcurl)
 
 ## Properties
 
-### displayName
+### id
 
-• **displayName**: `string`
-
-#### Defined in
-
-[packages/types/src/services/ConfigService.ts:97](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/services/ConfigService.ts#L97)
+ **id**: `string`
 
 ___
 
-### id
+### displayName
 
-• **id**: `string`
-
-#### Defined in
-
-[packages/types/src/services/ConfigService.ts:96](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/services/ConfigService.ts#L96)
+ **displayName**: `string`
 
 ___
 
 ### networkName
 
-• **networkName**: `string`
-
-#### Defined in
-
-[packages/types/src/services/ConfigService.ts:98](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/services/ConfigService.ts#L98)
+ **networkName**: `string`
 
 ___
 
 ### rpcUrl
 
-• **rpcUrl**: `string`
-
-#### Defined in
-
-[packages/types/src/services/ConfigService.ts:99](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/services/ConfigService.ts#L99)
+ **rpcUrl**: `string`
 
 
 <a name="paginatemd"></a>
@@ -800,21 +720,13 @@ ___
 
 ### cursor
 
-• **cursor**: `string`
-
-#### Defined in
-
-[packages/types/src/base.ts:4](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/base.ts#L4)
+ **cursor**: `string`
 
 ___
 
 ### objects
 
-• **objects**: `T`[]
-
-#### Defined in
-
-[packages/types/src/base.ts:5](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/base.ts#L5)
+ **objects**: `T`[]
 
 
 <a name="scriptmd"></a>
@@ -825,39 +737,27 @@ ___
 
 ### Properties
 
-- [args](#args)
 - [codeHash](#codehash)
 - [hashType](#hashtype)
+- [args](#args)
 
 ## Properties
 
-### args
-
-• **args**: `string`
-
-#### Defined in
-
-lumos/packages/base/lib/api.d.ts:20
-
-___
-
 ### codeHash
 
-• **codeHash**: `string`
-
-#### Defined in
-
-lumos/packages/base/lib/api.d.ts:18
+ **codeHash**: `string`
 
 ___
 
 ### hashType
 
-• **hashType**: `HashType`
+ **hashType**: `HashType`
 
-#### Defined in
+___
 
-lumos/packages/base/lib/api.d.ts:19
+### args
+
+ **args**: `string`
 
 
 <a name="signdatapayloadmd"></a>
@@ -881,29 +781,21 @@ lumos/packages/base/lib/api.d.ts:19
 
 ### data
 
-• **data**: [`BytesLike`](#byteslike)
+ **data**: [`BytesLike`](#byteslike)
 
 #### Inherited from
 
 SignDataPayloadType.data
 
-#### Defined in
-
-[packages/types/src/services/OwnershipService.ts:45](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/services/OwnershipService.ts#L45)
-
 ___
 
 ### lock
 
-• **lock**: [`Script`](#scriptmd)
+ **lock**: [`Script`](#scriptmd)
 
 #### Inherited from
 
 SignDataPayloadType.lock
-
-#### Defined in
-
-[packages/types/src/services/OwnershipService.ts:46](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/services/OwnershipService.ts#L46)
 
 
 <a name="signtransactionpayloadmd"></a>
@@ -920,11 +812,7 @@ SignDataPayloadType.lock
 
 ### tx
 
-• **tx**: `Transaction`
-
-#### Defined in
-
-[packages/types/src/services/OwnershipService.ts:41](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/services/OwnershipService.ts#L41)
+ **tx**: `Transaction`
 
 
 <a name="trustedhostmd"></a>
@@ -935,25 +823,17 @@ SignDataPayloadType.lock
 
 ### Properties
 
-- [favicon](#favicon)
 - [host](#host)
+- [favicon](#favicon)
 
 ## Properties
 
-### favicon
+### host
 
-• **favicon**: `string`
-
-#### Defined in
-
-[packages/types/src/services/ConfigService.ts:92](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/services/ConfigService.ts#L92)
+ **host**: `string`
 
 ___
 
-### host
+### favicon
 
-• **host**: `string`
-
-#### Defined in
-
-[packages/types/src/services/ConfigService.ts:91](https://github.com/ckb-js/nexus/blob/8341fef/packages/types/src/services/ConfigService.ts#L91)
+ **favicon**: `string`
