@@ -1,0 +1,40 @@
+{
+  "name": "@nexus-wallet/ownership-providers",
+  "version": "0.0.1",
+  "description": "Simple wrapper to work with Nexus",
+  "homepage": "https://github.com/ckb-js/nexus/tree/main/extension-chrome#readme",
+  "license": "MIT",
+  "typings": "./lib/index.d.ts",
+  "directories": {
+    "lib": "lib"
+  },
+  "files": [
+    "lib",
+    "src"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ckb-js/nexus.git"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf lib/*",
+    "check": "npm run check:types",
+    "check:types": "tsc --noEmit"
+  },
+  "bugs": {
+    "url": "https://github.com/ckb-js/nexus/issues"
+  },
+  "dependencies": {
+    "@nexus-wallet/protocol": "*",
+    "@nexus-wallet/utils": "*"
+  },
+  "devDependencies": {
+    "@ckb-lumos/bi": "*",
+    "@ckb-lumos/helpers": "*"
+  },
+  "peerDependencies": {
+    "@ckb-lumos/bi": "^0.20.0-alpha.1",
+    "@ckb-lumos/helpers": "^0.20.0-alpha.1"
+  }
+}
