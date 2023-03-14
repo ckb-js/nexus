@@ -1,66 +1,12 @@
-# Tutorial
+# Getting Started
 
-Nexus Wallet is a UTXO friendly wallet for CKB.
-
-It is designed not only for end users but also for DApp builders.
-
-It is a Chrome extension that end users can use to connect to DApps and sign transactions or messages.
-
-It also provides a set of APIs for DApp builders to interact with the wallet.
-
----
-
-## For Nexus Wallet Users
-
-This part is for you if you are a Nexus Wallet user, the following section will guide you to install the Nexus Wallet and initialize it.
-
----
-
-You can clone the repo and build the Nexus Wallet, then install the Nexus extension on Chrome by the instructions [here](https://developer.chrome.com/docs/extensions/mv3/getstarted/development-basics/).
-
----
-
-### Initialize the Nexus Wallet
-
----
-
-After installing the Nexus extension, you can open the Nexus Wallet and initialize the Nexus Wallet.
-
-Firstly, you can pin the Nexus Wallet to the Chrome taskbar by clicking the pin icon on the top right corner of the browser.
-
-<img src="./assets/pin-extension.png"  height="200" />
-
-Then you can open the Nexus Wallet initialization page by clicking the Nexus icon on the Chrome taskbar.
-
-<img src="./assets/click-extension.png"  height="200" />
-
-By clicking the Nexus icon, you will be navigated to the Nexus Wallet welcome page.
-
-<img src="./assets/welcome-extension.png"  height="200" />
-
-Then you have a set of mnemonics, click `Import Wallet` button, otherwise, click the `Create a Wallet` button. Follow the instructions on the page to initialize the Nexus Wallet, when you see the page below, now you are all set.
-
-<img src="./assets/init-done.png"  height="200" />
-
----
-
-### Try it out
-
----
-
-What you can do next is to go to your favorite dApp and try it out. Or click the Nexus icon on the Chrome taskbar to open the Nexus Wallet and view your profile.
-
-<img src="./assets/profile.png"  height="200" />
-
-A [Dapp Demo](https://demo-nexus.vercel.app/) which supports Nexus is also available.
-
-<img src="./assets/demo.png"  height="200" />
+Nexus Wallet provides a set of APIs for DApp builders to interact with the wallet.
 
 ---
 
 ## For DApp Developers
 
-This part is for you if you are a DApp developer, the following section introduces the APIs that Nexus provides for DApp developers, and some examples demonstrating how to use the APIs.
+This part is for you if you are a DApp developer, for Nexus Wallet end users, please go to [user guide](./user-guide.md). The following section introduces the APIs that Nexus provides for DApp developers, and some examples demonstrating how to use the APIs.
 
 ---
 
