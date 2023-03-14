@@ -1,8 +1,8 @@
 import { LIB_VERSION } from './version';
-import { formatMessageWithPrefix } from './internal';
+import { formatMessage } from './internal';
 
 export function makeError(...args: unknown[]): Error {
-  const formatted = formatMessageWithPrefix('[NexusWallet]:', ...args);
+  const formatted = formatMessage(...args);
   return new Error(`${formatted}\t(version=${LIB_VERSION})`);
 }
 
