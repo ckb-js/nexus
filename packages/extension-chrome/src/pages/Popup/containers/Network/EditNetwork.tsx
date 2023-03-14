@@ -1,5 +1,5 @@
 import React, { FC, useEffect } from 'react';
-import { Button, FormControl, FormLabel, Input, Flex, Spacer, VStack, ButtonGroup } from '@chakra-ui/react';
+import { Button, FormControl, FormLabel, Input, Flex, Spacer, VStack, ButtonGroup, useToast } from '@chakra-ui/react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AddIcon } from '@chakra-ui/icons';
 import { useForm } from 'react-hook-form';
@@ -24,6 +24,7 @@ type EditNetworkProps = {
 export const EditNetwork: FC<EditNetworkProps> = ({ mode }) => {
   const navigate = useNavigate();
   const configService = useService('configService');
+  const toast = useToast();
   const { id } = useParams() as { id: string };
 
   const { handleSubmit, register, formState, setValue, trigger } = useForm<EditNetworkFormState>();
@@ -73,16 +74,22 @@ export const EditNetwork: FC<EditNetworkProps> = ({ mode }) => {
             // manually trigger validation
             await trigger();
           }
-        })().catch(() => {});
+        })().catch(() => {
+          toast({
+            status: 'error',
+            title: 'Can not get origin network config',
+          });
+          navigate(-1);
+        });
       }
     }
-  }, [mode, id, configService, setValue, trigger]);
+  }, [mode, id, configService, setValue, trigger, toast, navigate]);
 
   const addNetworkMutation = useMutation({
-    mutationFn: ({ name, rpcUrl }: EditNetworkFormState) => {
+    mutationFn: async ({ name, rpcUrl }: EditNetworkFormState) => {
       return configService.addNetwork({
         network: { displayName: name, rpcUrl, id: nanoid(), networkName: name },
-      }) as Promise<void>;
+      });
     },
   });
 
