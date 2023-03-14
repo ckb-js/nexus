@@ -7,7 +7,7 @@ import { NetworkConfig } from './containers/Network/NetworkConfig';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { Home } from './containers/Home';
-import { AddNetwork } from './containers/Network/AddNetwork';
+import { EditNetwork } from './containers/Network/EditNetwork';
 import { theme } from '../theme';
 import { DialogFrame } from '../Components/DialogFrame';
 import { useStartInitIfNotInitialized } from '../hooks/useStartInitIfNotInitialized';
@@ -23,6 +23,11 @@ const routeMeta = [
   },
   {
     path: '/network',
+    title: 'Networks',
+    allowBack: true,
+  },
+  {
+    path: '/network/edit/:id',
     title: 'Networks',
     allowBack: true,
   },
@@ -48,7 +53,11 @@ const routeConfig: RouteObject[] = [
       },
       {
         path: '/network/add',
-        element: <AddNetwork />,
+        element: <EditNetwork mode="add" />,
+      },
+      {
+        path: '/network/edit/:id',
+        element: <EditNetwork mode="modify" />,
       },
       {
         path: '/network',
