@@ -2,7 +2,7 @@ import { BIish } from '@ckb-lumos/bi';
 import { TransactionSkeletonType } from '@ckb-lumos/helpers';
 import { Events, FullOwnership, InjectedCkb } from '@nexus-wallet/protocol';
 import { errors } from '@nexus-wallet/utils';
-import { Address, Script } from '@ckb-lumos/base';
+import { Address, Cell, Script } from '@ckb-lumos/base';
 
 // util types for FullOwnership
 
@@ -12,20 +12,20 @@ type OwnershipMethodNames = Suffix<keyof FullOwnership, FullOwnershipPrefix>;
 type ParamOf<K extends OwnershipMethodNames> = Parameters<FullOwnership[`${FullOwnershipPrefix}${K}`]>[0];
 type ReturnOf<K extends OwnershipMethodNames> = ReturnType<FullOwnership[`${FullOwnershipPrefix}${K}`]>;
 
-/**
- * Must be a full format address if it's an address
- */
+/** Must be a full format address if it's an address */
 export type LockScriptLike = Address | Script;
 
-/**
- * Pay by inject automatically
- */
-export type PayByAuto = { autoInject: true };
-/**
- * Pay by the specified payers
- */
+export type PayFeeOptions = {
+  /**
+   * The fee rate, in shannons per byte. If not specified, the fee rate will be calculated automatically.
+   */
+  feeRate?: BIish;
+} & PayBy;
+export type PayBy = PayByPayers | PayByAuto;
+/** Pay by the specified payers */
 export type PayByPayers = { payers: LockScriptLike[]; autoInject?: boolean };
-export type PayFeeOptions = PayByPayers | PayByAuto;
+/** Pay by inject automatically */
+export type PayByAuto = { autoInject: true };
 
 export class FullOwnershipProvider {
   private ckb: InjectedCkb<FullOwnership, Events>;
@@ -42,8 +42,8 @@ export class FullOwnershipProvider {
 
   // TODO need to be implemented
   /**
-   * Inject capacity to the transaction's inputs at least equal to the `amount`
-   *
+   * Inject capacity to the transaction's inputs at least equal to the `amount`,
+   * if the collected capacity is over the `amount`, a change cell will be added to the transaction's outputs.
    * @example
    *   // Transfer 100 CKB to the target lock script
    *   declare let txSkeleton: TransactionSkeletonType;
@@ -79,6 +79,10 @@ export class FullOwnershipProvider {
    */
   async payFee(txSkeleton: TransactionSkeletonType, options?: PayFeeOptions): Promise<TransactionSkeletonType> {
     console.log(txSkeleton, options);
+    errors.unimplemented();
+  }
+
+  collector(): AsyncIterable<Cell> {
     errors.unimplemented();
   }
 
