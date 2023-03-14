@@ -9,6 +9,7 @@ import { BackendProvider } from './backend';
 import { HexString, Script, utils } from '@ckb-lumos/lumos';
 import { common } from '@ckb-lumos/common-scripts';
 import { Config } from '@ckb-lumos/config-manager';
+import { NexusCommonErrors } from '../../errors';
 
 export function createFullOwnershipService({
   storage,
@@ -107,7 +108,7 @@ export function createFullOwnershipService({
           })
         ).password;
       } catch (e) {
-        errors.throwError('User has rejected');
+        throw NexusCommonErrors.ApproveRejected();
       }
 
       const signatures = await Promise.all(
@@ -143,7 +144,7 @@ export function createFullOwnershipService({
         password = (await platformService.requestSignData({ data: bytes.hexify(payload.data), url: payload.url }))
           .password;
       } catch (e) {
-        errors.throwError('User has rejected');
+        throw NexusCommonErrors.ApproveRejected();
       }
 
       const db = await getDb();

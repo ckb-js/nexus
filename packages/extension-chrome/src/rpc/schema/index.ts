@@ -6,10 +6,11 @@ import type {
   SignDataPayload,
   SignTransactionPayload,
 } from '@nexus-wallet/types/lib/services/OwnershipService';
-import { errors } from '@nexus-wallet/utils/lib';
 import { z, ZodError } from 'zod';
 import { RPCMethodHandler, RpcMethods } from '../types';
-import { ZTransaction, ZScript, ZBytesLike } from './primitives';
+import { ZBytesLike } from './primitives';
+import { ZTransaction, ZScript } from './blockchain';
+import { NexusError } from '../../errors';
 
 function createRPCMethodSchema<TArg extends z.AnyZodObject | z.ZodUndefined>(arg: TArg) {
   return z.function().args(arg, z.any()).returns(z.promise(z.any()));
@@ -58,9 +59,8 @@ export function bindSchemaValidator<T extends keyof RpcMethods>(
       return await impl(param, context);
     } catch (e) {
       if (e instanceof ZodError) {
-        // TODO: waiting for merging of https://github.com/ckb-js/nexus/pull/112
-        // use `NexusError` instead of `errors.throwError`
-        errors.throwError('Invalid params', e.message);
+        // TODO: format human readable error message of zod error
+        throw NexusError.create({ message: 'Invalid params', data: e });
       }
       throw e;
     }
