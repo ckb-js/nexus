@@ -4,7 +4,7 @@ import * as backendUtils from '../../../../src/services/ownership/backend/backen
 import fetchMock from 'jest-fetch-mock';
 
 describe('load secp256k1 cellDeps', () => {
-  it('should backend utils be called with correct params', async () => {
+  it('should backendUtils.loadSecp256k1ScriptDep be called with correct params', async () => {
     const mockUrl = 'mockUrl';
     const backend = createBackend({ nodeUrl: mockUrl });
     jest.spyOn(backendUtils, 'loadSecp256k1ScriptDep').mockResolvedValue({
@@ -15,6 +15,8 @@ describe('load secp256k1 cellDeps', () => {
       DEP_TYPE: 'code',
     });
     await expect(backend.getSecp256k1Blake160ScriptConfig({ networkId: 'someId' })).resolves.not.toThrow();
+    await expect(backendUtils.loadSecp256k1ScriptDep).toBeCalledTimes(1);
+    await expect(backendUtils.loadSecp256k1ScriptDep).toBeCalledWith({ nodeUrl: mockUrl });
   });
 });
 
