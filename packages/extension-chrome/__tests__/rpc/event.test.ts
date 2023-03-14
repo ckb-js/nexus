@@ -19,6 +19,22 @@ it('should the networkChanged fired when config has updated', async () => {
   expect(mockListener).toHaveBeenCalledWith('ckb_testnet');
 });
 
+it('should trigger networkChanged when setSelectedNetwork', async () => {
+  const { factory, ckb } = createTestRpcServer();
+
+  const configService = factory.get('configService');
+  // make sure the network is mainnet at the beginning
+  await configService.setSelectedNetwork({ id: 'testnet' });
+
+  const mockListener = jest.fn();
+  ckb.on('networkChanged', mockListener);
+  await configService.setSelectedNetwork({ id: 'mainnet' });
+
+  await asyncSleep(10);
+  expect(mockListener).toHaveBeenCalledTimes(1);
+  expect(mockListener).toHaveBeenCalledWith('ckb');
+});
+
 it('should the walletInitialized fired when wallet has initialized', async () => {
   const { ckb } = createTestRpcServer({ storage: createInMemoryStorage });
 

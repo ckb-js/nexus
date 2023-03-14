@@ -3,15 +3,16 @@ import { Modules } from '../services';
 import { Paginate } from '@nexus-wallet/types';
 import {
   GetOffChainLocksPayload,
-  GetPaginateItemsPayload,
-  GetUsedLocksPayload,
+  GetOnChainLocksPayload,
   GroupedSignature,
   Signature,
   SignDataPayload,
   SignTransactionPayload,
+  GetLiveCellsPayload,
 } from '@nexus-wallet/types/lib/services/OwnershipService';
 import { Config as NexusConfig } from '@nexus-wallet/types/lib/services/ConfigService';
 import { AsyncCall, AsyncCallMap } from '@nexus-wallet/types/lib/call';
+import { RequesterInfo } from '@nexus-wallet/types/lib/base';
 
 export interface WalletMethods extends AsyncCallMap {
   wallet_enable: AsyncCall<void, void>;
@@ -19,8 +20,8 @@ export interface WalletMethods extends AsyncCallMap {
   wallet_getNetworkName: AsyncCall<void, string>;
 
   wallet_fullOwnership_getOffChainLocks: AsyncCall<GetOffChainLocksPayload, Script[]>;
-  wallet_fullOwnership_getOnChainLocks: AsyncCall<GetUsedLocksPayload, Paginate<Script>>;
-  wallet_fullOwnership_getLiveCells: AsyncCall<GetPaginateItemsPayload, Paginate<Cell>>;
+  wallet_fullOwnership_getOnChainLocks: AsyncCall<GetOnChainLocksPayload, Paginate<Script>>;
+  wallet_fullOwnership_getLiveCells: AsyncCall<GetLiveCellsPayload, Paginate<Cell>>;
   wallet_fullOwnership_signData: AsyncCall<SignDataPayload, Signature>;
   wallet_fullOwnership_signTransaction: AsyncCall<SignTransactionPayload, GroupedSignature>;
 }
@@ -37,7 +38,7 @@ export interface DebugMethods extends AsyncCallMap {
 export interface ServerParams {
   resolveService<K extends keyof Modules>(name: K): Modules[K];
 
-  getRequesterAppInfo(): Promise<{ url: string }>;
+  getRequesterAppInfo(): Promise<RequesterInfo>;
 }
 
 export interface RpcMethods extends WalletMethods, DebugMethods {}

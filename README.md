@@ -19,6 +19,6 @@ npm run test
 
 # start the test server
 # and the `packages/extension-chrome/build` will be generated
-# drop the "build" folder into the chrome://extension to start
+# drop the "build" folder into the chrome://extensions to start
 npm start
 ```

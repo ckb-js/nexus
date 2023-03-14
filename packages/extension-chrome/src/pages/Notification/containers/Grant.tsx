@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ConnectStatusCard } from '../../Components/ConnectStatusCard';
 import { WhiteAlphaBox } from '../../Components/WhiteAlphaBox';
 import { useSessionMessenger } from '../../hooks/useSessionMessenger';
-import { useConfig } from '../../hooks/useConfig';
+import { useConfigQuery } from '../../hooks/useConfigQuery';
 
 export const Grant: React.FC = () => {
   const messenger = useSessionMessenger();
@@ -15,7 +15,7 @@ export const Grant: React.FC = () => {
     queryFn: () => messenger.send('session_getRequesterAppInfo'),
   });
 
-  const configQuery = useConfig();
+  const configQuery = useConfigQuery();
 
   const { favicon } = requestAppInfoQuery.data || {};
   const url = useMemo(() => {
@@ -28,7 +28,7 @@ export const Grant: React.FC = () => {
 
   return (
     <Skeleton colorScheme="purple" isLoaded={!requestAppInfoQuery.isLoading && !configQuery.isLoading}>
-      <ConnectStatusCard mt="44px" name={configQuery.data?.nickname!} />
+      <ConnectStatusCard name={configQuery.data?.nickname!} />
 
       <Flex py="32px" alignItems="center" direction="column">
         <Image data-test-id="requester.favicon" w="40px" mb="8px" h="40px" src={favicon} />
