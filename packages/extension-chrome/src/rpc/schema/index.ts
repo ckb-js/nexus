@@ -1,38 +1,48 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type {
-  GetOffChainLocksPayload,
-  GetOnChainLocksPayload,
-  GetLiveCellsPayload,
-  SignDataPayload,
-  SignTransactionPayload,
-} from '@nexus-wallet/types/lib/services/OwnershipService';
-import { z, ZodError } from 'zod';
+import { z, ZodError, ZodType } from 'zod';
 import { RPCMethodHandler, RpcMethods } from '../types';
 import { ZBytesLike } from './primitives';
 import { ZTransaction, ZScript } from './blockchain';
 import { NexusError } from '../../errors';
+import { ZGetLiveCellsPayload, ZGetOffChainLocksPayload, ZGetOnChainLocksPayload } from './nexus';
 
-function createRPCMethodSchema<TArg extends z.AnyZodObject | z.ZodUndefined>(arg: TArg) {
-  return z.function().args(arg, z.any()).returns(z.promise(z.any()));
+/**
+ * create a validate schema for a RPC method
+ * @param _field the field name of RpcMethods
+ * @param arg zod schema, NOTE: if this type is `never`, it means your `TArg` is not equal to `RpcMethods[TKey]['params']`
+ * @returns a zod function schema, which can be used to validate the RPC method invoke
+ */
+function createRPCMethodSchema<TKey extends keyof RpcMethods, TArg extends RpcMethods[TKey]['params']>(
+  _field: TKey,
+  arg: RpcMethods[TKey]['params'] extends TArg ? ZodType<TArg> : never,
+) {
+  return z.function().args(arg, z.any()).returns(z.any());
 }
 
-const ZGetPaginateItemsPayload = z.object({
-  cursor: z.string().optional(),
-});
-const ZFilterPayload = z.object({ change: z.enum(['external', 'internal']).optional() });
-
-const ZGetOffChainLocksPayload = ZFilterPayload;
-const ZGetLiveCellsPayload = ZGetPaginateItemsPayload;
-const ZGetOnChainLocksPayload = ZGetPaginateItemsPayload.merge(ZFilterPayload);
 // If we need validate parameter for wallet_enable, we can use this schema
 // const wallet_enable = createRPCMethodSchema(z.undefined(), z.void());
 
-const wallet_fullOwnership_signData = createRPCMethodSchema(z.object({ data: ZBytesLike, lock: ZScript }));
-const wallet_fullOwnership_signTransaction = createRPCMethodSchema(z.object({ tx: ZTransaction }));
+const wallet_fullOwnership_signData = createRPCMethodSchema(
+  'wallet_fullOwnership_signData',
+  z.object({ data: ZBytesLike, lock: ZScript }),
+);
+const wallet_fullOwnership_signTransaction = createRPCMethodSchema(
+  'wallet_fullOwnership_signTransaction',
+  z.object({ tx: ZTransaction }),
+);
 
-const wallet_fullOwnership_getLiveCells = createRPCMethodSchema(ZGetLiveCellsPayload);
-const wallet_fullOwnership_getOffChainLocks = createRPCMethodSchema(ZGetOffChainLocksPayload);
-const wallet_fullOwnership_getOnChainLocks = createRPCMethodSchema(ZGetOnChainLocksPayload);
+const wallet_fullOwnership_getLiveCells = createRPCMethodSchema(
+  'wallet_fullOwnership_getLiveCells',
+  ZGetLiveCellsPayload,
+);
+const wallet_fullOwnership_getOffChainLocks = createRPCMethodSchema(
+  'wallet_fullOwnership_getOffChainLocks',
+  ZGetOffChainLocksPayload,
+);
+const wallet_fullOwnership_getOnChainLocks = createRPCMethodSchema(
+  'wallet_fullOwnership_getOnChainLocks',
+  ZGetOnChainLocksPayload,
+);
 
 const walletMethodSchemas = {
   // wallet_enable,
@@ -72,23 +82,3 @@ export function bindSchemaValidator<T extends keyof RpcMethods>(
 export function getMethodSchema<T extends keyof RpcMethods>(name: T): AnyRpcSchema | undefined {
   return name in walletMethodSchemas ? walletMethodSchemas[name as keyof typeof walletMethodSchemas] : undefined;
 }
-
-// Static type validation for keeping type safety
-type Expect<T extends true> = T;
-type ParameterEqual<X extends Record<any, any>, Y extends Record<any, any>> = X extends Y
-  ? Y extends X
-    ? true
-    : false
-  : false;
-
-type SchemaFirstParameter<S extends AnyRpcSchema> = Parameters<z.infer<S>>[0];
-
-type ValidatePayload<S extends AnyRpcSchema, P extends Record<any, any>> = ParameterEqual<SchemaFirstParameter<S>, P>;
-type _cases = [
-  Expect<ValidatePayload<typeof wallet_fullOwnership_getLiveCells, GetLiveCellsPayload>>,
-  Expect<ValidatePayload<typeof wallet_fullOwnership_getOffChainLocks, GetOffChainLocksPayload>>,
-  Expect<ValidatePayload<typeof wallet_fullOwnership_getOnChainLocks, GetOnChainLocksPayload>>,
-  Expect<ValidatePayload<typeof wallet_fullOwnership_signData, SignDataPayload>>,
-
-  Expect<ValidatePayload<typeof wallet_fullOwnership_signTransaction, SignTransactionPayload>>,
-];
