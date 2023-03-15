@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 const ZArrayLikeNumber = z.custom<ArrayLike<number>>((value) => {
   return (
-    typeof typeof value === 'object' &&
+    typeof value === 'object' &&
     value !== null &&
     value !== undefined &&
     'length' in (value as ArrayLike<number>) &&
