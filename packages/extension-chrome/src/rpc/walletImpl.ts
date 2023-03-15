@@ -6,6 +6,8 @@ const logger = createLogger();
 addMethod('wallet_enable', async (_, { getRequesterAppInfo, resolveService }) => {
   const configService = resolveService('configService');
 
+  const response = { nickname: await configService.getNickname() };
+
   const { url } = await getRequesterAppInfo();
   const { host, protocol } = new URL(url);
 
@@ -14,7 +16,7 @@ addMethod('wallet_enable', async (_, { getRequesterAppInfo, resolveService }) =>
   const { whitelist } = await configService.getConfig();
 
   const isTrusted = whitelist.find((item) => item.host === host);
-  if (isTrusted) return;
+  if (isTrusted) return response;
 
   try {
     const notificationService = resolveService('notificationService');
@@ -24,6 +26,8 @@ addMethod('wallet_enable', async (_, { getRequesterAppInfo, resolveService }) =>
   }
 
   await configService.addWhitelistItem({ host: host, favicon: `${protocol}//${host}/favicon.ico` });
+
+  return response;
 });
 
 addMethod('wallet_fullOwnership_getOffChainLocks', async (payload, { resolveService }) => {

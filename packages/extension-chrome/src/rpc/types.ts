@@ -15,7 +15,7 @@ import { AsyncCall, AsyncCallMap } from '@nexus-wallet/types/lib/call';
 import { RequesterInfo } from '@nexus-wallet/types/lib/base';
 
 export interface WalletMethods extends AsyncCallMap {
-  wallet_enable: AsyncCall<void, void>;
+  wallet_enable: AsyncCall<void, { nickname: string }>;
   wallet_isEnabled: AsyncCall<void, boolean>;
   wallet_getNetworkName: AsyncCall<void, string>;
 

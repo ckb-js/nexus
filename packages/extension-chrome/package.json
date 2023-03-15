@@ -31,6 +31,7 @@
     "@chakra-ui/icons": "2.0.17",
     "@chakra-ui/react": "2.4.9",
     "@nexus-wallet/types": "*",
+    "@nexus-wallet/protocol": "*",
     "@nexus-wallet/utils": "*",
     "@tanstack/react-query": "4.23.0",
     "@types/chrome": "0.0.210",
