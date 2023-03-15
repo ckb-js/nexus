@@ -6,5 +6,6 @@
     "outDir": "lib",
     "lib": ["DOM"]
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": ["__tests__"]
 }

@@ -1,5 +1,5 @@
-import { BIish } from '@ckb-lumos/bi';
-import { TransactionSkeletonType } from '@ckb-lumos/helpers';
+import { BIish, BI } from '@ckb-lumos/bi';
+import { minimalCellCapacityCompatible, TransactionSkeletonType } from '@ckb-lumos/helpers';
 import { Events, FullOwnership, InjectedCkb } from '@nexus-wallet/protocol';
 import { errors } from '@nexus-wallet/utils';
 import { Address, Cell, Script } from '@ckb-lumos/base';
@@ -34,8 +34,16 @@ export class FullOwnershipProvider {
     this.ckb = config.ckb;
   }
 
-  async getLiveCells(params: ParamOf<'getLiveCells'>): ReturnOf<'getLiveCells'> {
+  async getLiveCells(params?: ParamOf<'getLiveCells'>): ReturnOf<'getLiveCells'> {
     return this.ckb.request({ method: 'wallet_fullOwnership_getLiveCells', params });
+  }
+
+  async getOffChainLocks(params: ParamOf<'getOffChainLocks'>): ReturnOf<'getOffChainLocks'> {
+    return this.ckb.request({ method: 'wallet_fullOwnership_getOffChainLocks', params });
+  }
+
+  async getOnChainLocks(params: ParamOf<'getOnChainLocks'>): ReturnOf<'getOnChainLocks'> {
+    return this.ckb.request({ method: 'wallet_fullOwnership_getOnChainLocks', params });
   }
 
   // TODO bind other methods, getOffChainLocks, getOnChainLocks, etc.
@@ -66,8 +74,51 @@ export class FullOwnershipProvider {
       amount: BIish;
     },
   ): Promise<TransactionSkeletonType> {
-    console.log(txSkeleton, config);
-    errors.unimplemented();
+    const changeLock = (await this.getOffChainLocks({ change: 'internal' }))[0];
+
+    const changeCell: Cell = {
+      cellOutput: {
+        capacity: '0x0',
+        lock: changeLock,
+      },
+      data: '0x',
+    };
+    const minimalChangeCapacity = minimalCellCapacityCompatible(changeCell);
+    if (minimalChangeCapacity.gt(config.amount)) {
+      errors.throwError('The amount is too small to pay the minimal change cell capacity');
+    }
+
+    if (!changeLock) {
+      errors.throwError('No change lock script found, it may be a internal bug');
+    }
+
+    let remainCapacity = BI.from(config.amount).add(minimalChangeCapacity);
+    const inputCells: Cell[] = [];
+    for await (const cell of this.collector()) {
+      inputCells.push(cell);
+      remainCapacity = remainCapacity.sub(BI.from(cell.cellOutput.capacity));
+      if (remainCapacity.lte(0)) {
+        break;
+      }
+    }
+    if (remainCapacity.gt(0)) {
+      errors.throwError('Not enough capacity');
+    }
+
+    const totalInputs = inputCells.reduce((sum, cell) => sum.add(BI.from(cell.cellOutput.capacity)), BI.from(0));
+    const changeAmount = totalInputs.sub(BI.from(config.amount));
+
+    changeCell.cellOutput.capacity = changeAmount.toHexString();
+
+    txSkeleton = txSkeleton
+      .update('inputs', (inputs) => {
+        return inputs.push(...inputCells);
+      })
+      .update('outputs', (outputs) => {
+        return outputs.push(changeCell);
+      });
+
+    return txSkeleton;
   }
 
   // TODO need to be implemented
@@ -82,8 +133,18 @@ export class FullOwnershipProvider {
     errors.unimplemented();
   }
 
-  collector(): AsyncIterable<Cell> {
-    errors.unimplemented();
+  async *collector(): AsyncIterable<Cell> {
+    let cursor = '';
+    while (true) {
+      const page = await this.getLiveCells({ cursor });
+      if (page.objects.length === 0) {
+        return;
+      }
+      cursor = page.cursor;
+      for (const cell of page.objects) {
+        yield cell;
+      }
+    }
   }
 
   // TODO need to be implemented
