@@ -8,6 +8,7 @@ import { nanoid } from 'nanoid';
 import type { Windows } from 'webextension-polyfill';
 import browser from 'webextension-polyfill';
 import { Endpoint } from 'webext-bridge';
+import { NexusCommonErrors } from '../errors';
 
 export type SessionMethods = {
   session_getRequesterAppInfo: Call<void, { url: string; favicon: string }>;
@@ -89,7 +90,7 @@ export function createBrowserExtensionPlatformService(): PlatformService<Endpoin
         browser.windows.onRemoved.addListener((windowId) => {
           if (windowId === notificationWindow.id) {
             messenger.destroy();
-            reject();
+            reject(NexusCommonErrors.ApproveRejected());
           }
         });
       });
@@ -113,7 +114,7 @@ export function createBrowserExtensionPlatformService(): PlatformService<Endpoin
         browser.windows.onRemoved.addListener((windowId) => {
           if (windowId === notificationWindow.id) {
             messenger.destroy();
-            reject();
+            reject(NexusCommonErrors.ApproveRejected());
           }
         });
       });

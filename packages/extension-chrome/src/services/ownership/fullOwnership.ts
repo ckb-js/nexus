@@ -9,7 +9,6 @@ import { BackendProvider } from './backend';
 import { HexString, Script, utils } from '@ckb-lumos/lumos';
 import { common } from '@ckb-lumos/common-scripts';
 import { Config } from '@ckb-lumos/config-manager';
-import { NexusCommonErrors } from '../../errors';
 
 export function createFullOwnershipService({
   storage,
@@ -100,16 +99,9 @@ export function createFullOwnershipService({
       let txSkeleton = await backend.resolveTx(tx);
       txSkeleton = common.prepareSigningEntries(txSkeleton, { config: await getLumosConfig() });
 
-      let password: string;
-      try {
-        password = (
-          await platformService.requestSignTransaction({
-            tx: transactionSkeletonToObject(txSkeleton),
-          })
-        ).password;
-      } catch (e) {
-        throw NexusCommonErrors.ApproveRejected();
-      }
+      const { password } = await platformService.requestSignTransaction({
+        tx: transactionSkeletonToObject(txSkeleton),
+      });
 
       const signatures = await Promise.all(
         txSkeleton
@@ -139,14 +131,10 @@ export function createFullOwnershipService({
       return signatures;
     },
     signData: async (payload) => {
-      let password: string;
-      try {
-        password = (await platformService.requestSignData({ data: bytes.hexify(payload.data), url: payload.url }))
-          .password;
-      } catch (e) {
-        throw NexusCommonErrors.ApproveRejected();
-      }
-
+      const { password } = await platformService.requestSignData({
+        data: bytes.hexify(payload.data),
+        url: payload.url,
+      });
       const db = await getDb();
       const [info] = await db.filterByMatch({ scriptHash: utils.computeScriptHash(payload.lock) });
       asserts.asserts(
