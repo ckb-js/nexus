@@ -9,6 +9,7 @@ import '../../src/rpc/debugImpl';
 import '../../src/rpc/walletImpl';
 import { createInjectedCkb, TypedEventClient, TypedRpcClient } from '../../src/injectedCkb';
 import { errors } from '@nexus-wallet/utils';
+jest.mock('../../src/rpc/schema');
 
 export interface RpcTestHelper {
   /**

@@ -3,10 +3,6 @@ import { Transaction } from '@ckb-lumos/lumos';
 import { MOCK_PLATFORM_URL } from '../helpers';
 import { createTestRpcServer } from './helper';
 
-jest.mock('../../src/rpc/schema', () => ({
-  bindSchemaValidator: jest.fn().mockImplementation((_, handler) => handler),
-}));
-
 describe('RPC wallet_enable', () => {
   it('should request be allowed when Nexus is initialized', async () => {
     const { request, factory } = createTestRpcServer();
