@@ -24,4 +24,4 @@ export type Paginate<T> = {
 
 export type Signature = HexString;
 
-export type { HexString, Transaction, Script, Cell } from '@ckb-lumos/base';
+export type { HexString, Transaction, Script, Cell } from '@ckb-lumos/lumos';

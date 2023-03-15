@@ -6,15 +6,20 @@ import type { Cell, Cursor, HexString, Paginate, Script, Signature, Transaction 
  */
 export const SIGN_DATA_MAGIC = '0x4e6572766f73204d6573736167653a';
 
-export type SignDataPayload = {
-  data: HexString;
+export type RequesterInfo = {
+  url: string;
 };
 
-export type SignTransactionPayload = {
+export type SignDataPayload = RequesterInfo & {
+  data: HexString;
+  lock: Script;
+};
+
+export type SignTransactionPayload = RequesterInfo & {
   tx: Transaction;
 };
 
-export type GroupedSignature = [[Script, Signature]];
+export type GroupedSignature = [Script, Signature][];
 
 /**
  * The **external** chain is used for addresses that are meant to be visible outside the wallet, e.g. for receiving payments.
@@ -27,12 +32,12 @@ export type GetOffChainLocksPayload = {
 };
 
 export type GetOnChainLocksPayload = {
-  cursor: Cursor;
+  cursor?: Cursor;
   change?: Bip44ChangeType;
 };
 
 export type GetLiveCellsPayload = {
-  cursor: Cursor;
+  cursor?: Cursor;
   change?: Bip44ChangeType;
 };
 
