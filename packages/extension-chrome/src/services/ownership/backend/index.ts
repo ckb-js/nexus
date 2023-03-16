@@ -6,7 +6,7 @@ import { createTransactionSkeleton, LiveCellFetcher, TransactionSkeletonType } f
 import { ScriptConfig } from '@ckb-lumos/config-manager';
 import chunk from 'lodash/chunk';
 import isEqual from 'lodash/isEqual';
-import { RPC as RPCType } from '@ckb-lumos/rpc/lib/types/rpc';
+import { RPC as RpcType } from '@ckb-lumos/rpc/lib/types/rpc';
 import { NexusCommonErrors } from '../../../errors';
 import {
   createRpcClient,
@@ -35,7 +35,7 @@ export interface Backend {
 }
 
 // TODO better make it persisted in localstorage/db
-const _Secp256k1Blake160ScriptInfoCache = new Map<NetworkId, ScriptConfig>();
+const secp256k1Blake160ScriptInfoCache = new Map<NetworkId, ScriptConfig>();
 
 export function createBackend(_payload: { nodeUrl: string }): Backend {
   // TODO replace with batch client when batch client supported type
@@ -43,16 +43,16 @@ export function createBackend(_payload: { nodeUrl: string }): Backend {
 
   return {
     getSecp256k1Blake160ScriptConfig: async ({ networkId }): Promise<ScriptConfig> => {
-      let config = _Secp256k1Blake160ScriptInfoCache.get(networkId);
+      let config = secp256k1Blake160ScriptInfoCache.get(networkId);
       if (!config) {
         const onChainConfig = await loadSecp256k1ScriptDep({ nodeUrl: _payload.nodeUrl });
         config = onChainConfig;
-        _Secp256k1Blake160ScriptInfoCache.set(networkId, onChainConfig);
+        secp256k1Blake160ScriptInfoCache.set(networkId, onChainConfig);
       }
       return config;
     },
     hasHistories: async (payload: { locks: Script[] }): Promise<boolean[]> => {
-      const responses = await client.batchRequest<RPCType.GetTransactionsResult>(
+      const responses = await client.batchRequest<RpcType.GetTransactionsResult>(
         'get_transactions',
         payload.locks.map((lock) => [
           {
@@ -102,7 +102,7 @@ export function createBackend(_payload: { nodeUrl: string }): Backend {
       const chunkedLocks = chunk(locks, 10);
 
       const responsePromises = chunkedRequestParams.map((chunkedRequestParam) =>
-        client.batchRequest<RPCType.GetLiveCellsResult>('get_cells', chunkedRequestParam),
+        client.batchRequest<RpcType.GetLiveCellsResult>('get_cells', chunkedRequestParam),
       );
       const responses = await Promise.all(responsePromises);
 
@@ -121,7 +121,7 @@ export function createBackend(_payload: { nodeUrl: string }): Backend {
           limit: `0x${searchOffset.toString(16)}`,
           order: 'desc',
         });
-        const descSearchResp = await client.request<RPCType.GetLiveCellsResult>('get_cells', descSearchParam);
+        const descSearchResp = await client.request<RpcType.GetLiveCellsResult>('get_cells', descSearchParam);
         const descSearchRespCells = descSearchResp.objects.map(toCell);
 
         asserts.asserts(
@@ -140,7 +140,7 @@ export function createBackend(_payload: { nodeUrl: string }): Backend {
     resolveTx: (tx) => {
       const fetcher: LiveCellFetcher = async (outPoint) => {
         const content = await client.request<{
-          cell: RPCType.LiveCell;
+          cell: RpcType.LiveCell;
           status: string;
         }>('get_live_cell', [
           {
@@ -190,7 +190,7 @@ export function createBackendProvider({ configService }: { configService: Config
  * @returns
  */
 function toGetLiveCellsResult(
-  responses: RPCType.GetLiveCellsResult[][],
+  responses: RpcType.GetLiveCellsResult[][],
   chunkedLocks: Script[][],
   limit: number,
 ): GetLiveCellsResult {

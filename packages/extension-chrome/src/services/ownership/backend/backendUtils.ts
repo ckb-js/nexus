@@ -1,17 +1,17 @@
-import { Cell, HexNumber, OutPoint, Script, utils } from '@ckb-lumos/lumos';
+import { Cell, HexNumber, HexString, OutPoint, Script, utils } from '@ckb-lumos/lumos';
 import type { Paginate } from '@nexus-wallet/types';
 import { asserts } from '@nexus-wallet/utils';
 import { ScriptConfig } from '@ckb-lumos/config-manager';
 import { JSONRPCRequest, JSONRPCResponse } from 'json-rpc-2.0';
-import { RPC as RPCType } from '@ckb-lumos/rpc/lib/types/rpc';
+import { RPC as RpcType } from '@ckb-lumos/rpc/lib/types/rpc';
 import { NexusCommonErrors } from '../../../errors';
 
 export type Order = 'asc' | 'desc';
 export type Limit = HexNumber;
-export type CursorType = HexNumber | null;
-export type RPCQueryType = [
+export type CursorType = HexString | null;
+export type RpcQueryType = [
   {
-    script: RPCType.Script;
+    script: RpcType.Script;
     script_type: 'lock' | 'type';
     search_type: 'exact' | 'prefix';
   },
@@ -26,7 +26,7 @@ export const toQueryParam = (payload: {
   cursor?: CursorType;
   order?: Order;
   limit?: HexNumber;
-}): RPCQueryType => [
+}): RpcQueryType => [
   {
     script: {
       code_hash: payload.lock.codeHash,
@@ -41,18 +41,18 @@ export const toQueryParam = (payload: {
   payload.cursor || null,
 ];
 
-export const toScript = (rpcScript: RPCType.Script): Script => ({
+export const toScript = (rpcScript: RpcType.Script): Script => ({
   codeHash: rpcScript.code_hash,
   hashType: rpcScript.hash_type,
   args: rpcScript.args,
 });
 
-export const toOutPoint = (rpcOutPoint: RPCType.OutPoint): OutPoint => ({
+export const toOutPoint = (rpcOutPoint: RpcType.OutPoint): OutPoint => ({
   txHash: rpcOutPoint.tx_hash,
   index: rpcOutPoint.index,
 });
 
-export const toCell = (rpcIndexerCell: RPCType.IndexerCell): Cell => ({
+export const toCell = (rpcIndexerCell: RpcType.IndexerCell): Cell => ({
   cellOutput: {
     capacity: rpcIndexerCell.output.capacity,
     lock: toScript(rpcIndexerCell.output.lock),
@@ -64,7 +64,7 @@ export const toCell = (rpcIndexerCell: RPCType.IndexerCell): Cell => ({
 });
 
 export async function loadSecp256k1ScriptDep(payload: { nodeUrl: string }): Promise<ScriptConfig> {
-  const genesisBlock = await createRpcClient(payload.nodeUrl).request<RPCType.Block>('get_block_by_number', ['0x0']);
+  const genesisBlock = await createRpcClient(payload.nodeUrl).request<RpcType.Block>('get_block_by_number', ['0x0']);
   if (!genesisBlock) throw new Error("can't load genesis block");
   const secp256k1DepTxHash = genesisBlock.transactions[1].hash;
   asserts.asserts(secp256k1DepTxHash, "can't load secp256k1 transaction");
