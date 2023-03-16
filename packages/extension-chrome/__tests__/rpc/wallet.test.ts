@@ -93,7 +93,6 @@ describe('RPC wallet_fullOwnership', () => {
     await request('wallet_fullOwnership_signData', {
       data: '0x1234',
       lock: { codeHash: '0x1234', hashType: 'type', args: '0x01' },
-      url: MOCK_PLATFORM_URL,
     });
     expect(fullOwnershipService.signData).toBeCalledTimes(1);
     expect(fullOwnershipService.signData).toBeCalledWith({
@@ -108,7 +107,7 @@ describe('RPC wallet_fullOwnership', () => {
     const { request, factory } = createTestRpcServer();
     const fullOwnershipService = factory.get('fullOwnershipService');
     jest.spyOn(fullOwnershipService, 'signTransaction').mockImplementation(() => Promise.resolve([]));
-    await request('wallet_fullOwnership_signTransaction', { tx: createFakeTransaction(), url: MOCK_PLATFORM_URL });
+    await request('wallet_fullOwnership_signTransaction', { tx: createFakeTransaction() });
     expect(fullOwnershipService.signTransaction).toBeCalledTimes(1);
     expect(fullOwnershipService.signTransaction).toBeCalledWith({
       tx: createFakeTransaction(),
