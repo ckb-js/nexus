@@ -6,6 +6,7 @@ exports[`rpcClient loadSecp256k1ScriptDep should match snapshot 1`] = `
   "DEP_TYPE": "depGroup",
   "HASH_TYPE": "type",
   "INDEX": "0x0",
+  "SHORT_ID": 0,
   "TX_HASH": "0x02",
 }
 `;

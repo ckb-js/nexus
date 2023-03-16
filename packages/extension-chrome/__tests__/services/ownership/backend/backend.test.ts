@@ -1,6 +1,7 @@
 import { Script, Transaction } from '@ckb-lumos/lumos';
 import { createBackend } from '../../../../src/services/ownership/backend';
 import fetchMock from 'jest-fetch-mock';
+import { predefined } from '@ckb-lumos/config-manager/lib';
 
 describe('load secp256k1 cellDeps', () => {
   beforeEach(() => {
@@ -14,6 +15,7 @@ describe('load secp256k1 cellDeps', () => {
     const res = await backend.getSecp256k1Blake160ScriptConfig({ networkId: 'someId' });
 
     expect(res).toMatchSnapshot();
+    expect(res).toEqual(predefined.AGGRON4.SCRIPTS.SECP256K1_BLAKE160);
   });
 });
 
