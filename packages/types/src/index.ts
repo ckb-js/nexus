@@ -13,3 +13,4 @@ export type { AsyncCall, AsyncCallMap, Call, CallMap, CallResult, CallParam } fr
 
 export { SIGN_DATA_MAGIC } from '@nexus-wallet/protocol/lib/ownership/fullOwnership';
 export type { Nickname } from '@nexus-wallet/protocol/lib/base';
+export type { RpcMethods as ProtocolRpcMethods } from '@nexus-wallet/protocol/lib/rpc';

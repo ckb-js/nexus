@@ -2,7 +2,7 @@ import { Modules } from '../services';
 import { Config as NexusConfig } from '@nexus-wallet/types/lib/services/ConfigService';
 import { AsyncCall, AsyncCallMap, Call } from '@nexus-wallet/types/lib/call';
 import { RequesterInfo } from '@nexus-wallet/types/lib/base';
-import { RpcMethods as ProtocolRpcMethods } from '@nexus-wallet/protocol/lib/rpc';
+import { ProtocolRpcMethods } from '@nexus-wallet/types';
 
 export type WalletMethods = {
   [MethodName in keyof ProtocolRpcMethods]: Call<
