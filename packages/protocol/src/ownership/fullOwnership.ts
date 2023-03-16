@@ -1,5 +1,5 @@
-import type { Cell, Cursor, HexString, Paginate, Script, Signature, Transaction } from '../base';
-
+import type { Cursor, Paginate, Signature } from '../base';
+import type { Cell, HexString, Script, Transaction } from '@ckb-lumos/lumos';
 /**
  * "Nervos Message:" in ASCII, used as a magic prefix when signing personal messages.
  * @see {@link https://github.com/nervosnetwork/neuron/blob/1f19cca93b3247447ab6082eca16021dd6656db6/packages/neuron-wallet/src/services/sign-message.ts#L14 Neuron implementation}
