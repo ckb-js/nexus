@@ -2,15 +2,47 @@ import { RPCMethodHandler, RpcMethods, ServerParams } from './types';
 import { ModulesFactory } from '../services';
 import { JSONRPCRequest, JSONRPCResponse, JSONRPCServer } from 'json-rpc-2.0';
 import { whitelistMiddleware } from './middlewares/whitelistMiddleware';
-import { createLogger } from '@nexus-wallet/utils';
-import { bindSchemaValidator } from './schema';
+import { createLogger, errors } from '@nexus-wallet/utils';
 import { errorMiddleware } from './middlewares/errorMiddleware';
+import { z, ZodError, ZodType } from 'zod';
+import { NexusError } from '../errors';
+import { fromZodError } from 'zod-validation-error';
 
 export const methods: Record<string, (...args: unknown[]) => unknown> = {};
 export const logger = createLogger();
 
 export function addMethod<K extends keyof RpcMethods>(method: K, handler: RPCMethodHandler<K>): void {
-  Object.assign(methods, { [method]: bindSchemaValidator(method, handler) });
+  Object.assign(methods, { [method]: handler });
+}
+
+/**
+ * add a zod schema to validate the method's arguments
+ * @param method the method name, must be the key of {@link RpcMethods}
+ * @param argSchema the schema of the method's first argument
+ */
+export function addMethodValidator<TKey extends keyof RpcMethods, TArg extends RpcMethods[TKey]['params']>(
+  method: TKey,
+  argSchema: RpcMethods[TKey]['params'] extends TArg ? ZodType<TArg> : never,
+): void {
+  if (!methods[method as string]) {
+    errors.throwError(`Method: ${method} is not registered yet. Please call \`addMethod\` first.`);
+  }
+
+  const schema = z.function().args(argSchema, z.any()).returns(z.any());
+  const handler: RPCMethodHandler<TKey> = async (param, context) => {
+    const impl = schema.implement(methods[method as string]);
+    try {
+      return await impl(param as never, context);
+    } catch (e) {
+      if (e instanceof ZodError) {
+        throw NexusError.create({ message: fromZodError(e).message, data: e });
+      }
+      throw e;
+    }
+  };
+  Object.assign(methods, {
+    [method]: handler,
+  });
 }
 
 interface NexusRpcServer<Sender> {
