@@ -2,17 +2,11 @@
 
 Nexus Wallet provides a set of APIs for DApp builders to interact with the wallet.
 
----
-
 ## For DApp Developers
 
 This part is for you if you are a DApp developer, for Nexus Wallet end users, please go to [user guide](./user-guide.md). The following section introduces the APIs that Nexus provides for DApp developers, and some examples demonstrating how to use the APIs.
 
----
-
-### The RPC interface
-
----
+## The RPC interface
 
 As described in the [arch](./arch.md) article, Nexus provides a JSON-RPC interface for the dApp to interact with the Nexus Wallet.
 
@@ -36,15 +30,9 @@ The request method name could be one of the following:
 
 You can get the full documentation of these request methods [here](./rpc.md).
 
----
+## Concepts
 
-### Concepts
-
----
-
-#### Ownership
-
----
+### Ownership
 
 Full ownership means some locks or cells that are under full control of the wallet. Users can spend the cells or sign the data with the locks as they want.
 
@@ -52,11 +40,7 @@ In contrast, rule-based ownership means some locks or cells that are under parti
 
 Currently, Nexus only supports full ownership. And the full ownership only supports secp256k1 lock for now.
 
----
-
-#### Off-chain/On-chain Locks
-
----
+### Off-chain/On-chain Locks
 
 Once the user has initialized the Nexus Wallet, the Nexus Wallet will derive locks for the user. These locks may have some transactions on the CKB chain, or not.
 
@@ -64,31 +48,17 @@ Off-chain locks are the locks that have no transactions on the CKB chain. On-cha
 
 Thus off-chain locks are never used on the CKB chain. For privacy reasons, we suggest users use off-chain locks to receive CKB or tokens, this is one big advantage of UTXO model compared to the account model.
 
----
-
-#### External/Internal Locks
-
----
+### External/Internal Locks
 
 External locks are used to receive CKB or tokens from other users. Internal locks are used to receive CKB or token changes from the transactions that are initiated by the user.
 
----
-
-#### Live Cells
-
----
+### Live Cells
 
 Live Cells are the cells that are alive on the CKB chain, they can be spent by the controller of its lock. It's just another name for Unspent-Transaction-Output (UTXO).
 
----
+## Issue a transfer transaction with the Nexus Wallet
 
-### Issue a transfer transaction with the Nexus Wallet
-
----
-
-#### Step 1: Enable the Nexus Wallet
-
----
+### Step 1: Enable the Nexus Wallet
 
 Firstly, you need to enable the Nexus Wallet by calling the `wallet_enable` RPC.
 
@@ -100,11 +70,7 @@ After calling this method, we can see the dApp in the whitelist
 await window.ckb.request({ method: 'wallet_enable' });
 ```
 
----
-
-#### Step 2: Get one off-chain lock and receive some testnet CKB
-
----
+### Step 2: Get one off-chain lock and receive some testnet CKB
 
 Then you can get the off-chain locks by calling the `wallet_fullOwnership_getOffChainLocks` RPC.
 
@@ -121,11 +87,7 @@ Then you can use the address to receive some testnet CKB from the [CKB Faucet](h
 
 After you have received the testnet CKB, the lock that used to receive the CKB will become an on-chain lock.
 
----
-
-#### Step 3: Get the live cells and build a transfer transaction
-
----
+### Step 3: Get the live cells and build a transfer transaction
 
 Now that you 10000 CKB, let's transfer 100 CKB to another address.
 
@@ -189,11 +151,7 @@ txSkeleton = txSkeleton.update('outputs', (outputs) => {
 // fill in cellDeps, placeholder witnesses, etc.
 ```
 
----
-
-#### Step 4: Sign the transaction and send it to the CKB chain
-
----
+### Step 4: Sign the transaction and send it to the CKB chain
 
 After you have built the transactionSkeleton, you can sign the transaction by calling the `wallet_fullOwnership_signTransaction` RPC.
 
@@ -210,10 +168,6 @@ for (let index = 0; index < signatures.length; index++) {
 const txHash = await rpc.sendTransaction(tx);
 ```
 
----
-
-### Other references
-
----
+## Other references
 
 You can find a complete demo of transferring CKB with the Nexus Wallet in [Nexus-Demo](https://github.com/zhangyouxin/demo-nexus/blob/main/pages/index.tsx#L140-L246)
