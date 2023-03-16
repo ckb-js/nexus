@@ -58,7 +58,7 @@ Live Cells are the cells that are alive on the CKB chain, they can be spent by t
 
 ## Issue a transfer transaction with the Nexus Wallet
 
-We recommend you to read the step-by-step guide in the following section to get a better understanding of how to use the Nexus Wallet. But if you would like to jump into the code directly, you can check out the [online example](https://codesandbox.io/s/nexus-example-o91mgr?file=/index.ts).
+We recommend you to read the step-by-step guide in the following section to get a better understanding of how to use the Nexus Wallet. But if you would like to jump into the code directly, you can check out the [online example](https://githubbox.com/ckb-js/nexus/tree/develop/examples/nexus-example).
 
 ### Step 1: Enable the Nexus Wallet
 

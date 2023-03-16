@@ -56,13 +56,15 @@ export const buildTxSkeleton = async (): Promise<helpers.TransactionSkeletonType
     );
   });
 
-  // to build the transaction, there are still some other things to do
-  // fill in cellDeps, placeholder witnesses, etc.
   return txSkeleton;
 };
 
+/**
+ *   To build the transaction, there are still some other things to do
+ *   Like fill in cellDeps, placeholder witnesses, etc.
+ */
 export const completeTx = async (txSkeleton: helpers.TransactionSkeletonType): Promise<Transaction> => {
-  // fill cell provider
+  // fill cell provider, this is required when later all `createTransactionFromSkeleton`
   txSkeleton = txSkeleton.set('cellProvider', new Indexer('https://testnet.ckb.dev'));
 
   // fill in cellDeps
