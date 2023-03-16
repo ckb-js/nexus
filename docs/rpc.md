@@ -1,7 +1,60 @@
 
-<a name="rpcmethodsmd"></a>
+<a name="cellmd"></a>
 
-# Interface: RpcMethods
+# Interface: Cell
+
+## Table of contents
+
+### Properties
+
+- [cellOutput](#celloutput)
+- [data](#data)
+- [outPoint](#outpoint)
+- [blockHash](#blockhash)
+- [blockNumber](#blocknumber)
+
+## Properties
+
+### cellOutput
+
+ **cellOutput**: `Object`
+
+#### Type declaration
+
+| Name | Type |
+| :------ | :------ |
+| `capacity` | `string` |
+| `lock` | [`Script`](#scriptmd) |
+| `type?` | [`Script`](#scriptmd) |
+
+___
+
+### data
+
+ **data**: `string`
+
+___
+
+### outPoint
+
+ `Optional` **outPoint**: `OutPoint`
+
+___
+
+### blockHash
+
+ `Optional` **blockHash**: `string`
+
+___
+
+### blockNumber
+
+ `Optional` **blockNumber**: `string`
+
+
+<a name="fullownershipmd"></a>
+
+# Interface: FullOwnership
 
 Exposed RPC methods for the wallet, the `debug_` prefix is for development purpose only,
 and will be removed in the production version
@@ -19,29 +72,13 @@ await window.ckb.request({ method: "wallet_enable" })
 
 ### Methods
 
-- [wallet\_enable](#wallet_enable)
 - [wallet\_fullOwnership\_getOffChainLocks](#wallet_fullownership_getoffchainlocks)
 - [wallet\_fullOwnership\_getOnChainLocks](#wallet_fullownership_getonchainlocks)
 - [wallet\_fullOwnership\_getLiveCells](#wallet_fullownership_getlivecells)
 - [wallet\_fullOwnership\_signTransaction](#wallet_fullownership_signtransaction)
 - [wallet\_fullOwnership\_signData](#wallet_fullownership_signdata)
-- [debug\_getConfig](#debug_getconfig)
 
 ## Methods
-
-### wallet\_enable
-
-**wallet_enable**(): `Promise`<`void`\>
-
-If a dApp is the first time to connect to the wallet,
-it needs to call this method to enable the wallet for the dApp.
-After calling this method, we can see the dApp in the whitelist
-
-#### Returns
-
-`Promise`<`void`\>
-
-___
 
 ### wallet\_fullOwnership\_getOffChainLocks
 
@@ -66,10 +103,10 @@ await window.ckb.request({ method: 'wallet_fullOwnership_getOffChainLocks', para
 `Promise`<[`Script`](#scriptmd)[]\>
 
 the off-chain locks of current wallet
- <details>
-  <summary>show return data example</summary>
+<details>
+     <summary>show return data example</summary>
 
-  ```json
+   ```json
    [
      {
          "args": "0xc05b4506ab74c69a5ea38ec4f0e7ce4ab540bc44",
@@ -173,13 +210,13 @@ the off-chain locks of current wallet
      }
    ]
    ```
- </details>
+</details>
 
 ___
 
 ### wallet\_fullOwnership\_getOnChainLocks
 
-**wallet_fullOwnership_getOnChainLocks**(`payload`): `Promise`<[`Paginate`](#paginatemd)<[`Script`](#scriptmd)\>\>
+**wallet_fullOwnership_getOnChainLocks**(`payload`): `Promise`<[`Paginate`](#paginate)<[`Script`](#scriptmd)\>\>
 
 get used locks of which the wallet has full ownership
 
@@ -197,14 +234,14 @@ await window.ckb.request({ method: 'wallet_fullOwnership_getOnChainLocks', param
 
 #### Returns
 
-`Promise`<[`Paginate`](#paginatemd)<[`Script`](#scriptmd)\>\>
+`Promise`<[`Paginate`](#paginate)<[`Script`](#scriptmd)\>\>
 
 on-chain locks of the current wallet with pagination info, the page size is 20
- <details>
-  <summary>show return data example</summary>
+<details>
+<summary>show return data example</summary>
 
- ```json
-   {
+```json
+{
      "cursor": "125",
      "objects": [
          {
@@ -234,14 +271,14 @@ on-chain locks of the current wallet with pagination info, the page size is 20
          }
      ]
    }
- ```
- </details>
+```
+</details>
 
 ___
 
 ### wallet\_fullOwnership\_getLiveCells
 
-**wallet_fullOwnership_getLiveCells**(`payload?`): `Promise`<[`Paginate`](#paginatemd)<`Cell`\>\>
+**wallet_fullOwnership_getLiveCells**(`payload?`): `Promise`<[`Paginate`](#paginate)<[`Cell`](#cellmd)\>\>
 
 get live cells of which the wallet has full ownership
 
@@ -266,108 +303,112 @@ await window.ckb.request({
 
 #### Returns
 
-`Promise`<[`Paginate`](#paginatemd)<`Cell`\>\>
+`Promise`<[`Paginate`](#paginate)<[`Cell`](#cellmd)\>\>
 
 live cells of current wallet with pagination info, the page size is 20
- <details>
+<details>
    <summary>show return data example</summary>
 
    ```json
    {
-     "objects": [
-         {
-               "cellOutput": {
-                   "capacity": "0x14ace47800",
-                   "lock": {
-                       "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                       "hashType": "type",
-                       "args": "0xe570f6b1cf07ecafe86583ff9543bfcfca585a45"
-                   }
-               },
-               "data": "0x",
-               "outPoint": {
-                   "txHash": "0xb9db307671e53ef75976c2ec8b3f501c2151998787581858eb84e95174dd9b5a",
-                   "index": "0x0"
-               },
-               "blockNumber": "0x81d587"
-           },
-           {
-               "cellOutput": {
-                   "capacity": "0xe8d4a51000",
-                   "lock": {
-                       "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                       "hashType": "type",
-                       "args": "0x74444a85fba9efcd2df6bade767200aab8fee58c"
-                   }
-               },
-               "data": "0x",
-               "outPoint": {
-                   "txHash": "0x9368614003637ea0c547335567a3c72e263d4fe395ec7fa263cbd52609f30dae",
-                   "index": "0x3"
-               },
-               "blockNumber": "0x82a31d"
-           },
-           {
-               "cellOutput": {
-                   "capacity": "0x1a13b8600",
-                   "lock": {
-                       "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                       "hashType": "type",
-                       "args": "0x5b6c1bb6757ebeef96181fc100cca7e4e962388e"
-                   }
-               },
-               "data": "0x",
-               "outPoint": {
-                   "txHash": "0xa041511f830955439a9b93c0fac6db8376d43d7de56054bc7dc8c51bda27741d",
-                   "index": "0x0"
-               },
-               "blockNumber": "0x82a327"
-           },
-           {
-               "cellOutput": {
-                   "capacity": "0xe8d4a51000",
-                   "lock": {
-                       "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                       "hashType": "type",
-                       "args": "0x193824fe5fecf4d30871237911e79096b4ca9cbb"
-                   }
-               },
-               "data": "0x",
-               "outPoint": {
-                   "txHash": "0x82be78c691ae1e7d4aafa4491cdba54c33dd1ca075ba5e8f3dd3497283bde849",
-                   "index": "0x0"
-               },
-               "blockNumber": "0x82a328"
-           },
-           {
-               "cellOutput": {
-                   "capacity": "0x5d21dba000",
-                   "lock": {
-                       "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                       "hashType": "type",
-                       "args": "0xfd822396937dab6ff35a04852b2b48c212384a3f"
-                   }
-               },
-               "data": "0x",
-               "outPoint": {
-                   "txHash": "0x4971ebab12b40c3662a5be6e984e27272e574bd13e9b6ffffb313d6bab453bcd",
-                   "index": "0x0"
-               },
-               "blockNumber": "0x82aa99"
-           }
-       ],
-       "cursor": "125:0x409bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce801fd822396937dab6ff35a04852b2b48c212384a3f000000000082aa990000000500000000"
-     }
+        "objects": [
+            {
+                  "cellOutput": {
+                      "capacity": "0x14ace47800",
+                      "lock": {
+                          "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+                          "hashType": "type",
+                          "args": "0xe570f6b1cf07ecafe86583ff9543bfcfca585a45"
+                      }
+                  },
+                  "data": "0x",
+                  "outPoint": {
+                      "txHash": "0xb9db307671e53ef75976c2ec8b3f501c2151998787581858eb84e95174dd9b5a",
+                      "index": "0x0"
+                  },
+                  "blockNumber": "0x81d587"
+              },
+              {
+                  "cellOutput": {
+                      "capacity": "0xe8d4a51000",
+                      "lock": {
+                          "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+                          "hashType": "type",
+                          "args": "0x74444a85fba9efcd2df6bade767200aab8fee58c"
+                      }
+                  },
+                  "data": "0x",
+                  "outPoint": {
+                      "txHash": "0x9368614003637ea0c547335567a3c72e263d4fe395ec7fa263cbd52609f30dae",
+                      "index": "0x3"
+                  },
+                  "blockNumber": "0x82a31d"
+              },
+              {
+                  "cellOutput": {
+                      "capacity": "0x1a13b8600",
+                      "lock": {
+                          "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+                          "hashType": "type",
+                          "args": "0x5b6c1bb6757ebeef96181fc100cca7e4e962388e"
+                      }
+                  },
+                  "data": "0x",
+                  "outPoint": {
+                      "txHash": "0xa041511f830955439a9b93c0fac6db8376d43d7de56054bc7dc8c51bda27741d",
+                      "index": "0x0"
+                  },
+                  "blockNumber": "0x82a327"
+              },
+              {
+                  "cellOutput": {
+                      "capacity": "0xe8d4a51000",
+                      "lock": {
+                          "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+                          "hashType": "type",
+                          "args": "0x193824fe5fecf4d30871237911e79096b4ca9cbb"
+                      }
+                  },
+                  "data": "0x",
+                  "outPoint": {
+                      "txHash": "0x82be78c691ae1e7d4aafa4491cdba54c33dd1ca075ba5e8f3dd3497283bde849",
+                      "index": "0x0"
+                  },
+                  "blockNumber": "0x82a328"
+              },
+              {
+                  "cellOutput": {
+                      "capacity": "0x5d21dba000",
+                      "lock": {
+                          "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+                          "hashType": "type",
+                          "args": "0xfd822396937dab6ff35a04852b2b48c212384a3f"
+                      }
+                  },
+                  "data": "0x",
+                  "outPoint": {
+                      "txHash": "0x4971ebab12b40c3662a5be6e984e27272e574bd13e9b6ffffb313d6bab453bcd",
+                      "index": "0x0"
+                  },
+                  "blockNumber": "0x82aa99"
+              }
+          ],
+          "cursor": "125:0x409bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce801fd822396937dab6ff35a04852b2b48c212384a3f000000000082aa990000000500000000"
+        }
    ```
- </details>
+</details>
 
 ___
 
 ### wallet\_fullOwnership\_signTransaction
 
-**wallet_fullOwnership_signTransaction**(`payload`): `Promise`<`GroupedSignature`\>
+**wallet_fullOwnership_signTransaction**(`payload`): `Promise`<[`GroupedSignature`](#groupedsignature)\>
 
-sign a transaction with the wallet
+Sign a transaction via key(s) derived from current wallet
+
+**`See`**
+
+[CKB Transaction Structure](https://github.com/nervosnetwork/rfcs/blob/master/rfcs/0022-transaction-structure/0022-transaction-structure.md)
 
 **`Example`**
 
@@ -431,25 +472,25 @@ sign a transaction with the wallet
 
 #### Returns
 
-`Promise`<`GroupedSignature`\>
+`Promise`<[`GroupedSignature`](#groupedsignature)\>
 
 an array of [lock, signature] tuple
- <details>
-  <summary>show return data example</summary>
+<details>
+<summary>show return data example</summary>
 
-   ```json
-     [
-       [
-         {
-             "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-             "hashType": "type",
-             "args": "0x477de073e7ec94aeb74184b981670e843dcb0eb2"
-         },
-         "0x38e4312aec9b93da8d66742af8ddfdfab8794bfb579c7ad05962c17530713e9452d04880d567b7c310bc4b18b1afe2aaecf4e573f8e751af6f60f8b6022e086e00"
-       ]
-     ]
-   ```
- </details>
+```json
+[
+  [
+    {
+      "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+      "hashType": "type",
+      "args": "0x477de073e7ec94aeb74184b981670e843dcb0eb2",
+    },
+    "0x38e4312aec9b93da8d66742af8ddfdfab8794bfb579c7ad05962c17530713e9452d04880d567b7c310bc4b18b1afe2aaecf4e573f8e751af6f60f8b6022e086e00",
+  ],
+]
+```
+</details>
 
 ___
 
@@ -457,11 +498,9 @@ ___
 
 **wallet_fullOwnership_signData**(`payload`): `Promise`<`string`\>
 
-sign a piece of
-
-**`Link`**
-
-BytesLike `BytesLike` data with the wallet
+Sign a data with some lock(public key), it can be used to identify the user, such as sign in with CKB.
+The data will be displayed as human-readable when it is UTF-8 encoded. Otherwise, it will be displayed as hex.
+For security reasons, the data will be signed with the following steps: `signRecoverable(blake2b("Nervos Message:" + data))`
 
 **`Example`**
 
@@ -490,98 +529,25 @@ let locks = await window.ckb.request({
 `Promise`<`string`\>
 
 the signature of the data if the wallet has full ownership of the lock passed in
- <details>
-  <summary>show return data example</summary>
-  
-   ```json
-     "0xa05fcab1955bb1aaf5d6733a5ae9ff932b5c8183532c682c1d3c735e75c2e2e6690d19ad664773ac1f438051a6c47b4aafb9e914292904fe9fe83d59906e827b00"
-   ```
- </details>
+<details>
+<summary>show return data example</summary>
 
-___
-
-### debug\_getConfig
-
-**debug_getConfig**(): `Promise`<[`Config`](#configmd)\>
-
-Get the wallet config
-
-#### Returns
-
-`Promise`<[`Config`](#configmd)\>
-
-
-<a name="configmd"></a>
-
-# Interface: Config
-
-## Table of contents
-
-### Properties
-
-- [version](#version)
-- [nickname](#nickname)
-- [selectedNetwork](#selectednetwork)
-- [networks](#networks)
-- [whitelist](#whitelist)
-
-## Properties
-
-### version
-
- **version**: `string`
-
-version of the current app
-
-___
-
-### nickname
-
- **nickname**: `string`
-
-the nickname of the current user, for display purpose.
-unlike other wallet, Nexus don't use a certain address as the identity of the user
-
-___
-
-### selectedNetwork
-
- **selectedNetwork**: `string`
-
-the id of networks that is selected to connect
-
-___
-
-### networks
-
- **networks**: [`NetworkConfig`](#networkconfigmd)[]
-
-a list of networks that the app can connect to
-
-___
-
-### whitelist
-
- **whitelist**: [`TrustedHost`](#trustedhostmd)[]
-
-a list of hosts that have been granted
+```json
+"0xa05fcab1955bb1aaf5d6733a5ae9ff932b5c8183532c682c1d3c735e75c2e2e6690d19ad664773ac1f438051a6c47b4aafb9e914292904fe9fe83d59906e827b00"
+```
+</details>
 
 
 <a name="getlivecellspayloadmd"></a>
 
 # Interface: GetLiveCellsPayload
 
-## Hierarchy
-
-- `GetPaginateItemsPayload`
-
-  ↳ **`GetLiveCellsPayload`**
-
 ## Table of contents
 
 ### Properties
 
 - [cursor](#cursor)
+- [change](#change)
 
 ## Properties
 
@@ -589,21 +555,17 @@ a list of hosts that have been granted
 
  `Optional` **cursor**: `string`
 
-#### Inherited from
+___
 
-GetPaginateItemsPayload.cursor
+### change
+
+ `Optional` **change**: `Bip44ChangeType`
 
 
 <a name="getoffchainlockspayloadmd"></a>
 
 # Interface: GetOffChainLocksPayload
 
-## Hierarchy
-
-- `FilterPayload`
-
-  ↳ **`GetOffChainLocksPayload`**
-
 ## Table of contents
 
 ### Properties
@@ -614,24 +576,12 @@ GetPaginateItemsPayload.cursor
 
 ### change
 
- `Optional` **change**: ``"external"`` \| ``"internal"``
-
-#### Inherited from
-
-FilterPayload.change
+ `Optional` **change**: `Bip44ChangeType`
 
 
 <a name="getonchainlockspayloadmd"></a>
 
 # Interface: GetOnChainLocksPayload
-
-## Hierarchy
-
-- `GetPaginateItemsPayload`
-
-- `FilterPayload`
-
-  ↳ **`GetOnChainLocksPayload`**
 
 ## Table of contents
 
@@ -646,87 +596,11 @@ FilterPayload.change
 
  `Optional` **cursor**: `string`
 
-#### Inherited from
-
-GetPaginateItemsPayload.cursor
-
 ___
 
 ### change
 
- `Optional` **change**: ``"external"`` \| ``"internal"``
-
-#### Inherited from
-
-FilterPayload.change
-
-
-<a name="networkconfigmd"></a>
-
-# Interface: NetworkConfig
-
-## Table of contents
-
-### Properties
-
-- [id](#id)
-- [displayName](#displayname)
-- [networkName](#networkname)
-- [rpcUrl](#rpcurl)
-
-## Properties
-
-### id
-
- **id**: `string`
-
-___
-
-### displayName
-
- **displayName**: `string`
-
-___
-
-### networkName
-
- **networkName**: `string`
-
-___
-
-### rpcUrl
-
- **rpcUrl**: `string`
-
-
-<a name="paginatemd"></a>
-
-# Interface: Paginate<T\>
-
-## Type parameters
-
-| Name |
-| :------ |
-| `T` |
-
-## Table of contents
-
-### Properties
-
-- [cursor](#cursor)
-- [objects](#objects)
-
-## Properties
-
-### cursor
-
- **cursor**: `string`
-
-___
-
-### objects
-
- **objects**: `T`[]
+ `Optional` **change**: `Bip44ChangeType`
 
 
 <a name="scriptmd"></a>
@@ -764,12 +638,6 @@ ___
 
 # Interface: SignDataPayload
 
-## Hierarchy
-
-- `SignDataPayload`
-
-  ↳ **`SignDataPayload`**
-
 ## Table of contents
 
 ### Properties
@@ -781,21 +649,13 @@ ___
 
 ### data
 
- **data**: [`BytesLike`](#byteslike)
-
-#### Inherited from
-
-SignDataPayloadType.data
+ **data**: `string`
 
 ___
 
 ### lock
 
  **lock**: [`Script`](#scriptmd)
-
-#### Inherited from
-
-SignDataPayloadType.lock
 
 
 <a name="signtransactionpayloadmd"></a>
@@ -812,28 +672,104 @@ SignDataPayloadType.lock
 
 ### tx
 
- **tx**: `Transaction`
+ **tx**: [`Transaction`](#transactionmd)
 
 
-<a name="trustedhostmd"></a>
+<a name="transactionmd"></a>
 
-# Interface: TrustedHost
+# Interface: Transaction
 
 ## Table of contents
 
 ### Properties
 
-- [host](#host)
-- [favicon](#favicon)
+- [cellDeps](#celldeps)
+- [hash](#hash)
+- [headerDeps](#headerdeps)
+- [inputs](#inputs)
+- [outputs](#outputs)
+- [outputsData](#outputsdata)
+- [version](#version)
+- [witnesses](#witnesses)
 
 ## Properties
 
-### host
+### cellDeps
 
- **host**: `string`
+ **cellDeps**: `CellDep`[]
 
 ___
 
-### favicon
+### hash
 
- **favicon**: `string`
+ `Optional` **hash**: `string`
+
+___
+
+### headerDeps
+
+ **headerDeps**: `string`[]
+
+___
+
+### inputs
+
+ **inputs**: `Input`[]
+
+___
+
+### outputs
+
+ **outputs**: `Output`[]
+
+___
+
+### outputsData
+
+ **outputsData**: `string`[]
+
+___
+
+### version
+
+ **version**: `string`
+
+___
+
+### witnesses
+
+ **witnesses**: `string`[]
+
+
+<a name="walletmd"></a>
+
+# Interface: Wallet
+
+## Table of contents
+
+### Methods
+
+- [wallet\_enable](#wallet_enable)
+
+## Methods
+
+### wallet\_enable
+
+**wallet_enable**(): `Promise`<{ `nickname`: `string`  }\>
+
+If a dApp is the first time to connect to the wallet,
+it needs to call this method to enable the wallet for the dApp.
+After calling this method, we can see the dApp in the whitelist
+
+**`Example`**
+
+To communicate with the wallet, we use the `window.ckb.request` method.
+The `window.ckb` object is injected by the wallet
+
+```js
+await window.ckb.request({ method: "wallet_enable" })
+```
+
+#### Returns
+
+`Promise`<{ `nickname`: `string`  }\>

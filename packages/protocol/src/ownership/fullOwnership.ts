@@ -1,19 +1,10 @@
-import type { Cell, Cursor, HexString, Paginate, RequesterInfo, Script, Signature, Transaction } from '../base';
+import type { Cell, Cursor, HexString, Paginate, Script, Signature, Transaction } from '../base';
 
 /**
  * "Nervos Message:" in ASCII, used as a magic prefix when signing personal messages.
  * @see {@link https://github.com/nervosnetwork/neuron/blob/1f19cca93b3247447ab6082eca16021dd6656db6/packages/neuron-wallet/src/services/sign-message.ts#L14 Neuron implementation}
  */
 export const SIGN_DATA_MAGIC = '0x4e6572766f73204d6573736167653a';
-
-export type SignDataPayload = RequesterInfo & {
-  data: HexString;
-  lock: Script;
-};
-
-export type SignTransactionPayload = RequesterInfo & {
-  tx: Transaction;
-};
 
 export type GroupedSignature = [Script, Signature][];
 
@@ -22,20 +13,30 @@ export type GroupedSignature = [Script, Signature][];
  * The **internal** chain is used for addresses which are NOT meant to be visible outside the wallet, e.g. for return transaction change
  * @see {@link https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki#change BIP44 Change}
  */
-type Bip44ChangeType = 'external' | 'internal';
-export type GetOffChainLocksPayload = {
-  change?: Bip44ChangeType;
-};
+export type Bip44ChangeType = 'external' | 'internal';
 
-export type GetOnChainLocksPayload = {
+export interface GetOffChainLocksPayload {
+  change?: Bip44ChangeType;
+}
+
+export interface GetOnChainLocksPayload {
   cursor?: Cursor;
   change?: Bip44ChangeType;
-};
+}
 
-export type GetLiveCellsPayload = {
+export interface GetLiveCellsPayload {
   cursor?: Cursor;
   change?: Bip44ChangeType;
-};
+}
+
+export interface SignDataPayload {
+  data: HexString;
+  lock: Script;
+}
+
+export interface SignTransactionPayload {
+  tx: Transaction;
+}
 
 /**
  * Exposed RPC methods for the wallet, the `debug_` prefix is for development purpose only,
@@ -60,111 +61,111 @@ export interface FullOwnership {
    * <details>
    *      <summary>show return data example</summary>
    *
-   *      ```json
-   *       [
-   *         {
-   *             "args": "0xc05b4506ab74c69a5ea38ec4f0e7ce4ab540bc44",
-   *             "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-   *             "hashType": "type"
-   *         },
-   *         {
-   *             "args": "0xbfed0b63e97e2022a348126c75b50f7c9f4364df",
-   *             "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-   *             "hashType": "type"
-   *         },
-   *         {
-   *             "args": "0x1830521b4d4cf93711f671d44f205f6eec606766",
-   *             "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-   *             "hashType": "type"
-   *         },
-   *         {
-   *             "args": "0x6b9bae12909f9c7eeea6a2bc8bab76f5b7835d2c",
-   *             "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-   *             "hashType": "type"
-   *         },
-   *         {
-   *             "args": "0xe502d73d571c0a87720b38fdf81a51d03e99f48f",
-   *             "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-   *             "hashType": "type"
-   *         },
-   *         {
-   *             "args": "0x82f6699f1e563d5e9fcec280da90982c6645c160",
-   *             "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-   *             "hashType": "type"
-   *         },
-   *         {
-   *             "args": "0x80b71195dc38de6fbf044d18a308cd0650e79ffb",
-   *             "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-   *             "hashType": "type"
-   *         },
-   *         {
-   *             "args": "0xe1bcaec77cfbada45e4afc44a8f3f43e64e9ac2d",
-   *             "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-   *             "hashType": "type"
-   *         },
-   *         {
-   *             "args": "0xb4efa0c3a6267a5173bc8cd671453333753376b4",
-   *             "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-   *             "hashType": "type"
-   *         },
-   *         {
-   *             "args": "0x0ac738d446c33278d5ac908c387c70265078bed7",
-   *             "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-   *             "hashType": "type"
-   *         },
-   *         {
-   *             "args": "0x8261878431542e549843c2feda68384569f80733",
-   *             "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-   *             "hashType": "type"
-   *         },
-   *         {
-   *             "args": "0x122ca47c5125cce520170901bec659cef2586150",
-   *             "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-   *             "hashType": "type"
-   *         },
-   *         {
-   *             "args": "0xc58ceee0c38eed98fd1ab8da05ba0ec05c456b4a",
-   *             "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-   *             "hashType": "type"
-   *         },
-   *         {
-   *             "args": "0x1dd233a6f5c3d52d4102d2eb4a5ba89b71fd26de",
-   *             "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-   *             "hashType": "type"
-   *         },
-   *         {
-   *             "args": "0xd601a6c4327142ecc1b88d5d3ff51a8fb0a66ec3",
-   *             "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-   *             "hashType": "type"
-   *         },
-   *         {
-   *             "args": "0x43a0bb1729b250681c64f310312af404be402164",
-   *             "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-   *             "hashType": "type"
-   *         },
-   *         {
-   *             "args": "0x2682db25239951d9943b4e469eb38a1a6ddd1ab8",
-   *             "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-   *             "hashType": "type"
-   *         },
-   *         {
-   *             "args": "0x40a4ef24f0611b2cf93927c80177e50e87f19ec2",
-   *             "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-   *             "hashType": "type"
-   *         },
-   *         {
-   *             "args": "0x078313f8a5f03cd5570f3293848223d8a49fc71e",
-   *             "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-   *             "hashType": "type"
-   *         },
-   *         {
-   *             "args": "0x51cc96d3e509d73fd037faae2653dece708d1acd",
-   *             "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-   *             "hashType": "type"
-   *         }
-   *       ]
-   *       ```
-   *     </details>
+   *    ```json
+   *    [
+   *      {
+   *          "args": "0xc05b4506ab74c69a5ea38ec4f0e7ce4ab540bc44",
+   *          "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+   *          "hashType": "type"
+   *      },
+   *      {
+   *          "args": "0xbfed0b63e97e2022a348126c75b50f7c9f4364df",
+   *          "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+   *          "hashType": "type"
+   *      },
+   *      {
+   *          "args": "0x1830521b4d4cf93711f671d44f205f6eec606766",
+   *          "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+   *          "hashType": "type"
+   *      },
+   *      {
+   *          "args": "0x6b9bae12909f9c7eeea6a2bc8bab76f5b7835d2c",
+   *          "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+   *          "hashType": "type"
+   *      },
+   *      {
+   *          "args": "0xe502d73d571c0a87720b38fdf81a51d03e99f48f",
+   *          "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+   *          "hashType": "type"
+   *      },
+   *      {
+   *          "args": "0x82f6699f1e563d5e9fcec280da90982c6645c160",
+   *          "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+   *          "hashType": "type"
+   *      },
+   *      {
+   *          "args": "0x80b71195dc38de6fbf044d18a308cd0650e79ffb",
+   *          "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+   *          "hashType": "type"
+   *      },
+   *      {
+   *          "args": "0xe1bcaec77cfbada45e4afc44a8f3f43e64e9ac2d",
+   *          "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+   *          "hashType": "type"
+   *      },
+   *      {
+   *          "args": "0xb4efa0c3a6267a5173bc8cd671453333753376b4",
+   *          "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+   *          "hashType": "type"
+   *      },
+   *      {
+   *          "args": "0x0ac738d446c33278d5ac908c387c70265078bed7",
+   *          "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+   *          "hashType": "type"
+   *      },
+   *      {
+   *          "args": "0x8261878431542e549843c2feda68384569f80733",
+   *          "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+   *          "hashType": "type"
+   *      },
+   *      {
+   *          "args": "0x122ca47c5125cce520170901bec659cef2586150",
+   *          "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+   *          "hashType": "type"
+   *      },
+   *      {
+   *          "args": "0xc58ceee0c38eed98fd1ab8da05ba0ec05c456b4a",
+   *          "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+   *          "hashType": "type"
+   *      },
+   *      {
+   *          "args": "0x1dd233a6f5c3d52d4102d2eb4a5ba89b71fd26de",
+   *          "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+   *          "hashType": "type"
+   *      },
+   *      {
+   *          "args": "0xd601a6c4327142ecc1b88d5d3ff51a8fb0a66ec3",
+   *          "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+   *          "hashType": "type"
+   *      },
+   *      {
+   *          "args": "0x43a0bb1729b250681c64f310312af404be402164",
+   *          "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+   *          "hashType": "type"
+   *      },
+   *      {
+   *          "args": "0x2682db25239951d9943b4e469eb38a1a6ddd1ab8",
+   *          "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+   *          "hashType": "type"
+   *      },
+   *      {
+   *          "args": "0x40a4ef24f0611b2cf93927c80177e50e87f19ec2",
+   *          "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+   *          "hashType": "type"
+   *      },
+   *      {
+   *          "args": "0x078313f8a5f03cd5570f3293848223d8a49fc71e",
+   *          "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+   *          "hashType": "type"
+   *      },
+   *      {
+   *          "args": "0x51cc96d3e509d73fd037faae2653dece708d1acd",
+   *          "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+   *          "hashType": "type"
+   *      }
+   *    ]
+   *    ```
+   *</details>
    */
   wallet_fullOwnership_getOffChainLocks(payload: GetOffChainLocksPayload): Promise<Script[]>;
 
@@ -320,7 +321,7 @@ export interface FullOwnership {
    *           "cursor": "125:0x409bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce801fd822396937dab6ff35a04852b2b48c212384a3f000000000082aa990000000500000000"
    *         }
    *    ```
-   *    </details>
+   *</details>
    */
   wallet_fullOwnership_getLiveCells(payload?: GetLiveCellsPayload): Promise<Paginate<Cell>>;
 
@@ -381,22 +382,22 @@ export interface FullOwnership {
    * ```
    * @param payload  the `tx` is your {@link [Transaction](https://github.com/nervosnetwork/rfcs/blob/master/rfcs/0019-data-structures/0019-data-structures.md#Transaction)}
    * @returns an array of [lock, signature] tuple
-   <details>
-   <summary>show return data example</summary>
-
-   ```json
-   [
-   [
-   {
-                "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                "hashType": "type",
-                "args": "0x477de073e7ec94aeb74184b981670e843dcb0eb2"
-            },
-   "0x38e4312aec9b93da8d66742af8ddfdfab8794bfb579c7ad05962c17530713e9452d04880d567b7c310bc4b18b1afe2aaecf4e573f8e751af6f60f8b6022e086e00"
-   ]
-   ]
-   ```
-   </details>
+   * <details>
+   * <summary>show return data example</summary>
+   *
+   * ```json
+   * [
+   *   [
+   *     {
+   *       "codeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+   *       "hashType": "type",
+   *       "args": "0x477de073e7ec94aeb74184b981670e843dcb0eb2",
+   *     },
+   *     "0x38e4312aec9b93da8d66742af8ddfdfab8794bfb579c7ad05962c17530713e9452d04880d567b7c310bc4b18b1afe2aaecf4e573f8e751af6f60f8b6022e086e00",
+   *   ],
+   * ]
+   * ```
+   * </details>
    */
   wallet_fullOwnership_signTransaction(payload: SignTransactionPayload): Promise<GroupedSignature>;
 
