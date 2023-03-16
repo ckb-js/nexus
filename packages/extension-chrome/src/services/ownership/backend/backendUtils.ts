@@ -5,6 +5,8 @@ import { ScriptConfig } from '@ckb-lumos/config-manager';
 import { JSONRPCRequest, JSONRPCResponse } from 'json-rpc-2.0';
 import { RPC as RpcType } from '@ckb-lumos/rpc/lib/types/rpc';
 import { NexusCommonErrors } from '../../../errors';
+import pTimeout from './p-timeout';
+import pRetry from './p-retry';
 
 export type Order = 'asc' | 'desc';
 export type Limit = HexNumber;
@@ -97,18 +99,29 @@ export function createRpcClient(url: string): RpcClient {
 
   async function _request(body: JSONRPCRequest | JSONRPCRequest[]): Promise<JSONRPCResponse | JSONRPCResponse[]> {
     ++jsonRpcId;
-    const res = await fetch(url, {
+    const fetchPromise = fetch(url, {
       method: 'POST',
       body: JSON.stringify(body),
       headers: {
         'Content-Type': 'application/json',
       },
     });
-    if (res.status >= 300) {
-      /* istanbul ignore next */
-      throw NexusCommonErrors.RequestCkbFailed(res);
-    }
-    return res.json();
+    const retryRunner = async () => {
+      const res = await pTimeout(fetchPromise, {
+        milliseconds: 5_000,
+      });
+
+      // Abort retrying if the resource doesn't exist
+      if (res.status >= 300) {
+        /* istanbul ignore next */
+        throw NexusCommonErrors.RequestCkbFailed(res);
+      }
+
+      return res.json();
+    };
+
+    const res = await pRetry(retryRunner, { retries: 5 });
+    return res as Promise<JSONRPCResponse | JSONRPCResponse[]>;
   }
 
   async function request<Result = unknown, Params = unknown>(method: string, params: Params): Promise<Result> {
