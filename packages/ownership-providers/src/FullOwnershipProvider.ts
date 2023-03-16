@@ -1,8 +1,15 @@
 import { BIish, BI } from '@ckb-lumos/bi';
-import { minimalCellCapacityCompatible, TransactionSkeletonType } from '@ckb-lumos/helpers';
+import isEqual from 'lodash.isequal';
+import {
+  createTransactionFromSkeleton,
+  minimalCellCapacityCompatible,
+  parseAddress,
+  TransactionSkeletonType,
+} from '@ckb-lumos/helpers';
 import { Events, FullOwnership, InjectedCkb } from '@nexus-wallet/protocol';
 import { errors } from '@nexus-wallet/utils';
-import { Address, Cell, Script } from '@ckb-lumos/base';
+import { Address, blockchain, Cell, Script, Transaction } from '@ckb-lumos/base';
+import { config } from '@ckb-lumos/lumos';
 
 // util types for FullOwnership
 
@@ -17,7 +24,7 @@ export type LockScriptLike = Address | Script;
 
 export type PayFeeOptions = {
   /**
-   * The fee rate, in shannons per byte. If not specified, the fee rate will be calculated automatically.
+   * The fee rate, in Shannons per byte. If not specified, the fee rate will be calculated automatically.
    */
   feeRate?: BIish;
 } & PayBy;
@@ -26,6 +33,31 @@ export type PayBy = PayByPayers | PayByAuto;
 export type PayByPayers = { payers: LockScriptLike[]; autoInject?: boolean };
 /** Pay by inject automatically */
 export type PayByAuto = { autoInject: true };
+
+function getTransactionSizeByTx(tx: Transaction): number {
+  const serializedTx = blockchain.Transaction.pack(tx);
+  // 4 is serialized offset bytesize
+  const size = serializedTx.byteLength + 4;
+  return size;
+}
+function calculateFeeCompatible(size: number, feeRate: BIish): BI {
+  const ratio = BI.from(1000);
+  const base = BI.from(size).mul(feeRate);
+  const fee = base.div(ratio);
+  if (fee.mul(ratio).lt(base)) {
+    return fee.add(1);
+  }
+  return BI.from(fee);
+}
+
+const lockToScript = (addr: LockScriptLike): Script => {
+  if (typeof addr === 'object') {
+    return addr;
+  }
+  const networkConfig = addr.startsWith('ckt') ? config.predefined.AGGRON4 : config.predefined.LINA;
+  // FIXME: it is not a good way to determine the network
+  return parseAddress(addr, { config: networkConfig });
+};
 
 export class FullOwnershipProvider {
   private ckb: InjectedCkb<FullOwnership, Events>;
@@ -72,6 +104,7 @@ export class FullOwnershipProvider {
     config: {
       /** Inject at least this amount of capacity */
       amount: BIish;
+      lock?: LockScriptLike;
     },
   ): Promise<TransactionSkeletonType> {
     const changeLock = (await this.getOffChainLocks({ change: 'internal' }))[0];
@@ -84,9 +117,10 @@ export class FullOwnershipProvider {
       data: '0x',
     };
     const minimalChangeCapacity = minimalCellCapacityCompatible(changeCell);
-    if (minimalChangeCapacity.gt(config.amount)) {
-      errors.throwError('The amount is too small to pay the minimal change cell capacity');
-    }
+    // How to deal with the minimal change capacity?
+    // if (minimalChangeCapacity.gt(config.amount)) {
+    // errors.throwError('The amount is too small to pay the minimal change cell capacity');
+    // }
 
     if (!changeLock) {
       errors.throwError('No change lock script found, it may be a internal bug');
@@ -94,7 +128,9 @@ export class FullOwnershipProvider {
 
     let remainCapacity = BI.from(config.amount).add(minimalChangeCapacity);
     const inputCells: Cell[] = [];
-    for await (const cell of this.collector()) {
+    const payerLock = config.lock ? lockToScript(config.lock) : undefined;
+
+    for await (const cell of this.collector({ lock: payerLock })) {
       inputCells.push(cell);
       remainCapacity = remainCapacity.sub(BI.from(cell.cellOutput.capacity));
       if (remainCapacity.lte(0)) {
@@ -102,7 +138,7 @@ export class FullOwnershipProvider {
       }
     }
     if (remainCapacity.gt(0)) {
-      errors.throwError('Not enough capacity');
+      errors.throwError('No cell sufficient to inject');
     }
 
     const totalInputs = inputCells.reduce((sum, cell) => sum.add(BI.from(cell.cellOutput.capacity)), BI.from(0));
@@ -128,12 +164,45 @@ export class FullOwnershipProvider {
    * @param txSkeleton
    * @param options
    */
-  async payFee(txSkeleton: TransactionSkeletonType, options?: PayFeeOptions): Promise<TransactionSkeletonType> {
-    console.log(txSkeleton, options);
-    errors.unimplemented();
+  async payFee({
+    txSkeleton,
+    options = { autoInject: true },
+  }: {
+    txSkeleton: TransactionSkeletonType;
+    options?: PayFeeOptions;
+  }): Promise<TransactionSkeletonType> {
+    let size = 0;
+    let txSkeletonWithFee = txSkeleton;
+    const autoInject = !!options.autoInject;
+    const payers = 'payers' in options ? options.payers : [];
+    const feeRate = BI.from(options.feeRate || 1000);
+    let currentTransactionSize = getTransactionSizeByTx(createTransactionFromSkeleton(txSkeleton));
+
+    while (currentTransactionSize > size) {
+      size = currentTransactionSize;
+      const fee = calculateFeeCompatible(size, feeRate);
+
+      let injected = false;
+      for (const payer of payers) {
+        try {
+          txSkeletonWithFee = await this.injectCapacity(txSkeleton, { lock: payer, amount: fee });
+          injected = true;
+          break;
+        } catch {}
+      }
+
+      if (!injected && autoInject) {
+        txSkeletonWithFee = await this.injectCapacity(txSkeleton, {
+          amount: fee,
+        });
+      }
+      currentTransactionSize = getTransactionSizeByTx(createTransactionFromSkeleton(txSkeletonWithFee));
+    }
+
+    return txSkeletonWithFee;
   }
 
-  async *collector(): AsyncIterable<Cell> {
+  async *collector({ lock }: { lock?: Script } = {}): AsyncIterable<Cell> {
     let cursor = '';
     while (true) {
       const page = await this.getLiveCells({ cursor });
@@ -142,7 +211,9 @@ export class FullOwnershipProvider {
       }
       cursor = page.cursor;
       for (const cell of page.objects) {
-        yield cell;
+        if (!lock || isEqual(lock, cell.cellOutput.lock)) {
+          yield cell;
+        }
       }
     }
   }
