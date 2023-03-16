@@ -9,6 +9,7 @@ import '../../src/rpc/debugImpl';
 import '../../src/rpc/walletImpl';
 import { createInjectedCkb, TypedEventClient, TypedRpcClient } from '../../src/injectedCkb';
 import { errors } from '@nexus-wallet/utils';
+import { bindSchemaValidator } from '../../src/rpc/schema';
 jest.mock('../../src/rpc/schema');
 
 export interface RpcTestHelper {
@@ -32,8 +33,21 @@ export interface RpcTestHelper {
  * @param payload
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function createTestRpcServer<S = any, P = any>(payload: Partial<ModuleProviderMap<S, P>> = {}): RpcTestHelper {
-  const { storage = () => mockStorage as Storage<S>, platform = () => mockPlatformService, ...modules } = payload;
+export function createTestRpcServer<S = any, P = any>(
+  payload: Partial<ModuleProviderMap<S, P>> & { enableParameterValidate?: boolean } = {},
+): RpcTestHelper {
+  const {
+    storage = () => mockStorage as Storage<S>,
+    platform = () => mockPlatformService,
+    enableParameterValidate,
+    ...modules
+  } = payload;
+
+  if (enableParameterValidate) {
+    (bindSchemaValidator as jest.Mock).mockImplementation(
+      jest.requireActual('../../src/rpc/schema').bindSchemaValidator,
+    );
+  }
 
   const factory = createModulesFactory({ storage, platform, ...modules });
   const server = createServer(factory);

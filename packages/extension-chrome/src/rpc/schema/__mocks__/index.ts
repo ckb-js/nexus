@@ -1,3 +1,1 @@
-export function bindSchemaValidator(method: unknown, handler: unknown): unknown {
-  return handler;
-}
+export const bindSchemaValidator = jest.fn().mockImplementation((_, handler) => handler);
