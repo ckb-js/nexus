@@ -9,6 +9,8 @@ import '../../src/rpc/debugImpl';
 import '../../src/rpc/walletImpl';
 import { createInjectedCkb, TypedEventClient, TypedRpcClient } from '../../src/injectedCkb';
 import { errors } from '@nexus-wallet/utils';
+
+// TODO: make parameter validation configurable
 jest.mock('../../src/rpc/schema');
 
 export interface RpcTestHelper {
