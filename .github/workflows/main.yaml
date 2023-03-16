@@ -16,9 +16,9 @@ jobs:
 
       - uses: ./.github/actions/install-deps
 
-      - name: Build packages
+      - name: Build libraries
         run: |
-          npm run build
+          npm run build:libs
           git diff --exit-code
 
       - name: Check TypeScript
@@ -51,8 +51,11 @@ jobs:
 
       - name: Build extension
         run: |
-          npm run build
+          npm run build:libs
+          npm run build:extension-chrome
           npm run -w @nexus-wallet/extension-chrome zip
-          npx auto shipit -vv
+
+      - name: Create Release
+        run: npx auto shipit -vv
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}

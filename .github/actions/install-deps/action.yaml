@@ -17,3 +17,15 @@ runs:
     - name: Install project dependencies and build
       shell: bash
       run: npm install
+
+    - name: Restore Lumos
+      uses: actions/cache@v3
+      id: restore_lumos
+      with:
+        path: 'lumos/packages/*/lib'
+        key: ${{ runner.os }}-${{ hashFiles('lumos/packages/*/src') }}
+
+    - name: Build lumos
+      if: steps.restore_lumos.outputs.cache-hit != 'true'
+      shell: bash
+      run: npm run build:lumos
