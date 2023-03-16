@@ -81,7 +81,6 @@ export async function loadSecp256k1ScriptDep(payload: { nodeUrl: string }): Prom
     HASH_TYPE: 'type',
     CODE_HASH: secp256k1TypeHash,
     INDEX: '0x0',
-    SHORT_ID: 0,
     TX_HASH: secp256k1DepTxHash,
     DEP_TYPE: 'depGroup',
   };
