@@ -58,6 +58,8 @@ Live Cells are the cells that are alive on the CKB chain, they can be spent by t
 
 ## Issue a transfer transaction with the Nexus Wallet
 
+We recommend you to read the step-by-step guide in the following section to get a better understanding of how to use the Nexus Wallet. But if you would like to jump into the code directly, you can check out the [online example](https://codesandbox.io/s/nexus-example-o91mgr?file=/index.ts).
+
 ### Step 1: Enable the Nexus Wallet
 
 Firstly, you need to enable the Nexus Wallet by calling the `wallet_enable` RPC.
@@ -112,10 +114,8 @@ const getLiveCellsRes = await window.ckb.request({
   params: {},
 });
 const liveCells: Cell[] = getLiveCellsRes.objects;
-const totalCapacity = liveCells.reduce((acc, cell) => acc.add(cell.cellOutput.capacity), BigInt(0));
-let txSkeleton = helpers.TransactionSkeleton({
-  cellProvider: new Indexer('https://testnet.ckb.dev'),
-});
+const totalCapacity = liveCells.reduce((acc, cell) => acc.add(cell.cellOutput.capacity), BI.from(0));
+let txSkeleton = helpers.TransactionSkeleton();
 // setup inputs
 txSkeleton = txSkeleton.update('inputs', (inputs) => {
   return inputs.concat(...liveCells);
