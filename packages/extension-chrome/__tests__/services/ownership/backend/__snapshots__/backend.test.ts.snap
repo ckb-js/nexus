@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`load secp256k1 cellDeps should backendUtils.loadSecp256k1ScriptDep be called with correct params 1`] = `
+{
+  "CODE_HASH": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+  "DEP_TYPE": "depGroup",
+  "HASH_TYPE": "type",
+  "INDEX": "0x0",
+  "TX_HASH": "0xf8de3bb47d055cdf460d93a2a6e1b05f7432f9777c8c474abf4eec1d4aee5d37",
+}
+`;

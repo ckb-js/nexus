@@ -1,26 +1,26 @@
 import { Script, Transaction } from '@ckb-lumos/lumos';
 import { createBackend } from '../../../../src/services/ownership/backend';
-import * as backendUtils from '../../../../src/services/ownership/backend/backendUtils';
 import fetchMock from 'jest-fetch-mock';
 
 describe('load secp256k1 cellDeps', () => {
+  beforeEach(() => {
+    fetchMock.disableMocks();
+  });
   it('should backendUtils.loadSecp256k1ScriptDep be called with correct params', async () => {
-    const mockUrl = 'mockUrl';
-    const backend = createBackend({ nodeUrl: mockUrl });
-    jest.spyOn(backendUtils, 'loadSecp256k1ScriptDep').mockResolvedValue({
-      CODE_HASH: '0x',
-      HASH_TYPE: 'type',
-      TX_HASH: '0x',
-      INDEX: '0x0',
-      DEP_TYPE: 'code',
-    });
-    await expect(backend.getSecp256k1Blake160ScriptConfig({ networkId: 'someId' })).resolves.not.toThrow();
-    await expect(backendUtils.loadSecp256k1ScriptDep).toBeCalledTimes(1);
-    await expect(backendUtils.loadSecp256k1ScriptDep).toBeCalledWith({ nodeUrl: mockUrl });
+    // TODO: replace it with an internal server
+    const SNAPSHOT_CKB_RPC = 'https://testnet.ckb.dev';
+    const backend = createBackend({ nodeUrl: SNAPSHOT_CKB_RPC });
+
+    const res = await backend.getSecp256k1Blake160ScriptConfig({ networkId: 'someId' });
+
+    expect(res).toMatchSnapshot();
   });
 });
 
 describe('hasHistory', () => {
+  beforeAll(() => {
+    fetchMock.enableMocks();
+  });
   afterEach(() => {
     fetchMock.resetMocks();
   });
@@ -35,6 +35,9 @@ describe('hasHistory', () => {
 });
 
 describe('resolveTx', () => {
+  beforeAll(() => {
+    fetchMock.enableMocks();
+  });
   afterEach(() => {
     fetchMock.resetMocks();
   });
@@ -49,6 +52,9 @@ describe('resolveTx', () => {
 });
 
 describe('getLiveCells', () => {
+  beforeAll(() => {
+    fetchMock.enableMocks();
+  });
   afterEach(() => {
     fetchMock.resetMocks();
   });
