@@ -98,6 +98,9 @@ describe('FullOwnership', () => {
       const db = createScriptInfoDb({ storage, networkId: (await configService.getSelectedNetwork()).id });
       await db.setAll(scriptInfos);
     });
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
     it('should get the on-chain external locks of full-ownership', async () => {
       await expect(ownershipService.getOnChainLocks({})).resolves.toEqual({
         cursor: '2',
