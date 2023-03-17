@@ -9,7 +9,7 @@ import {
   ZGetOnChainLocksPayload,
   ZSignDataPayload,
   ZSignTransactionPayload,
-} from '..';
+} from '../../../src/rpc/schema';
 
 describe('Rpc schema bind functions', () => {
   it('createRpcMethodSchema', () => {

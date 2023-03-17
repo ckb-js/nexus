@@ -1,5 +1,5 @@
 import { ZodType } from 'zod';
-import { ZBytesLike, ZHash, ZHexNumber, ZHexString } from '../primitives';
+import { ZBytesLike, ZHash, ZHexNumber, ZHexString } from '../../../src/rpc/schema/primitives';
 
 describe('primitive type', () => {
   function expectParseSuccess<T>(schema: ZodType<T>, value: unknown) {
