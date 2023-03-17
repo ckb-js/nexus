@@ -1,5 +1,4 @@
 //@ts-nocheck
-/* istanbul ignore next */
 export class TimeoutError extends Error {
   constructor(message?: string) {
     super(message);
@@ -11,7 +10,6 @@ export class TimeoutError extends Error {
 An error to be thrown when the request is aborted by AbortController.
 DOMException is thrown instead of this Error when DOMException is available.
 */
-/* istanbul ignore next */
 export class AbortError extends Error {
   constructor(message: string) {
     super();
@@ -23,21 +21,18 @@ export class AbortError extends Error {
 /**
 TODO: Remove AbortError and just throw DOMException when targeting Node 18.
 */
-/* istanbul ignore next */
 const getDOMException = (errorMessage: string) =>
   globalThis.DOMException === undefined ? new AbortError(errorMessage) : new DOMException(errorMessage);
 
 /**
 TODO: Remove below function and just 'reject(signal.reason)' when targeting Node 18.
 */
-/* istanbul ignore next */
 const getAbortedReason = (signal) => {
   const reason = signal.reason === undefined ? getDOMException('This operation was aborted.') : signal.reason;
 
   return reason instanceof Error ? reason : getDOMException(reason);
 };
 
-/* istanbul ignore next */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
 export default function pTimeout<T>(promise: Promise<T>, options: any): Promise<T> {
   const { milliseconds, fallback, message, customTimers = { setTimeout, clearTimeout } } = options;

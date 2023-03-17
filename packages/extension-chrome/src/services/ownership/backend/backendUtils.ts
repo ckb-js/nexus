@@ -4,8 +4,8 @@ import { ScriptConfig } from '@ckb-lumos/config-manager';
 import { JSONRPCRequest, JSONRPCResponse } from 'json-rpc-2.0';
 import { RPC as RpcType } from '@ckb-lumos/rpc/lib/types/rpc';
 import { NexusCommonErrors } from '../../../errors';
-import pTimeout from './p-timeout';
-import pRetry from './p-retry';
+import pTimeout from './thirdpartyLib/p-timeout';
+import pRetry from './thirdpartyLib/p-retry';
 
 type Order = 'asc' | 'desc';
 type Limit = HexNumber;

@@ -3,7 +3,6 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import retry from 'retry';
 
-/* istanbul ignore next */
 const networkErrorMsgs = new Set([
   'Failed to fetch', // Chrome
   'NetworkError when attempting to fetch resource.', // Firefox
@@ -12,7 +11,6 @@ const networkErrorMsgs = new Set([
   'fetch failed', // Undici (Node.js)
 ]);
 
-/* istanbul ignore next */
 export class AbortError extends Error {
   constructor(message: any) {
     super();
@@ -29,7 +27,6 @@ export class AbortError extends Error {
     this.message = message;
   }
 }
-/* istanbul ignore next */
 const decorateErrorWithCounts = (error, attemptNumber, options) => {
   // Minus 1 from attemptNumber because the first attempt does not count as a retry
   const retriesLeft = options.retries - (attemptNumber - 1);
@@ -38,12 +35,9 @@ const decorateErrorWithCounts = (error, attemptNumber, options) => {
   error.retriesLeft = retriesLeft;
   return error;
 };
-/* istanbul ignore next */
 const isNetworkError = (errorMessage) => networkErrorMsgs.has(errorMessage);
-/* istanbul ignore next */
 const getDOMException = (errorMessage) =>
   globalThis.DOMException === undefined ? new Error(errorMessage) : new DOMException(errorMessage);
-/* istanbul ignore next */
 export default async function pRetry(input, options) {
   return new Promise((resolve, reject) => {
     options = {
