@@ -18,6 +18,10 @@ describe('RPC wallet_enable', () => {
     jest.spyOn(platformService, 'requestGrant').mockImplementation(() => Promise.resolve());
     await expect(request('wallet_enable')).resolves.not.toThrowError();
   });
+  it('should wallet_enable return nickname', async () => {
+    const { request } = createTestRpcServer();
+    await expect(request('wallet_enable')).resolves.toEqual({ nickname: 'Nexus Dev' });
+  });
 });
 describe('RPC wallet_fullOwnership', () => {
   it('should request wallet_fullOwnership_getOffChainLocks call ownership service with default parameter', async () => {
