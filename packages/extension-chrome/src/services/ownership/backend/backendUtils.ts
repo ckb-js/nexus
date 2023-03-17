@@ -110,20 +110,20 @@ function createRpcClient(url: string, options?: RpcClientOptions): RpcClient {
       },
     });
     const retryRunner = async () => {
-      const res = await pTimeout(fetchPromise, {
-        milliseconds: options?.timeout || 5_000,
-      });
-
+      const res = await fetchPromise;
       // Abort retrying if the resource doesn't exist
       if (res.status >= 300) {
         /* istanbul ignore next */
         throw NexusCommonErrors.RequestCkbFailed(res);
       }
-
       return res.json();
     };
 
-    const res = await pRetry(retryRunner, { retries: options?.maxRetries || 5 });
+    const retryPromise = pRetry(retryRunner, { retries: options?.maxRetries || 5 });
+    const res = await pTimeout(retryPromise, {
+      milliseconds: options?.timeout || 5_000,
+    });
+
     return res as Promise<JSONRPCResponse | JSONRPCResponse[]>;
   }
 
