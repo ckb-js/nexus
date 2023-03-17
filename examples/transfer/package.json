@@ -1,5 +1,5 @@
 {
-  "name": "nexus-example",
+  "name": "@nexus-wallet/example-transfer",
   "version": "1.0.0",
   "description": "",
   "main": "index.ts",
