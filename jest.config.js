@@ -3,6 +3,6 @@ module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   projects: ['<rootDir>/packages/*'],
-  coveragePathIgnorePatterns: ['lumos/*', 'lib', 'thirdpartyLib'],
+  coveragePathIgnorePatterns: ['lumos/*', 'lib'],
   testPathIgnorePatterns: ['lumos/*'],
 };
