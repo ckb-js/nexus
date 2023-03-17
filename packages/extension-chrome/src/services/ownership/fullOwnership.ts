@@ -144,7 +144,7 @@ export function createFullOwnershipService({
         payload.lock,
       );
 
-      const prefixedData = `${SIGN_DATA_MAGIC}${bytes.hexify(payload.data).slice(2)}`;
+      const prefixedData = bytes.concat(SIGN_DATA_MAGIC, payload.data);
       const signature = await keystoreService.signMessage({
         message: prefixedData,
         password,
