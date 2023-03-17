@@ -1,5 +1,4 @@
 import { Cell, HexNumber, HexString, OutPoint, Script, utils } from '@ckb-lumos/lumos';
-import type { Paginate } from '@nexus-wallet/types';
 import { asserts } from '@nexus-wallet/utils';
 import { ScriptConfig } from '@ckb-lumos/config-manager';
 import { JSONRPCRequest, JSONRPCResponse } from 'json-rpc-2.0';
@@ -8,10 +7,10 @@ import { NexusCommonErrors } from '../../../errors';
 import pTimeout from './p-timeout';
 import pRetry from './p-retry';
 
-export type Order = 'asc' | 'desc';
-export type Limit = HexNumber;
-export type CursorType = HexString | null;
-export type RpcQueryType = [
+type Order = 'asc' | 'desc';
+type Limit = HexNumber;
+type CursorType = HexString | null;
+type RpcQueryType = [
   {
     script: RpcType.Script;
     script_type: 'lock' | 'type';
@@ -21,9 +20,8 @@ export type RpcQueryType = [
   Limit,
   CursorType?,
 ];
-export type GetLiveCellsResult = Paginate<Cell> & { lastLock?: Script };
 
-export const toQueryParam = (payload: {
+const toQueryParam = (payload: {
   lock: Script;
   cursor?: CursorType;
   order?: Order;
@@ -43,18 +41,18 @@ export const toQueryParam = (payload: {
   payload.cursor || null,
 ];
 
-export const toScript = (rpcScript: RpcType.Script): Script => ({
+const toScript = (rpcScript: RpcType.Script): Script => ({
   codeHash: rpcScript.code_hash,
   hashType: rpcScript.hash_type,
   args: rpcScript.args,
 });
 
-export const toOutPoint = (rpcOutPoint: RpcType.OutPoint): OutPoint => ({
+const toOutPoint = (rpcOutPoint: RpcType.OutPoint): OutPoint => ({
   txHash: rpcOutPoint.tx_hash,
   index: rpcOutPoint.index,
 });
 
-export const toCell = (rpcIndexerCell: RpcType.IndexerCell): Cell => ({
+const toCell = (rpcIndexerCell: RpcType.IndexerCell): Cell => ({
   cellOutput: {
     capacity: rpcIndexerCell.output.capacity,
     lock: toScript(rpcIndexerCell.output.lock),
@@ -65,7 +63,7 @@ export const toCell = (rpcIndexerCell: RpcType.IndexerCell): Cell => ({
   blockNumber: rpcIndexerCell.block_number,
 });
 
-export async function loadSecp256k1ScriptDep(payload: { nodeUrl: string }): Promise<ScriptConfig> {
+async function loadSecp256k1ScriptDep(payload: { nodeUrl: string }): Promise<ScriptConfig> {
   const genesisBlock = await createRpcClient(payload.nodeUrl).request<RpcType.Block>('get_block_by_number', ['0x0']);
   if (!genesisBlock) throw new Error("can't load genesis block");
   const secp256k1DepTxHash = genesisBlock.transactions[1].hash;
@@ -93,7 +91,12 @@ type RpcClient = {
   batchRequest: <Result = unknown, Params = unknown>(method: string, batchParams: Params[]) => Promise<Result[]>;
 };
 
-export function createRpcClient(url: string): RpcClient {
+type RpcClientOptions = {
+  timeout?: number; // in milliseconds
+  maxRetries?: number;
+};
+
+function createRpcClient(url: string, options?: RpcClientOptions): RpcClient {
   // auto-increment id
   let jsonRpcId = 0;
 
@@ -108,7 +111,7 @@ export function createRpcClient(url: string): RpcClient {
     });
     const retryRunner = async () => {
       const res = await pTimeout(fetchPromise, {
-        milliseconds: 5_000,
+        milliseconds: options?.timeout || 5_000,
       });
 
       // Abort retrying if the resource doesn't exist
@@ -120,7 +123,7 @@ export function createRpcClient(url: string): RpcClient {
       return res.json();
     };
 
-    const res = await pRetry(retryRunner, { retries: 5 });
+    const res = await pRetry(retryRunner, { retries: options?.maxRetries || 5 });
     return res as Promise<JSONRPCResponse | JSONRPCResponse[]>;
   }
 
@@ -158,3 +161,5 @@ export function createRpcClient(url: string): RpcClient {
 
   return { request, batchRequest };
 }
+
+export { createRpcClient, loadSecp256k1ScriptDep, toCell, toScript, toQueryParam };

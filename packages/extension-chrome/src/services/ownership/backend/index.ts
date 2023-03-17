@@ -8,14 +8,9 @@ import chunk from 'lodash/chunk';
 import isEqual from 'lodash/isEqual';
 import { RPC as RpcType } from '@ckb-lumos/rpc/lib/types/rpc';
 import { NexusCommonErrors } from '../../../errors';
-import {
-  createRpcClient,
-  loadSecp256k1ScriptDep,
-  GetLiveCellsResult,
-  toQueryParam,
-  toCell,
-  toScript,
-} from './backendUtils';
+import { createRpcClient, loadSecp256k1ScriptDep, toQueryParam, toCell, toScript } from './backendUtils';
+
+type GetLiveCellsResult = Paginate<Cell> & { lastLock?: Script };
 
 export interface Backend {
   getSecp256k1Blake160ScriptConfig(payload: { networkId: string }): Promise<ScriptConfig>;
