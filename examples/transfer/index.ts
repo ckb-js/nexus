@@ -5,7 +5,7 @@ import { connectWallet, getAnAddress, buildTransferTxSkeleton, signTx, sendTx } 
 if (!window.ckb) {
   alert('please install Nexus at first');
 }
-
+// prettier-ignore
 async function main() {
   /**
    *  Step 1: connect wallet
@@ -17,6 +17,7 @@ async function main() {
    */
   // uncomment next line to connect Nexus
   // await connectWallet();
+
   /**
    *  Step 2: Get an address and receive some testnet CKB
    *
@@ -28,6 +29,7 @@ async function main() {
    */
   // uncomment next line to get an address
   // await getAnAddress();
+
   /**
    *  Step 3: Build a transfer transaction
    *
@@ -37,6 +39,7 @@ async function main() {
    */
   // uncomment next line to build a transfer transaction
   // const txSkeleton = await buildTransferTxSkeleton();
+
   /**
    *  Step 4: Sign the transaction
    *
@@ -47,8 +50,11 @@ async function main() {
    */
   // uncomment next line to sign the transaction
   // const tx = await signTx(txSkeleton);
+  
   /**
-   *  Step 4: Sign the transaction
+   *  Step 5: Send the transaction on CKB testnet
+   *
+   *  After you have signed the transaction, you can send the transaction on the CKB testnet if you would like to.
    */
   // uncomment next lines to send tx on the CKB chain
   // await sendTx(tx);

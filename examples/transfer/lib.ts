@@ -2,6 +2,7 @@
 import { Cell, BI, helpers, RPC } from '@ckb-lumos/lumos';
 import { Transaction, commons } from '@ckb-lumos/lumos';
 import { Script } from '@ckb-lumos/base';
+import { config } from '@ckb-lumos/lumos';
 
 export const connectWallet = async (): Promise<unknown> => {
   return await window.ckb.request({ method: 'wallet_enable', params: [] });
@@ -14,7 +15,6 @@ export const getAnAddress = async (): Promise<string> => {
   })) as Script[];
   const lock = offChainLocks[0];
   const address = helpers.encodeToAddress(lock);
-
   console.log('got an address:', address);
   return address;
 };
@@ -37,17 +37,16 @@ export const buildTransferTxSkeleton = async (): Promise<helpers.TransactionSkel
     method: 'wallet_fullOwnership_getLiveCells',
     params: {},
   });
-  const liveCells: Cell[] = (getLiveCellsRes as any).objects[0];
-  const totalCapacity = liveCells.reduce((acc, cell) => acc.add(cell.cellOutput.capacity), BI.from(0));
-
-  console.log('CKBs collected:' + totalCapacity.div(10 ** 8).toString());
+  // find some cell that has enough capacity(164 CKB)
+  const liveCell: Cell = (getLiveCellsRes as any).objects.find((cell: Cell) =>
+    BI.from(cell.cellOutput.capacity).gte(BI.from(165).mul(10 ** 8)),
+  );
+  const cellCapacity = BI.from(liveCell.cellOutput.capacity);
+  console.log('CKBs collected:' + cellCapacity.div(10 ** 8).toString() + ' CKBs');
   let txSkeleton = helpers.TransactionSkeleton();
   // setup inputs
-  txSkeleton = await commons.common.setupInputCell(txSkeleton, liveCells[0]);
-  // add other live cells to inputs
-  txSkeleton = txSkeleton.update('inputs', (inputs) => {
-    return inputs.concat(liveCells.slice(1));
-  });
+  config.initializeConfig(config.predefined.AGGRON4);
+  txSkeleton = await commons.common.setupInputCell(txSkeleton, liveCell);
   // setup outputs
   txSkeleton = txSkeleton.update('outputs', (outputs) => {
     return outputs.clear().concat(
@@ -64,7 +63,7 @@ export const buildTransferTxSkeleton = async (): Promise<helpers.TransactionSkel
       // receive change CKB
       {
         cellOutput: {
-          capacity: totalCapacity
+          capacity: cellCapacity
             .sub(BI.from(100).mul(10 ** 8))
             .sub(1000) // 1000 shannons for tx fee
             .toHexString(),
