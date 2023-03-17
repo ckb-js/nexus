@@ -4,9 +4,8 @@ import { JSONRPCRequest, JSONRPCResponse, JSONRPCServer } from 'json-rpc-2.0';
 import { whitelistMiddleware } from './middlewares/whitelistMiddleware';
 import { createLogger, errors } from '@nexus-wallet/utils';
 import { errorMiddleware } from './middlewares/errorMiddleware';
-import { z, ZodError, ZodType } from 'zod';
-import { NexusError } from '../errors';
-import { fromZodError } from 'zod-validation-error';
+import { ZodType } from 'zod';
+import { bindSchemaValidator, createRpcMethodSchema } from './schema';
 
 export const methods: Record<string, (...args: unknown[]) => unknown> = {};
 export const logger = createLogger();
@@ -25,21 +24,11 @@ export function addMethodValidator<TKey extends keyof RpcMethods, TArg extends R
   argSchema: RpcMethods[TKey]['params'] extends TArg ? ZodType<TArg> : never,
 ): void {
   if (!methods[method as string]) {
-    errors.throwError(`Method: ${method} is not registered yet. Please call \`addMethod\` first.`);
+    errors.throwError(`Method ${method} is not registered yet. Please call \`addMethod\` first.`);
   }
 
-  const schema = z.function().args(argSchema, z.any()).returns(z.any());
-  const handler: RPCMethodHandler<TKey> = async (param, context) => {
-    const impl = schema.implement(methods[method as string]);
-    try {
-      return await impl(param as never, context);
-    } catch (e) {
-      if (e instanceof ZodError) {
-        throw NexusError.create({ message: fromZodError(e).message, data: e });
-      }
-      throw e;
-    }
-  };
+  const schema = createRpcMethodSchema(argSchema);
+  const handler = bindSchemaValidator(schema, methods[method as string] as RPCMethodHandler<TKey>);
   Object.assign(methods, {
     [method]: handler,
   });

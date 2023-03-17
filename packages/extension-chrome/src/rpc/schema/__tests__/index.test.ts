@@ -1,26 +1,54 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Transaction } from '@ckb-lumos/lumos';
-// import { bindSchemaValidator } from '..';
-import { RpcMethods } from '../../types';
+import { z, ZodError, ZodType } from 'zod';
+import {
+  bindSchemaValidator,
+  createRpcMethodSchema,
+  ZGetLiveCellsPayload,
+  ZGetOffChainLocksPayload,
+  ZGetOnChainLocksPayload,
+  ZSignDataPayload,
+  ZSignTransactionPayload,
+} from '..';
 
-const bindSchemaValidator: any = jest.fn();
-
-describe.skip('Rpc schema validator', () => {
-  function getWrappedHandler(method: keyof RpcMethods) {
-    return bindSchemaValidator(method, handler) as (...args: any[]) => any;
-  }
-
-  const handler = jest.fn();
-  beforeEach(() => {
-    handler.mockClear();
+describe('Rpc schema bind functions', () => {
+  it('createRpcMethodSchema', () => {
+    const schema = createRpcMethodSchema(z.object({ host: z.string(), value: z.string() }));
+    const handler = schema.implement(jest.fn().mockImplementation((param) => param));
+    expect(handler({ host: 'localhost', value: '123' }, undefined)).toEqual({ host: 'localhost', value: '123' });
+    expect(() => handler({ host: 'localhost', volume: '123', extra: 'extra' } as any, undefined)).toThrowError(
+      ZodError,
+    );
   });
+
+  it('bindSchemaValidator', async () => {
+    const schema = createRpcMethodSchema(z.object({ host: z.string(), value: z.string() }));
+    const handler = bindSchemaValidator(
+      schema,
+      jest.fn().mockImplementation((param) => param),
+    );
+    await expect(handler({ host: 'localhost', value: '123' }, undefined)).resolves.toEqual({
+      host: 'localhost',
+      value: '123',
+    });
+    await expect(() =>
+      handler({ host: 'localhost', volume: '123', extra: 'extra' } as any, undefined),
+    ).rejects.toThrowError(/Validation error: Required at "value"/);
+  });
+});
+
+describe('Rpc schema validate', () => {
+  const handler = jest.fn().mockImplementation((params) => params);
+  function bindMethodWithMockHandler(schema: ZodType<any>) {
+    const methodSchema = createRpcMethodSchema(schema);
+    const wrapped = bindSchemaValidator(methodSchema, handler);
+    return wrapped as (params: Parameters<typeof wrapped>[0]) => ReturnType<typeof wrapped>;
+  }
 
   it('wallet_fullOwnership_signData', async () => {
     handler.mockReturnValue('signed message');
-    const wrappedHandler = getWrappedHandler('wallet_fullOwnership_signData');
-
-    await expect(wrappedHandler({ data: '0x1234' })).rejects.toThrowError(/Invalid params/);
-
+    const wrappedHandler = bindMethodWithMockHandler(ZSignDataPayload);
+    await expect(wrappedHandler({ data: '0x1234' })).rejects.toThrowError(/Validation error: Required at "lock"/);
     await expect(
       wrappedHandler({
         data: '0x1234',
@@ -28,7 +56,6 @@ describe.skip('Rpc schema validator', () => {
       }),
     ).resolves.toBe('signed message');
   });
-
   it('wallet_fullOwnership_signTransaction', async () => {
     const tx = {
       cellDeps: [
@@ -96,40 +123,42 @@ describe.skip('Rpc schema validator', () => {
       ],
     } as Transaction;
     handler.mockResolvedValue([]);
-    const wrappedHandler = getWrappedHandler('wallet_fullOwnership_signTransaction');
-    // wrappedHandler('wallet_fullOwnership_signTransaction', { tx });
+    const wrappedHandler = bindMethodWithMockHandler(ZSignTransactionPayload);
     await expect(wrappedHandler({ tx })).resolves.toEqual([]);
-
     tx.inputs[0].since = 'Wrong since';
-    await expect(wrappedHandler({ tx })).rejects.toThrow('Invalid params');
+    await expect(wrappedHandler({ tx })).rejects.toThrow(
+      'Validation error: Invalid hex number at "tx.inputs[0].since"',
+    );
   });
-
   it('wallet_fullOwnership_getLiveCells', async () => {
     handler.mockReturnValue([]);
-    const wrappedHandler = getWrappedHandler('wallet_fullOwnership_getLiveCells');
+    const wrappedHandler = bindMethodWithMockHandler(ZGetLiveCellsPayload);
     await expect(wrappedHandler({})).resolves.toEqual([]);
     await expect(wrappedHandler({ cursor: 'To be continued...' })).resolves.toEqual([]);
-    await expect(wrappedHandler({ cursor: 0 } as any)).rejects.toThrow('Invalid params');
+    await expect(wrappedHandler({ cursor: 0 } as any)).rejects.toThrow(
+      'Validation error: Expected string, received number at "cursor"',
+    );
   });
-
   it('wallet_fullOwnership_getOffChainLocks', async () => {
     handler.mockReturnValue('0x');
-    const wrappedHandler = getWrappedHandler('wallet_fullOwnership_getOffChainLocks');
+    const wrappedHandler = bindMethodWithMockHandler(ZGetOffChainLocksPayload);
     await expect(wrappedHandler({})).resolves.toBe('0x');
     await expect(wrappedHandler({ change: 'external' })).resolves.toBe('0x');
-    await expect(wrappedHandler({ change: 'Ape' as any })).rejects.toThrow('Invalid params');
+    await expect(wrappedHandler({ change: 'Ape' as any })).rejects.toThrow(
+      `Validation error: Invalid enum value. Expected 'external' | 'internal', received 'Ape' at "change"`,
+    );
   });
-
   it('wallet_fullOwnership_getOnChainLocks', async () => {
     handler.mockReturnValue('0x');
-    const wrappedHandler = getWrappedHandler('wallet_fullOwnership_getOnChainLocks');
-
+    const wrappedHandler = bindMethodWithMockHandler(ZGetOnChainLocksPayload);
     await expect(wrappedHandler({})).resolves.toBe('0x');
-
     await expect(wrappedHandler({ change: 'external' })).resolves.toBe('0x');
-    await expect(wrappedHandler({ change: 'Ape' as any })).rejects.toThrow('Invalid params');
-
+    await expect(wrappedHandler({ change: 'Ape' as any })).rejects.toThrow(
+      `Validation error: Invalid enum value. Expected 'external' | 'internal', received 'Ape' at "change"`,
+    );
     await expect(wrappedHandler({ cursor: 'To be continued...' })).resolves.toEqual('0x');
-    await expect(wrappedHandler({ cursor: 0 } as any)).rejects.toThrow('Invalid params');
+    await expect(wrappedHandler({ cursor: 0 } as any)).rejects.toThrow(
+      'Validation error: Expected string, received number at "cursor"',
+    );
   });
 });
