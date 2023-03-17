@@ -31,7 +31,6 @@ export function bindSchemaValidator<T>(schema: ZRpcMethodSchema<T>, handler: ZRp
     try {
       return await impl(param, context);
     } catch (e) {
-      // TODO: format human readable error message of zod error
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const argumentError: ZodError | undefined = (e as any).errors[0]?.argumentsError;
       if (e instanceof ZodError && argumentError) {

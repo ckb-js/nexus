@@ -17,7 +17,7 @@ export function addMethod<K extends keyof RpcMethods>(method: K, handler: RPCMet
 /**
  * add a zod schema to validate the method's arguments
  * @param method the method name, must be the key of {@link RpcMethods}
- * @param argSchema the schema of the method's first argument
+ * @param argSchema the schema of the method's first argument.When it's type is `never`, it means the schema is not same as `RpcMethods[TKey]['params']`
  */
 export function addMethodValidator<TKey extends keyof RpcMethods, TArg extends RpcMethods[TKey]['params']>(
   method: TKey,
