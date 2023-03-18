@@ -4,7 +4,7 @@ import { JSONRPCRequest, JSONRPCResponse, JSONRPCServer } from 'json-rpc-2.0';
 import { whitelistMiddleware } from './middlewares/whitelistMiddleware';
 import { createLogger, errors } from '@nexus-wallet/utils';
 import { errorMiddleware } from './middlewares/errorMiddleware';
-import { ZodType } from 'zod';
+import { z, ZodType } from 'zod';
 import { parameterValidateMiddleware } from './middlewares/parameterValidateMiddleware';
 
 export const methods: Record<string, (...args: unknown[]) => unknown> = {};
@@ -16,14 +16,15 @@ export function addMethod<K extends keyof RpcMethods>(method: K, handler: RPCMet
   Object.assign(methods, { [method]: handler });
 }
 
+type ObjectEquals<X, Y> = X extends Y ? (Y extends X ? true : false) : false;
 /**
  * add a zod schema to validate the method's arguments
  * @param method the method name, must be the key of {@link RpcMethods}
  * @param argSchema the schema of the method's first argument.When it's type is `never`, it means the schema is not same as `RpcMethods[TKey]['params']`
  */
-export function addMethodValidator<TKey extends keyof RpcMethods, TArg extends RpcMethods[TKey]['params']>(
+export function addMethodValidator<TKey extends keyof RpcMethods, TArg extends ZodType>(
   method: TKey,
-  argSchema: RpcMethods[TKey]['params'] extends TArg ? ZodType<TArg> : never,
+  argSchema: ObjectEquals<RpcMethods[TKey]['params'], z.infer<TArg>> extends true ? TArg : never,
 ): void {
   if (!methods[method as string]) {
     errors.throwError(`Method ${method} is not registered yet. Please call \`addMethod\` first.`);

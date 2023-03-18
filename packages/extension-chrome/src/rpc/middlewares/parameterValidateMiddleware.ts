@@ -21,10 +21,5 @@ export const parameterValidateMiddleware: JSONRPCServerMiddleware<ServerParams> 
   }
   const { error } = validateResult;
 
-  return createJSONRPCErrorResponse(
-    request.id!,
-    JSONRPCErrorCode.InvalidParams,
-    `Validation error: ${fromZodError(error).message}`,
-    error,
-  );
+  return createJSONRPCErrorResponse(request.id!, JSONRPCErrorCode.InvalidParams, fromZodError(error).message, error);
 };

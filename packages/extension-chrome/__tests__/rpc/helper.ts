@@ -1,11 +1,13 @@
 import './_patch';
 import { InjectedCkb, Storage } from '@nexus-wallet/types';
-import { JSONRPCClient } from 'json-rpc-2.0';
+import { JSONRPCClient, JSONRPCServerMiddleware } from 'json-rpc-2.0';
 import { createModulesFactory, ModuleProviderMap, ModulesFactory } from '../../src/services/factory';
 import { RpcMethods } from '../../src/rpc/types';
 import { mockPlatformService, mockStorage } from '../helpers';
 import { createInjectedCkb, TypedEventClient, TypedRpcClient } from '../../src/injectedCkb';
 import { errors } from '@nexus-wallet/utils';
+
+const bypassMiddleware: JSONRPCServerMiddleware<unknown> = (next, ...rest) => next(...rest);
 
 export interface RpcTestHelper {
   /**
@@ -36,20 +38,17 @@ function initCreateServerFactory(config: MiddlewareConfig): CreateServerFactory 
   jest.isolateModules(() => {
     require('../../src/rpc/walletImpl');
     require('../../src/rpc/debugImpl');
-
     jest.mock('../../src/rpc/middlewares/whitelistMiddleware');
     jest.mock('../../src/rpc/middlewares/parameterValidateMiddleware');
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const bypass = (next: any, ...rest: any[]) => next(...rest);
-    const whitelistMiddleware = require('../../src/rpc/middlewares/whitelistMiddleware')
-      .whitelistMiddleware as jest.Mock;
-    const parameterValidateMiddleware = require('../../src/rpc/middlewares/parameterValidateMiddleware')
-      .parameterValidateMiddleware as jest.Mock;
+    const whitelistMiddleware: jest.Mock = require('../../src/rpc/middlewares/whitelistMiddleware').whitelistMiddleware;
+    const parameterValidateMiddleware: jest.Mock =
+      require('../../src/rpc/middlewares/parameterValidateMiddleware').parameterValidateMiddleware;
+
     if (!config.whitelist) {
-      whitelistMiddleware.mockImplementation(bypass);
+      whitelistMiddleware.mockImplementation(bypassMiddleware);
     }
     if (!config.parameterValidate) {
-      parameterValidateMiddleware.mockImplementation(bypass);
+      parameterValidateMiddleware.mockImplementation(bypassMiddleware);
     }
 
     createServer = require('../../src/rpc/server').createServer;
