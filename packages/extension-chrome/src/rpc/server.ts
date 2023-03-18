@@ -5,9 +5,11 @@ import { whitelistMiddleware } from './middlewares/whitelistMiddleware';
 import { createLogger, errors } from '@nexus-wallet/utils';
 import { errorMiddleware } from './middlewares/errorMiddleware';
 import { ZodType } from 'zod';
-import { bindSchemaValidator, createRpcMethodSchema } from './schema';
+import { parameterValidateMiddleware } from './middlewares/parameterValidateMiddleware';
 
 export const methods: Record<string, (...args: unknown[]) => unknown> = {};
+export const validators: Record<string, ZodType<unknown>> = {};
+
 export const logger = createLogger();
 
 export function addMethod<K extends keyof RpcMethods>(method: K, handler: RPCMethodHandler<K>): void {
@@ -26,11 +28,12 @@ export function addMethodValidator<TKey extends keyof RpcMethods, TArg extends R
   if (!methods[method as string]) {
     errors.throwError(`Method ${method} is not registered yet. Please call \`addMethod\` first.`);
   }
+  if (!methods[method as string]) {
+    console.warn(`Method ${method} is already registered with a schema. The new schema will override it`);
+  }
 
-  const schema = createRpcMethodSchema(argSchema);
-  const handler = bindSchemaValidator(schema, methods[method as string] as RPCMethodHandler<TKey>);
-  Object.assign(methods, {
-    [method]: handler,
+  Object.assign(validators, {
+    [method]: argSchema,
   });
 }
 
@@ -49,6 +52,7 @@ export function createServer<Sender>(factory: ModulesFactory): NexusRpcServer<Se
   const server = new JSONRPCServer<ServerParams>();
   server.applyMiddleware(errorMiddleware);
   server.applyMiddleware(whitelistMiddleware);
+  server.applyMiddleware(parameterValidateMiddleware);
 
   const registered = Object.keys(methods);
   logger.info('Methods has been registered: ', registered);

@@ -3,19 +3,9 @@ import { InjectedCkb, Storage } from '@nexus-wallet/types';
 import { JSONRPCClient } from 'json-rpc-2.0';
 import { createModulesFactory, ModuleProviderMap, ModulesFactory } from '../../src/services/factory';
 import { RpcMethods } from '../../src/rpc/types';
-import { mockPlatformService, mockStorage, MOCK_PLATFORM_URL } from '../helpers';
+import { mockPlatformService, mockStorage } from '../helpers';
 import { createInjectedCkb, TypedEventClient, TypedRpcClient } from '../../src/injectedCkb';
 import { errors } from '@nexus-wallet/utils';
-
-function initMethods(parameterValidation = false) {
-  const server = jest.requireActual<typeof import('../../src/rpc/server')>('../../src/rpc/server');
-  const addMethodValidator = jest.spyOn(server, 'addMethodValidator');
-  if (!parameterValidation) {
-    addMethodValidator.mockImplementation();
-  }
-  jest.requireActual('../../src/rpc/walletImpl');
-  jest.requireActual('../../src/rpc/debugImpl');
-}
 
 export interface RpcTestHelper {
   /**
@@ -33,27 +23,59 @@ export interface RpcTestHelper {
   factory: ModulesFactory;
 }
 
+type MiddlewareConfig = {
+  whitelist?: boolean;
+  parameterValidate?: boolean;
+};
+
+type CreateServerFactory = typeof import('../../src/rpc/server').createServer;
+
+function initCreateServerFactory(config: MiddlewareConfig): CreateServerFactory {
+  let createServer!: CreateServerFactory;
+
+  jest.isolateModules(() => {
+    require('../../src/rpc/walletImpl');
+    require('../../src/rpc/debugImpl');
+
+    jest.mock('../../src/rpc/middlewares/whitelistMiddleware');
+    jest.mock('../../src/rpc/middlewares/parameterValidateMiddleware');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const bypass = (next: any, ...rest: any[]) => next(...rest);
+    const whitelistMiddleware = require('../../src/rpc/middlewares/whitelistMiddleware')
+      .whitelistMiddleware as jest.Mock;
+    const parameterValidateMiddleware = require('../../src/rpc/middlewares/parameterValidateMiddleware')
+      .parameterValidateMiddleware as jest.Mock;
+    if (!config.whitelist) {
+      whitelistMiddleware.mockImplementation(bypass);
+    }
+    if (!config.parameterValidate) {
+      parameterValidateMiddleware.mockImplementation(bypass);
+    }
+
+    createServer = require('../../src/rpc/server').createServer;
+  });
+
+  return createServer;
+}
+
+type Payload<S, P> = Partial<ModuleProviderMap<S, P>> & {
+  middlewareConfig?: MiddlewareConfig;
+};
+
 /**
  * create a test RPC server with initialized storage
  * @param payload
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function createTestRpcServer<S = any, P = any>(
-  payload: Partial<ModuleProviderMap<S, P>> & { parameterValidation?: boolean; skipWhitelist?: boolean } = {},
-): RpcTestHelper {
+export function createTestRpcServer<S = any, P = any>(payload: Payload<S, P> = {}): RpcTestHelper {
   const {
     storage = () => mockStorage as Storage<S>,
     platform = () => mockPlatformService,
-    parameterValidation,
-    skipWhitelist,
+    middlewareConfig = { whitelist: true, parameterValidate: true },
     ...modules
   } = payload;
-  let createServer = jest.requireActual('../../src/rpc/server').createServer;
 
-  jest.isolateModules(() => {
-    createServer = jest.requireActual('../../src/rpc/server').createServer;
-    initMethods(parameterValidation);
-  });
+  const createServer = initCreateServerFactory(middlewareConfig);
 
   const factory = createModulesFactory({ storage, platform, ...modules });
   const server = createServer(factory);
@@ -78,12 +100,6 @@ export function createTestRpcServer<S = any, P = any>(
   const request: RpcTestHelper['request'] = (method, params) => {
     return client.request(String(method), params);
   };
-
-  if (skipWhitelist) {
-    jest
-      .spyOn(factory.get('configService'), 'getWhitelist')
-      .mockReturnValue([{ host: new URL(MOCK_PLATFORM_URL).host, favicon: '' }]);
-  }
 
   return { request, factory, ckb };
 }

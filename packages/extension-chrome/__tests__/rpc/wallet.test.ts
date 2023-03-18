@@ -21,9 +21,9 @@ describe('RPC wallet_enable', () => {
 });
 
 describe('RPC wallet_fullOwnership', () => {
-  let whitelistBypassServer = createTestRpcServer({ skipWhitelist: true });
+  let whitelistBypassServer: ReturnType<typeof createTestRpcServer>;
   beforeEach(() => {
-    whitelistBypassServer = createTestRpcServer({ skipWhitelist: true });
+    whitelistBypassServer = createTestRpcServer({ middlewareConfig: { whitelist: false } });
   });
 
   it('should request wallet_fullOwnership_getOffChainLocks call ownership service with default parameter', async () => {

@@ -3,6 +3,9 @@ import { createInMemoryStorage } from '../../src/services/storage';
 import { errorMiddleware } from '../../src/rpc/middlewares/errorMiddleware';
 import { createJSONRPCRequest, JSONRPCServer } from 'json-rpc-2.0';
 import { NexusCommonErrors, NexusError } from '../../src/errors';
+import { parameterValidateMiddleware } from '../../src/rpc/middlewares/parameterValidateMiddleware';
+import { ServerParams } from '../../src/rpc/types';
+import { z } from 'zod';
 
 describe('Middlewares#whitelistMiddleware', () => {
   it('should request be baned when Nexus is not initialized', async () => {
@@ -43,5 +46,28 @@ describe('Middlewares#errorMiddleware', () => {
     const res2 = await server.receive(createJSONRPCRequest(0, 'object'));
     expect(res2?.error?.message).toMatch(/request.*failed/i);
     expect(res2?.error?.data).toMatchObject({ method: 'some_method', params: [] });
+  });
+});
+
+describe('Middlewares#parameterValidationMiddleware', () => {
+  let server: JSONRPCServer<ServerParams>;
+  beforeEach(() => {
+    server = new JSONRPCServer<ServerParams>();
+    server.applyMiddleware(parameterValidateMiddleware);
+  });
+
+  it('should skip when method have no validator', async () => {
+    server.addMethod('insert_Paimon', jest.fn());
+    await expect(server.receive(createJSONRPCRequest(0, 'insert_Paimon', 'paimon'))).resolves.toBeTruthy();
+  });
+  it('should throw error when params is invalid', async () => {
+    server.addMethod('insert_Paimon', jest.fn().mockReturnValue('ok'));
+    const { validators } = jest.requireActual<typeof import('../../src/rpc/server')>('../../src/rpc/server');
+    validators.insert_Paimon = z.object({ name: z.string() });
+    const failedRes = await server.receive(createJSONRPCRequest(0, 'insert_Paimon', { nome: 'wrong' }));
+    expect(failedRes?.error?.message).toMatch(/Validation error/);
+
+    const successRes = await server.receive(createJSONRPCRequest(0, 'insert_Paimon', { name: 'paimon' }));
+    expect(successRes?.result).toBe('ok');
   });
 });
