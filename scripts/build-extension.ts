@@ -38,11 +38,11 @@ export default class BuildExtension implements IPlugin {
       });
 
       build.on('close', (code) => {
-        auto.logger.log.info('Nexus extension built successfully.');
-
         if (code) {
+          auto.logger.log.error(`Nexus extension build failed, exit code: ${code}`);
           reject();
         } else {
+          auto.logger.log.info('Nexus extension built successfully.');
           resolve();
         }
       });
