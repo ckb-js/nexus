@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
 import { Flex, Spacer, Button, Radio, RadioGroup, Skeleton, Icon, useToast, VStack } from '@chakra-ui/react';
 import { AddIcon, DeleteIcon } from '@chakra-ui/icons';
-import EditIcon from '../../../Components/icons/edit.svg';
+import EditIcon from '../../../Components/icons/Edit.svg';
 import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 
