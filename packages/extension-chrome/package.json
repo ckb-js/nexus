@@ -5,6 +5,7 @@
   "homepage": "https://github.com/ckb-js/nexus/tree/main/extension-chrome#readme",
   "license": "MIT",
   "main": "lib",
+  "private": true,
   "directories": {
     "lib": "lib",
     "test": "__tests__"
@@ -20,6 +21,7 @@
     "start": "cross-env NODE_ENV=development npm run start:webpack",
     "start:webpack": "ts-node ./scripts/start.ts",
     "build": "npm run clean && webpack --config=config/webpack.config.prod.ts",
+    "zip": "bestzip nexus.zip build/",
     "clean": "rimraf build/*",
     "check": "npm run check:types",
     "check:types": "tsc --noEmit"
@@ -70,6 +72,7 @@
     "@types/lodash.zip": "4.2.7",
     "@types/rimraf": "3.0.2",
     "babel-loader": "9.1.2",
+    "bestzip": "2.2.1",
     "clean-webpack-plugin": "4.0.0",
     "copy-webpack-plugin": "11.0.0",
     "css-loader": "6.7.3",
