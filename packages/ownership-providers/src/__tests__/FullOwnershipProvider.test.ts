@@ -23,17 +23,19 @@ const offChainLock1: Script = {
   hashType: 'type',
   args: '0x11223344',
 };
-const onChainLocks1: Script = {
-  codeHash: '0x79f90bb5e892d80dd213439eeab551120eb417678824f282b4ffb5f21bad2e1e',
-  hashType: 'type',
-  args: '0x441509af',
-};
 
-const onChainLocks2: Script = {
-  codeHash: '0x79f90bb5e892d80dd213439eeab551120eb417678824f282b4ffb5f21bad2e1e',
-  hashType: 'type',
-  args: '0x12321ffff',
-};
+function createOnchainLock(args: string): Script {
+  return {
+    codeHash: '0x79f90bb5e892d80dd213439eeab551120eb417678824f282b4ffb5f21bad2e1e',
+    hashType: 'type',
+    args,
+  };
+}
+
+const onChainLocks1: Script = createOnchainLock('0x441509af');
+
+const onChainLocks2: Script = createOnchainLock('0x25061223');
+const onChainLocks3: Script = createOnchainLock('0x25061224');
 
 function createFakeCellWithCapacity(capacity: number, lock = offChainLock1) {
   return {
@@ -183,10 +185,26 @@ describe('class FullOwnershipProvider', () => {
       );
     });
 
-    it('Should throw error when payer lock is not provided', () => {});
+    it('Should throw error when payer lock is not provided and auto inject is false', async () => {
+      const provider = buildProvider([
+        createFakeCellWithCapacity(100 * 1e8, onChainLocks1),
+        createFakeCellWithCapacity(200 * 1e8, onChainLocks2),
+      ]);
+      const txSkeleton = createFakeSkeleton();
+      await expect(
+        provider.payFee({ txSkeleton, options: { autoInject: false, payers: [] } }) as any,
+      ).rejects.toThrowError('no payer is provided, but autoInject is `false`');
+    });
 
-    it('Should throw error when payer lock is not owned', () => {
-      //
+    it('Should throw error when payer lock is not available and auto inject is false', async () => {
+      const provider = buildProvider([
+        createFakeCellWithCapacity(100 * 1e8, onChainLocks1),
+        createFakeCellWithCapacity(200 * 1e8, onChainLocks2),
+      ]);
+      const txSkeleton = createFakeSkeleton();
+      await expect(
+        provider.payFee({ txSkeleton, options: { autoInject: false, payers: [onChainLocks3] } }) as any,
+      ).rejects.toThrowError('No payer available to pay fee');
     });
   });
 
@@ -202,40 +220,79 @@ describe('class FullOwnershipProvider', () => {
     });
   });
 
-  it('#collector', async () => {
-    const provider = new FullOwnershipProvider({} as any);
-    const cellLists = [
-      'cell1',
-      'cell2',
-      'cell3',
-      'cell4',
-      'cell5',
-      'cell6',
-      'cell7',
-      'cell8',
-      'cell9',
-      'cell10',
-      'cell11',
-      'cell12',
-    ];
+  describe('#collector', () => {
+    function buildProvider(cells: any[], pageSize = 4) {
+      const provider = new FullOwnershipProvider({} as any);
+      provider.getLiveCells = jest.fn().mockImplementation(({ cursor = 0 }: any) => {
+        cursor = cursor || 0;
+        return {
+          objects: cells.slice(cursor, cursor + pageSize),
+          cursor: cursor + pageSize,
+        };
+      });
 
-    const getLiveCells = jest.fn().mockImplementation(({ cursor }: any) => {
-      cursor = cursor || 0;
-      return { objects: cellLists.slice(cursor, cursor + 4), cursor: cursor + 4 };
-    });
-
-    provider.getLiveCells = getLiveCells;
-
-    let index = 0;
-    for await (const cell of provider.collector()) {
-      expect(cell).toEqual(`cell${index + 1}`);
-      index++;
+      return provider;
     }
 
-    expect(getLiveCells).toBeCalledTimes(4);
-    expect(getLiveCells).nthCalledWith(1, { cursor: '' });
-    expect(getLiveCells).nthCalledWith(2, { cursor: 4 });
-    expect(getLiveCells).nthCalledWith(3, { cursor: 8 });
-    expect(getLiveCells).nthCalledWith(4, { cursor: 12 });
+    it('#should return paginated cell', async () => {
+      const cellLists = [
+        'cell1',
+        'cell2',
+        'cell3',
+        'cell4',
+        'cell5',
+        'cell6',
+        'cell7',
+        'cell8',
+        'cell9',
+        'cell10',
+        'cell11',
+        'cell12',
+      ];
+
+      const provider = buildProvider(cellLists);
+      const getLiveCells = provider.getLiveCells as jest.Mock;
+
+      let index = 0;
+      for await (const cell of provider.collector()) {
+        expect(cell).toEqual(`cell${index + 1}`);
+        index++;
+      }
+
+      expect(getLiveCells).toBeCalledTimes(4);
+      expect(getLiveCells).nthCalledWith(1, { cursor: '' });
+      expect(getLiveCells).nthCalledWith(2, { cursor: 4 });
+      expect(getLiveCells).nthCalledWith(3, { cursor: 8 });
+      expect(getLiveCells).nthCalledWith(4, { cursor: 12 });
+    });
+
+    it('Should return specific lock cells', async () => {
+      const provider = buildProvider([
+        {
+          cellOutput: {
+            lock: onChainLocks1,
+          },
+        },
+        {
+          cellOutput: {
+            lock: onChainLocks1,
+          },
+        },
+        {
+          cellOutput: {
+            lock: onChainLocks2,
+          },
+        },
+      ]);
+
+      let count = 0;
+
+      for await (const cell of provider.collector({ lock: onChainLocks1 })) {
+        count++;
+        expect(cell.cellOutput.lock).toEqual(onChainLocks1);
+      }
+
+      expect(count).toBe(2);
+    });
   });
 });

@@ -10,6 +10,8 @@ import { Events, FullOwnership, InjectedCkb } from '@nexus-wallet/protocol';
 import { errors } from '@nexus-wallet/utils';
 import { Address, blockchain, Cell, Script, Transaction } from '@ckb-lumos/base';
 import { config } from '@ckb-lumos/lumos';
+import { WitnessArgs } from '@ckb-lumos/base/lib/blockchain';
+import { bytes } from '@ckb-lumos/codec';
 
 // util types for FullOwnership
 
@@ -80,7 +82,6 @@ export class FullOwnershipProvider {
 
   // TODO bind other methods, getOffChainLocks, getOnChainLocks, etc.
 
-  // TODO need to be implemented
   /**
    * Inject capacity to the transaction's inputs at least equal to the `amount`,
    * if the collected capacity is over the `amount`, a change cell will be added to the transaction's outputs.
@@ -117,10 +118,6 @@ export class FullOwnershipProvider {
       data: '0x',
     };
     const minimalChangeCapacity = minimalCellCapacityCompatible(changeCell);
-    // How to deal with the minimal change capacity?
-    // if (minimalChangeCapacity.gt(config.amount)) {
-    // errors.throwError('The amount is too small to pay the minimal change cell capacity');
-    // }
 
     if (!changeLock) {
       errors.throwError('No change lock script found, it may be a internal bug');
@@ -157,8 +154,6 @@ export class FullOwnershipProvider {
     return txSkeleton;
   }
 
-  // TODO need to be implemented
-
   /**
    * Pay the transaction fee
    * @param txSkeleton
@@ -171,6 +166,10 @@ export class FullOwnershipProvider {
     txSkeleton: TransactionSkeletonType;
     options?: PayFeeOptions;
   }): Promise<TransactionSkeletonType> {
+    if ('payers' in options && options.payers.length === 0 && !options.autoInject) {
+      errors.throwError('no payer is provided, but autoInject is `false`');
+    }
+
     let size = 0;
     let txSkeletonWithFee = txSkeleton;
     const autoInject = !!options.autoInject;
@@ -195,6 +194,11 @@ export class FullOwnershipProvider {
         txSkeletonWithFee = await this.injectCapacity(txSkeleton, {
           amount: fee,
         });
+        injected = true;
+      }
+
+      if (!injected) {
+        errors.throwError(autoInject ? 'No cell sufficient to pay fee' : 'No payer available to pay fee');
       }
       currentTransactionSize = getTransactionSizeByTx(createTransactionFromSkeleton(txSkeletonWithFee));
     }
@@ -218,9 +222,30 @@ export class FullOwnershipProvider {
     }
   }
 
-  // TODO need to be implemented
   async signTransaction(txSkeleton: TransactionSkeletonType): Promise<TransactionSkeletonType> {
-    console.log(txSkeleton);
-    errors.unimplemented();
+    const groupedSignature = await this.ckb.request({
+      method: 'wallet_fullOwnership_signTransaction',
+      params: { tx: createTransactionFromSkeleton(txSkeleton) },
+    });
+
+    txSkeleton = txSkeleton.update('witnesses', (witnesses) => {
+      return witnesses.map((witness, index) => {
+        const [, signature] = groupedSignature[index];
+        if (!signature) return witness;
+        const witnessArgs = WitnessArgs.unpack(witness);
+        return bytes.hexify(
+          WitnessArgs.pack({
+            ...witnessArgs,
+            lock: signature,
+          }),
+        );
+      });
+    });
+
+    txSkeleton = txSkeleton.update('signingEntries', (signingEntries) =>
+      signingEntries.splice(0, groupedSignature.length),
+    );
+
+    return txSkeleton;
   }
 }
