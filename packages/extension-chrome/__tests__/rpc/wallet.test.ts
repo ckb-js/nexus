@@ -23,7 +23,7 @@ describe('RPC wallet_fullOwnership', () => {
   beforeAll(async () => {
     const { request, factory } = createTestRpcServer();
     const platformService = factory.get('platformService');
-    jest.spyOn(platformService, 'requestGrant').mockImplementation(() => Promise.reject());
+    jest.spyOn(platformService, 'requestGrant').mockImplementation(() => Promise.resolve());
     await request('wallet_enable');
   });
 
