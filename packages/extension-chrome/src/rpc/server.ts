@@ -5,10 +5,11 @@ import { whitelistMiddleware } from './middlewares/whitelistMiddleware';
 import { createLogger, errors } from '@nexus-wallet/utils';
 import { errorMiddleware } from './middlewares/errorMiddleware';
 import { z, ZodType } from 'zod';
-import { parameterValidateMiddleware } from './middlewares/parameterValidateMiddleware';
+import { buildParameterValidateMiddleware } from './middlewares/parameterValidateMiddleware';
 
 export const methods: Record<string, (...args: unknown[]) => unknown> = {};
 export const validators: Record<string, ZodType<unknown>> = {};
+const parameterValidateMiddleware = buildParameterValidateMiddleware(validators);
 
 export const logger = createLogger();
 

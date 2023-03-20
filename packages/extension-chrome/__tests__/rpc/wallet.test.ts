@@ -19,15 +19,16 @@ describe('RPC wallet_enable', () => {
     await expect(request('wallet_enable')).resolves.not.toThrowError();
   });
 });
-
 describe('RPC wallet_fullOwnership', () => {
-  let whitelistBypassServer: ReturnType<typeof createTestRpcServer>;
-  beforeEach(() => {
-    whitelistBypassServer = createTestRpcServer({ middlewareConfig: { whitelist: false } });
+  beforeAll(async () => {
+    const { request, factory } = createTestRpcServer();
+    const platformService = factory.get('platformService');
+    jest.spyOn(platformService, 'requestGrant').mockImplementation(() => Promise.reject());
+    await request('wallet_enable');
   });
 
   it('should request wallet_fullOwnership_getOffChainLocks call ownership service with default parameter', async () => {
-    const { request, factory } = whitelistBypassServer;
+    const { request, factory } = createTestRpcServer();
     const fullOwnershipService = factory.get('fullOwnershipService');
     jest.spyOn(fullOwnershipService, 'getOffChainLocks').mockImplementation(() => Promise.resolve([]));
     await request('wallet_fullOwnership_getOffChainLocks', {});
@@ -36,7 +37,7 @@ describe('RPC wallet_fullOwnership', () => {
     jest.clearAllMocks();
   });
   it('should request wallet_fullOwnership_getOffChainLocks call ownership service with `change: internal`', async () => {
-    const { request, factory } = whitelistBypassServer;
+    const { request, factory } = createTestRpcServer();
     const fullOwnershipService = factory.get('fullOwnershipService');
     jest.spyOn(fullOwnershipService, 'getOffChainLocks').mockImplementation(() => Promise.resolve([]));
     await request('wallet_fullOwnership_getOffChainLocks', { change: 'internal' });
@@ -46,7 +47,7 @@ describe('RPC wallet_fullOwnership', () => {
   });
 
   it('should request wallet_fullOwnership_getOnChainLocks call ownership service with default parameter', async () => {
-    const { request, factory } = whitelistBypassServer;
+    const { request, factory } = createTestRpcServer();
     const fullOwnershipService = factory.get('fullOwnershipService');
     jest
       .spyOn(fullOwnershipService, 'getOnChainLocks')
@@ -57,7 +58,7 @@ describe('RPC wallet_fullOwnership', () => {
     jest.clearAllMocks();
   });
   it('should request wallet_fullOwnership_getOnChainLocks call ownership service with `change: internal, cursor: some_cursor`', async () => {
-    const { request, factory } = whitelistBypassServer;
+    const { request, factory } = createTestRpcServer();
     const fullOwnershipService = factory.get('fullOwnershipService');
     jest
       .spyOn(fullOwnershipService, 'getOnChainLocks')
@@ -69,7 +70,7 @@ describe('RPC wallet_fullOwnership', () => {
   });
 
   it('should request wallet_fullOwnership_getLiveCells call ownership service with empty parameter', async () => {
-    const { request, factory } = whitelistBypassServer;
+    const { request, factory } = createTestRpcServer();
     const fullOwnershipService = factory.get('fullOwnershipService');
     jest
       .spyOn(fullOwnershipService, 'getLiveCells')
@@ -81,7 +82,7 @@ describe('RPC wallet_fullOwnership', () => {
   });
 
   it('should request wallet_fullOwnership_getLiveCells call ownership service with proper parameter', async () => {
-    const { request, factory } = whitelistBypassServer;
+    const { request, factory } = createTestRpcServer();
     const fullOwnershipService = factory.get('fullOwnershipService');
     jest
       .spyOn(fullOwnershipService, 'getLiveCells')
@@ -93,7 +94,7 @@ describe('RPC wallet_fullOwnership', () => {
   });
 
   it('should request wallet_fullOwnership_signData call ownership service with proper parameter', async () => {
-    const { request, factory } = whitelistBypassServer;
+    const { request, factory } = createTestRpcServer();
     const fullOwnershipService = factory.get('fullOwnershipService');
     jest.spyOn(fullOwnershipService, 'signData').mockImplementation(() => Promise.resolve(''));
     await request('wallet_fullOwnership_signData', {
@@ -110,7 +111,7 @@ describe('RPC wallet_fullOwnership', () => {
   });
 
   it('should request wallet_fullOwnership_signTx call ownership service with proper parameter', async () => {
-    const { request, factory } = whitelistBypassServer;
+    const { request, factory } = createTestRpcServer();
     const fullOwnershipService = factory.get('fullOwnershipService');
     jest.spyOn(fullOwnershipService, 'signTransaction').mockImplementation(() => Promise.resolve([]));
     await request('wallet_fullOwnership_signTransaction', { tx: createFakeTransaction() });

@@ -32,7 +32,7 @@ describe('Rpc schema validate', () => {
     await expect(wrappedHandler(payload)).resolves.toBeTruthy();
   });
   it('wallet_fullOwnership_signTransaction', async () => {
-    const tx = {
+    const tx: Transaction = {
       cellDeps: [
         {
           outPoint: {
@@ -96,7 +96,7 @@ describe('Rpc schema validate', () => {
         '0x55000000100000005500000055000000410000007037d390c84ad7c9b44d62834e6f0e7f083ee5cedbc12b152392cc7fd00f56aa42ef412d61ba24e09fb19ea952b2996883a861bceffa7cba92df2bab224cc09d00',
         '0x55000000100000005500000055000000410000000e399817a6120495314b2c13738a84b5e5bdaef8be69b15af924c4ebbaf0373c40ae558f9370d94c72b19ecd697999ae8b73055876d850c3e05ea682664ce67a00',
       ],
-    } as Transaction;
+    };
     const wrappedHandler = bindSchema(ZSignTransactionPayload);
     await expect(wrappedHandler({ tx })).resolves.toEqual({ tx });
     tx.inputs[0].since = 'Wrong since';
