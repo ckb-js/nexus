@@ -3,7 +3,7 @@ import { createInMemoryStorage } from '../../src/services/storage';
 import { errorMiddleware } from '../../src/rpc/middlewares/errorMiddleware';
 import { createJSONRPCRequest, JSONRPCServer } from 'json-rpc-2.0';
 import { NexusCommonErrors, NexusError } from '../../src/errors';
-import { buildParameterValidateMiddleware } from '../../src/rpc/middlewares/parameterValidateMiddleware';
+import { createParameterValidateMiddleware } from '../../src/rpc/middlewares/parameterValidateMiddleware';
 import { ServerParams } from '../../src/rpc/types';
 import { z, ZodType } from 'zod';
 
@@ -56,7 +56,7 @@ describe('Middlewares#parameterValidationMiddleware', () => {
   beforeEach(() => {
     validators = {};
     server = new JSONRPCServer<ServerParams>();
-    server.applyMiddleware(buildParameterValidateMiddleware(validators));
+    server.applyMiddleware(createParameterValidateMiddleware(validators));
   });
 
   it('should skip when method have no validator', async () => {

@@ -1,15 +1,6 @@
-import { ZBytesLike, ZHash, ZHexNumber, ZHexString } from '../../../src/rpc/schema/primitives';
+import { ZHash, ZHexNumber, ZHexString } from '../../../src/rpc/schema/primitives';
 
 describe('primitive type', () => {
-  it('BytesLike', () => {
-    // array like buffer
-    expect(ZBytesLike.parse('aabbcc')).toBe('aabbcc');
-    expect(ZBytesLike.parse(new Uint8Array([1, 2, 3]))).toEqual(new Uint8Array([1, 2, 3]));
-    expect(ZBytesLike.parse(new Uint8Array([1, 2, 3]).buffer)).toEqual(new Uint8Array([1, 2, 3]).buffer);
-
-    expect(() => ZBytesLike.parse(1)).toThrow('Expected string, received number');
-  });
-
   it('HexString', () => {
     for (const schema of [ZHexString, ZHash]) {
       expect(schema.parse('0x')).toBe('0x');

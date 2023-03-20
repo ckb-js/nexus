@@ -3,7 +3,7 @@ import { ZodType } from 'zod';
 import { fromZodError } from 'zod-validation-error';
 import { ServerParams } from '../types';
 
-export function buildParameterValidateMiddleware(
+export function createParameterValidateMiddleware(
   validators: Record<string, ZodType<unknown>>,
 ): JSONRPCServerMiddleware<ServerParams> {
   const parameterValidateMiddleware: JSONRPCServerMiddleware<ServerParams> = async (next, request, serverParams) => {

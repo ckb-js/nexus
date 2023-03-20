@@ -5,11 +5,11 @@ import { whitelistMiddleware } from './middlewares/whitelistMiddleware';
 import { createLogger, errors } from '@nexus-wallet/utils';
 import { errorMiddleware } from './middlewares/errorMiddleware';
 import { z, ZodType } from 'zod';
-import { buildParameterValidateMiddleware } from './middlewares/parameterValidateMiddleware';
+import { createParameterValidateMiddleware } from './middlewares/parameterValidateMiddleware';
 
 export const methods: Record<string, (...args: unknown[]) => unknown> = {};
 export const validators: Record<string, ZodType<unknown>> = {};
-const parameterValidateMiddleware = buildParameterValidateMiddleware(validators);
+const parameterValidateMiddleware = createParameterValidateMiddleware(validators);
 
 export const logger = createLogger();
 
@@ -31,7 +31,7 @@ export function addMethodValidator<TKey extends keyof RpcMethods, TArg extends Z
     errors.throwError(`Method ${method} is not registered yet. Please call \`addMethod\` first.`);
   }
   if (!methods[method as string]) {
-    console.warn(`Method ${method} is already registered with a schema. The new schema will override it`);
+    logger.warn(`Method ${method} is already registered with a schema. The new schema will override it`);
   }
 
   Object.assign(validators, {
