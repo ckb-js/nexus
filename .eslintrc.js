@@ -23,6 +23,7 @@ module.exports = {
         '@typescript-eslint/explicit-module-boundary-types': 'error',
         '@typescript-eslint/no-floating-promises': 'error',
         'no-console': 'warn',
+        '@typescript-eslint/no-throw-literal': 'error',
       },
     },
   ],

@@ -3,6 +3,7 @@ import { ModulesFactory } from '../services';
 import { JSONRPCRequest, JSONRPCResponse, JSONRPCServer } from 'json-rpc-2.0';
 import { whitelistMiddleware } from './middlewares/whitelistMiddleware';
 import { createLogger } from '@nexus-wallet/utils';
+import { errorMiddleware } from './middlewares/errorMiddleware';
 
 export const methods: Record<string, (...args: unknown[]) => unknown> = {};
 export const logger = createLogger();
@@ -27,6 +28,7 @@ interface NexusRpcServer<Sender> {
  */
 export function createServer<Sender>(factory: ModulesFactory): NexusRpcServer<Sender> {
   const server = new JSONRPCServer<ServerParams>();
+  server.applyMiddleware(errorMiddleware);
   server.applyMiddleware(whitelistMiddleware);
 
   const registered = Object.keys(methods);

@@ -11,4 +11,5 @@ module.exports = {
   },
   testMatch: ['**/__tests__/**/*.test.ts'],
   setupFiles: ['./setupJest.js'],
+  coveragePathIgnorePatterns: ['thirdpartyLib'],
 };
