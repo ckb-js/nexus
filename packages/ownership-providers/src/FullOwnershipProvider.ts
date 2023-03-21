@@ -12,7 +12,8 @@ import { Address, blockchain, Cell, Script, Transaction } from '@ckb-lumos/base'
 import { config } from '@ckb-lumos/lumos';
 import { WitnessArgs } from '@ckb-lumos/base/lib/blockchain';
 import { bytes } from '@ckb-lumos/codec';
-
+import { prepareSigningEntries } from '@ckb-lumos/common-scripts/lib/secp256k1_blake160';
+import { Config as LumosConfig } from '@ckb-lumos/config-manager/lib';
 // util types for FullOwnership
 
 type Suffix<T extends string, P extends string> = T extends `${P}${infer S}` ? S : never;
@@ -61,10 +62,14 @@ const lockToScript = (addr: LockScriptLike): Script => {
   return parseAddress(addr, { config: networkConfig });
 };
 
+type FullOwnershipProviderConfig = {
+  ckb: InjectedCkb<FullOwnership, Events>;
+};
+
 export class FullOwnershipProvider {
   private ckb: InjectedCkb<FullOwnership, Events>;
 
-  constructor(config: { ckb: InjectedCkb<FullOwnership, Events> }) {
+  constructor(config: FullOwnershipProviderConfig) {
     this.ckb = config.ckb;
   }
 
@@ -222,7 +227,14 @@ export class FullOwnershipProvider {
     }
   }
 
+  /**
+   * request wallet to sign a transaction skeleton
+   * @param txSkeleton The transaction skeleton, you can create it from transaction object via `@ckb-lumos` {@link createTransactionFromSkeleton}
+   * @returns The signed transaction skeleton. To get the signed transaction object, please use {@link sealTransaction} with empty sealingContents(`[ ]`).
+   */
   async signTransaction(txSkeleton: TransactionSkeletonType): Promise<TransactionSkeletonType> {
+    const config = await this.getLumosConfig();
+    prepareSigningEntries(txSkeleton, { config });
     const groupedSignature = await this.ckb.request({
       method: 'wallet_fullOwnership_signTransaction',
       params: { tx: createTransactionFromSkeleton(txSkeleton) },
@@ -247,5 +259,10 @@ export class FullOwnershipProvider {
     );
 
     return txSkeleton;
+  }
+
+  // TODO: wait for wallet provide a API to get genius block hash
+  private async getLumosConfig(): Promise<LumosConfig> {
+    errors.unimplemented();
   }
 }

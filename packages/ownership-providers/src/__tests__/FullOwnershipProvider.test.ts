@@ -3,6 +3,9 @@ import { BI } from '@ckb-lumos/bi';
 import { TransactionSkeleton, TransactionSkeletonType } from '@ckb-lumos/helpers';
 import { common } from '@ckb-lumos/common-scripts';
 import { Cell, Script } from '@nexus-wallet/protocol';
+import { predefined } from '@ckb-lumos/config-manager';
+import * as secp256k1Blake160 from '@ckb-lumos/common-scripts/lib/secp256k1_blake160';
+
 import { FullOwnershipProvider } from '..';
 
 function getExpectedFee(txSkeleton: TransactionSkeletonType, feeRate = BI.from(1000)): BI {
@@ -59,8 +62,13 @@ const receiverLock: Script = {
 
 describe('class FullOwnershipProvider', () => {
   it('Should get live cells invoke `InjectedCkb#wallet_fullOwnership_getLiveCells`', async () => {
-    // TODO:
-    expect(1).toBe(1);
+    const provider = new FullOwnershipProvider({ ckb: { request: jest.fn().mockReturnValue([]) } } as any);
+    await expect(provider.getLiveCells({ cursor: '0x' })).resolves.toEqual([]);
+
+    expect(provider['ckb'].request).toBeCalledWith({
+      method: 'wallet_fullOwnership_getLiveCells',
+      params: { cursor: '0x' },
+    });
   });
 
   describe('#injectCapacity', () => {
@@ -83,18 +91,6 @@ describe('class FullOwnershipProvider', () => {
       await expect(provider.injectCapacity(emptyTxSkeleton, { amount: 400 * 1e8 })).rejects.toThrowError(
         /No cell sufficient to inject/,
       );
-    });
-
-    it.skip('Should throw error when capacity is too small', async () => {
-      const provider = initProviderWithCells([
-        createFakeCellWithCapacity(100 * 1e8),
-        createFakeCellWithCapacity(200 * 1e8),
-      ]);
-      await expect(provider.injectCapacity(emptyTxSkeleton, { amount: 1 })).rejects.toThrowError(
-        /The amount is too small to pay the minimal change cell capacity/,
-      );
-
-      await expect(provider.injectCapacity(emptyTxSkeleton, { amount: 100 * 1e8 })).resolves.toBeTruthy();
     });
 
     it('Should pick one cell when capacity is enough', async () => {
@@ -293,6 +289,62 @@ describe('class FullOwnershipProvider', () => {
       }
 
       expect(count).toBe(2);
+    });
+  });
+
+  describe('#Sign transaction', () => {
+    const groupedSignature = [
+      [
+        undefined,
+        '0x69000000100000006900000069000000550000005500000010000000550000005500000041000000d376d4bcb6539fe0e0b3d408556757183c75ccaf5c31b2486f9d0411217d41372828ed78e57d1cff7ffaeaf4870ebfdb338828175f8d197af203e7f4ac26924d00',
+      ],
+      [
+        undefined,
+        '0x5500000010000000550000005500000041000000a15ff63f3d55e6360a8ee9ce25fb77c320e5e23cbee767953a7291f9c3e1c222782d90079d5c86a238061e7c995b9fd61ccc45d77e5c0e6883e8dd0c5fc6078a00',
+      ],
+    ];
+
+    it('Should put signature into witnesses', async () => {
+      const txSkeleton = TransactionSkeleton()
+        .update('inputs', (inputs) => {
+          return inputs.push(
+            {
+              cellOutput: { capacity: '0xaa', lock: onChainLocks1 },
+              data: '0x',
+              outPoint: { txHash: '0xe1cfb60b99b4a0b0b00240a3521ead04efdd96cd9a433819f72f33d150a6dadb', index: '0x0' },
+            },
+            {
+              cellOutput: { capacity: '0xaa', lock: onChainLocks1 },
+              data: '0x',
+              outPoint: { txHash: '0xe1cfb60b99b4a0b0b00240a3521ead04efdd96cd9a433819f72f33d150a6dadb', index: '0x0' },
+            },
+          );
+        })
+        .update('signingEntries', (signingEntries) => {
+          const placeholder = { type: 'type', index: 0, message: '0x' };
+          return signingEntries.push(placeholder, placeholder, placeholder, placeholder);
+        });
+
+      const prepareSigningEntries = jest
+        .spyOn(secp256k1Blake160, 'prepareSigningEntries')
+        .mockImplementation((skeleton) => skeleton);
+      const provider = new FullOwnershipProvider({
+        ckb: { request: jest.fn().mockReturnValue(predefined.LINA) } as any,
+      } as any);
+
+      provider['ckb'].request = jest.fn().mockReturnValue(groupedSignature);
+      provider['getLumosConfig'] = jest.fn().mockReturnValue(predefined.LINA);
+
+      const signedTxSkeleton = await provider.signTransaction(txSkeleton);
+      expect(provider['getLumosConfig']).toBeCalled();
+      signedTxSkeleton
+        .get('witnesses')
+        .slice(0, groupedSignature.length)
+        .forEach((witness, index) => {
+          expect(witness).toEqual(groupedSignature[index][1]);
+        });
+
+      expect(prepareSigningEntries).toHaveBeenCalledWith(txSkeleton, { config: predefined.LINA });
     });
   });
 });
