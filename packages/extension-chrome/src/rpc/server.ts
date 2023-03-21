@@ -2,7 +2,7 @@ import { RPCMethodHandler, RpcMethods, ServerParams } from './types';
 import { ModulesFactory } from '../services';
 import { JSONRPCRequest, JSONRPCResponse, JSONRPCServer } from 'json-rpc-2.0';
 import { whitelistMiddleware } from './middlewares/whitelistMiddleware';
-import { createLogger, errors } from '@nexus-wallet/utils';
+import { createLogger } from '@nexus-wallet/utils';
 import { errorMiddleware } from './middlewares/errorMiddleware';
 import { z, ZodType } from 'zod';
 import { createParameterValidateMiddleware } from './middlewares/parameterValidateMiddleware';
@@ -28,9 +28,12 @@ export function addMethodValidator<TKey extends keyof RpcMethods, TArg extends Z
   argSchema: ObjectEquals<RpcMethods[TKey]['params'], z.infer<TArg>> extends true ? TArg : never,
 ): void {
   if (!methods[method as string]) {
-    errors.throwError(`Method ${method} is not registered yet. Please call \`addMethod\` first.`);
+    logger.error(
+      `Method ${method} is not registered yet. Please call \`addMethod\` first. This addMethodValidator call will be ignored.`,
+    );
+    return;
   }
-  if (!methods[method as string]) {
+  if (validators[method as string]) {
     logger.warn(`Method ${method} is already registered with a schema. The new schema will override it`);
   }
 
