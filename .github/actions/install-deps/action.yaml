@@ -1,0 +1,38 @@
+name: 'Install dependencies'
+description: 'install dependencies'
+
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 18
+
+    - name: restore dependencies
+      uses: actions/cache@v3
+      with:
+        path: '**/node_modules'
+        key: ${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+
+    - name: Install project dependencies and build
+      shell: bash
+      run: npm install
+
+    - name: Get Lumos commit ID
+      id: get-lumos-commit-id
+      shell: bash
+      run: |
+        cd lumos
+        echo "result=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+
+    - name: Restore Lumos
+      uses: actions/cache@v3
+      id: restore-lumos
+      with:
+        path: 'lumos/packages/*/lib'
+        key: lumos-${{ steps.get-lumos-commit-id.outputs.result }}
+
+    - name: Build lumos
+      if: steps.restore-lumos.outputs.cache-hit != 'true'
+      shell: bash
+      run: npm run build:lumos

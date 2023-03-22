@@ -1,5 +1,5 @@
 {
-  "name": "nexus",
+  "name": "@nexus-wallet/nexus",
   "version": "0.0.1",
   "description": "An UTxO friendly wallet extension for CKB",
   "private": true,
@@ -13,6 +13,10 @@
     "lumos/packages/*"
   ],
   "devDependencies": {
+    "@auto-it/magic-zero": "10.43.0",
+    "@auto-it/npm": "10.43.0",
+    "@auto-it/released": "10.43.0",
+    "@auto-it/upload-assets": "10.43.0",
     "@babel/preset-env": "7.20.2",
     "@babel/preset-react": "7.18.6",
     "@babel/preset-typescript": "7.18.6",
@@ -40,9 +44,11 @@
   },
   "scripts": {
     "prepare": "husky install",
-    "build": "run-s build:lumos build:nexus",
-    "build:nexus": "npm run build --workspace=@nexus-wallet/types --workspace=@nexus-wallet/utils",
+    "build": "run-s build:lumos build:libs build:extension-chrome",
+    "build:nexus": "echo -e '[DEPRECATED]: please migrate to build:libs' && npm run build:libs",
+    "build:libs": "npm run build -w @nexus-wallet/types -w @nexus-wallet/utils",
     "build:lumos": "cd lumos && npm run build",
+    "build:extension-chrome": "npm run build -w @nexus-wallet/extension-chrome",
     "test": "jest",
     "start": "npm run start -w @nexus-wallet/extension-chrome",
     "lint": "eslint 'packages/*/{src,__tests__}/**/*.{js,ts,jsx,tsx}'",
@@ -76,5 +82,32 @@
     "lodash.times": "4.3.2",
     "webext-bridge": "5.0.5",
     "webextension-polyfill": "0.10.0"
+  },
+  "auto": {
+    "plugins": [
+      "magic-zero",
+      "./scripts/build-extension.ts",
+      [
+        "upload-assets",
+        [
+          "packages/extension-chrome/nexus.zip"
+        ]
+      ],
+      "npm",
+      "released"
+    ],
+    "labels": [
+      {
+        "name": "breaking-minor",
+        "description": "Major version zero (0.y.z) is for initial development. Anything MAY change at any time.",
+        "changelogTitle": "🔨 Breaking Minor Change",
+        "releaseType": "minor"
+      },
+      {
+        "name": "dependency-update",
+        "changelogTitle": "🔩 Dependency Updates",
+        "releaseType": "none"
+      }
+    ]
   }
 }
