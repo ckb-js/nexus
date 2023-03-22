@@ -60,6 +60,8 @@
     "sanitize.css": "13.0.0",
     "webext-bridge": "5.0.5",
     "webextension-polyfill": "0.10.0",
+    "zod": "3.21.4",
+    "zod-validation-error": "1.0.1",
     "zustand": "4.3.2"
   },
   "devDependencies": {

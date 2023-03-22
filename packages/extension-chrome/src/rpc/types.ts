@@ -41,4 +41,9 @@ export interface ServerParams {
   getRequesterAppInfo(): Promise<RequesterInfo>;
 }
 
+export type RPCMethodHandler<T extends keyof RpcMethods> = (
+  param: RpcMethods[T]['params'],
+  context: ServerParams,
+) => RpcMethods[T]['result'];
+
 export interface RpcMethods extends WalletMethods, DebugMethods {}
