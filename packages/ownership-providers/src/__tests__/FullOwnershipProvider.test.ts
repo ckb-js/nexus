@@ -29,7 +29,7 @@ const offChainLock1: Script = {
 
 function createOnchainLock(args: string): Script {
   return {
-    codeHash: '0x79f90bb5e892d80dd213439eeab551120eb417678824f282b4ffb5f21bad2e1e',
+    codeHash: '0xe1e2dab12f5bff4b282f428876714be021155baee934312dd08d298e5bb09f97',
     hashType: 'type',
     args,
   };

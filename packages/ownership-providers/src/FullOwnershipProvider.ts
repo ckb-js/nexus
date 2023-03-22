@@ -9,7 +9,6 @@ import {
 import { Events, FullOwnership, InjectedCkb } from '@nexus-wallet/protocol';
 import { errors } from '@nexus-wallet/utils';
 import { Address, blockchain, Cell, Script, Transaction } from '@ckb-lumos/base';
-import { config } from '@ckb-lumos/lumos';
 import { WitnessArgs } from '@ckb-lumos/base/lib/blockchain';
 import { bytes } from '@ckb-lumos/codec';
 import { prepareSigningEntries } from '@ckb-lumos/common-scripts/lib/secp256k1_blake160';
@@ -37,12 +36,16 @@ export type PayByPayers = { payers: LockScriptLike[]; autoInject?: boolean };
 /** Pay by inject automatically */
 export type PayByAuto = { autoInject: true };
 
+// TODO: let lumos export `getTransactionSizeByTx` and `calculateFeeCompatible` and `lockToScript`
+/* istanbul ignore next */
 function getTransactionSizeByTx(tx: Transaction): number {
   const serializedTx = blockchain.Transaction.pack(tx);
   // 4 is serialized offset bytesize
   const size = serializedTx.byteLength + 4;
   return size;
 }
+
+/* istanbul ignore next */
 function calculateFeeCompatible(size: number, feeRate: BIish): BI {
   const ratio = BI.from(1000);
   const base = BI.from(size).mul(feeRate);
@@ -52,15 +55,6 @@ function calculateFeeCompatible(size: number, feeRate: BIish): BI {
   }
   return BI.from(fee);
 }
-
-const lockToScript = (addr: LockScriptLike): Script => {
-  if (typeof addr === 'object') {
-    return addr;
-  }
-  const networkConfig = addr.startsWith('ckt') ? config.predefined.AGGRON4 : config.predefined.LINA;
-  // FIXME: it is not a good way to determine the network
-  return parseAddress(addr, { config: networkConfig });
-};
 
 type FullOwnershipProviderConfig = {
   ckb: InjectedCkb<FullOwnership, Events>;
@@ -84,8 +78,6 @@ export class FullOwnershipProvider {
   async getOnChainLocks(params: ParamOf<'getOnChainLocks'>): ReturnOf<'getOnChainLocks'> {
     return this.ckb.request({ method: 'wallet_fullOwnership_getOnChainLocks', params });
   }
-
-  // TODO bind other methods, getOffChainLocks, getOnChainLocks, etc.
 
   /**
    * Inject capacity to the transaction's inputs at least equal to the `amount`,
@@ -130,7 +122,7 @@ export class FullOwnershipProvider {
 
     let remainCapacity = BI.from(config.amount).add(minimalChangeCapacity);
     const inputCells: Cell[] = [];
-    const payerLock = config.lock ? lockToScript(config.lock) : undefined;
+    const payerLock = config.lock ? await this.parseLockScriptLike(config.lock) : undefined;
 
     for await (const cell of this.collector({ lock: payerLock })) {
       inputCells.push(cell);
@@ -192,7 +184,9 @@ export class FullOwnershipProvider {
           txSkeletonWithFee = await this.injectCapacity(txSkeleton, { lock: payer, amount: fee });
           injected = true;
           break;
-        } catch {}
+        } catch {
+          // it means the payer can not pay the fee. However, it may be able to pay fee by other injected lock when autoInject is true.
+        }
       }
 
       if (!injected && autoInject) {
@@ -214,6 +208,7 @@ export class FullOwnershipProvider {
   async *collector({ lock }: { lock?: Script } = {}): AsyncIterable<Cell> {
     let cursor = '';
     while (true) {
+      // TODO: in current version, the cursor prop is required. But it should be optional.
       const page = await this.getLiveCells({ cursor });
       if (page.objects.length === 0) {
         return;
@@ -262,7 +257,17 @@ export class FullOwnershipProvider {
   }
 
   // TODO: wait for wallet provide a API to get genius block hash
+  /* istanbul ignore next */
   private async getLumosConfig(): Promise<LumosConfig> {
     errors.unimplemented();
+  }
+
+  private async parseLockScriptLike(lock: LockScriptLike) {
+    if (typeof lock === 'object') {
+      return lock;
+    }
+
+    const config = await this.getLumosConfig();
+    return parseAddress(lock, { config });
   }
 }
