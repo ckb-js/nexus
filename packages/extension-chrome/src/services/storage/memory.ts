@@ -27,6 +27,7 @@ export function createInMemoryStorage<S>(): InMemoryStorage<S> {
       store.set(key, value);
     },
     getAll() {
+      /* istanbul ignore next */
       return Object.fromEntries(store.entries()) as S;
     },
     setAll(s) {
