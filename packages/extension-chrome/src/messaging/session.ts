@@ -98,7 +98,10 @@ export function createSessionMessenger<Map extends CallMap>(
         });
       });
     },
-    register: (method, handler) => {
+    register: <T extends keyof Map>(
+      method: T,
+      handler: (data: CallParam<Map[T]>) => Promisable<CallResult<Map[T]>>,
+    ): void => {
       adapter.receive(async function handleRequest(unknownMessage) {
         if (!isSessionMessage(unknownMessage)) {
           return;
@@ -112,7 +115,7 @@ export function createSessionMessenger<Map extends CallMap>(
         const res: JSONRPCResponse = await (async () => {
           asserts.asserts(req.id, `request id is required`);
           try {
-            return createJSONRPCSuccessResponse(req.id, await handler(req.params as never));
+            return createJSONRPCSuccessResponse(req.id, await handler(req.params as CallParam<Map[T]>));
           } catch (e: unknown) {
             const errorMessage = e instanceof Error ? e.message : 'Internal Error';
             return createJSONRPCErrorResponse(req.id, JSONRPCErrorCode.InternalError, errorMessage, e);
