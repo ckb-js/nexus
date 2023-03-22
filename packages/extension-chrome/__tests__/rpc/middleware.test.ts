@@ -11,7 +11,7 @@ describe('Middlewares#whitelistMiddleware', () => {
   it('should request be baned when Nexus is not initialized', async () => {
     const { request } = createTestRpcServer({ storage: createInMemoryStorage });
 
-    // @ts-ignore
+    // @ts-expect-error
     await expect(request('unknown_method')).rejects.toThrowError(/Nexus is not initialized/);
     await expect(request('wallet_enable')).rejects.toThrowError(/Nexus is not initialized/);
   });
@@ -19,15 +19,15 @@ describe('Middlewares#whitelistMiddleware', () => {
   it('should request be baned when requester is not in whitelist', async () => {
     const { request } = createTestRpcServer();
 
-    // @ts-ignore
+    // @ts-expect-error
     await expect(request('other_method')).rejects.toThrowError(/whitelist/);
     await expect(request('wallet_enable')).resolves.not.toThrowError();
 
     // after calling wallet_enable should be able to call other methods
     // but other methods is not registered in RPC
-    // @ts-ignore
+    // @ts-expect-error
     await expect(request('other_method')).rejects.not.toThrowError(/whitelist/);
-    // @ts-ignore
+    // @ts-expect-error
     await expect(request('other_method')).rejects.toThrowError(/Method not found/);
   });
 });
