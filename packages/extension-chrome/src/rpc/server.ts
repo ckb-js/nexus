@@ -1,4 +1,4 @@
-import { RpcMethods, ServerParams } from './types';
+import { RPCMethodHandler, RpcMethods, ServerParams } from './types';
 import { ModulesFactory } from '../services';
 import { JSONRPCRequest, JSONRPCResponse, JSONRPCServer } from 'json-rpc-2.0';
 import { whitelistMiddleware } from './middlewares/whitelistMiddleware';
@@ -25,7 +25,7 @@ type ObjectEquals<X, Y> = X extends Y ? (Y extends X ? true : false) : false;
  */
 export function addMethodValidator<TKey extends keyof RpcMethods, TArg extends ZodType>(
   method: TKey,
-  argSchema: ObjectEquals<RpcMethods[TKey]['params'], z.infer<TArg>> extends true ? TArg : never,
+  argSchema: ObjectEquals<Parameters<RpcMethods[TKey]>[0], z.infer<TArg>> extends true ? TArg : never,
 ): void {
   if (!methods[method as string]) {
     logger.error(

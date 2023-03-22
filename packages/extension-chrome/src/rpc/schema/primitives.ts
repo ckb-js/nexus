@@ -1,4 +1,4 @@
-import { z, ZodType } from 'zod';
+import { z } from 'zod';
 
 export const ZHexString = z.string().regex(/^0x([0-9a-fA-F][0-9a-fA-F])*$/, { message: 'Invalid hex string' });
 
@@ -6,6 +6,5 @@ export const ZHexString = z.string().regex(/^0x([0-9a-fA-F][0-9a-fA-F])*$/, { me
  * BytesLike type
  * @description Typescript type system will be regarded as the schema in `HexString | ArrayLike<number> | ArrayBuffer`, for aligning type in `lumos`, but this schema only accept `HexString` in implementation.
  */
-export const ZBytesLike: ZodType<z.infer<typeof ZHexString> | ArrayLike<number> | ArrayBuffer> = ZHexString;
 export const ZHexNumber = z.string().regex(/^0x([0-9a-fA-F])+$/, { message: 'Invalid hex number' });
 export const ZHash = ZHexString;
