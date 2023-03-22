@@ -67,14 +67,9 @@
       "npx eslint"
     ],
     "packages/types/**/*": [
-      "npm run build:docs -w @nexus-wallet/types",
+      "npm run build:docs -w @nexus-wallet/protocol",
+      "prettier --write",
       "git add docs/rpc.md"
     ]
-  },
-  "dependencies": {
-    "@types/webextension-polyfill": "0.10.0",
-    "lodash.times": "4.3.2",
-    "webext-bridge": "5.0.5",
-    "webextension-polyfill": "0.10.0"
   }
 }

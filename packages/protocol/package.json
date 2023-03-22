@@ -18,6 +18,7 @@
   },
   "scripts": {
     "build": "tsc",
+    "build:docs": "ts-node scripts/buildRpcDocs.ts",
     "clean": "rimraf lib/*",
     "check": "npm run check:types",
     "check:types": "tsc --noEmit"

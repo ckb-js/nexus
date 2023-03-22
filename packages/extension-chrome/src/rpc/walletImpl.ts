@@ -14,7 +14,9 @@ addMethod('wallet_enable', async (_, { getRequesterAppInfo, resolveService }) =>
   const { whitelist } = await configService.getConfig();
 
   const isTrusted = whitelist.find((item) => item.host === host);
-  if (isTrusted) return;
+  if (isTrusted) {
+    return { nickname: await configService.getNickname() };
+  }
 
   try {
     const notificationService = resolveService('notificationService');
@@ -24,6 +26,7 @@ addMethod('wallet_enable', async (_, { getRequesterAppInfo, resolveService }) =>
   }
 
   await configService.addWhitelistItem({ host: host, favicon: `${protocol}//${host}/favicon.ico` });
+  return { nickname: await configService.getNickname() };
 });
 
 addMethod('wallet_fullOwnership_getOffChainLocks', async (payload, { resolveService }) => {

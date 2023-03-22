@@ -9,7 +9,7 @@ export const logger = createLogger();
 
 export function addMethod<K extends keyof RpcMethods>(
   method: K,
-  handler: (param: RpcMethods[K]['params'], context: ServerParams) => RpcMethods[K]['result'],
+  handler: (param: Parameters<RpcMethods[K]>[0], context: ServerParams) => ReturnType<RpcMethods[K]>,
 ): void {
   Object.assign(methods, { [method]: handler });
 }

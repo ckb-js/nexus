@@ -1,7 +1,11 @@
-export * from './base';
-export * from './ownership/fullOwnership';
-export * from './event';
-export * from './injected';
+// types
 
-// TODO refactor @nexus-wallet/types to depend on @nexus-wallet/protocol
-// TODO refactor @nexus-wallet/extension-chrome CallMap to depend on @nexus-wallet/protocol
+export type { Cursor, Signature, HexString, Paginate, Transaction, Script, Nickname, Cell } from './base';
+export type { Bip44ChangeType, FullOwnership, GroupedSignature } from './ownership';
+export type { NetworkName, Events } from './event';
+export type { RpcMethods } from './rpc';
+export type { InjectedCkb, EventClient, RpcClient } from './injected';
+
+// constants
+
+export { SIGN_DATA_MAGIC } from './constants';
