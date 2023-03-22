@@ -15,6 +15,7 @@
   "devDependencies": {
     "@auto-it/magic-zero": "10.43.0",
     "@auto-it/npm": "10.43.0",
+    "@auto-it/protected-branch": "10.43.0",
     "@auto-it/released": "10.43.0",
     "@auto-it/upload-assets": "10.43.0",
     "@babel/preset-env": "7.20.2",
@@ -87,6 +88,7 @@
     "plugins": [
       "magic-zero",
       "./scripts/build-extension.ts",
+      "protected-branch",
       [
         "upload-assets",
         [
