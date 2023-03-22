@@ -46,7 +46,7 @@
     "prepare": "husky install",
     "build": "run-s build:lumos build:libs build:extension-chrome",
     "build:nexus": "echo -e '[DEPRECATED]: please migrate to build:libs' && npm run build:libs",
-    "build:libs": "npm run build -w @nexus-wallet/types -w @nexus-wallet/utils",
+    "build:libs": "npm run build -w @nexus-wallet/protocol -w @nexus-wallet/types -w @nexus-wallet/utils",
     "build:lumos": "cd lumos && npm run build",
     "build:extension-chrome": "npm run build -w @nexus-wallet/extension-chrome",
     "test": "jest",
