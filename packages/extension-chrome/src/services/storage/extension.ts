@@ -3,9 +3,9 @@ import browser from 'webextension-polyfill';
 
 export function createBrowserExtensionStorage<S>(): Storage<S> {
   return {
-    getItem: (key) => {
+    getItem: <K extends keyof S>(key: K) => {
       const k = String(key);
-      return browser.storage.local.get(k).then((record) => record[k]);
+      return browser.storage.local.get(k).then((record) => record[k] as S[K]);
     },
     removeItem: async (key) => {
       const k = String(key);

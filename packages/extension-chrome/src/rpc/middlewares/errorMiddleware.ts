@@ -5,7 +5,7 @@ import { NexusError } from '../../errors';
 export const errorMiddleware: JSONRPCServerMiddleware<any> = async (next, request, serverParams) => {
   try {
     return await next(request, serverParams);
-  } catch (e) {
+  } catch (e: unknown) {
     if (NexusError.isNexusError(e)) {
       return createJSONRPCErrorResponse(request.id!, e.code, e.message, e.data);
     }

@@ -185,7 +185,7 @@ export function createWatchtower({
       }
       try {
         await scanAndUpdate();
-      } catch (e) {
+      } catch (e: unknown) {
         logger.error(`Scan error`, e);
       } finally {
         await asyncSleep(options.scanInterval ?? DEFAULT_SCAN_INTERVAL);

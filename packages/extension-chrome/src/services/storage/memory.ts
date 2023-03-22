@@ -11,11 +11,11 @@ export function createInMemoryStorage<S>(): InMemoryStorage<S> {
   const store = new Map();
 
   return {
-    getItem(key) {
-      const value = store.get(key);
-      if (!value) return value;
+    getItem<K extends keyof S>(key: K) {
+      const value = store.get(key) as string | undefined;
+      if (!value) return value as undefined;
       // deep clone to avoid the value being modified by the caller
-      return JSON.parse(JSON.stringify(value));
+      return JSON.parse(JSON.stringify(value)) as S[K];
     },
     hasItem(key) {
       return store.has(key);
@@ -27,7 +27,7 @@ export function createInMemoryStorage<S>(): InMemoryStorage<S> {
       store.set(key, value);
     },
     getAll() {
-      return Object.fromEntries(store.entries());
+      return Object.fromEntries(store.entries()) as S;
     },
     setAll(s) {
       if (!s) errors.throwError(`The storage cannot be set to ${s}`);

@@ -133,7 +133,7 @@ function createRpcClient(url: string, options?: RpcClientOptions): RpcClient {
     if (res.error !== undefined) {
       throw NexusCommonErrors.RequestCkbFailed(res);
     }
-    return res.result;
+    return res.result as Result;
   }
 
   async function batchRequest<Result = unknown, Params = unknown>(
@@ -155,7 +155,7 @@ function createRpcClient(url: string, options?: RpcClientOptions): RpcClient {
       if (res.error !== undefined) {
         throw NexusCommonErrors.RequestCkbFailed(res);
       }
-      return res.result;
+      return res.result as Result;
     });
   }
 

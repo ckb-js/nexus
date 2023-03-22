@@ -73,7 +73,7 @@ export function createSessionMessenger<Map extends CallMap>(
 
   return {
     sessionId: () => sessionId,
-    send: (type, param) => {
+    send: <T extends keyof Map>(type: T, param?: CallParam<Map[T]>) => {
       const currentReqId = genJsonRpcRequestId();
 
       const requestMessage = createSessionMessage(createJSONRPCRequest(currentReqId, String(type), param));
@@ -93,7 +93,7 @@ export function createSessionMessenger<Map extends CallMap>(
           if (res.error) {
             reject(res.error);
           } else {
-            resolve(res.result);
+            resolve(res.result as CallResult<Map[T]>);
           }
         });
       });
@@ -112,8 +112,8 @@ export function createSessionMessenger<Map extends CallMap>(
         const res: JSONRPCResponse = await (async () => {
           asserts.asserts(req.id, `request id is required`);
           try {
-            return createJSONRPCSuccessResponse(req.id, await handler(req.params));
-          } catch (e) {
+            return createJSONRPCSuccessResponse(req.id, await handler(req.params as never));
+          } catch (e: unknown) {
             const errorMessage = e instanceof Error ? e.message : 'Internal Error';
             return createJSONRPCErrorResponse(req.id, JSONRPCErrorCode.InternalError, errorMessage, e);
           }
