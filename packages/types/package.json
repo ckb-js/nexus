@@ -16,12 +16,14 @@
     "type": "git",
     "url": "git+https://github.com/ckb-js/nexus.git"
   },
+  "dependencies": {
+    "@nexus-wallet/protocol": "*"
+  },
   "scripts": {
     "start": "cross-env NODE_ENV=development npm run start:webpack",
     "start:webpack": "ts-node ./scripts/start.ts",
     "test": "jest",
     "build": "tsc",
-    "build:docs": "ts-node scripts/buildRpcDocs.ts",
     "clean": "rimraf build/*",
     "check": "npm run check:types",
     "check:types": "tsc --noEmit"
