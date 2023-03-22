@@ -18,4 +18,9 @@ export interface ServerParams {
   getRequesterAppInfo(): Promise<RequesterInfo>;
 }
 
+export type RPCMethodHandler<T extends keyof RpcMethods> = (
+  param: Parameters<RpcMethods[T]>[0],
+  context: ServerParams,
+) => ReturnType<RpcMethods[T]>;
+
 export interface RpcMethods extends ProtocolRpcMethods, DebugMethods {}

@@ -20,6 +20,13 @@ describe('RPC wallet_enable', () => {
   });
 });
 describe('RPC wallet_fullOwnership', () => {
+  beforeAll(async () => {
+    const { request, factory } = createTestRpcServer();
+    const platformService = factory.get('platformService');
+    jest.spyOn(platformService, 'requestGrant').mockImplementation(() => Promise.resolve());
+    await request('wallet_enable');
+  });
+
   it('should request wallet_fullOwnership_getOffChainLocks call ownership service with default parameter', async () => {
     const { request, factory } = createTestRpcServer();
     const fullOwnershipService = factory.get('fullOwnershipService');
