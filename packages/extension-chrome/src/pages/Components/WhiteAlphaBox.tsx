@@ -11,7 +11,7 @@ export const WhiteAlphaBox: FC<FlexProps> = ({ children, sx, ...props }) => {
       sx={{
         '::-webkit-scrollbar': {
           backgroundColor: 'transparent',
-          w: '8px',
+          w: '5px',
         },
         '::-webkit-scrollbar-thumb': {
           borderRadius: '30px',

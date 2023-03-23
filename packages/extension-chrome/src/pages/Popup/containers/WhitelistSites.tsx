@@ -82,6 +82,7 @@ export const WhitelistSites: FC = () => {
         padding="30px 20px"
         as={WhiteAlphaBox}
         spacing="12px"
+        maxH="288px"
         flexDirection="column"
       >
         {filteredSites?.map((site, index) => (

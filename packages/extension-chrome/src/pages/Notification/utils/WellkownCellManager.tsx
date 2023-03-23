@@ -18,7 +18,7 @@ for (const cfg of Object.values(config.predefined)) {
     },
     parse(cell: Cell) {
       if (cell.data === DEPOSIT_CELL_DATA) {
-        return 'DAO Diposit';
+        return 'DAO Deposit';
       } else {
         return 'DAO Withdraw';
       }
