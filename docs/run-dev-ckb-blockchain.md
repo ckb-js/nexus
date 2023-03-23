@@ -20,7 +20,7 @@ $ tree .
 
 then you get a directory structure like this:
 
-<image width="200" src="./assets/tree.png">
+<image width="300" src="./assets/tree.png">
 
 ## Customize the Configuration
 
@@ -34,18 +34,18 @@ hash_type = "type"
 message = "0x"
 ```
 
-To test Nervos DAO faster, modify the `genesis_epoch_length` parameter in the `specs/dev.toml` file under the `params` section:
-
-```toml
-[params]
-genesis_epoch_length = 1
-```
-
 To produce blocks more quickly, modify the `value` parameter in the `ckb-miner.toml` file under the `miner.workers` section:
 
 ```toml
 [[miner.workers]]
 value = 500  # in million seconds
+```
+
+To test Nervos DAO faster, modify the `genesis_epoch_length` parameter in the `specs/dev.toml` file under the `params` section:
+
+```toml
+[params]
+genesis_epoch_length = 1
 ```
 
 To get some CKB from the genesis block, add a `genesis.issued_cells` block in the `specs/dev.toml` file before the `params` section:
@@ -112,7 +112,7 @@ Found! #4 0x4550fb3b62d9d5ba4d3926db6704b25b90438cfb67037d253ceceb2d86ffdbf7
 
 Sometimes you need to reset the blockchain for some testing purpose.
 
-Firstly, top the CKB node and miner, remove the `data` directory, and then restart the CKB node and miner:
+Firstly, stop the CKB node and miner, then remove the `data` directory, and then restart the CKB node and miner:
 
 ```bash
 $ rm -rf data
