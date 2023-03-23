@@ -8,7 +8,7 @@ import {
 } from '@ckb-lumos/helpers';
 import { Events, FullOwnership, InjectedCkb } from '@nexus-wallet/protocol';
 import { errors } from '@nexus-wallet/utils';
-import { Address, blockchain, Cell, Script, Transaction } from '@ckb-lumos/base';
+import { Address, blockchain, Cell, HexString, Script, Transaction } from '@ckb-lumos/base';
 import { WitnessArgs } from '@ckb-lumos/base/lib/blockchain';
 import { bytes } from '@ckb-lumos/codec';
 import { prepareSigningEntries } from '@ckb-lumos/common-scripts/lib/secp256k1_blake160';
@@ -102,6 +102,10 @@ export class FullOwnershipProvider {
     config: {
       /** Inject at least this amount of capacity */
       amount: BIish;
+
+      /**
+       * If specified, candidate cells for injecting will be filtered by this lock script.
+       */
       lock?: LockScriptLike;
     },
   ): Promise<TransactionSkeletonType> {
@@ -120,18 +124,18 @@ export class FullOwnershipProvider {
       errors.throwError('No change lock script found, it may be a internal bug');
     }
 
-    let remainCapacity = BI.from(config.amount).add(minimalChangeCapacity);
+    let neededCapacity = BI.from(config.amount).add(minimalChangeCapacity);
     const inputCells: Cell[] = [];
     const payerLock = config.lock ? await this.parseLockScriptLike(config.lock) : undefined;
 
     for await (const cell of this.collector({ lock: payerLock })) {
       inputCells.push(cell);
-      remainCapacity = remainCapacity.sub(BI.from(cell.cellOutput.capacity));
-      if (remainCapacity.lte(0)) {
+      neededCapacity = neededCapacity.sub(BI.from(cell.cellOutput.capacity));
+      if (neededCapacity.lte(0)) {
         break;
       }
     }
-    if (remainCapacity.gt(0)) {
+    if (neededCapacity.gt(0)) {
       errors.throwError('No cell sufficient to inject');
     }
 
@@ -153,8 +157,8 @@ export class FullOwnershipProvider {
 
   /**
    * Pay the transaction fee
-   * @param txSkeleton
-   * @param options
+   * @param txSkeleton The transaction skeleton
+   * @param options if omitted, the candidate cells for paying are all the cells of the wallet
    */
   async payFee({
     txSkeleton,
@@ -205,6 +209,22 @@ export class FullOwnershipProvider {
     return txSkeletonWithFee;
   }
 
+  /**
+   * Collect cells from wallet.
+   * @returns A async iterator of cells
+   *
+   * @example
+   * ```ts
+   * async function getOwnedCells(lock: Script) {
+   * const cells = [];
+   *  for await(const cell of provider.collector({ lock })) {
+   *      cells.push(cell);
+   *  }
+   *
+   * return cells;
+   * }
+   * ```
+   */
   async *collector({ lock }: { lock?: Script } = {}): AsyncIterable<Cell> {
     let cursor = '';
     while (true) {
@@ -224,40 +244,36 @@ export class FullOwnershipProvider {
 
   /**
    * request wallet to sign a transaction skeleton
-   * @param txSkeleton The transaction skeleton, you can create it from transaction object via `@ckb-lumos` {@link createTransactionFromSkeleton}
-   * @returns The signed transaction skeleton. To get the signed transaction object, please use {@link sealTransaction} with empty sealingContents(`[ ]`).
+   * @param txSkeleton The transaction skeleton, you can create it from transaction object via {@link @ckb-lumos/helpers#TransactionSkeleton}
+   * @returns The signed transaction skeleton. Signing message is in `witnesses` field.
    */
   async signTransaction(txSkeleton: TransactionSkeletonType): Promise<TransactionSkeletonType> {
-    const config = await this.getLumosConfig();
-    prepareSigningEntries(txSkeleton, { config });
+    const lumosConfig = await this.getLumosConfig();
+    txSkeleton = prepareSigningEntries(txSkeleton, { config: lumosConfig });
+
     const groupedSignature = await this.ckb.request({
       method: 'wallet_fullOwnership_signTransaction',
       params: { tx: createTransactionFromSkeleton(txSkeleton) },
     });
 
-    txSkeleton = txSkeleton.update('witnesses', (witnesses) => {
-      return witnesses.map((witness, index) => {
-        const [, signature] = groupedSignature[index];
-        if (!signature) return witness;
-        const witnessArgs = WitnessArgs.unpack(witness);
-        return bytes.hexify(
-          WitnessArgs.pack({
-            ...witnessArgs,
-            lock: signature,
-          }),
-        );
-      });
-    });
+    for (let [lock, signature] of groupedSignature) {
+      const witnessIndex = txSkeleton.inputs.findIndex((input) => isEqual(input.cellOutput.lock, lock));
+      if (witnessIndex === -1) {
+        continue;
+      }
 
-    txSkeleton = txSkeleton.update('signingEntries', (signingEntries) =>
-      signingEntries.splice(0, groupedSignature.length),
-    );
+      const witnessArgs = WitnessArgs.unpack(txSkeleton.witnesses.get(witnessIndex) as HexString);
+      let witnesses = txSkeleton.witnesses;
+      witnesses = witnesses.set(witnessIndex, bytes.hexify(WitnessArgs.pack({ ...witnessArgs, lock: signature })));
+      txSkeleton = txSkeleton.set('witnesses', witnesses);
+    }
+
+    txSkeleton = txSkeleton.update('signingEntries', (entries) => entries.clear());
 
     return txSkeleton;
   }
 
-  // TODO: wait for wallet provide a API to get genius block hash
-  /* istanbul ignore next */
+  // TODO: wait for wallet provide a API to get genesis block hash
   private async getLumosConfig(): Promise<LumosConfig> {
     errors.unimplemented();
   }

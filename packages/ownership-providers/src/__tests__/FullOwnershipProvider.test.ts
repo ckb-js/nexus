@@ -7,6 +7,8 @@ import { predefined } from '@ckb-lumos/config-manager';
 import * as secp256k1Blake160 from '@ckb-lumos/common-scripts/lib/secp256k1_blake160';
 
 import { FullOwnershipProvider } from '..';
+import { WitnessArgs } from '@ckb-lumos/base/lib/blockchain';
+import { bytes } from '@ckb-lumos/codec';
 
 function getExpectedFee(txSkeleton: TransactionSkeletonType, feeRate = BI.from(1000)): BI {
   return BI.from(
@@ -295,16 +297,17 @@ describe('class FullOwnershipProvider', () => {
   describe('#Sign transaction', () => {
     const groupedSignature = [
       [
-        undefined,
+        onChainLocks2,
         '0x69000000100000006900000069000000550000005500000010000000550000005500000041000000d376d4bcb6539fe0e0b3d408556757183c75ccaf5c31b2486f9d0411217d41372828ed78e57d1cff7ffaeaf4870ebfdb338828175f8d197af203e7f4ac26924d00',
       ],
       [
-        undefined,
+        onChainLocks3,
         '0x5500000010000000550000005500000041000000a15ff63f3d55e6360a8ee9ce25fb77c320e5e23cbee767953a7291f9c3e1c222782d90079d5c86a238061e7c995b9fd61ccc45d77e5c0e6883e8dd0c5fc6078a00',
       ],
     ];
 
     it('Should put signature into witnesses', async () => {
+      const emptyWitness = bytes.hexify(WitnessArgs.pack({}));
       const txSkeleton = TransactionSkeleton()
         .update('inputs', (inputs) => {
           return inputs.push(
@@ -314,15 +317,19 @@ describe('class FullOwnershipProvider', () => {
               outPoint: { txHash: '0xe1cfb60b99b4a0b0b00240a3521ead04efdd96cd9a433819f72f33d150a6dadb', index: '0x0' },
             },
             {
-              cellOutput: { capacity: '0xaa', lock: onChainLocks1 },
+              cellOutput: { capacity: '0xaa', lock: onChainLocks2 },
+              data: '0x',
+              outPoint: { txHash: '0xe1cfb60b99b4a0b0b00240a3521ead04efdd96cd9a433819f72f33d150a6dadb', index: '0x0' },
+            },
+            {
+              cellOutput: { capacity: '0xaa', lock: onChainLocks3 },
               data: '0x',
               outPoint: { txHash: '0xe1cfb60b99b4a0b0b00240a3521ead04efdd96cd9a433819f72f33d150a6dadb', index: '0x0' },
             },
           );
         })
-        .update('signingEntries', (signingEntries) => {
-          const placeholder = { type: 'type', index: 0, message: '0x' };
-          return signingEntries.push(placeholder, placeholder, placeholder, placeholder);
+        .update('witnesses', (witnesses) => {
+          return witnesses.push(emptyWitness, emptyWitness, emptyWitness);
         });
 
       const prepareSigningEntries = jest
@@ -336,15 +343,18 @@ describe('class FullOwnershipProvider', () => {
       provider['getLumosConfig'] = jest.fn().mockReturnValue(predefined.LINA);
 
       const signedTxSkeleton = await provider.signTransaction(txSkeleton);
-      expect(provider['getLumosConfig']).toBeCalled();
+      expect(prepareSigningEntries).toHaveBeenCalledWith(txSkeleton, { config: predefined.LINA });
+
+      expect(signedTxSkeleton.get('witnesses').get(0)).toBe(emptyWitness);
+
       signedTxSkeleton
         .get('witnesses')
-        .slice(0, groupedSignature.length)
+        .slice(1)
         .forEach((witness, index) => {
-          expect(witness).toEqual(groupedSignature[index][1]);
+          const lock = WitnessArgs.unpack(witness).lock;
+          expect(lock).toEqual(groupedSignature[index][1]);
         });
-
-      expect(prepareSigningEntries).toHaveBeenCalledWith(txSkeleton, { config: predefined.LINA });
+      expect(signedTxSkeleton.get('signingEntries').size).toBe(0);
     });
   });
 });
