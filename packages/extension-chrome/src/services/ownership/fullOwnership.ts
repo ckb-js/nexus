@@ -9,7 +9,7 @@ import { BackendProvider } from './backend';
 import { HexString, Script, utils } from '@ckb-lumos/lumos';
 import { common } from '@ckb-lumos/common-scripts';
 import { Config } from '@ckb-lumos/config-manager';
-import { SIGN_DATA_MAGIC } from '@nexus-wallet/protocol/lib/constants';
+import { SIGN_DATA_MAGIC } from '@nexus-wallet/protocol';
 
 export function createFullOwnershipService({
   storage,
