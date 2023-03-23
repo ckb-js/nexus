@@ -1,6 +1,8 @@
-import type { Bytes, Paginate, RequesterInfo } from '../base';
-import type { Cell, Script, Transaction } from '@ckb-lumos/lumos';
+import type { RequesterInfo } from '../base';
+import type { Cell, Script } from '@ckb-lumos/lumos';
 import type { BytesLike } from '@ckb-lumos/codec';
+import { FullOwnership, GroupedSignature, Paginate, Signature } from '@nexus-wallet/protocol';
+import { OmitPrefix } from '../helpers';
 
 export interface OwnershipService {
   getLiveCells(payload?: GetLiveCellsPayload): Promise<Paginate<Cell>>;
@@ -16,35 +18,20 @@ export interface OwnershipService {
    * sign a transaction, only the secp256k1_blake2b lock will be signed
    * @param payload
    */
-  signTransaction(payload: SignTransactionPayload & RequesterInfo): Promise<GroupedSignature>;
+  signTransaction(payload: SignTransactionPayload): Promise<GroupedSignature>;
 
   /**
    * sign binary data
    * @param payload
    */
-  signData(payload: SignDataPayload & RequesterInfo): Promise<Signature>;
+  signData(payload: SignDataPayload): Promise<Signature>;
 }
 
-export interface GetPaginateItemsPayload {
-  cursor?: string;
-}
+type OwnershipMethods = OmitPrefix<FullOwnership, 'wallet_fullOwnership_'>;
+type ParamOf<K extends keyof OwnershipMethods> = Parameters<OwnershipMethods[K]>[0];
 
-export interface FilterPayload {
-  change?: 'external' | 'internal';
-}
-
-export interface GetOffChainLocksPayload extends FilterPayload {}
-export interface GetLiveCellsPayload extends GetPaginateItemsPayload {}
-export interface GetOnChainLocksPayload extends GetPaginateItemsPayload, FilterPayload {}
-
-export interface SignTransactionPayload {
-  tx: Transaction;
-}
-
-export type SignDataPayload = {
-  data: BytesLike;
-  lock: Script;
-};
-
-export type GroupedSignature = [Script, Signature][];
-export type Signature = Bytes;
+export type GetOffChainLocksPayload = ParamOf<'getOffChainLocks'>;
+export type GetLiveCellsPayload = ParamOf<'getLiveCells'>;
+export type GetOnChainLocksPayload = ParamOf<'getOnChainLocks'>;
+export type SignTransactionPayload = ParamOf<'signTransaction'> & RequesterInfo;
+export type SignDataPayload = { data: BytesLike; lock: Script } & RequesterInfo;

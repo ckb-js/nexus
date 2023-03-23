@@ -1,6 +1,6 @@
 {
   "name": "@nexus-wallet/nexus",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "An UTxO friendly wallet extension for CKB",
   "private": true,
   "engines": {
@@ -15,6 +15,7 @@
   "devDependencies": {
     "@auto-it/magic-zero": "10.43.0",
     "@auto-it/npm": "10.43.0",
+    "@auto-it/protected-branch": "10.43.0",
     "@auto-it/released": "10.43.0",
     "@auto-it/upload-assets": "10.43.0",
     "@babel/preset-env": "7.20.2",
@@ -73,20 +74,16 @@
       "npx eslint"
     ],
     "packages/types/**/*": [
-      "npm run build:docs -w @nexus-wallet/types",
+      "npm run build:docs -w @nexus-wallet/protocol",
+      "prettier --write",
       "git add docs/rpc.md"
     ]
-  },
-  "dependencies": {
-    "@types/webextension-polyfill": "0.10.0",
-    "lodash.times": "4.3.2",
-    "webext-bridge": "5.0.5",
-    "webextension-polyfill": "0.10.0"
   },
   "auto": {
     "plugins": [
       "magic-zero",
       "./scripts/build-extension.ts",
+      "protected-branch",
       [
         "upload-assets",
         [

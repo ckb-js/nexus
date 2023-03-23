@@ -1,14 +1,15 @@
 type PromiseLiked<T> = PromiseLike<Awaited<T>>;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyFn = (...args: any) => any;
-type StrKeyOf<T> = Extract<keyof T, string>;
+type Assert<A, E> = A extends E ? A : never;
+type AssertFn<T> = Assert<T, AnyFn>;
 
 /**
  * An object acts as an RPC client and an event client to communicate with Nexus
  *
  * @example
- *   import { Ownership, Events } from '@nexus-wallet/protocol';
- *   const ckb: InjectedCkb<Ownership, Events> = window.ckb;
+ *   import { RpcMethods, Events } from '@nexus-wallet/protocol';
+ *   const ckb: InjectedCkb<RpcMethods, Events> = window.ckb;
  *   ckb.request({ method: 'wallet_enable' });
  *
  * @typeParam Rpc - The RPC methods
@@ -19,11 +20,14 @@ export interface InjectedCkb<Rpc = any, Evt = any> extends RpcClient<Rpc>, Event
   readonly version: string;
 }
 
+/**
+ * @typeParam T - An object of RPC methods
+ */
 export interface RpcClient<T> {
-  request<K extends StrKeyOf<T>>(payload: {
+  request<K extends keyof T>(payload: {
     method: K;
-    params?: T[K] extends AnyFn ? Parameters<T[K]>[0] : never;
-  }): T[K] extends AnyFn ? PromiseLiked<ReturnType<T[K]>> : never;
+    params?: Parameters<AssertFn<T[K]>>[0];
+  }): PromiseLiked<ReturnType<AssertFn<T[K]>>>;
 }
 
 export interface EventClient<T> {
@@ -33,7 +37,7 @@ export interface EventClient<T> {
    * @param eventName
    * @param listener
    */
-  on<K extends keyof T>(eventName: K, listener: T[K] extends AnyFn ? T[K] : never): void;
+  on<K extends keyof T>(eventName: K, listener: AssertFn<T[K]>): void;
 
   /**
    * Remove a listener, the listener must be the same(===) with the one added
@@ -41,5 +45,5 @@ export interface EventClient<T> {
    * @param eventName
    * @param listener
    */
-  removeListener<K extends keyof T>(eventName: K, listener: T[K] extends AnyFn ? T[K] : never): void;
+  removeListener<K extends keyof T>(eventName: K, listener: AssertFn<T[K]>): void;
 }

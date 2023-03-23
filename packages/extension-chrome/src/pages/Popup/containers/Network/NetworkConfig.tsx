@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import { Flex, Spacer, Button, Radio, RadioGroup, Skeleton, Icon, useToast, VStack } from '@chakra-ui/react';
+import { Flex, Spacer, Button, Radio, RadioGroup, Skeleton, Icon, useToast, VStack, Box } from '@chakra-ui/react';
 import { AddIcon, DeleteIcon } from '@chakra-ui/icons';
 import EditIcon from '../../../Components/icons/Edit.svg';
 import { useNavigate } from 'react-router-dom';
@@ -87,7 +87,7 @@ export const NetworkConfig: FC = () => {
                 justifyContent="space-between"
               >
                 <Radio colorScheme="cyan" data-test-id={`networkRadio[${index}]`} value={network.id}>
-                  {network.displayName}
+                  <Box marginLeft="12px">{network.displayName}</Box>
                 </Radio>
                 <Spacer />
                 {!PERSIST_IDS.has(network.id) && (
