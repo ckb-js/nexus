@@ -57,10 +57,10 @@ jobs:
         with:
           submodules: recursive
 
-      #      - name: Set up git
-      #        run: |
-      #          git config user.name github-actions
-      #          git config user.email github-actions@github.com
+      - name: Set up git
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
 
       - uses: ./.github/actions/install-deps
 
