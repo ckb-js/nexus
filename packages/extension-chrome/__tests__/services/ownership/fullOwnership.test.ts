@@ -20,7 +20,7 @@ import { bytes } from '@ckb-lumos/codec';
 import { Script, utils, Transaction } from '@ckb-lumos/lumos';
 import { common } from '@ckb-lumos/common-scripts';
 import { createEventHub } from '../../../src/services/event';
-import { SIGN_DATA_MAGIC } from '@nexus-wallet/protocol/lib/ownership/fullOwnership';
+import { SIGN_DATA_MAGIC } from '@nexus-wallet/protocol/lib/constants';
 
 describe('FullOwnership', () => {
   describe('getOffChainLocks', function () {
