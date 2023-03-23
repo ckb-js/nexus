@@ -1,3 +1,15 @@
+# v0.0.3 (Thu Mar 23 2023)
+
+#### 🐛 Bug Fix
+
+- fix(extension-chrome): fix typo and whitelist UI overflow [#142](https://github.com/ckb-js/nexus/pull/142) ([@IronLu233](https://github.com/IronLu233))
+
+#### Authors: 1
+
+- Iron Lu ([@IronLu233](https://github.com/IronLu233))
+
+---
+
 # v0.0.2 (Thu Mar 23 2023)
 
 #### 🔨 Breaking Minor Change
