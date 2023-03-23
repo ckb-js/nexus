@@ -1,14 +1,14 @@
 import { concatMdSync } from 'concat-md';
-import fs from 'fs';
-import path from 'path';
+import * as fs from 'fs';
+import * as path from 'path';
 import { execSync } from 'child_process';
 
 // entryPoints for typedoc
-const RPC_DECL_ENTRYPOINT = path.join(__dirname, '../src/rpc/index.ts');
+const RPC_DECL_ENTRYPOINT = path.join(__dirname, './rpc.ts');
 // output dir for typedoc
 const TMP_OUTPUT_DIR = path.join(__dirname, '.tmpdoc');
 // output dir for typedoc interfaces
-const TMP_OUTPUT_INTERFACE_DIR = path.join(TMP_OUTPUT_DIR, 'interfaces');
+const TMP_OUTPUT_INTERFACE_DIR = path.join(TMP_OUTPUT_DIR);
 // output path for rpc.md
 const OUTPUT_MD_PATH = path.join(__dirname, '../../../docs/rpc.md');
 
@@ -18,10 +18,10 @@ async function main() {
     --entryPoints "${RPC_DECL_ENTRYPOINT}" \
     --out "${TMP_OUTPUT_DIR}" \
     --hideMembersSymbol \
-    --sort source-order \
     --disableSources \
     --plugin typedoc-plugin-markdown \
     --hideBreadcrumbs \
+    --tsconfig tsconfig.typedoc.json \
     --readme none`,
   );
 
