@@ -2,7 +2,9 @@
 
 ## Why
 
-With a dev blockchain, you can connect your Nexus wallet to it and test your DApp locally.
+Nexus wallet is connected to the CKB testnet/mainnet by default, thus there are some restrictions on the DApp development. For instance, it is not possible to modify the block generation frequency or the epoch length, and network stability may be uncertain.
+
+With a dev blockchain, you can take full control of the blockchain, change the configuration to build a test environment that is more suitable for DApp development.
 
 ## Download the latest CKB Binary
 
