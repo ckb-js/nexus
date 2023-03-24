@@ -24,7 +24,7 @@ import { Sleep } from '../../src/nexus/util/helper';
 import { BrowserContext, Page } from 'playwright';
 
 injectionTestStatus();
-describe('popup', function () {
+describe.only('popup', function () {
   let browser: BrowserContext;
   let nexusWallet: NexusWallet;
   let page: Page;
