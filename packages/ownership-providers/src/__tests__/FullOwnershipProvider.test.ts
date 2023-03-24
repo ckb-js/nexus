@@ -170,7 +170,7 @@ describe('class FullOwnershipProvider', () => {
         createFakeCellWithCapacity(200 * 1e8, onChainLocks2),
       ]);
       const txSkeleton = createFakeSkeleton();
-      const withFee = await provider.payFee({ txSkeleton, options: { payers: [onChainLocks2] } });
+      const withFee = await provider.payFee({ txSkeleton, options: { payers: [onChainLocks2], autoInject: false } });
       expect(withFee.inputs.size).toBe(2);
       expect(withFee.outputs.size).toBe(2);
       const payerCell = withFee.inputs.get(1);

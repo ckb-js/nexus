@@ -32,7 +32,7 @@ export type PayFeeOptions = {
 } & PayBy;
 export type PayBy = PayByPayers | PayByAuto;
 /** Pay by the specified payers */
-export type PayByPayers = { payers: LockScriptLike[]; autoInject?: boolean };
+export type PayByPayers = { payers: LockScriptLike[]; autoInject: boolean };
 /** Pay by inject automatically */
 export type PayByAuto = { autoInject: true };
 
@@ -156,10 +156,41 @@ export class FullOwnershipProvider {
   }
 
   /**
-   * Pay the transaction fee
-   * @param txSkeleton The transaction skeleton
-   * @param options if omitted, the candidate cells for paying are all the cells of the wallet
+   * Pay the transaction fee using the wallet owned lock
+   * @param params.txSkeleton The transaction skeleton
+   * @param params.options.feeRate the fee rate, if omitted the fee rate will be calculated automatically
+   * @example
+   * ```ts
+   * const provider = new FullOwnershipProvider({ ckb });
+   * // auto calculate fee rate and use wallet owned lock to pay fee
+   * const txSkeleton = await provider.payFee({ txSkeleton });
+   * ```
    */
+  payFee(params: {
+    txSkeleton: TransactionSkeletonType;
+    options?: { feeRate?: number } & PayByAuto;
+  }): Promise<TransactionSkeletonType>;
+
+  /**
+   * Pay the transaction fee using the specified lock
+   * @description `options.payers` and options `options.autoInject` are required. If `options.autoInject` is true, wallet owned lock can be payer as fallback
+   * @param params.txSkeleton The transaction skeleton
+   * @param params.options.payers Only cell with these lock scripts can be used to pay fee
+   * @param params.options.autoInject if true, wallet owned lock can be payer as fallback
+   * @example
+   * ```ts
+   * const provider = new FullOwnershipProvider({ ckb });
+   * // auto inject capacity when payers can not cover the fee
+   * const txSkeleton = await provider.payFee({ txSkeleton, payers: [payer1, payer2], autoInject: true });
+   * // throw error when payers can not cover the fee
+   * const txSkeleton = await provider.payFee({ txSkeleton, payers: [payer1, payer2], autoInject: false });
+   * ```
+   */
+  payFee(params: {
+    txSkeleton: TransactionSkeletonType;
+    options: { feeRate?: number } & PayByPayers;
+  }): Promise<TransactionSkeletonType>;
+
   async payFee({
     txSkeleton,
     options = { autoInject: true },
