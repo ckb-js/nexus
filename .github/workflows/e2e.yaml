@@ -1,0 +1,108 @@
+name: E2E Test
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  unit-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: restore dependencies
+        uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+
+      - name: start nexus web web
+        id: startWeb
+        if: success() || failure()
+        run: |
+          cd /home/runner/work/nexus/nexus/e2e/packages/nexus-web
+          npm i
+          npm run start > node.log 2>&1 &
+
+      - name: test
+        id: test
+        if: success() || failure()
+        run: |
+          cd /home/runner/work/nexus/nexus/e2e/packages/e2e
+          npm i
+          npm run build
+          xvfb-run --auto-servernum npm run jest
+      - name: make update file  dir
+        if: success() || failure()
+        run: |
+          mkdir /home/runner/work/nexus/nexus/reportAndNexus
+      - name: cp nexus file to update file
+        if: success() || failure()
+        run: |
+          tar -zcvf /home/runner/work/nexus/nexus/reportAndNexus/build.tar.gz /home/runner/work/nexus/nexus/packages/extension-chrome/build
+
+      - name: package report
+        id: package
+        if: success() || failure()
+        run: |
+          tar -zcvf /home/runner/work/nexus/nexus/reportAndNexus/allure-results.tar.gz  /home/runner/work/nexus/nexus/e2e/packages/e2e/allure-results
+
+      - name: Publish e2e test report and nexus build
+        if: success() || failure()
+        uses: actions/upload-artifact@v2
+        with:
+          name: jfoa-build-reports-${{ runner.os }}
+          path: /home/runner/work/nexus/nexus/reportAndNexus
+
+      - name: cp report
+        id: cp-report
+        if: success() || failure()
+        run: |
+          cd /home/runner/work/nexus/nexus
+          cp -r /home/runner/work/nexus/nexus/e2e/packages/e2e/allure-results .
+
+      - name: Get Allure history
+        uses: actions/checkout@v2
+        if: always()
+        continue-on-error: true
+        with:
+          ref: gh-pages
+          repository: gpBlockchain/nexus-e2e-report
+          path: gh-pages
+
+      - name: Allure Report action from marketplace
+        uses: simple-elf/allure-report-action@master
+        if: always()
+        #id: allure-report
+        with:
+          allure_results: /home/runner/work/nexus/nexus/allure-results
+          github_repo: gpBlockchain/nexus-e2e-report
+          github_repo_owner: ${{ github.repository_owner }}
+          gh_pages: gh-pages
+          #allure_report: allure-report
+          allure_history: allure-history
+          keep_reports: 20
+
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@v4
+        if: always()
+        with:
+          token: ${{ secrets.PERSON_TOKEN }}
+          folder: allure-history # The folder the action should deploy.
+          repository-name: gpBlockchain/nexus-e2e-report
+          branch: gh-pages
+
+      - name: Cat report Link
+        if: always()
+        run: |
+          cat allure-history/index.html
