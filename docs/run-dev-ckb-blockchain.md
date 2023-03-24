@@ -34,6 +34,13 @@ hash_type = "type"
 message = "0x"
 ```
 
+Modify the modules in the `ckb.toml` file under the `rpc` section:
+
+```toml
+[rpc]
+modules = ["Net", "Pool", "Miner", "Chain", "Stats", "Subscription", "Experiment", "Debug", "Indexer"] # Add "Indexer" module
+```
+
 To produce blocks more quickly, modify the `value` parameter in the `ckb-miner.toml` file under the `miner.workers` section:
 
 ```toml
@@ -84,9 +91,13 @@ $ ../ckb run
 2020-06-05 18:31:26.586 +08:00 ChainService INFO ckb-chain  block: 1, hash: 0x47995f78e95202d2c85ce11bce2ee16d131a57d871f7d93cd4c90ad2a8220bd1, epoch: 0(1/1000), total_diff: 0x200, txs: 1
 ```
 
+The dev blockchain is now running, rpc endpoint is: `http://localhost:8114`
+
 </details>
 
 ## Start the CKB Miner
+
+Start a miner to pack transactions and generate blocks:
 
 ```bash
 # open a new terminal tab
