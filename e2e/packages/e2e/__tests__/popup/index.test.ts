@@ -2,7 +2,6 @@ import { expectedThrow, failedTestScreenshot, injectionTestStatus, step } from '
 import { launchWithNexus } from '../../src/setup/launch';
 import { setUpNexus } from '../../src/setup/setup';
 import { NEXUS_BUILD_PATH, NEXUS_WEB_LOCAL_URL, NEXUS_WEB_URL, PASSWd, UserName } from '../config/config';
-import { BrowserContext, Page } from 'playwright';
 import { AddNetworkOpt, NexusWallet } from '../../src/types';
 import {
   clickAdd,
@@ -22,6 +21,7 @@ import { enableWallet } from '../../src/nexus/servicer/provider';
 import { clickConnect } from '../../src/nexus/helper/notification';
 import { wallet_enable, wallet_fullOwnership_getLiveCells } from '../../src/nexus/servicer/rpc';
 import { Sleep } from '../../src/nexus/util/helper';
+import { BrowserContext, Page } from 'playwright';
 
 injectionTestStatus();
 describe('popup', function () {
