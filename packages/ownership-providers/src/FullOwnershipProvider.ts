@@ -29,7 +29,17 @@ export type PayFeeOptions = {
    * The fee rate, in Shannons per byte. If not specified, the fee rate will be calculated automatically.
    */
   feeRate?: BIish;
-} & PayBy;
+
+  /**
+   * Only cell with these lock scripts can be used to pay fee
+   */
+  payers?: LockScriptLike[];
+
+  /**
+   * if `true`, the fee can be paid by the other wallet owned cells. if {@link PayFeeOptions#payers} is specified, payers lock have higher priority.
+   */
+  autoInject: boolean;
+};
 export type PayBy = PayByPayers | PayByAuto;
 /** Pay by the specified payers */
 export type PayByPayers = { payers: LockScriptLike[]; autoInject: boolean };
@@ -156,56 +166,32 @@ export class FullOwnershipProvider {
   }
 
   /**
-   * Pay the transaction fee using the wallet owned lock
-   * @param params.txSkeleton The transaction skeleton
-   * @param params.options.feeRate the fee rate, if omitted the fee rate will be calculated automatically
+   * Pay the transaction fee using the specified lock
+   * @param txSkeleton The transaction skeleton
+   * @param options.payers if provided, candidates for paying fee will be filtered by these lock scripts
+   * @param options.autoInject if true, wallet owned lock can be payer as fallback
+   * @param options.feeRate The fee rate, in Shannons per byte. If not specified, the fee rate will be calculated automatically.
    * @example
    * ```ts
+   * const provider = new FullOwnershipProvider({ ckb });
    * const provider = new FullOwnershipProvider({ ckb });
    * // auto calculate fee rate and use wallet owned lock to pay fee
    * const txSkeleton = await provider.payFee({ txSkeleton });
-   * ```
-   */
-  payFee(params: {
-    txSkeleton: TransactionSkeletonType;
-    options?: { feeRate?: number } & PayByAuto;
-  }): Promise<TransactionSkeletonType>;
-
-  /**
-   * Pay the transaction fee using the specified lock
-   * @description `options.payers` and options `options.autoInject` are required. If `options.autoInject` is true, wallet owned lock can be payer as fallback
-   * @param params.txSkeleton The transaction skeleton
-   * @param params.options.payers Only cell with these lock scripts can be used to pay fee
-   * @param params.options.autoInject if true, wallet owned lock can be payer as fallback
-   * @example
-   * ```ts
-   * const provider = new FullOwnershipProvider({ ckb });
    * // auto inject capacity when payers can not cover the fee
    * const txSkeleton = await provider.payFee({ txSkeleton, payers: [payer1, payer2], autoInject: true });
    * // throw error when payers can not cover the fee
    * const txSkeleton = await provider.payFee({ txSkeleton, payers: [payer1, payer2], autoInject: false });
    * ```
    */
-  payFee(params: {
-    txSkeleton: TransactionSkeletonType;
-    options: { feeRate?: number } & PayByPayers;
-  }): Promise<TransactionSkeletonType>;
-
-  async payFee({
-    txSkeleton,
-    options = { autoInject: true },
-  }: {
-    txSkeleton: TransactionSkeletonType;
-    options?: PayFeeOptions;
-  }): Promise<TransactionSkeletonType> {
-    if ('payers' in options && options.payers.length === 0 && !options.autoInject) {
+  async payFee(txSkeleton: TransactionSkeletonType, options: PayFeeOptions): Promise<TransactionSkeletonType> {
+    if ('payers' in options && options.payers?.length === 0 && !options.autoInject) {
       errors.throwError('no payer is provided, but autoInject is `false`');
     }
 
     let size = 0;
     let txSkeletonWithFee = txSkeleton;
     const autoInject = !!options.autoInject;
-    const payers = 'payers' in options ? options.payers : [];
+    const payers = options.payers ? options.payers : [];
     const feeRate = BI.from(options.feeRate || 1000);
     let currentTransactionSize = getTransactionSizeByTx(createTransactionFromSkeleton(txSkeleton));
 

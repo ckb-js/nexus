@@ -150,7 +150,7 @@ describe('class FullOwnershipProvider', () => {
     it('Automatically inject capacity when `autoInject` is true', async () => {
       const provider = buildProvider([createFakeCellWithCapacity(100 * 1e8), createFakeCellWithCapacity(200 * 1e8)]);
       const txSkeleton = createFakeSkeleton();
-      const withFee = await provider.payFee({ txSkeleton });
+      const withFee = await provider.payFee(txSkeleton, { autoInject: true });
 
       expect(withFee.get('inputs').size).toBe(2);
       expect(withFee.get('outputs').size).toBe(2);
@@ -161,7 +161,9 @@ describe('class FullOwnershipProvider', () => {
       const provider = buildProvider([]);
       const txSkeleton = createFakeSkeleton();
 
-      await expect(provider.payFee({ txSkeleton })).rejects.toThrowError('No cell sufficient to inject');
+      await expect(provider.payFee(txSkeleton, { autoInject: true })).rejects.toThrowError(
+        'No cell sufficient to inject',
+      );
     });
 
     it('Should use the provided payers lock for paying fee', async () => {
@@ -170,7 +172,7 @@ describe('class FullOwnershipProvider', () => {
         createFakeCellWithCapacity(200 * 1e8, onChainLocks2),
       ]);
       const txSkeleton = createFakeSkeleton();
-      const withFee = await provider.payFee({ txSkeleton, options: { payers: [onChainLocks2], autoInject: false } });
+      const withFee = await provider.payFee(txSkeleton, { payers: [onChainLocks2], autoInject: false });
       expect(withFee.inputs.size).toBe(2);
       expect(withFee.outputs.size).toBe(2);
       const payerCell = withFee.inputs.get(1);
@@ -189,9 +191,9 @@ describe('class FullOwnershipProvider', () => {
         createFakeCellWithCapacity(200 * 1e8, onChainLocks2),
       ]);
       const txSkeleton = createFakeSkeleton();
-      await expect(
-        provider.payFee({ txSkeleton, options: { autoInject: false, payers: [] } }) as any,
-      ).rejects.toThrowError('no payer is provided, but autoInject is `false`');
+      await expect(provider.payFee(txSkeleton, { autoInject: false, payers: [] }) as any).rejects.toThrowError(
+        'no payer is provided, but autoInject is `false`',
+      );
     });
 
     it('Should throw error when payer lock is not available and auto inject is false', async () => {
@@ -201,7 +203,7 @@ describe('class FullOwnershipProvider', () => {
       ]);
       const txSkeleton = createFakeSkeleton();
       await expect(
-        provider.payFee({ txSkeleton, options: { autoInject: false, payers: [onChainLocks3] } }) as any,
+        provider.payFee(txSkeleton, { autoInject: false, payers: [onChainLocks3] }) as any,
       ).rejects.toThrowError('No payer available to pay fee');
     });
   });
