@@ -387,4 +387,27 @@ describe('class FullOwnershipProvider', () => {
       ),
     );
   });
+
+  it('#getOffChainLocks and #getOnChainLocks', async () => {
+    const ckbRequest = jest.fn().mockReturnValue([]);
+    const provider = new FullOwnershipProvider({
+      ckb: {
+        request: ckbRequest,
+      } as any,
+    });
+
+    await expect(provider.getOffChainLocks({ change: 'internal' })).resolves.toEqual([]);
+    expect(ckbRequest).toBeCalledWith({
+      method: 'wallet_fullOwnership_getOffChainLocks',
+      params: { change: 'internal' },
+    });
+
+    await expect(provider.getOnChainLocks({ cursor: '0' })).resolves.toEqual([]);
+    expect(ckbRequest).toBeCalledWith({
+      method: 'wallet_fullOwnership_getOnChainLocks',
+      params: {
+        cursor: '0',
+      },
+    });
+  });
 });
