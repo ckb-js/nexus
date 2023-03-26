@@ -116,7 +116,7 @@ export function createSessionMessenger<Map extends CallMap>(
           asserts.asserts(req.id, `request id is required`);
           try {
             return createJSONRPCSuccessResponse(req.id, await handler(req.params as CallParam<Map[T]>));
-          } catch (e: unknown) {
+          } catch (e) {
             const errorMessage = e instanceof Error ? e.message : 'Internal Error';
             return createJSONRPCErrorResponse(req.id, JSONRPCErrorCode.InternalError, errorMessage, e);
           }

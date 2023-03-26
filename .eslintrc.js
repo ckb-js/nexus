@@ -20,7 +20,6 @@ module.exports = {
       files: '*.{ts,tsx}',
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
-        '@typescript-eslint/no-implicit-any-catch': 'error',
         '@typescript-eslint/no-unsafe-argument': 'error',
         '@typescript-eslint/no-unsafe-assignment': 'error',
         '@typescript-eslint/no-unsafe-call': 'error',
@@ -36,7 +35,6 @@ module.exports = {
       files: '**/__tests__/**/*.{ts,tsx}',
       rules: {
         '@typescript-eslint/no-explicit-any': 'off',
-        '@typescript-eslint/no-implicit-any-catch': 'off',
         '@typescript-eslint/no-unsafe-argument': 'off',
         '@typescript-eslint/no-unsafe-assignment': 'off',
         '@typescript-eslint/no-unsafe-call': 'off',

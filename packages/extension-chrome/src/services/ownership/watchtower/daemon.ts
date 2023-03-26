@@ -67,7 +67,7 @@ export function createDaemonWatchtower(factory: ModulesFactory, options?: Runner
       try {
         await compareAndEmit();
         await asyncSleep(pollIntervalMs);
-      } catch (e: unknown) {
+      } catch (e) {
         logger.error('Watchtower state listener error:', e);
         await asyncSleep(pollIntervalMs);
       }
