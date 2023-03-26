@@ -115,6 +115,9 @@ export class FullOwnershipProvider {
     },
   ): Promise<TransactionSkeletonType> {
     const changeLock = (await this.getOffChainLocks({ change: 'internal' }))[0];
+    if (!changeLock) {
+      errors.throwError('No change lock script found, it may be a internal bug');
+    }
 
     const changeCell: Cell = {
       cellOutput: {
@@ -124,10 +127,6 @@ export class FullOwnershipProvider {
       data: '0x',
     };
     const minimalChangeCapacity = minimalCellCapacityCompatible(changeCell);
-
-    if (!changeLock) {
-      errors.throwError('No change lock script found, it may be a internal bug');
-    }
 
     let neededCapacity = BI.from(config.amount).add(minimalChangeCapacity);
     const inputCells: Cell[] = [];
@@ -270,6 +269,8 @@ export class FullOwnershipProvider {
 
     for (let [lock, signature] of groupedSignature) {
       const witnessIndex = txSkeleton.inputs.findIndex((input) => isEqual(input.cellOutput.lock, lock));
+
+      /* istanbul ignore next */
       if (witnessIndex === -1) {
         continue;
       }

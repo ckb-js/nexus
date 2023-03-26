@@ -205,6 +205,14 @@ describe('class FullOwnershipProvider', () => {
         provider.payFee(txSkeleton, { autoInject: false, payers: [onChainLocks3] }) as any,
       ).rejects.toThrowError('No payer available to pay fee');
     });
+    it('Should throw error when changeLock is not found', async () => {
+      const provider = new FullOwnershipProvider({} as any);
+      provider.getOffChainLocks = jest.fn().mockResolvedValue([]);
+      // @ts-expect-error
+      await expect(provider.injectCapacity()).rejects.toThrowError(
+        'No change lock script found, it may be a internal bug',
+      );
+    });
   });
 
   it('#getLiveCells', async () => {
