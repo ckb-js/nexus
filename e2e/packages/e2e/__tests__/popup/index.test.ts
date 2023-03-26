@@ -159,7 +159,11 @@ describe('popup', function () {
       let newPage: Page;
       await step(`goto white web:${whiteUrl}`, async () => {
         newPage = await browser.newPage();
-        await newPage.goto(`https://${whiteUrl}`);
+        if (whiteUrl.includes('localhost')) {
+          await newPage.goto(`http://${whiteUrl}`);
+        } else {
+          await newPage.goto(`https://${whiteUrl}`);
+        }
       });
       let ret: unknown;
       await step('send ckb.enable', async () => {
@@ -469,9 +473,7 @@ describe('popup', function () {
       await step(`change network:${addTestNetOpt.name}`, async () => {
         await nexusWallet.popup.changeNetworkByName(addTestNetOpt.name);
       });
-      await step(`click network`, async () => {
-        await newPage.click('#getNetworkName');
-      });
+
       await step('get network response', async () => {
         await newPage.getByText(addTestNetOpt.name).innerText();
       });
@@ -500,9 +502,6 @@ describe('popup', function () {
       await step(`change network:Ckb `, async () => {
         // await nexusWallet.popup.changeNetworkByName(addTestNetOpt.name)
         await nexusWallet.popup.changeNetworkByName('Mainnet');
-      });
-      await step(`click network`, async () => {
-        await newPage.click('#getNetworkName');
       });
       let afterChangeNetworkResponse: string;
       await step('get network response', async () => {
