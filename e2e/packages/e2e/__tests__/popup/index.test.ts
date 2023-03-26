@@ -464,9 +464,6 @@ describe('popup', function () {
       await step('connected web', async () => {
         await nexusWallet.connect();
       });
-      await step('click network', async () => {
-        await newPage.click('#getNetworkName');
-      });
       await step('get network response', async () => {
         await newPage.locator('#networkNameResponse').innerText();
       });
