@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { BI } from '@ckb-lumos/bi';
-import { TransactionSkeleton, TransactionSkeletonType } from '@ckb-lumos/helpers';
+import { parseAddress, TransactionSkeleton, TransactionSkeletonType } from '@ckb-lumos/helpers';
 import { common } from '@ckb-lumos/common-scripts';
 import { Cell, Script } from '@nexus-wallet/protocol';
 import { predefined } from '@ckb-lumos/config-manager';
 import * as secp256k1Blake160 from '@ckb-lumos/common-scripts/lib/secp256k1_blake160';
-
 import { FullOwnershipProvider } from '..';
 import { WitnessArgs } from '@ckb-lumos/base/lib/blockchain';
 import { bytes } from '@ckb-lumos/codec';
@@ -358,5 +357,26 @@ describe('class FullOwnershipProvider', () => {
         });
       expect(signedTxSkeleton.get('signingEntries').size).toBe(0);
     });
+  });
+
+  // TODO: when get lumos config implementation is read, add more test
+  it('#getLumosConfig', async () => {
+    const provider = new FullOwnershipProvider({} as any);
+    await expect(() => provider['getLumosConfig']()).rejects.toThrow();
+  });
+
+  it('#parseLockScriptLike', async () => {
+    const provider = new FullOwnershipProvider({} as any);
+    provider['getLumosConfig'] = jest.fn().mockResolvedValue(predefined.AGGRON4);
+    await expect(
+      provider['parseLockScriptLike'](
+        'ckt1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsqgxvk9qlymu894vugvgflwa967zjvud07qq4x3kf',
+      ),
+    ).resolves.toEqual(
+      parseAddress(
+        'ckt1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsqgxvk9qlymu894vugvgflwa967zjvud07qq4x3kf',
+        { config: predefined.AGGRON4 },
+      ),
+    );
   });
 });

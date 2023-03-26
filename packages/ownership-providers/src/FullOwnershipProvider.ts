@@ -40,11 +40,6 @@ export type PayFeeOptions = {
    */
   autoInject: boolean;
 };
-export type PayBy = PayByPayers | PayByAuto;
-/** Pay by the specified payers */
-export type PayByPayers = { payers: LockScriptLike[]; autoInject: boolean };
-/** Pay by inject automatically */
-export type PayByAuto = { autoInject: true };
 
 // TODO: let lumos export `getTransactionSizeByTx` and `calculateFeeCompatible` and `lockToScript`
 /* istanbul ignore next */
