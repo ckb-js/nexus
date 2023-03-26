@@ -20,11 +20,10 @@ import {
 import { enableWallet } from '../../src/nexus/servicer/provider';
 import { clickConnect } from '../../src/nexus/helper/notification';
 import { wallet_enable, wallet_fullOwnership_getLiveCells } from '../../src/nexus/servicer/rpc';
-import { Sleep } from '../../src/nexus/util/helper';
 import { BrowserContext, Page } from 'playwright';
 
 injectionTestStatus();
-describe.only('popup', function () {
+describe('popup', function () {
   let browser: BrowserContext;
   let nexusWallet: NexusWallet;
   let page: Page;
@@ -513,7 +512,6 @@ describe.only('popup', function () {
       await step('not eq ', async () => {
         expect(beforeNetworkResponse).not.toBe(afterChangeNetworkResponse);
       });
-      await Sleep(10000);
     });
     it('change to bad url', async () => {
       await step('add bad url', async () => {
@@ -552,6 +550,9 @@ describe.only('popup', function () {
     await failedTestScreenshot(browser);
     const pages = browser.pages();
     for (let i = 0; i < pages.length; i++) {
+      if (pages[i].url() === 'about:blank') {
+        continue;
+      }
       await pages[i].close();
     }
   });
