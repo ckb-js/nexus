@@ -70,36 +70,36 @@ describe('importWallet', function () {
 
     it('#1 Mnemonic phrase contains repeated words => unable to import mnemonic phrase', async () => {
       //todo pass
-      const replace_mn = 'abandon abandon able about above absent absorb abstract absurd abuse access accident';
-      await step(`input mnemonic:${replace_mn}`, async () => {
-        await inputMnemonic(page, replace_mn);
+      const replaceMnemonic = 'abandon abandon able about above absent absorb abstract absurd abuse access accident';
+      await step(`input mnemonic:${replaceMnemonic}`, async () => {
+        await inputMnemonic(page, replaceMnemonic);
       });
       await step('click next', async () => {
         await expectedThrow(clickNext(page));
       });
     });
     it('#2 Mnemonic phrase contains number => unable to import mnemonic phrase', async () => {
-      const replace_mn = '1234 abandon able about above absent absorb abstract absurd abuse access accident';
-      await step(`input mnemonic:${replace_mn}`, async () => {
-        await inputMnemonic(page, replace_mn);
+      const replaceMnemonic = '1234 abandon able about above absent absorb abstract absurd abuse access accident';
+      await step(`input mnemonic:${replaceMnemonic}`, async () => {
+        await inputMnemonic(page, replaceMnemonic);
       });
       await step('click next', async () => {
         await expectedThrow(clickNext(page));
       });
     });
     it('#3 Mnemonic phrase contains special characters => unable to import mnemonic phrase', async () => {
-      const replace_mn = '%7k🆚 abandon able about above absent absorb abstract absurd abuse access accident';
-      await step(`input mnemonic:${replace_mn}`, async () => {
-        await inputMnemonic(page, replace_mn);
+      const replaceMnemonic = '%7k🆚 abandon able about above absent absorb abstract absurd abuse access accident';
+      await step(`input mnemonic:${replaceMnemonic}`, async () => {
+        await inputMnemonic(page, replaceMnemonic);
       });
       await step('click next', async () => {
         await expectedThrow(clickNext(page));
       });
     });
     it('#4 Words outside of the word list https://github.com/bitcoin/bips/blob/master/bip-0039/english.txt => unable to import', async () => {
-      const replace_mn = 'adasdahiuhif finite doze dog pat team seek pink punch scale clap computer';
-      await step(`input mnemonic:${replace_mn}`, async () => {
-        await inputMnemonic(page, replace_mn);
+      const replaceMnemonic = 'adasdahiuhif finite doze dog pat team seek pink punch scale clap computer';
+      await step(`input mnemonic:${replaceMnemonic}`, async () => {
+        await inputMnemonic(page, replaceMnemonic);
       });
       await step('click next', async () => {
         await expectedThrow(clickNext(page));

@@ -170,10 +170,10 @@ describe('create a wallet', function () {
             await clickNext(page);
           });
           it('#1 If the input sequence is not consistent with the previous inputs => unable to click "confirm"', async () => {
-            const sed1 = seeds.sort();
-            await step(`input seeds not eq:${sed1}`, async () => {
-              await step(`click order:${sed1}`, async () => {
-                await fullCheckSeeds(page, sed1);
+            const seed1 = seeds.sort();
+            await step(`input seeds not eq:${seed1}`, async () => {
+              await step(`click order:${seed1}`, async () => {
+                await fullCheckSeeds(page, seed1);
               });
             });
             await step('click confirm', async () => {
@@ -181,20 +181,20 @@ describe('create a wallet', function () {
             });
           });
           it('#2 Entering an incorrect sequence can be canceled and the correct sequence entered', async () => {
-            const sed1 = seeds.slice(0, 4);
-            const sed2 = seeds.slice(4, seeds.length);
-            await step(`click order :${sed2}`, async () => {
-              await fullCheckSeeds(page, sed2);
+            const seed1 = seeds.slice(0, 4);
+            const seed2 = seeds.slice(4, seeds.length);
+            await step(`click order :${seed2}`, async () => {
+              await fullCheckSeeds(page, seed2);
             });
-            await step(`click order :${sed2}`, async () => {
-              await fullCheckSeeds(page, sed2);
+            await step(`click order :${seed2}`, async () => {
+              await fullCheckSeeds(page, seed2);
             });
 
-            await step(`click order :${sed1}`, async () => {
-              await fullCheckSeeds(page, sed1);
+            await step(`click order :${seed1}`, async () => {
+              await fullCheckSeeds(page, seed1);
             });
-            await step(`click order:${sed2}`, async () => {
-              await fullCheckSeeds(page, sed2);
+            await step(`click order:${seed2}`, async () => {
+              await fullCheckSeeds(page, seed2);
             });
             await step('click confirm', async () => {
               await clickConfirm(page);
