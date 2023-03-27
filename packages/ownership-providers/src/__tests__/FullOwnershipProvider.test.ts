@@ -161,7 +161,7 @@ describe('class FullOwnershipProvider', () => {
       const txSkeleton = createFakeSkeleton();
 
       await expect(provider.payFee(txSkeleton, { autoInject: true })).rejects.toThrowError(
-        'No cell sufficient to inject',
+        'No cell sufficient to pay fee',
       );
     });
 

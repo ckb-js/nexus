@@ -87,6 +87,8 @@ export class FullOwnershipProvider {
   /**
    * Inject capacity to the transaction's inputs at least equal to the `amount`,
    * if the collected capacity is over the `amount`, a change cell will be added to the transaction's outputs.
+   * @param txSkeleton
+   * @param config
    * @example
    *   // Transfer 100 CKB to the target lock script
    *   declare let txSkeleton: TransactionSkeletonType;
@@ -99,8 +101,6 @@ export class FullOwnershipProvider {
    *
    *   txSkeleton = await provider.injectCapacity(txSkeleton, { amount: capacity });
    *
-   * @param txSkeleton
-   * @param config
    */
   async injectCapacity(
     txSkeleton: TransactionSkeletonType,
@@ -204,10 +204,14 @@ export class FullOwnershipProvider {
       }
 
       if (!injected && autoInject) {
-        txSkeletonWithFee = await this.injectCapacity(txSkeleton, {
-          amount: fee,
-        });
-        injected = true;
+        try {
+          txSkeletonWithFee = await this.injectCapacity(txSkeleton, {
+            amount: fee,
+          });
+          injected = true;
+        } catch {
+          // will throw error on sequence logic
+        }
       }
 
       if (!injected) {
