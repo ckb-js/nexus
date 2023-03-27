@@ -38,32 +38,27 @@ describe('demo', function () {
   });
 
   describe('sign-Data', function () {
-    const signDataTestCases = [
+    test.each([
       {
         inputSignData: '{"data":"0x1234"}',
         expectedGetResponse: 'mooooock signed data',
       },
-    ];
-    for (let i = 0; i < signDataTestCases.length; i++) {
-      let signDataTestCase = signDataTestCases[i];
-      // eslint-disable-next-line no-loop-func
-      it.skip(`${i}-signData test`, async (): Promise<void> => {
-        await step(`input:${signDataTestCase.inputSignData}`, async () => {
-          await page.locator(`#fullOwnership-signDataInput`).type(signDataTestCase.inputSignData);
-        });
-        await step('click signData', async () => {
-          await page.locator(`#fullOwnership-signDataButton`).click();
-        });
-
-        await step(`nexus:click approve sign`, async () => {
-          await nexusWallet.approve(PASS_WORD);
-        });
-        await step(`check response  == ${signDataTestCase.expectedGetResponse}`, async () => {
-          const ret = await page.locator(`#fullOwnership-signDataResult`).innerText();
-          expect(ret).toBe(signDataTestCase.expectedGetResponse);
-        });
+    ])(`signData test:%s`, async ({ inputSignData, expectedGetResponse }) => {
+      await step(`input:${inputSignData}`, async () => {
+        await page.locator(`#fullOwnership-signDataInput`).type(inputSignData);
       });
-    }
+      await step('click signData', async () => {
+        await page.locator(`#fullOwnership-signDataButton`).click();
+      });
+
+      await step(`nexus:click approve sign`, async () => {
+        await nexusWallet.approve(PASS_WORD);
+      });
+      await step(`check response  == ${expectedGetResponse}`, async () => {
+        const ret = await page.locator(`#fullOwnership-signDataResult`).innerText();
+        expect(ret).toBe(expectedGetResponse);
+      });
+    });
   });
 
   afterEach(async () => {

@@ -132,20 +132,21 @@ describe('importWallet', function () {
           await expectedThrow(clickNext(page));
         });
       });
-      const passwdArr = ['中文12345678', '👋👋👋👋👋👋👋👋👋👋👋'];
-      for (let i = 0; i < passwdArr.length; i++) {
-        it.skip(`#2-${i} input password:${passwdArr[i]}=> error`, async () => {
-          await step(`input passwd:${passwdArr[i]}`, async () => {
-            await inputPassword(page, passwdArr[i]);
+      test.each([{ passwd: '中文12345678' }, { passwd: '👋👋👋👋👋👋👋👋👋👋👋' }])(
+        `#2- input password: %s=> error`,
+        async ({ passwd }) => {
+          await step(`input passwd: ${passwd}`, async () => {
+            await inputPassword(page, passwd);
           });
-          await step(`input confirm passwd:${passwdArr[i]}`, async () => {
-            await inputConfirmPassword(page, passwdArr[i]);
+          await step(`input confirm passwd:${passwd}`, async () => {
+            await inputConfirmPassword(page, passwd);
           });
           await step('click next', async () => {
             await expectedThrow(clickNext(page));
           });
-        });
-      }
+        },
+      );
+
       it('#3 Input password does not match confirmation password => unable to click continue ', async () => {
         const passwd = '12341231231231';
         const confirmPasswd = '21312312313';

@@ -99,20 +99,21 @@ describe('create a wallet', function () {
           await expectedThrow(clickNext(page));
         });
       });
-      const passwdArr = ['中文中文中文中文中文中文中文', '🆕🆕🆕🆕🆕🆕🆕🆕🆕🆕🆕'];
-      for (let i = 0; i < passwdArr.length; i++) {
-        it.skip(`#2-${i} Entered password:${passwdArr[i]}=>error message`, async () => {
-          await step(`input passwd:${passwdArr[i]}`, async () => {
-            await inputPassword(page, passwdArr[i]);
+      test.each([{ passwd: '中文中文中文中文中文中文中文' }, { passwd: '🆕🆕🆕🆕🆕🆕🆕🆕🆕🆕🆕' }])(
+        `#2 Entered password:%s =>error message`,
+        async ({ passwd }) => {
+          await step(`input passwd: ${passwd}`, async () => {
+            await inputPassword(page, passwd);
           });
-          await step(`input confirm passwd:${passwdArr[i]}`, async () => {
-            await inputConfirmPassword(page, passwdArr[i]);
+          await step(`input confirm passwd:${passwd}`, async () => {
+            await inputConfirmPassword(page, passwd);
           });
           await step('click next', async () => {
             await expectedThrow(clickNext(page));
           });
-        });
-      }
+        },
+      );
+
       it('#3 If the entered password and confirmation password do not match => unable to continue', async () => {
         const passwd = '12341231231231';
         const confirmPasswd = '21312312313';

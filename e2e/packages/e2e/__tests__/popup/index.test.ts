@@ -2,7 +2,7 @@ import { expectedThrow, failedTestScreenshot, injectionTestStatus, step } from '
 import { launchWithNexus } from '../../src/setup/launch';
 import { setUpNexus } from '../../src/setup/setup';
 import { NEXUS_BUILD_PATH, NEXUS_WEB_LOCAL_URL, NEXUS_WEB_URL, PASS_WORD, USER_NAME } from '../config/config';
-import { AddNetworkOpt, NexusWallet } from '../../src/types';
+import { NexusWallet } from '../../src/types';
 import {
   clickAdd,
   clickAddNetwork,
@@ -99,51 +99,45 @@ describe('popup', function () {
       await clickWhitelistSites(page);
     });
 
-    describe('add white list ', function () {
-      let notExistUrl = 'https://pudge.explorer.nervos.org/';
-      let testCase = [
-        notExistUrl, // 第一次添加
-        NEXUS_WEB_LOCAL_URL, // 本地
-        'http://info.cern.ch/', // http
-        'https://godwoken-bridge-testnet.vercel.app/#/v1/deposit/pending?sadasdasdasdasdasdandawndasdandawndasdandawndasdandawndasdandawndasdandawndasdandawndasdandawndasdandawndasdandawndasdandawndasdandawndasdandawndasdandawndasdandawndasdandawndasdandawndasdandawndasdandawndasdandawndiowafnoawhfaoihfoaihfioawhfoia=aaa', // 特别长的网页
-      ];
+    let notExistUrl = 'https://pudge.explorer.nervos.org/';
+    test.each([
+      { url: notExistUrl }, //  add white list that it is first
+      { url: NEXUS_WEB_LOCAL_URL }, // local url
+      { url: 'http://info.cern.ch/' }, // http
+      {
+        url: 'https://godwoken-bridge-testnet.vercel.app/#/v1/deposit/pending?sadasdasdasdasdasdandawndasdandawndasdandawndasdandawndasdandawndasdandawndasdandawndasdandawndasdandawndasdandawndasdandawndasdandawndasdandawndasdandawndasdandawndasdandawndasdandawndasdandawndasdandawndasdandawndiowafnoawhfaoihfoaihfioawhfoia=aaa',
+      }, // long url
+    ])(`add white :%s`, async ({ url }) => {
       let newPage: Page;
-
-      for (let i = 0; i < testCase.length; i++) {
-        let url = testCase[i];
-
-        it(`${url}`, async () => {
-          await step('check url in whitelist,if exist ,remove it', async () => {
-            await nexusWallet.popup.removeWhitelistBySearch(urlTransferDomainName(url));
-          });
-          await step(`goto url:${url}`, async () => {
-            newPage = await browser.newPage();
-            await newPage.goto(url);
-          });
-          await step('send ckb.enable,and approve', async () => {
-            await Promise.all([wallet_enable(newPage), nexusWallet.connect()]);
-          });
-          await step('wallet_fullOwnership_getLiveCells enable', async () => {
-            await newPage.bringToFront();
-            await wallet_fullOwnership_getLiveCells(newPage, {
-              cursor:
-                '99:0x409bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce801dafb7ea1dd60616fb9e9088332e5f975a68ac28e000000000082a3220000000700000000',
-              change: 'internal',
-            });
-            await newPage.close();
-          });
-
-          await step('bringToFront nexus:pop', async () => {
-            await page.bringToFront();
-          });
-          await step('go to whiteList ', async () => {
-            await page.reload();
-          });
-          await step(`query whitelist,url:${url} should exist`, async () => {
-            await getSiteList(page, [url]);
-          });
+      await step('check url in whitelist,if exist ,remove it', async () => {
+        await nexusWallet.popup.removeWhitelistBySearch(urlTransferDomainName(url));
+      });
+      await step(`goto url:${url}`, async () => {
+        newPage = await browser.newPage();
+        await newPage.goto(url);
+      });
+      await step('send ckb.enable,and approve', async () => {
+        await Promise.all([wallet_enable(newPage), nexusWallet.connect()]);
+      });
+      await step('wallet_fullOwnership_getLiveCells enable', async () => {
+        await newPage.bringToFront();
+        await wallet_fullOwnership_getLiveCells(newPage, {
+          cursor:
+            '99:0x409bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce801dafb7ea1dd60616fb9e9088332e5f975a68ac28e000000000082a3220000000700000000',
+          change: 'internal',
         });
-      }
+        await newPage.close();
+      });
+
+      await step('bringToFront nexus:pop', async () => {
+        await page.bringToFront();
+      });
+      await step('go to whiteList ', async () => {
+        await page.reload();
+      });
+      await step(`query whitelist,url:${url} should exist`, async () => {
+        await getSiteList(page, [url]);
+      });
     });
 
     it('On the webpage that is on the whitelist, click "enable" => auto approval ,without requiring approval.', async () => {
@@ -268,7 +262,6 @@ describe('popup', function () {
     });
     it('click back => successful', async () => {
       await step('check url  contains:whitelist', async () => {
-        console.log(page.url());
         expect(page.url()).toContain('whitelist');
       });
       await step('click back', async () => {
@@ -338,7 +331,7 @@ describe('popup', function () {
       });
     });
     describe('add can use network', function () {
-      let testCases: AddNetworkOpt[] = [
+      test.each([
         {
           name: 'nework为中文特殊符号', // network为中文
           url: 'https://testnet.ckb.dev/', // http
@@ -355,28 +348,24 @@ describe('popup', function () {
           name: 'longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglong',
           url: 'https://testnet.ckb.dev/',
         },
-      ];
-      for (let i = 0; i < testCases.length; i++) {
-        let testCase = testCases[i];
-        it(`${JSON.stringify(testCases)}`, async () => {
-          await step('click addNetwork', async () => {
-            await clickAddNetwork(page);
-          });
-          await step(`input name :${testCase.name}`, async () => {
-            await inputName(page, testCase.name);
-          });
-          await step(`input url :${testCase.url}`, async () => {
-            await inputUrl(page, testCase.url);
-          });
-          await step('click add', async () => {
-            await clickAdd(page);
-          });
-          await step(`check name:${testCase.name} in network lists`, async () => {
-            const networkList = await nexusWallet.popup.queryNetworkList();
-            expect(networkList).toContain(testCase.name);
-          });
+      ])('%s', async ({ name, url }) => {
+        await step('click addNetwork', async () => {
+          await clickAddNetwork(page);
         });
-      }
+        await step(`input name :${name}`, async () => {
+          await inputName(page, name);
+        });
+        await step(`input url :${url}`, async () => {
+          await inputUrl(page, url);
+        });
+        await step('click add', async () => {
+          await clickAdd(page);
+        });
+        await step(`check name:${name} in network lists`, async () => {
+          const networkList = await nexusWallet.popup.queryNetworkList();
+          expect(networkList).toContain(name);
+        });
+      });
     });
     it('add networkName that exist =>add succ', async () => {
       let queryNetworkList: string[] = [];
