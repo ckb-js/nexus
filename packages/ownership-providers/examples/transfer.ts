@@ -18,7 +18,7 @@ async function transferCkb(): Promise<void> {
   txSkeleton = txSkeleton.update('outputs', (outputs) => outputs.push(recipientCell));
 
   txSkeleton = await provider.injectCapacity(txSkeleton, { amount: capacity });
-  txSkeleton = await provider.payFee(txSkeleton);
+  txSkeleton = await provider.payFee(txSkeleton, { autoInject: true });
   txSkeleton = await provider.signTransaction(txSkeleton);
 
   // TODO broadcast the transaction
@@ -47,7 +47,7 @@ async function transferNft(): Promise<void> {
 
   txSkeleton.update('inputs', (inputs) => inputs.push(myNft));
   txSkeleton.update('outputs', (outputs) => outputs.push(recipientCell));
-  txSkeleton = await provider.payFee(txSkeleton);
+  txSkeleton = await provider.payFee(txSkeleton, { autoInject: true });
   txSkeleton = await provider.signTransaction(txSkeleton);
 
   // TODO broadcast the transaction
