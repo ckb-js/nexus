@@ -5,6 +5,7 @@
   "homepage": "https://github.com/ckb-js/nexus/tree/main/extension-chrome#readme",
   "license": "MIT",
   "typings": "./lib/index.d.ts",
+  "main": "lib",
   "directories": {
     "lib": "lib"
   },
