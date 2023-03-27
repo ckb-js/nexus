@@ -12,7 +12,7 @@ describe('wallet_enable', function () {
   let browser: BrowserContext;
   let nexusWallet: NexusWallet;
   let page: Page;
-  it('demo', async () => {
+  it('send wallet_enable, and click connect => url in white list', async () => {
     const connectedUrl = 'https://www.baidu.com';
     await step('launchWithNexus', async () => {
       browser = await launchWithNexus({ nexusPath: NEXUS_BUILD_PATH });

@@ -6,7 +6,7 @@ import { failedTestScreenshot, injectionTestStatus, step } from '../util';
 import { MNEMONIC, NEXUS_BUILD_PATH, NEXUS_WEB_URL, PASS_WORD, USER_NAME } from '../config/config';
 
 injectionTestStatus();
-describe('demo', function () {
+describe('nexus-e2e-web', function () {
   let browser: BrowserContext;
   let nexusWallet: NexusWallet;
   let page: Page;

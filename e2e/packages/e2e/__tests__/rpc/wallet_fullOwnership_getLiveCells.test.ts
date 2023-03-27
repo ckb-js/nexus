@@ -11,7 +11,7 @@ describe('wallet_fullOwnership_getLiveCells', function () {
   let browser: BrowserContext;
   let nexusWallet: NexusWallet;
   let page: Page;
-  it('demo', async () => {
+  it('get wallet_fullOwnership_getLiveCells response after wallet_enable => should return { objects: [], cursor: "" }', async () => {
     const connectedUrl = 'https://www.baidu.com';
     await step('launchWithNexus', async () => {
       browser = await launchWithNexus({ nexusPath: NEXUS_BUILD_PATH });
