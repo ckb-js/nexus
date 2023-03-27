@@ -131,6 +131,63 @@ Firstly, stop the CKB node and miner, then remove the `data` directory, and then
 $ rm -rf data
 ```
 
+## Build Nexus Wallet and Connect to the Dev Blockchain
+
+### Build Nexus Wallet
+
+Please follow the [Nexus Wallet README](../README.md) to build the wallet.
+
+### Connect to the Dev Blockchain
+
+Ideally, you can add the dev blockchain network by clicking the `Add Network` button on the wallet home page.
+
+<img width='200' src='./assets/add-network.png'/>
+
+But, currently the wallet doesn't support adding a custom network(This functionality will be added in the near future), so that you need to modify some code to connect to the dev blockchain.
+
+Add the dev network config in default networks list after [12th line of src/services/internal.ts](https://github.com/ckb-js/nexus/blob/ba5923525ac7706e5e14834b9c68b4652f4a83db/packages/extension-chrome/src/services/internal.ts#L12):
+
+```diff
++ {
++     id: 'devnet',
++     networkName: 'ckb_devnet',
++     displayName: 'Devnet',
++     rpcUrl: 'http://localhost:8114',
++ }
+```
+
+and change default network to `devnet` in [36th line of src/services/internal.ts](https://github.com/ckb-js/nexus/blob/ba5923525ac7706e5e14834b9c68b4652f4a83db/packages/extension-chrome/src/services/internal.ts#L36)
+
+```diff
+- selectedNetwork: 'testnet',
++ selectedNetwork: 'devnet',
+```
+
+You may need to remove Nexus Wallet from your browser and reinstall it again after the code mofiication.
+
+## Get CKBs from the genesis block
+
+In order to test your DApp, you may need to acquire some CKBs to initiate transactions.
+
+First, get some derived locks by calling the RPC method: `wallet_fullOwnership_getOffChainLocks`. Here is a simple example:
+
+1. Open [nexus-demo](https://demo-nexus.vercel.app/) in your browser.
+2. Connect to the Nexus Wallet.
+3. Open the console of your browser, and run:
+
+```js
+let locks = await window.ckb.request({ method: 'wallet_fullOwnership_getOffChainLocks', params: {} });
+locks[0];
+```
+
+Some sample outputs:
+
+<img width="400" src="./assets/derived-locks.png"/>
+
+Then you can change the configuration to issue some cells to the locks you got.
+
+Refer to the last part of [Customize the Configuration](#customize-the-configuration) to change the configuration. Remember to reset the dev blockchain after changing the configuration.
+
 ## References
 
 - https://docs.nervos.org/docs/basics/guides/devchain
