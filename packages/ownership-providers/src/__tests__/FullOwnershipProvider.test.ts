@@ -372,20 +372,26 @@ describe('class FullOwnershipProvider', () => {
     const provider = new FullOwnershipProvider({} as any);
     await expect(() => provider['getLumosConfig']()).rejects.toThrow();
   });
+  describe('#parseLockScriptLike', () => {
+    it('Should parse address', async () => {
+      const provider = new FullOwnershipProvider({} as any);
+      provider['getLumosConfig'] = jest.fn().mockResolvedValue(predefined.AGGRON4);
+      await expect(
+        provider['parseLockScriptLike'](
+          'ckt1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsqgxvk9qlymu894vugvgflwa967zjvud07qq4x3kf',
+        ),
+      ).resolves.toEqual(
+        parseAddress(
+          'ckt1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsqgxvk9qlymu894vugvgflwa967zjvud07qq4x3kf',
+          { config: predefined.AGGRON4 },
+        ),
+      );
+    });
 
-  it('#parseLockScriptLike', async () => {
-    const provider = new FullOwnershipProvider({} as any);
-    provider['getLumosConfig'] = jest.fn().mockResolvedValue(predefined.AGGRON4);
-    await expect(
-      provider['parseLockScriptLike'](
-        'ckt1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsqgxvk9qlymu894vugvgflwa967zjvud07qq4x3kf',
-      ),
-    ).resolves.toEqual(
-      parseAddress(
-        'ckt1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsqgxvk9qlymu894vugvgflwa967zjvud07qq4x3kf',
-        { config: predefined.AGGRON4 },
-      ),
-    );
+    it('Should return origin lock when input is a lock script', async () => {
+      const provider = new FullOwnershipProvider({} as any);
+      await expect(provider['parseLockScriptLike'](onChainLocks1)).resolves.toBe(onChainLocks1);
+    });
   });
 
   it('#getOffChainLocks and #getOnChainLocks', async () => {
