@@ -1,5 +1,5 @@
 import { launchWithNexus } from '../../src/setup/launch';
-import { MNEMONIC, NEXUS_BUILD_PATH, PASSWd, UserName } from '../config/config';
+import { MNEMONIC, NEXUS_BUILD_PATH, PASS_WORD, USER_NAME } from '../config/config';
 import { setUpNexus } from '../../src/setup/setup';
 import { wallet_enable } from '../../src/nexus/servicer/rpc';
 import { failedTestScreenshot, injectionTestStatus, step } from '../util';
@@ -22,9 +22,9 @@ describe('wallet_enable', function () {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       nexusWallet = await setUpNexus(browser, {
         mock: true,
-        userName: UserName,
+        userName: USER_NAME,
         seed: MNEMONIC,
-        passwd: PASSWd,
+        passwd: PASS_WORD,
       });
     });
 

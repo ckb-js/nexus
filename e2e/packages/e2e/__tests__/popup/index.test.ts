@@ -1,7 +1,7 @@
 import { expectedThrow, failedTestScreenshot, injectionTestStatus, step } from '../util';
 import { launchWithNexus } from '../../src/setup/launch';
 import { setUpNexus } from '../../src/setup/setup';
-import { NEXUS_BUILD_PATH, NEXUS_WEB_LOCAL_URL, NEXUS_WEB_URL, PASSWd, UserName } from '../config/config';
+import { NEXUS_BUILD_PATH, NEXUS_WEB_LOCAL_URL, NEXUS_WEB_URL, PASS_WORD, USER_NAME } from '../config/config';
 import { AddNetworkOpt, NexusWallet } from '../../src/types';
 import {
   clickAdd,
@@ -33,19 +33,19 @@ describe('popup', function () {
 
     nexusWallet = await setUpNexus(browser, {
       mock: true,
-      userName: UserName,
+      userName: USER_NAME,
       // seed: MNEMONIC,
-      passwd: PASSWd,
+      passwd: PASS_WORD,
     });
   });
   beforeEach(async () => {
     page = await nexusWallet.popup.getNewPage();
   });
 
-  it(`query user name is equal UserName:${UserName}`, async () => {
-    await step(`query userName#userName should eq:${UserName}`, async () => {
-      await step(`get UserName eq:${UserName} `, async () => {
-        await page.getByText(UserName).innerText();
+  it(`query user name is equal UserName:${USER_NAME}`, async () => {
+    await step(`query userName#userName should eq:${USER_NAME}`, async () => {
+      await step(`get UserName eq:${USER_NAME} `, async () => {
+        await page.getByText(USER_NAME).innerText();
       });
     });
   });
@@ -149,6 +149,7 @@ describe('popup', function () {
     it('On the webpage that is on the whitelist, click "enable" => auto approval ,without requiring approval.', async () => {
       let urls: string[];
       let whiteUrl: string = '';
+      await step('add white url', async () => {});
       await step('get url from white list', async () => {
         urls = await nexusWallet.popup.queryWhitelist();
         if (urls.length < 1) {

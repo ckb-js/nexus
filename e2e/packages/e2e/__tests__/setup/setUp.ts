@@ -1,5 +1,5 @@
 import { launchWithNexus } from '../../src/setup/launch';
-import { MNEMONIC, NEXUS_BUILD_PATH, PASSWd, UserName } from '../config/config';
+import { MNEMONIC, NEXUS_BUILD_PATH, PASS_WORD, USER_NAME } from '../config/config';
 import { setUpNexus } from '../../src/setup/setup';
 import * as fs from 'fs';
 
@@ -14,9 +14,9 @@ async function init(): Promise<void> {
   const browser = await launchWithNexus({ nexusPath: NEXUS_BUILD_PATH });
   await setUpNexus(browser, {
     // mock: true,
-    userName: UserName,
+    userName: USER_NAME,
     seed: MNEMONIC,
-    passwd: PASSWd,
+    passwd: PASS_WORD,
   });
   await browser.close();
 }

@@ -13,16 +13,13 @@ import {
   inputPassword,
   inputUserName,
 } from '../../src/nexus/helper/walletManager';
-import { NEXUS_BUILD_PATH } from '../config/config';
+import { MNEMONIC, NEXUS_BUILD_PATH, PASS_WORD, USER_NAME } from '../config/config';
 
 injectionTestStatus();
 describe('importWallet', function () {
   let browser: BrowserContext;
   let extensionId;
   let page: Page;
-  const seeds = 'abandon ability able about above absent absorb abstract absurd abuse access accident';
-  const passwd = '12345678';
-  const userName = 'xm';
 
   beforeEach(async () => {
     browser = await launchWithNexus(
@@ -40,23 +37,23 @@ describe('importWallet', function () {
     await step('click import wallet', async () => {
       await clickImportWallet(page);
     });
-    await step(`input seed:${seeds}`, async () => {
-      await inputMnemonic(page, seeds);
+    await step(`input seed:${MNEMONIC}`, async () => {
+      await inputMnemonic(page, MNEMONIC);
     });
     await step('click next', async () => {
       await clickNext(page);
     });
-    await step(`input passwd:${passwd}`, async () => {
-      await inputPassword(page, passwd);
+    await step(`input passwd:${PASS_WORD}`, async () => {
+      await inputPassword(page, PASS_WORD);
     });
-    await step(`input confirm passwd:${passwd}`, async () => {
-      await inputConfirmPassword(page, passwd);
+    await step(`input confirm passwd:${PASS_WORD}`, async () => {
+      await inputConfirmPassword(page, PASS_WORD);
     });
     await step('click next', async () => {
       await clickNext(page);
     });
-    await step(`input UserName:${userName}`, async () => {
-      await inputUserName(page, userName);
+    await step(`input UserName:${USER_NAME}`, async () => {
+      await inputUserName(page, USER_NAME);
     });
     await step('click next', async () => {
       await clickNext(page);
@@ -72,6 +69,7 @@ describe('importWallet', function () {
     });
 
     it('#1 Mnemonic phrase contains repeated words => unable to import mnemonic phrase', async () => {
+      //todo pass
       const replace_mn = 'abandon abandon able about above absent absorb abstract absurd abuse access accident';
       await step(`input mnemonic:${replace_mn}`, async () => {
         await inputMnemonic(page, replace_mn);
@@ -119,7 +117,7 @@ describe('importWallet', function () {
     });
     describe('import/password', function () {
       beforeEach(async () => {
-        await inputMnemonic(page, seeds);
+        await inputMnemonic(page, MNEMONIC);
         await clickNext(page);
       });
       it('#1 Password input is less than 8 characters, click next => click failed', async () => {
@@ -169,8 +167,8 @@ describe('importWallet', function () {
       });
       describe('import/account', function () {
         beforeEach(async () => {
-          await inputPassword(page, passwd);
-          await inputConfirmPassword(page, passwd);
+          await inputPassword(page, PASS_WORD);
+          await inputConfirmPassword(page, PASS_WORD);
           await clickNext(page);
         });
         it('#1 Click continue without inputting username => unable to click continue', async () => {

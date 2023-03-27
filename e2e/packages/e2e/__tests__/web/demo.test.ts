@@ -3,7 +3,7 @@ import { setUpNexus } from '../../src/setup/setup';
 import { NexusWallet } from '../../src/types';
 import { BrowserContext, Page } from 'playwright';
 import { failedTestScreenshot, injectionTestStatus, step } from '../util';
-import { MNEMONIC, NEXUS_BUILD_PATH, NEXUS_WEB_URL, PASSWd, UserName } from '../config/config';
+import { MNEMONIC, NEXUS_BUILD_PATH, NEXUS_WEB_URL, PASS_WORD, USER_NAME } from '../config/config';
 
 injectionTestStatus();
 describe('demo', function () {
@@ -15,9 +15,9 @@ describe('demo', function () {
 
     nexusWallet = await setUpNexus(browser, {
       mock: true,
-      userName: UserName,
+      userName: USER_NAME,
       seed: MNEMONIC,
-      passwd: PASSWd,
+      passwd: PASS_WORD,
     });
 
     // link web
@@ -56,7 +56,7 @@ describe('demo', function () {
         });
 
         await step(`nexus:click approve sign`, async () => {
-          await nexusWallet.approve(PASSWd);
+          await nexusWallet.approve(PASS_WORD);
         });
         await step(`check response  == ${signDataTestCase.expectedGetResponse}`, async () => {
           const ret = await page.locator(`#fullOwnership-signDataResult`).innerText();

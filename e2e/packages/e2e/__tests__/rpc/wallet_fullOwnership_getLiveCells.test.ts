@@ -2,7 +2,7 @@ import { BrowserContext, Page } from 'playwright';
 import { NexusWallet } from '../../src/types';
 import { failedTestScreenshot, injectionTestStatus, step } from '../util';
 import { launchWithNexus } from '../../src/setup/launch';
-import { MNEMONIC, NEXUS_BUILD_PATH, PASSWd, UserName } from '../config/config';
+import { MNEMONIC, NEXUS_BUILD_PATH, PASS_WORD, USER_NAME } from '../config/config';
 import { setUpNexus } from '../../src/setup/setup';
 import { wallet_enable, wallet_fullOwnership_getLiveCells } from '../../src/nexus/servicer/rpc';
 
@@ -21,9 +21,9 @@ describe('wallet_fullOwnership_getLiveCells', function () {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       nexusWallet = await setUpNexus(browser, {
         mock: true,
-        userName: UserName,
+        userName: USER_NAME,
         seed: MNEMONIC,
-        passwd: PASSWd,
+        passwd: PASS_WORD,
       });
     });
 
