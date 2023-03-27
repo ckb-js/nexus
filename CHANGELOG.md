@@ -1,3 +1,20 @@
+# v0.0.4 (Mon Mar 27 2023)
+
+#### 🔨 Breaking Minor Change
+
+- feat: sign data with a magic prefix for security [#139](https://github.com/ckb-js/nexus/pull/139) ([@zhangyouxin](https://github.com/zhangyouxin))
+
+#### 🏠 Internal
+
+- chore: prevent canary release in PR from forked repo [#147](https://github.com/ckb-js/nexus/pull/147) ([@homura](https://github.com/homura))
+
+#### Authors: 2
+
+- Shinya ([@zhangyouxin](https://github.com/zhangyouxin))
+- Yonghui Lin ([@homura](https://github.com/homura))
+
+---
+
 # v0.0.3 (Thu Mar 23 2023)
 
 #### 🐛 Bug Fix
