@@ -319,7 +319,7 @@ describe('popup', function () {
         await clickNetwork(page);
       });
     });
-    it('click back  => succ', async () => {
+    it('click back  => success', async () => {
       await step('page url contains network', async () => {
         expect(page.url()).toContain('network');
       });
@@ -367,7 +367,7 @@ describe('popup', function () {
         });
       });
     });
-    it('add networkName that exist =>add succ', async () => {
+    it('add networkName that exist =>add success', async () => {
       let queryNetworkList: string[] = [];
       await step('query network list', async () => {
         queryNetworkList = await nexusWallet.popup.queryNetworkList();
@@ -402,7 +402,7 @@ describe('popup', function () {
       await step('add network', async () => {
         await nexusWallet.popup.addNetwork(addOpt);
       });
-      await step('check add is succ ', async () => {
+      await step('check add is success ', async () => {
         const list = await nexusWallet.popup.queryNetworkList();
         expect(list).toContain(addOpt.name);
       });
@@ -415,7 +415,7 @@ describe('popup', function () {
       await step('add network', async () => {
         await nexusWallet.popup.addNetwork(addOpt);
       });
-      await step('check add is succ ', async () => {
+      await step('check add is success ', async () => {
         //todo check add should failed
         const list = await nexusWallet.popup.queryNetworkList();
         expect(list).toContain(addOpt.name);
@@ -429,7 +429,7 @@ describe('popup', function () {
       await step('add network', async () => {
         await nexusWallet.popup.addNetwork(addOpt);
       });
-      await step('check add is succ ', async () => {
+      await step('check add is success ', async () => {
         //todo check add should failed
         const list = await nexusWallet.popup.queryNetworkList();
         expect(list).toContain(addOpt.name);
@@ -465,7 +465,7 @@ describe('popup', function () {
         await newPage.getByText(addTestNetOpt.name).innerText();
       });
     });
-    it('change diff network', async () => {
+    it('change different network', async () => {
       let newPage: Page;
       await step(`change network:ckb test `, async () => {
         // await nexusWallet.popup.changeNetworkByName(addTestNetOpt.name)

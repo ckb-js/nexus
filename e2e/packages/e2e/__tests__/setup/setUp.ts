@@ -41,5 +41,5 @@ function checkDirExist(path: string): boolean {
 module.exports = async () => {
   await init();
   // eslint-disable-next-line no-console
-  console.info('set up succ');
+  console.info('set up success');
 };
