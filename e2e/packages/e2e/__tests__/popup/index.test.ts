@@ -49,16 +49,16 @@ describe('popup', function () {
       });
     });
   });
-  it('the web site is not connected => query connection status is not connected', async () => {
+  it('the web site is not connected => query connection status is Disconnected', async () => {
     let connected: string;
     await step('query connected status', async () => {
-      connected = await getConnectedStatus(page, 'not Connected');
+      connected = await getConnectedStatus(page, 'Disconnected');
     });
-    await step('statues should not connected', async () => {
-      expect(connected).toBe('not Connected');
+    await step('statues should Disconnected', async () => {
+      expect(connected).toBe('Disconnected');
     });
   });
-  it('connect to a web site => query connection status is connected, and when it is closed => it is not connected', async () => {
+  it('connect to a web site => query connection status is connected, and when it is closed => it is Disconnected', async () => {
     let newPage: Page;
     await step('go to new web:', async () => {
       newPage = await browser.newPage();
@@ -77,10 +77,10 @@ describe('popup', function () {
     await step('close open new page', async () => {
       await newPage.close();
     });
-    await step('query connected status should not connected', async () => {
+    await step('query connected status should Disconnected', async () => {
       await page.reload();
-      const connectedStatus = await getConnectedStatus(page, 'not Connected');
-      expect(connectedStatus).toBe('not Connected');
+      const connectedStatus = await getConnectedStatus(page, 'Disconnected');
+      expect(connectedStatus).toBe('Disconnected');
     });
   });
 
@@ -279,7 +279,7 @@ describe('popup', function () {
         expect(page.url()).not.toContain('whitelist');
       });
     });
-    it("When connecting to a whitelist webpage, remove the white url=>rpc can't use and connectStatus is not connected", async () => {
+    it("When connecting to a whitelist webpage, remove the white url=>rpc can't use and connectStatus is Disconnected", async () => {
       const url = NEXUS_WEB_URL;
       let newPage: Page;
       await step('goto new web:', async () => {
@@ -315,7 +315,7 @@ describe('popup', function () {
           'not in the whitelist',
         );
       });
-      await step('check connectStatus status is not connected ', async () => {
+      await step('check connectStatus status is Disconnected ', async () => {
         expect(await nexusWallet.popup.queryConnected()).toBe(false);
       });
     });
