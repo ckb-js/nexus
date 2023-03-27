@@ -1,0 +1,83 @@
+name: Test
+
+on:
+  push:
+    branches: [main, next]
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+# Enabled permissions on GITHUB_TOKEN
+permissions:
+  # To be able to push to the repo
+  contents: write
+  # To update the pr description with canary info
+  pull-requests: write
+  # For pr-check to create a status
+  statuses: write
+  # Needed to create PR statuses/checks
+  checks: write
+  # To post comments on PRs
+  issues: write
+
+jobs:
+  unit-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - uses: ./.github/actions/install-deps
+
+      - name: Build libraries
+        run: |
+          npm run build:libs
+          git diff --exit-code
+
+      - name: Check TypeScript
+        run: npm run check
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Run unit test with coverage
+        run: npx jest --coverage --verbose
+
+      - uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage/clover.xml
+          verbose: true # optional (default = false)
+
+  release:
+    runs-on: ubuntu-latest
+    if: |
+      (!contains(github.event.head_commit.message, 'ci skip') && !contains(github.event.head_commit.message, 'skip ci')) &&
+      (
+        (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
+        github.event_name == 'push'
+      )
+    needs: unit-test
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Set up git
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+
+      - uses: ./.github/actions/install-deps
+
+      - name: Prepare repository
+        run: git fetch --unshallow --prune --tags
+
+      - name: Unset header
+        run: git config --local --unset http.https://github.com/.extraheader
+
+      # when shipit is triggered, it will run hooks in `scripts/build-extension.ts` to build the extension
+      - name: Create Release
+        run: npx auto shipit -vv
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PROTECTED_BRANCH_REVIEWER_TOKEN: ${{ secrets.GH_TOKEN }}
