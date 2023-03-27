@@ -168,7 +168,6 @@ export class FullOwnershipProvider {
    * @example
    * ```ts
    * const provider = new FullOwnershipProvider({ ckb });
-   * const provider = new FullOwnershipProvider({ ckb });
    * // auto calculate fee rate and use wallet owned lock to pay fee
    * const txSkeleton = await provider.payFee({ txSkeleton });
    * // auto inject capacity when payers can not cover the fee
