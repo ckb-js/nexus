@@ -256,7 +256,7 @@ export class FullOwnershipProvider {
   /**
    * request wallet to sign a transaction skeleton
    * @param txSkeleton The transaction skeleton, you can create it from transaction object via {@link @ckb-lumos/helpers#TransactionSkeleton}
-   * @returns The signed transaction skeleton. Signing message is in `witnesses` field.
+   * @returns The signed transaction skeleton. The signatures are serialized and put into the witnesses field.
    */
   async signTransaction(txSkeleton: TransactionSkeletonType): Promise<TransactionSkeletonType> {
     const lumosConfig = await this.getLumosConfig();
