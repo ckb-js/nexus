@@ -20,6 +20,7 @@ import { bytes } from '@ckb-lumos/codec';
 import { Script, utils, Transaction } from '@ckb-lumos/lumos';
 import { common } from '@ckb-lumos/common-scripts';
 import { createEventHub } from '../../../src/services/event';
+import { SIGN_DATA_MAGIC } from '@nexus-wallet/protocol';
 
 describe('FullOwnership', () => {
   describe('getOffChainLocks', function () {
@@ -121,7 +122,7 @@ describe('FullOwnership', () => {
     it('should signData by keystore service with proper params', async () => {
       await ownershipService.signData({ data: '0x1234', lock: scriptInfos[0].lock, url: MOCK_PLATFORM_URL });
       expect(keystoreService.signMessage).toBeCalledWith({
-        message: '0x1234',
+        message: bytes.hexify(bytes.concat(SIGN_DATA_MAGIC, '0x1234')),
         password: '12345678',
         path: `${scriptInfos[0].parentPath}/${scriptInfos[0].childIndex}`,
       });
