@@ -163,7 +163,7 @@ and change default network to `devnet` in [36th line of src/services/internal.ts
 + selectedNetwork: 'devnet',
 ```
 
-You may need to remove Nexus Wallet from your browser and reinstall it again after the code mofiication.
+You may need to remove Nexus Wallet from your browser and reinstall it after the code mofiication.
 
 ## Get CKBs from the genesis block
 
@@ -184,9 +184,9 @@ Some sample outputs:
 
 <img width="400" src="./assets/derived-locks.png"/>
 
-Then you can change the configuration to issue some cells to the locks you got.
+Then you can change the dev blockchain configuration file `specs/dev.toml` to issue some cells to the locks you got.
 
-Refer to the last part of [Customize the Configuration](#customize-the-configuration) to change the configuration. Remember to reset the dev blockchain after changing the configuration.
+Refer to the last part of [Customize the Configuration](#customize-the-configuration) to change the configuration. Remember to [reset the dev blockchain](#how-to-reset-the-ckb-dev-blockchain) after changing the configuration.
 
 ## References
 
