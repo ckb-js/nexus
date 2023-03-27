@@ -53,7 +53,7 @@ const useConnectedStatus = () => {
     [whitelistQuery.data],
   );
 
-  return whitelistSitesSet.has(new URL(activeTab?.url || '').host);
+  return !!activeTab?.url && whitelistSitesSet.has(new URL(activeTab?.url).host);
 };
 
 export const Home: FC = () => {
