@@ -61,9 +61,21 @@ const receiverLock: Script = {
   args: '0x55667788',
 };
 
+const mockRpcRequest = jest.fn();
+
+const mockProviderConfig: any = {
+  ckb: {
+    request: mockRpcRequest,
+  },
+};
+
 describe('class FullOwnershipProvider', () => {
+  beforeEach(() => {
+    mockRpcRequest.mockReset();
+  });
   it('Should get live cells invoke `InjectedCkb#wallet_fullOwnership_getLiveCells`', async () => {
-    const provider = new FullOwnershipProvider({ ckb: { request: jest.fn().mockReturnValue([]) } } as any);
+    mockRpcRequest.mockResolvedValue([]);
+    const provider = new FullOwnershipProvider(mockProviderConfig);
     await expect(provider.getLiveCells({ cursor: '0x' })).resolves.toEqual([]);
 
     expect(provider['ckb'].request).toBeCalledWith({
@@ -76,13 +88,17 @@ describe('class FullOwnershipProvider', () => {
     const emptyTxSkeleton = TransactionSkeleton();
 
     function initProviderWithCells(cells: Cell[], offChainLock = offChainLock1) {
-      const provider = new FullOwnershipProvider({} as any);
-      provider.collector = jest.fn().mockImplementation(async function* mock() {
-        for (const cell of cells) {
-          yield cell;
+      mockRpcRequest.mockImplementation(({ method, params }: { method: string; params: any }) => {
+        switch (method) {
+          case 'wallet_fullOwnership_getOffChainLocks':
+            return [offChainLock];
+          case 'wallet_fullOwnership_getLiveCells':
+            const cursor = parseInt(params.cursor || 0);
+            return { objects: cells.slice(cursor, cursor + 1), cursor: cursor + 1 };
         }
       });
-      provider.getOffChainLocks = jest.fn().mockResolvedValue([offChainLock]);
+      const provider = new FullOwnershipProvider(mockProviderConfig);
+
       return provider;
     }
 
@@ -120,14 +136,23 @@ describe('class FullOwnershipProvider', () => {
   });
 
   describe('#payFee', () => {
-    function buildProvider(cells: Cell[], offChainLock = offChainLock1) {
-      const provider = new FullOwnershipProvider({} as any);
-      provider.getOffChainLocks = jest.fn().mockResolvedValue([offChainLock]);
-      const getLiveCells = jest.fn().mockImplementation(({ cursor }: any) => {
-        cursor = cursor || 0;
-        return { objects: cells.slice(cursor, cursor + 4), cursor: cursor + 4 };
+    function buildProvider(cells: Cell[], offChainLocks = [offChainLock1]) {
+      const provider = new FullOwnershipProvider(mockProviderConfig);
+      mockRpcRequest.mockImplementation(({ method, params }) => {
+        switch (method) {
+          case 'wallet_fullOwnership_getOffChainLocks':
+            return offChainLocks;
+          case 'wallet_fullOwnership_getLiveCells':
+            const cursor = parseInt(params.cursor || 0);
+            return { objects: cells.slice(cursor, cursor + 4), cursor: cursor + 4 };
+        }
       });
-      provider.getLiveCells = getLiveCells;
+
+      // const getLiveCells = jest.fn().mockImplementation(({ cursor }: any) => {
+      //   cursor = cursor || 0;
+      //   return { objects: cells.slice(cursor, cursor + 4), cursor: cursor + 4 };
+      // });
+      // provider.getLiveCells = getLiveCells;
       return provider;
     }
     function createFakeSkeleton() {
@@ -206,8 +231,8 @@ describe('class FullOwnershipProvider', () => {
       ).rejects.toThrowError('No payer available to pay fee');
     });
     it('Should throw error when changeLock is not found', async () => {
-      const provider = new FullOwnershipProvider({} as any);
-      provider.getOffChainLocks = jest.fn().mockResolvedValue([]);
+      const provider = buildProvider([createFakeCellWithCapacity(100 * 1e8)], []);
+
       // @ts-expect-error
       await expect(provider.injectCapacity()).rejects.toThrowError(
         'No change lock script found, it may be a internal bug',
@@ -216,12 +241,11 @@ describe('class FullOwnershipProvider', () => {
   });
 
   it('#getLiveCells', async () => {
-    const fakeCKB = { request: jest.fn().mockResolvedValue([]) };
-
-    const provider = new FullOwnershipProvider({ ckb: fakeCKB as any });
+    mockRpcRequest.mockResolvedValue([]);
+    const provider = new FullOwnershipProvider(mockProviderConfig);
     const params: any = { cursor: '0x', change: 'external' };
     expect(await provider.getLiveCells(params)).toEqual([]);
-    expect(fakeCKB.request).toBeCalledWith({
+    expect(mockRpcRequest).toBeCalledWith({
       method: 'wallet_fullOwnership_getLiveCells',
       params,
     });
@@ -229,9 +253,9 @@ describe('class FullOwnershipProvider', () => {
 
   describe('#collector', () => {
     function buildProvider(cells: any[], pageSize = 4) {
-      const provider = new FullOwnershipProvider({} as any);
-      provider.getLiveCells = jest.fn().mockImplementation(({ cursor = 0 }: any) => {
-        cursor = cursor || 0;
+      const provider = new FullOwnershipProvider(mockProviderConfig);
+      mockRpcRequest.mockImplementation(({ params }: any) => {
+        const cursor = parseInt(params.cursor || 0);
         return {
           objects: cells.slice(cursor, cursor + pageSize),
           cursor: cursor + pageSize,
@@ -258,7 +282,6 @@ describe('class FullOwnershipProvider', () => {
       ];
 
       const provider = buildProvider(cellLists);
-      const getLiveCells = provider.getLiveCells as jest.Mock;
 
       let index = 0;
       for await (const cell of provider.collector()) {
@@ -266,11 +289,11 @@ describe('class FullOwnershipProvider', () => {
         index++;
       }
 
-      expect(getLiveCells).toBeCalledTimes(4);
-      expect(getLiveCells).nthCalledWith(1, { cursor: '' });
-      expect(getLiveCells).nthCalledWith(2, { cursor: 4 });
-      expect(getLiveCells).nthCalledWith(3, { cursor: 8 });
-      expect(getLiveCells).nthCalledWith(4, { cursor: 12 });
+      expect(mockRpcRequest).toBeCalledTimes(4);
+      expect(mockRpcRequest).nthCalledWith(1, { method: 'wallet_fullOwnership_getLiveCells', params: { cursor: '' } });
+      expect(mockRpcRequest).nthCalledWith(2, { method: 'wallet_fullOwnership_getLiveCells', params: { cursor: 4 } });
+      expect(mockRpcRequest).nthCalledWith(3, { method: 'wallet_fullOwnership_getLiveCells', params: { cursor: 8 } });
+      expect(mockRpcRequest).nthCalledWith(4, { method: 'wallet_fullOwnership_getLiveCells', params: { cursor: 12 } });
     });
 
     it('Should return specific lock cells', async () => {
@@ -344,11 +367,9 @@ describe('class FullOwnershipProvider', () => {
       const prepareSigningEntries = jest
         .spyOn(secp256k1Blake160, 'prepareSigningEntries')
         .mockImplementation((skeleton) => skeleton);
-      const provider = new FullOwnershipProvider({
-        ckb: { request: jest.fn().mockReturnValue(predefined.LINA) } as any,
-      } as any);
+      const provider = new FullOwnershipProvider(mockProviderConfig);
 
-      provider['ckb'].request = jest.fn().mockReturnValue(groupedSignature);
+      mockRpcRequest.mockReturnValue(groupedSignature);
       provider['getLumosConfig'] = jest.fn().mockReturnValue(predefined.LINA);
 
       const signedTxSkeleton = await provider.signTransaction(txSkeleton);
@@ -369,12 +390,13 @@ describe('class FullOwnershipProvider', () => {
 
   // TODO: when get lumos config implementation is read, add more test
   it('#getLumosConfig', async () => {
-    const provider = new FullOwnershipProvider({} as any);
+    const provider = new FullOwnershipProvider(mockProviderConfig);
     await expect(() => provider['getLumosConfig']()).rejects.toThrow();
   });
+
   describe('#parseLockScriptLike', () => {
     it('Should parse address', async () => {
-      const provider = new FullOwnershipProvider({} as any);
+      const provider = new FullOwnershipProvider(mockProviderConfig);
       provider['getLumosConfig'] = jest.fn().mockResolvedValue(predefined.AGGRON4);
       await expect(
         provider['parseLockScriptLike'](
@@ -389,27 +411,23 @@ describe('class FullOwnershipProvider', () => {
     });
 
     it('Should return origin lock when input is a lock script', async () => {
-      const provider = new FullOwnershipProvider({} as any);
+      const provider = new FullOwnershipProvider(mockProviderConfig);
       await expect(provider['parseLockScriptLike'](onChainLocks1)).resolves.toBe(onChainLocks1);
     });
   });
 
   it('#getOffChainLocks and #getOnChainLocks', async () => {
-    const ckbRequest = jest.fn().mockReturnValue([]);
-    const provider = new FullOwnershipProvider({
-      ckb: {
-        request: ckbRequest,
-      } as any,
-    });
+    mockRpcRequest.mockReturnValue([]);
+    const provider = new FullOwnershipProvider(mockProviderConfig);
 
     await expect(provider.getOffChainLocks({ change: 'internal' })).resolves.toEqual([]);
-    expect(ckbRequest).toBeCalledWith({
+    expect(mockRpcRequest).toBeCalledWith({
       method: 'wallet_fullOwnership_getOffChainLocks',
       params: { change: 'internal' },
     });
 
     await expect(provider.getOnChainLocks({ cursor: '0' })).resolves.toEqual([]);
-    expect(ckbRequest).toBeCalledWith({
+    expect(mockRpcRequest).toBeCalledWith({
       method: 'wallet_fullOwnership_getOnChainLocks',
       params: {
         cursor: '0',
