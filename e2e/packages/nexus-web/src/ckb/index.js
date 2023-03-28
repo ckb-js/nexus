@@ -1,11 +1,8 @@
 import React from 'react';
-import { CkbOwnershipService } from './ckbOwnershipService';
 import { InjectedCkbService } from './injectedCkbService';
 
 class RootStore {
   constructor() {
-    this.fullOwnership = new CkbOwnershipService();
-    this.ruleBasedOwnership = new CkbOwnershipService();
     this.injectedCkbService = new InjectedCkbService();
   }
 }
