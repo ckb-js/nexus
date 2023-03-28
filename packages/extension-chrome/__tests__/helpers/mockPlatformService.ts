@@ -12,4 +12,5 @@ export const mockPlatformService: PlatformService = /* istanbul ignore next */ {
   requestSignData: async () => ({ password: MOCK_PLATFORM_PASSWORD }),
   requestSignTransaction: async () => ({ password: MOCK_PLATFORM_PASSWORD }),
   navigateToInitWallet: async () => {},
+  getFavicon: () => 'https://nexus-wallet.io/favicon.ico',
 };
