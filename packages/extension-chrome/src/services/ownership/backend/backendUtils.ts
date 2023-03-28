@@ -155,7 +155,7 @@ function createRpcClient(url: string, options?: RpcClientOptions): RpcClient {
       if (res.error !== undefined) {
         throw NexusCommonErrors.RequestCkbFailed(res);
       }
-      return res.result as Result;
+      return res.result;
     });
   }
 

@@ -26,7 +26,7 @@ onMessage('rpc', async ({ data, sender }) => {
     const result = await server.handleRequest({ request: data, sender: sender });
     logger.info(`RPC end`, result);
     return result;
-  } catch (error: unknown) {
+  } catch (error) {
     throw error;
   }
 });

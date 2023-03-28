@@ -11,11 +11,11 @@ export function createInMemoryStorage<S>(): InMemoryStorage<S> {
   const store = new Map();
 
   return {
-    getItem<K extends keyof S>(key: K) {
+    getItem(key) {
       const value = store.get(key) as string | undefined;
       if (!value) return value as undefined;
       // deep clone to avoid the value being modified by the caller
-      return JSON.parse(JSON.stringify(value)) as S[K];
+      return JSON.parse(JSON.stringify(value));
     },
     hasItem(key) {
       return store.has(key);
