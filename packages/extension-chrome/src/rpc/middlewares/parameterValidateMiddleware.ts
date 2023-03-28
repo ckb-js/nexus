@@ -7,7 +7,7 @@ export function createParameterValidateMiddleware(
   validators: Record<string, ZodType<unknown>>,
 ): JSONRPCServerMiddleware<ServerParams> {
   const parameterValidateMiddleware: JSONRPCServerMiddleware<ServerParams> = async (next, request, serverParams) => {
-    const { method, params } = request;
+    const { method, params } = request as { method: string; params: unknown };
     const validator: ZodType<unknown> | undefined = validators[method];
     if (!validator) {
       return next(request, serverParams);

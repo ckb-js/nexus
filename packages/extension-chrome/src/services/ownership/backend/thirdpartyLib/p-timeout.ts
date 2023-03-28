@@ -1,4 +1,5 @@
 //@ts-nocheck
+/* eslint-disable */
 export class TimeoutError extends Error {
   constructor(message?: string) {
     super(message);

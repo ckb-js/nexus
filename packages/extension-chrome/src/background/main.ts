@@ -22,6 +22,7 @@ void createDaemonWatchtower(factory).run();
 onMessage('rpc', async ({ data, sender }) => {
   logger.info(`RPC start`, data);
   try {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const result = await server.handleRequest({ request: data, sender: sender });
     logger.info(`RPC end`, result);
     return result;

@@ -12,8 +12,8 @@ export function createInMemoryStorage<S>(): InMemoryStorage<S> {
 
   return {
     getItem(key) {
-      const value = store.get(key);
-      if (!value) return value;
+      const value = store.get(key) as string | undefined;
+      if (!value) return value as undefined;
       // deep clone to avoid the value being modified by the caller
       return JSON.parse(JSON.stringify(value));
     },
@@ -27,7 +27,8 @@ export function createInMemoryStorage<S>(): InMemoryStorage<S> {
       store.set(key, value);
     },
     getAll() {
-      return Object.fromEntries(store.entries());
+      /* istanbul ignore next */
+      return Object.fromEntries(store.entries()) as S;
     },
     setAll(s) {
       if (!s) errors.throwError(`The storage cannot be set to ${s}`);
