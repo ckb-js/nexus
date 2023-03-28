@@ -1,3 +1,15 @@
+# v0.0.7 (Tue Mar 28 2023)
+
+#### 🐛 Bug Fix
+
+- fix: retry not work in backend [#167](https://github.com/ckb-js/nexus/pull/167) ([@zhangyouxin](https://github.com/zhangyouxin))
+
+#### Authors: 1
+
+- Shinya ([@zhangyouxin](https://github.com/zhangyouxin))
+
+---
+
 # v0.0.6 (Tue Mar 28 2023)
 
 #### 🐛 Bug Fix
