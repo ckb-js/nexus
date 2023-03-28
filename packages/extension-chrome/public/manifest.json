@@ -44,7 +44,6 @@
         "_favicon"
       ],
       "matches": ["<all_urls>"],
-      "extension_ids": ["*"],
       "all_frames": true
     }
   ],
