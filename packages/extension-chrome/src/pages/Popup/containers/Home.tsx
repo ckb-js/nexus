@@ -1,4 +1,4 @@
-import React, { FC, useMemo } from 'react';
+import React, { FC } from 'react';
 import { Flex, Box, Icon, Center, Link } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import { Button, ButtonProps } from '@chakra-ui/react';
@@ -22,23 +22,18 @@ const useConnectedStatus = () => {
   const configService = useService('configService');
   const platformService = useService('platformService');
 
-  // TODO: use GrantService to check if the current site is granted
-  const whitelistQuery = useQuery({
-    queryKey: ['whitelist'],
-    queryFn: async () => configService.getWhitelist(),
-  });
-
-  const whitelistSitesSet = useMemo(
-    () => new Set(whitelistQuery.data?.map((item) => item.host) || []),
-    [whitelistQuery.data],
-  );
-
   const hasGrantedQuery = useQuery({
-    // Set in query key is not serialized correct, so add the whitelistSitesSet as a extra dependency
-    queryKey: ['platformService', whitelistSitesSet, whitelistQuery.data] as const,
-    queryFn: async ({ queryKey: [, whitelistSitesSet] }) => {
-      const activeTab = await platformService.getActiveSiteInfo();
-      return !!activeTab?.url && whitelistSitesSet.has(new URL(activeTab.url).host);
+    queryKey: ['hasGranted'],
+    queryFn: async () => {
+      // TODO: use GrantService to check if the current site is granted
+      const whitelist = await configService.getWhitelist();
+      const activeSite = await platformService.getActiveSiteInfo();
+      if (!activeSite?.url) {
+        return false;
+      }
+
+      const siteHost = new URL(activeSite.url).host;
+      return whitelist.some((item) => item.host === siteHost);
     },
   });
 
