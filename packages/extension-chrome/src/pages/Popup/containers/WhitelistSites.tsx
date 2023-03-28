@@ -2,7 +2,6 @@ import React, { FC, useMemo, useState } from 'react';
 import {
   Flex,
   VStack,
-  Image,
   Center,
   Box,
   Text,
@@ -19,6 +18,7 @@ import { useMutation } from '@tanstack/react-query';
 import { WhiteAlphaBox } from '../../Components/WhiteAlphaBox';
 import { useConfigQuery } from '../../hooks/useConfigQuery';
 import { useService } from '../../hooks/useService';
+import { SiteFavicon } from '../../Components/SiteFavicon';
 
 export const WhitelistSites: FC = () => {
   const configQuery = useConfigQuery();
@@ -88,7 +88,7 @@ export const WhitelistSites: FC = () => {
         {filteredSites?.map((site, index) => (
           <Flex data-test-id={`site[${index}]`} alignItems="center" h="48px" w="100%" key={site.host}>
             <Center w="48px" borderRadius="50%" padding="4px" h="48px" backgroundColor="whiteAlpha.300">
-              <Image data-test-id={`site[${index}].favicon`} w="32px" h="32px" src={site.favicon} />
+              <SiteFavicon data-test-id={`site[${index}].favicon`} size={32} host={site.host} />
             </Center>
             <Flex ml="20px" data-test-id={`site[${index}].url`} flex={1} fontSize="lg" alignItems="center">
               <Highlight query={searchQuery} styles={{ bg: 'white' }}>

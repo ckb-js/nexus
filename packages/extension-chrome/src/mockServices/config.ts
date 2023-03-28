@@ -22,11 +22,9 @@ class ConfigService {
   whitelist = [
     {
       url: 'https://google.com',
-      favicon: 'http://www.getfavicon.org/icons/favicon17.ico',
     },
     {
       url: 'https://baidu.com',
-      favicon: 'http://www.getfavicon.org/icons/favicon16.ico',
     },
   ];
 

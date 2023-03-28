@@ -7,7 +7,7 @@ import { createEventHub } from '../../src/services/event';
 let service: ConfigService;
 const fakeConfig = {
   nickname: 'Nickname',
-  whitelist: [{ host: 'google.com', favicon: 'https://google.com/favicon.ico' }],
+  whitelist: [{ host: 'google.com' }],
   selectedNetwork: '1',
   networks: [{ networkName: 'ckb', displayName: 'Mainnet', rpcUrl: 'https://mainnet.ckb.dev', id: '1' }],
 };
@@ -27,7 +27,7 @@ describe('ConfigService', () => {
     const config = await service.getConfig();
     expect(config).toEqual({
       nickname: 'Nickname',
-      whitelist: [{ host: 'google.com', favicon: 'https://google.com/favicon.ico' }],
+      whitelist: [{ host: 'google.com' }],
       selectedNetwork: '1',
       networks: [{ networkName: 'ckb', displayName: 'Mainnet', rpcUrl: 'https://mainnet.ckb.dev', id: '1' }],
       version: LIB_VERSION,
@@ -50,7 +50,6 @@ describe('ConfigService', () => {
           ...fakeConfig,
           whitelist: [
             {
-              favicon: 'http://localhost:9180/favicon.ico',
               host: 'localhost',
             },
           ],
@@ -61,7 +60,6 @@ describe('ConfigService', () => {
       ...fakeConfig,
       whitelist: [
         {
-          favicon: 'http://localhost:9180/favicon.ico',
           host: 'localhost',
         },
       ],
@@ -76,7 +74,6 @@ describe('ConfigService', () => {
           ...fakeConfig,
           whitelist: [
             {
-              favicon: 'http://example.com/favicon.ico',
               host: 'localhost:9180',
             },
           ],
@@ -87,7 +84,6 @@ describe('ConfigService', () => {
       ...fakeConfig,
       whitelist: [
         {
-          favicon: 'http://example.com/favicon.ico',
           host: 'localhost:9180',
         },
       ],
@@ -120,7 +116,6 @@ describe('ConfigService', () => {
           ...fakeConfig,
           whitelist: [
             {
-              favicon: 'http://localhost:9180/favicon.ico',
               host: 'localhost:123123123',
             },
           ],

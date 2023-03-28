@@ -13,7 +13,8 @@
     "scripting",
     "storage",
     "unlimitedStorage",
-    "webRequest"
+    "webRequest",
+    "favicon"
   ],
   "background": {
     "service_worker": "background.js"
@@ -39,7 +40,8 @@
         "notification.html",
         "inpage.js.map",
         "content.js.map",
-        "walletManager.html"
+        "walletManager.html",
+        "_favicon"
       ],
       "matches": ["<all_urls>"],
       "all_frames": true
