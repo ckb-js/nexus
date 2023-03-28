@@ -1,3 +1,15 @@
+# v0.0.6 (Tue Mar 28 2023)
+
+#### 🐛 Bug Fix
+
+- feat(extension-chrome): Use Chrome extension favicon API for whitelist and grant [#122](https://github.com/ckb-js/nexus/pull/122) ([@IronLu233](https://github.com/IronLu233))
+
+#### Authors: 1
+
+- Iron Lu ([@IronLu233](https://github.com/IronLu233))
+
+---
+
 # v0.0.5 (Tue Mar 28 2023)
 
 #### 🐛 Bug Fix
