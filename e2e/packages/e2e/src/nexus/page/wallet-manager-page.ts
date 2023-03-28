@@ -80,7 +80,6 @@ export const WalletManagerPageTestIdInfo = {
   // next
 
   /**
-   * Page 6, confirm seed（TBD）
    *
    *     test-id: selectedSeed#n, when the user select a seed, the seed will appear in top of the page
    *     test-id: seed#n, the seed waiting for select. a extra boolean attribute named seed-selected tells the seed selected status
