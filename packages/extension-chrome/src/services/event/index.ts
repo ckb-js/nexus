@@ -1,12 +1,7 @@
-import { NetworkName } from '@nexus-wallet/types/lib/services';
 import { EventEmitter } from 'events';
+import { Events } from '@nexus-wallet/types';
 
-export interface EventMap {
-  /**
-   * available for all pages
-   * @param networkName
-   */
-  networkChanged: (networkName: NetworkName) => void;
+export interface EventMap extends Events {
   /**
    * available only for extension
    */

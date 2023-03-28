@@ -73,7 +73,7 @@ export function createSessionMessenger<Map extends CallMap>(
 
   return {
     sessionId: () => sessionId,
-    send: (type, param) => {
+    send: <T extends keyof Map>(type: T, param?: CallParam<Map[T]>) => {
       const currentReqId = genJsonRpcRequestId();
 
       const requestMessage = createSessionMessage(createJSONRPCRequest(currentReqId, String(type), param));
@@ -93,12 +93,15 @@ export function createSessionMessenger<Map extends CallMap>(
           if (res.error) {
             reject(res.error);
           } else {
-            resolve(res.result);
+            resolve(res.result as CallResult<Map[T]>);
           }
         });
       });
     },
-    register: (method, handler) => {
+    register: <T extends keyof Map>(
+      method: T,
+      handler: (data: CallParam<Map[T]>) => Promisable<CallResult<Map[T]>>,
+    ): void => {
       adapter.receive(async function handleRequest(unknownMessage) {
         if (!isSessionMessage(unknownMessage)) {
           return;
@@ -112,7 +115,7 @@ export function createSessionMessenger<Map extends CallMap>(
         const res: JSONRPCResponse = await (async () => {
           asserts.asserts(req.id, `request id is required`);
           try {
-            return createJSONRPCSuccessResponse(req.id, await handler(req.params));
+            return createJSONRPCSuccessResponse(req.id, await handler(req.params as CallParam<Map[T]>));
           } catch (e) {
             const errorMessage = e instanceof Error ? e.message : 'Internal Error';
             return createJSONRPCErrorResponse(req.id, JSONRPCErrorCode.InternalError, errorMessage, e);

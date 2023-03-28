@@ -3,12 +3,13 @@ import { InjectedCkb, Storage } from '@nexus-wallet/types';
 import { JSONRPCClient } from 'json-rpc-2.0';
 import { createServer } from '../../src/rpc';
 import { createModulesFactory, ModuleProviderMap, ModulesFactory } from '../../src/services/factory';
-import { RpcMethods } from '../../src/rpc/types';
 import { mockPlatformService, mockStorage } from '../helpers';
 import '../../src/rpc/debugImpl';
 import '../../src/rpc/walletImpl';
-import { createInjectedCkb, TypedEventClient, TypedRpcClient } from '../../src/injectedCkb';
+import { createInjectedCkb } from '../../src/injectedCkb';
 import { errors } from '@nexus-wallet/utils';
+import { RpcMethods } from '../../src/rpc/types';
+import { EventMap } from '../../src/services/event';
 
 export interface RpcTestHelper {
   /**
@@ -18,10 +19,10 @@ export interface RpcTestHelper {
    */
   request<Method extends keyof RpcMethods>(
     method: Method,
-    params?: RpcMethods[Method]['params'],
-  ): RpcMethods[Method]['result'];
+    params?: Parameters<RpcMethods[Method]>[0],
+  ): ReturnType<RpcMethods[Method]>;
 
-  ckb: InjectedCkb<TypedRpcClient, TypedEventClient>;
+  ckb: InjectedCkb<RpcMethods, EventMap>;
 
   factory: ModulesFactory;
 }
@@ -54,9 +55,9 @@ export function createTestRpcServer<S = any, P = any>(payload: Partial<ModulePro
     },
   });
 
-  const request: RpcTestHelper['request'] = (method, params) => {
+  const request = ((method, params) => {
     return client.request(String(method), params);
-  };
+  }) as RpcTestHelper['request'];
 
   return { request, factory, ckb };
 }
