@@ -11,7 +11,7 @@ function connectionSection(injectedCkbService) {
             <div className="card-body">
               <h4 className="card-title">Basic Actions</h4>
               <p className="info-text alert  alert-secondary">
-                nexus version: <span id="ckbVersion">{injectedCkbService.ckbVersion}</span>
+                nexus version: <span id="ckbVersion">{injectedCkbService.ckbWalletVersion}</span>
               </p>
               <button
                 className="btn btn-primary btn-lg btn-block mb-3"

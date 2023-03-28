@@ -2,8 +2,6 @@ import { makeAutoObservable } from 'mobx';
 
 export class InjectedCkbService {
   enableStatus = false;
-  ckbProvider;
-  walletVersion = '';
   networkNameResponse = '';
   nicknameResponse = '';
   fullOwnershipGetLiveCellsResponse = '';
@@ -16,20 +14,7 @@ export class InjectedCkbService {
     makeAutoObservable(this);
   }
 
-  enable = async () => {
-    this.ckbProvider = await window.ckb.enable();
-    this.enableStatus = true;
-    await window.ckb.on('networkChanged', (networkName) => {
-      console.log(networkName);
-      this.networkNameResponse = networkName;
-    });
-  };
-
-  isEnable = async () => {
-    this.enableStatus = await window.ckb.isEnabled();
-  };
-
-  get ckbVersion() {
+  get ckbWalletVersion() {
     return window.ckb.version;
   }
 
