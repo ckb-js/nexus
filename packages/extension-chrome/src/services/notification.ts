@@ -156,6 +156,15 @@ export function createBrowserExtensionPlatformService(): PlatformService<Endpoin
       url.searchParams.set('size', size.toString());
       return url.toString();
     },
+    getActiveSiteInfo: async () => {
+      const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
+      return (
+        tab && {
+          faviconUrl: tab.favIconUrl,
+          url: tab.url,
+        }
+      );
+    },
   };
 }
 

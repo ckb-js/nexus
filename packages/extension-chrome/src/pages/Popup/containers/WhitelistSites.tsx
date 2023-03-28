@@ -51,7 +51,7 @@ export const WhitelistSites: FC = () => {
   return (
     <Skeleton isLoaded={!!filteredSites}>
       <Text as={Box} fontSize="md" mb="20px" w="100%">
-        Yan is connected to these sites. They can view your account address
+        {configQuery.data?.nickname} is connected to these sites. They can view your account address
       </Text>
       <InputGroup alignItems="center" h="60px" mb="20px">
         <InputLeftElement

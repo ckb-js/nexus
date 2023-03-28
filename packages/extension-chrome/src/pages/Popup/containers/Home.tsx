@@ -7,6 +7,8 @@ import NetworkIcon from '../../Components/icons/Network.svg';
 import { WhiteAlphaBox } from '../../Components/WhiteAlphaBox';
 import { ConnectStatusCard } from '../../Components/ConnectStatusCard';
 import { useConfigQuery } from '../../hooks/useConfigQuery';
+import { useService } from '../../hooks/useService';
+import { useQuery } from '@tanstack/react-query';
 
 const FeedbackButton: FC<ButtonProps> = (props) => {
   return (
@@ -16,9 +18,32 @@ const FeedbackButton: FC<ButtonProps> = (props) => {
   );
 };
 
+const useConnectedStatus = () => {
+  const configService = useService('configService');
+  const platformService = useService('platformService');
+
+  const hasGrantedQuery = useQuery({
+    queryKey: ['hasGranted'],
+    queryFn: async () => {
+      // TODO: use GrantService to check if the current site is granted
+      const whitelist = await configService.getWhitelist();
+      const activeSite = await platformService.getActiveSiteInfo();
+      if (!activeSite?.url) {
+        return false;
+      }
+
+      const siteHost = new URL(activeSite.url).host;
+      return whitelist.some((item) => item.host === siteHost);
+    },
+  });
+
+  return hasGrantedQuery.data;
+};
+
 export const Home: FC = () => {
   const navigate = useNavigate();
   const { data: config } = useConfigQuery();
+  const connectedStatus = useConnectedStatus();
 
   const entries = [
     {
@@ -41,7 +66,7 @@ export const Home: FC = () => {
 
   return (
     <Flex flexDir="column" h="100%">
-      <ConnectStatusCard name={config?.nickname!} connected />
+      <ConnectStatusCard name={config?.nickname!} connected={connectedStatus} />
 
       <WhiteAlphaBox direction="column" mt="20px">
         {entries.map(({ title, icon, onClick, testId }) => (
