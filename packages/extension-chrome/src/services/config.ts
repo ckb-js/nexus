@@ -17,6 +17,9 @@ const NetworkSchema = joi.object<NetworkConfig>({
 const TrustedHostSchema = joi
   .object<TrustedHost>({
     host: [joi.string().hostname(), joi.string().pattern(new RegExp(`^localhost(:[0-9]{2,5})?$`))],
+
+    // TODO: migrate config without favicon field
+    favicon: joi.string().uri().optional(),
   })
   .with('favicon', 'host');
 

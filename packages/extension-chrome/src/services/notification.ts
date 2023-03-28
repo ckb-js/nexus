@@ -79,7 +79,7 @@ export function createBrowserExtensionPlatformService(): PlatformService<Endpoin
 
       return new Promise((resolve, reject) => {
         messenger.register('session_getRequesterAppInfo', () => {
-          return { url, favicon: `${new URL(url).origin}/favicon.ico` };
+          return { url };
         });
 
         messenger.register('session_approveEnableWallet', () => {
@@ -149,6 +149,12 @@ export function createBrowserExtensionPlatformService(): PlatformService<Endpoin
         errors.throwError(`Cannot get the site information from the request`);
       }
       return { url: tab.url };
+    },
+    getFavicon({ size = 32, host }) {
+      const url = new URL(browser.runtime.getURL('/_favicon/'));
+      url.searchParams.set('pageUrl', `https://${host}`);
+      url.searchParams.set('size', size.toString());
+      return url.toString();
     },
   };
 }

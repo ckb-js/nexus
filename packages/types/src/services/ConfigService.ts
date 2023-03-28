@@ -1,4 +1,5 @@
 import { Promisable } from '../base';
+import type { PlatformService } from '../services/NotificationService'; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface ConfigService {
   /**
@@ -89,6 +90,10 @@ export interface Config {
 
 export interface TrustedHost {
   host: string;
+  /**
+   * @deprecated please use {@link PlatformService.getFavicon}
+   */
+  favicon?: string;
 }
 
 export interface NetworkConfig {

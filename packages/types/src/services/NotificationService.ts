@@ -30,6 +30,11 @@ export interface PlatformService<Sender = unknown> {
    * @throws if the Chrome extension permission is not granted, e.g. favicon
    */
   getRequesterAppInfo(sender: Sender): Promise<{ url: string }>;
+
+  /**
+   * get the favicon URL of the given host
+   */
+  getFavicon(options: { host: string; size?: number }): string;
 }
 
 /**
