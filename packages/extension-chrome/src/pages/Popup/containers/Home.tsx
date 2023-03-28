@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { FC, useMemo } from 'react';
 import { Flex, Box, Icon, Center, Link } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import { Button, ButtonProps } from '@chakra-ui/react';
@@ -20,32 +20,11 @@ const FeedbackButton: FC<ButtonProps> = (props) => {
 
 const useConnectedStatus = () => {
   const configService = useService('configService');
-  const [activeTab, setActiveTab] = useState<chrome.tabs.Tab>();
+  const platformService = useService('platformService');
 
-  const updateCurrentTab = useCallback(async () => {
-    const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
-    tabs?.[0] && setActiveTab(tabs[0]);
-  }, []);
-
-  useEffect(() => {
-    void updateCurrentTab();
-
-    chrome.tabs.onActivated.addListener(updateCurrentTab);
-    return () => {
-      chrome.tabs.onActivated.removeListener(updateCurrentTab);
-    };
-  }, [updateCurrentTab]);
-
-  useEffect(() => {
-    if (!activeTab?.id) {
-      return;
-    }
-
-    chrome.tabs.onUpdated.addListener(updateCurrentTab);
-  }, [activeTab?.id, updateCurrentTab]);
-
-  const whitelistQuery = useQuery(['whitelist'], async () => {
-    return configService.getWhitelist();
+  const whitelistQuery = useQuery({
+    queryKey: ['whitelist'],
+    queryFn: async () => configService.getWhitelist(),
   });
 
   const whitelistSitesSet = useMemo(
@@ -53,7 +32,16 @@ const useConnectedStatus = () => {
     [whitelistQuery.data],
   );
 
-  return !!activeTab?.url && whitelistSitesSet.has(new URL(activeTab?.url).host);
+  const hasGrantedQuery = useQuery({
+    // Set in query key is not serialized correct, so add the whitelistSitesSet as a extra dependency
+    queryKey: ['platformService', whitelistSitesSet, whitelistQuery.data] as const,
+    queryFn: async ({ queryKey: [, whitelistSitesSet] }) => {
+      const activeTab = await platformService.getActiveSiteInfo();
+      return !!activeTab?.url && whitelistSitesSet.has(new URL(activeTab.url).host);
+    },
+  });
+
+  return hasGrantedQuery.data;
 };
 
 export const Home: FC = () => {

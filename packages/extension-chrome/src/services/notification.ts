@@ -150,6 +150,15 @@ export function createBrowserExtensionPlatformService(): PlatformService<Endpoin
       }
       return { url: tab.url };
     },
+    getActiveSiteInfo: async () => {
+      const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
+      return (
+        tab && {
+          faviconUrl: tab.favIconUrl,
+          url: tab.url,
+        }
+      );
+    },
   };
 }
 
