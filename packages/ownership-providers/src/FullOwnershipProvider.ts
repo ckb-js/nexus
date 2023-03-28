@@ -61,7 +61,7 @@ function calculateFeeCompatible(size: number, feeRate: BIish): BI {
   return BI.from(fee);
 }
 
-type FullOwnershipProviderConfig = {
+export type FullOwnershipProviderConfig = {
   ckb: InjectedCkb<FullOwnership, Events>;
 };
 

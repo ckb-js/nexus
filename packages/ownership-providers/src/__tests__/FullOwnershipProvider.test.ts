@@ -8,6 +8,7 @@ import * as secp256k1Blake160 from '@ckb-lumos/common-scripts/lib/secp256k1_blak
 import { FullOwnershipProvider } from '..';
 import { WitnessArgs } from '@ckb-lumos/base/lib/blockchain';
 import { bytes } from '@ckb-lumos/codec';
+import { FullOwnershipProviderConfig } from '../FullOwnershipProvider';
 
 function getExpectedFee(txSkeleton: TransactionSkeletonType, feeRate = BI.from(1000)): BI {
   return BI.from(
@@ -41,7 +42,7 @@ const onChainLocks1: Script = createOnchainLock('0x441509af');
 const onChainLocks2: Script = createOnchainLock('0x25061223');
 const onChainLocks3: Script = createOnchainLock('0x25061224');
 
-function createFakeCellWithCapacity(capacity: number, lock = offChainLock1) {
+function createFakeCellWithCapacity(capacity: number, lock = offChainLock1): Cell {
   return {
     cellOutput: {
       capacity: BI.from(capacity).toHexString(),
@@ -52,7 +53,7 @@ function createFakeCellWithCapacity(capacity: number, lock = offChainLock1) {
       txHash: '0xd2e09c658206d4d0d71c066c46eddaa568d49c09f76b7396ae803dad25850174',
     },
     data: '0x',
-  } as Cell;
+  };
 }
 
 const receiverLock: Script = {
@@ -63,10 +64,10 @@ const receiverLock: Script = {
 
 const mockRpcRequest = jest.fn();
 
-const mockProviderConfig: any = {
+const mockProviderConfig: FullOwnershipProviderConfig = {
   ckb: {
     request: mockRpcRequest,
-  },
+  } as any,
 };
 
 describe('class FullOwnershipProvider', () => {
@@ -148,11 +149,6 @@ describe('class FullOwnershipProvider', () => {
         }
       });
 
-      // const getLiveCells = jest.fn().mockImplementation(({ cursor }: any) => {
-      //   cursor = cursor || 0;
-      //   return { objects: cells.slice(cursor, cursor + 4), cursor: cursor + 4 };
-      // });
-      // provider.getLiveCells = getLiveCells;
       return provider;
     }
     function createFakeSkeleton() {
@@ -215,7 +211,7 @@ describe('class FullOwnershipProvider', () => {
         createFakeCellWithCapacity(200 * 1e8, onChainLocks2),
       ]);
       const txSkeleton = createFakeSkeleton();
-      await expect(provider.payFee(txSkeleton, { autoInject: false, payers: [] }) as any).rejects.toThrowError(
+      await expect(provider.payFee(txSkeleton, { autoInject: false, payers: [] })).rejects.toThrowError(
         'no payer is provided, but autoInject is `false`',
       );
     });
@@ -226,9 +222,9 @@ describe('class FullOwnershipProvider', () => {
         createFakeCellWithCapacity(200 * 1e8, onChainLocks2),
       ]);
       const txSkeleton = createFakeSkeleton();
-      await expect(
-        provider.payFee(txSkeleton, { autoInject: false, payers: [onChainLocks3] }) as any,
-      ).rejects.toThrowError('No payer available to pay fee');
+      await expect(provider.payFee(txSkeleton, { autoInject: false, payers: [onChainLocks3] })).rejects.toThrowError(
+        'No payer available to pay fee',
+      );
     });
     it('Should throw error when changeLock is not found', async () => {
       const provider = buildProvider([createFakeCellWithCapacity(100 * 1e8)], []);
@@ -243,7 +239,7 @@ describe('class FullOwnershipProvider', () => {
   it('#getLiveCells', async () => {
     mockRpcRequest.mockResolvedValue([]);
     const provider = new FullOwnershipProvider(mockProviderConfig);
-    const params: any = { cursor: '0x', change: 'external' };
+    const params = { cursor: '0x', change: 'external' } as const;
     expect(await provider.getLiveCells(params)).toEqual([]);
     expect(mockRpcRequest).toBeCalledWith({
       method: 'wallet_fullOwnership_getLiveCells',
@@ -252,10 +248,10 @@ describe('class FullOwnershipProvider', () => {
   });
 
   describe('#collector', () => {
-    function buildProvider(cells: any[], pageSize = 4) {
+    function buildProvider(cells: Cell[], pageSize = 4) {
       const provider = new FullOwnershipProvider(mockProviderConfig);
-      mockRpcRequest.mockImplementation(({ params }: any) => {
-        const cursor = parseInt(params.cursor || 0);
+      mockRpcRequest.mockImplementation(({ params }: { params: { cursor: string } }) => {
+        const cursor = Number(params.cursor || 0);
         return {
           objects: cells.slice(cursor, cursor + pageSize),
           cursor: cursor + pageSize,
@@ -266,7 +262,7 @@ describe('class FullOwnershipProvider', () => {
     }
 
     it('#should return paginated cell', async () => {
-      const cellLists = [
+      const cellLists: any[] = [
         'cell1',
         'cell2',
         'cell3',
@@ -313,7 +309,7 @@ describe('class FullOwnershipProvider', () => {
             lock: onChainLocks2,
           },
         },
-      ]);
+      ] as Cell[]);
 
       let count = 0;
 
