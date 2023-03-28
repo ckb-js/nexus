@@ -8,7 +8,9 @@ import chunk from 'lodash/chunk';
 import isEqual from 'lodash/isEqual';
 import { RPC as RpcType } from '@ckb-lumos/rpc/lib/types/rpc';
 import { NexusCommonErrors } from '../../../errors';
-import { createRpcClient, loadSecp256k1ScriptDep, toQueryParam, toCell, toScript } from './backendUtils';
+import { createRpcClient, loadSecp256k1ScriptDep, toCell, toQueryParam, toScript } from './backendUtils';
+import { ChainInfo } from '@ckb-lumos/base';
+import { ResultFormatter } from '@ckb-lumos/rpc';
 
 type GetLiveCellsResult = Paginate<Cell> & { lastLock?: Script };
 
@@ -27,6 +29,8 @@ export interface Backend {
   }): Promise<Paginate<Cell> & { lastLock?: Script }>;
 
   resolveTx(tx: Transaction): Promise<TransactionSkeletonType>;
+
+  getBlockchainInfo(): Promise<ChainInfo>;
 }
 
 // TODO better make it persisted in localstorage/db
@@ -160,6 +164,11 @@ export function createBackend(_payload: { nodeUrl: string }): Backend {
         };
       };
       return createTransactionSkeleton(tx, fetcher);
+    },
+
+    getBlockchainInfo: async () => {
+      const res = await client.request<RpcType.BlockchainInfo>('get_blockchain_info', null);
+      return ResultFormatter.toBlockchainInfo(res);
     },
   };
 }

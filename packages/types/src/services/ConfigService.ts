@@ -1,3 +1,4 @@
+import { NetworkName } from '@nexus-wallet/protocol';
 import { Promisable } from '../base';
 
 export interface ConfigService {
@@ -98,8 +99,3 @@ export interface NetworkConfig {
   networkName: NetworkName;
   rpcUrl: string;
 }
-
-/**
- * {@link https://github.com/nervosnetwork/ckb/blob/develop/rpc/README.md#type-chaininfo network type}
- */
-export type NetworkName = 'ckb' | 'ckb_testnet' | string;
