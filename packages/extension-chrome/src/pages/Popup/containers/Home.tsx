@@ -22,6 +22,7 @@ const useConnectedStatus = () => {
   const configService = useService('configService');
   const platformService = useService('platformService');
 
+  // TODO: use GrantService to check if the current site is granted
   const whitelistQuery = useQuery({
     queryKey: ['whitelist'],
     queryFn: async () => configService.getWhitelist(),
