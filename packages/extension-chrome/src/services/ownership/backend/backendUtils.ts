@@ -3,9 +3,8 @@ import { asserts } from '@nexus-wallet/utils';
 import { ScriptConfig } from '@ckb-lumos/config-manager';
 import { JSONRPCRequest, JSONRPCResponse } from 'json-rpc-2.0';
 import { RPC as RpcType } from '@ckb-lumos/rpc/lib/types/rpc';
+import { RequestOptions, requestWithOptions } from './request';
 import { NexusCommonErrors } from '../../../errors';
-import pTimeout from './thirdpartyLib/p-timeout';
-import pRetry from './thirdpartyLib/p-retry';
 
 type Order = 'asc' | 'desc';
 type Limit = HexNumber;
@@ -91,39 +90,22 @@ type RpcClient = {
   batchRequest: <Result = unknown, Params = unknown>(method: string, batchParams: Params[]) => Promise<Result[]>;
 };
 
-type RpcClientOptions = {
-  timeout?: number; // in milliseconds
-  maxRetries?: number;
-};
-
-function createRpcClient(url: string, options?: RpcClientOptions): RpcClient {
+function createRpcClient(url: string, options?: RequestOptions): RpcClient {
   // auto-increment id
   let jsonRpcId = 0;
 
   async function _request(body: JSONRPCRequest | JSONRPCRequest[]): Promise<JSONRPCResponse | JSONRPCResponse[]> {
     ++jsonRpcId;
-    const retryRunner = async () => {
-      const res = await fetch(url, {
+    const fetchProvider = () =>
+      fetch(url, {
         method: 'POST',
         body: JSON.stringify(body),
         headers: {
           'Content-Type': 'application/json',
         },
       });
-      // Abort retrying if the resource doesn't exist
-      if (res.status >= 300) {
-        /* istanbul ignore next */
-        throw NexusCommonErrors.RequestCkbFailed(res);
-      }
-      return res.json();
-    };
 
-    const retryPromise = pRetry(retryRunner, { retries: options?.maxRetries || 5 });
-    const res = await pTimeout(retryPromise, {
-      milliseconds: options?.timeout || 5_000,
-    });
-
-    return res as Promise<JSONRPCResponse | JSONRPCResponse[]>;
+    return requestWithOptions(fetchProvider, options);
   }
 
   async function request<Result = unknown, Params = unknown>(method: string, params: Params): Promise<Result> {
