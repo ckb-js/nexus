@@ -3,7 +3,7 @@ import { asserts } from '@nexus-wallet/utils';
 import { ScriptConfig } from '@ckb-lumos/config-manager';
 import { JSONRPCRequest, JSONRPCResponse } from 'json-rpc-2.0';
 import { RPC as RpcType } from '@ckb-lumos/rpc/lib/types/rpc';
-import { RequestOptions, requestWithOptions } from './request';
+import { RequestOptions, requestWithRetries } from './request';
 import { NexusCommonErrors } from '../../../errors';
 
 type Order = 'asc' | 'desc';
@@ -105,7 +105,7 @@ function createRpcClient(url: string, options?: RequestOptions): RpcClient {
         },
       });
 
-    return requestWithOptions(fetchProvider, options);
+    return requestWithRetries(fetchProvider, options);
   }
 
   async function request<Result = unknown, Params = unknown>(method: string, params: Params): Promise<Result> {

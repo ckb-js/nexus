@@ -8,7 +8,7 @@ export type RequestOptions = {
   maxRetries?: number;
 };
 
-export const requestWithOptions = async (
+export const requestWithRetries = async (
   promiseCtor: () => Promise<Response>,
   options?: RequestOptions,
 ): Promise<JSONRPCResponse | JSONRPCResponse[]> => {
