@@ -39,7 +39,7 @@ export interface PlatformService<Sender = unknown> {
    * get the active site(the active tab) information
    * @throws if the Chrome extension permission is not granted
    */
-  getActiveSiteInfo(): Promise<{ favIconUrl: string; url: string } | undefined>;
+  getActiveSiteInfo(): Promise<{ favIconUrl?: string; url?: string } | undefined>;
 }
 
 /**
