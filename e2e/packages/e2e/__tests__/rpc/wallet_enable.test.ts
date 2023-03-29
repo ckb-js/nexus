@@ -1,7 +1,7 @@
 import { launchWithNexus } from '../../src/setup/launch';
 import { MNEMONIC, NEXUS_BUILD_PATH, PASS_WORD, USER_NAME } from '../config/config';
 import { setUpNexus } from '../../src/setup/setup';
-import { wallet_enable } from '../../src/nexus/servicer/rpc';
+import { wallet_enable, WalletEnableResponse } from '../../src/nexus/servicer/rpc';
 import { failedTestScreenshot, injectionTestStatus, step } from '../util';
 import { BrowserContext, Page } from 'playwright';
 import { NexusWallet } from '../../src/types';
@@ -32,8 +32,12 @@ describe('wallet_enable', function () {
       page = await browser.newPage();
       await page.goto(connectedUrl);
     });
+    let walletEnableResponse: WalletEnableResponse;
     await step('connect', async () => {
-      await Promise.all([wallet_enable(page), nexusWallet.connect()]);
+      [walletEnableResponse] = await Promise.all([wallet_enable(page), nexusWallet.connect()]);
+    });
+    await step('check nick name', async () => {
+      expect(walletEnableResponse.nickname).toBe(USER_NAME);
     });
 
     await step('get white list', async () => {

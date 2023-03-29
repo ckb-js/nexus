@@ -17,9 +17,8 @@ import {
   inputUrl,
   urlTransferDomainName,
 } from '../../src/nexus/helper/popup';
-import { enableWallet } from '../../src/nexus/servicer/provider';
 import { clickConnect } from '../../src/nexus/helper/notification';
-import { wallet_enable, wallet_fullOwnership_getLiveCells } from '../../src/nexus/servicer/rpc';
+import { wallet_enable, wallet_fullOwnership_getLiveCells, WalletEnableResponse } from '../../src/nexus/servicer/rpc';
 import { BrowserContext, Page } from 'playwright';
 
 injectionTestStatus();
@@ -65,11 +64,8 @@ describe('popup', function () {
       await newPage.goto('https://map.baidu.com/');
     });
     await step('playwright connected web use injected js', async () => {
-      let enable = enableWallet(newPage);
-      nexusWallet.connect();
-      await enable;
+      await Promise.all([wallet_enable(newPage), nexusWallet.connect()]);
     });
-
     await step('query connected status should connected', async () => {
       const connectedStatus = await getConnectedStatus(page, 'Connected');
       expect(connectedStatus).toBe('Connected');
@@ -160,20 +156,18 @@ describe('popup', function () {
           await newPage.goto(`https://${whiteUrl}`);
         }
       });
-      let ret: unknown;
       await step('send ckb.enable', async () => {
-        ret = enableWallet(newPage);
-        nexusWallet.connect();
-        await ret;
+        await Promise.all([wallet_enable(newPage), nexusWallet.connect()]);
       });
       await step('reload web', async () => {
         await newPage.reload();
       });
+      let ret: WalletEnableResponse;
       await step('send ckb.enable again', async () => {
-        ret = await enableWallet(newPage);
+        ret = await wallet_enable(newPage);
       });
       await step('check enable success', async () => {
-        expect(JSON.stringify(ret)).toContain('fullOwnership');
+        expect(ret.nickname).toContain(USER_NAME);
       });
       await step('close newPage', async () => {
         await newPage.close();
@@ -550,8 +544,6 @@ describe('popup', function () {
 async function addWhiteListByUrl(browserContext: BrowserContext, nexus: NexusWallet, url: string) {
   const page = await browserContext.newPage();
   await page.goto(url);
-  const enable = enableWallet(page);
-  nexus.connect();
-  await enable;
+  await Promise.all([wallet_enable(page), nexus.connect()]);
   await page.close();
 }

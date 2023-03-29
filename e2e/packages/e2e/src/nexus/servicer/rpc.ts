@@ -1,26 +1,36 @@
-/* eslint-disable */
 import { Page } from 'playwright';
+import { Cell } from '@ckb-lumos/base';
 
-export async function wallet_enable(page: Page): Promise<void> {
+export interface WalletEnableResponse {
+  nickname: string;
+}
+
+export async function wallet_enable(page: Page): Promise<WalletEnableResponse> {
   try {
-    await page.evaluate(() => {
+    return await page.evaluate(() => {
       // @ts-ignore
-      window.ckb.request({ method: 'wallet_enable' });
+      return window.ckb.request({ method: 'wallet_enable' });
     });
   } catch (e) {
     throw Error(`${e}`);
   }
 }
 
+//todo import @nexus-wallet/protocol
 interface WalletFullOwnershipGetLiveCellsRequest {
   cursor: string;
   change: 'external' | 'internal';
 }
 
+export type WalletFullOwnershipGetLiveCellsResponse = {
+  cursor: string;
+  objects: Cell[];
+};
+
 export async function wallet_fullOwnership_getLiveCells(
   page: Page,
   request: WalletFullOwnershipGetLiveCellsRequest,
-): Promise<string> {
+): Promise<WalletFullOwnershipGetLiveCellsResponse> {
   const obj = { request: request };
   return await page.evaluate((obj) => {
     // @ts-ignore
