@@ -1,3 +1,48 @@
+# v0.0.7 (Tue Mar 28 2023)
+
+#### 🐛 Bug Fix
+
+- fix: retry not work in backend [#167](https://github.com/ckb-js/nexus/pull/167) ([@zhangyouxin](https://github.com/zhangyouxin))
+
+#### Authors: 1
+
+- Shinya ([@zhangyouxin](https://github.com/zhangyouxin))
+
+---
+
+# v0.0.6 (Tue Mar 28 2023)
+
+#### 🐛 Bug Fix
+
+- feat(extension-chrome): Use Chrome extension favicon API for whitelist and grant [#122](https://github.com/ckb-js/nexus/pull/122) ([@IronLu233](https://github.com/IronLu233))
+
+#### Authors: 1
+
+- Iron Lu ([@IronLu233](https://github.com/IronLu233))
+
+---
+
+# v0.0.5 (Tue Mar 28 2023)
+
+#### 🐛 Bug Fix
+
+- fix: connect status is always connected [#157](https://github.com/ckb-js/nexus/pull/157) ([@IronLu233](https://github.com/IronLu233))
+
+#### 🏠 Internal
+
+- refactor: disable unsafe any access [#138](https://github.com/ckb-js/nexus/pull/138) ([@IronLu233](https://github.com/IronLu233))
+
+#### 📝 Documentation
+
+- docs: faq [#150](https://github.com/ckb-js/nexus/pull/150) ([@homura](https://github.com/homura))
+
+#### Authors: 2
+
+- Iron Lu ([@IronLu233](https://github.com/IronLu233))
+- Yonghui Lin ([@homura](https://github.com/homura))
+
+---
+
 # v0.0.4 (Mon Mar 27 2023)
 
 #### 🔨 Breaking Minor Change

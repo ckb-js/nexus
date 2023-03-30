@@ -1,6 +1,5 @@
 //@ts-nocheck
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable */
 import retry from 'retry';
 
 const networkErrorMsgs = new Set([
