@@ -108,7 +108,6 @@ export async function failedTestScreenshot(browser: BrowserContext): Promise<voi
         fullPage: true,
         path: `allure-results/${picName}-${i}.png`,
       });
-      console.info('ret length:', ret.length);
       attachJpeg(`allure-results/${picName}-${i}`, ret);
     } catch (e) {
       // eslint-disable-next-line no-console

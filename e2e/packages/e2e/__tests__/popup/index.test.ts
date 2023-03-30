@@ -67,7 +67,7 @@ describe('popup', function () {
     let newPage: Page;
     await step('go to new web:', async () => {
       newPage = await browser.newPage();
-      await newPage.goto('https://map.baidu.com/');
+      await newPage.goto('https://www.baidu.com/');
     });
 
     let walletEnableResponse: WalletEnableResponse;
@@ -108,7 +108,7 @@ describe('popup', function () {
       await clickWhitelistSites(page);
     });
 
-    let notExistUrl = 'https://pudge.explorer.nervos.org/';
+    let notExistUrl = 'https://docs.nervos.org/';
     test.each([
       { url: notExistUrl }, //  add white list that it is first
       { url: NEXUS_WEB_LOCAL_URL }, // local url
@@ -116,6 +116,7 @@ describe('popup', function () {
       {
         url: 'https://godwoken-bridge-testnet.vercel.app/#/v1/deposit/pending?sadasdasdasdasdasdandawndasdandawndasdandawndasdandawndasdandawndasdandawndasdandawndasdandawndasdandawndasdandawndasdandawndasdandawndasdandawndasdandawndasdandawndasdandawndasdandawndasdandawndasdandawndasdandawndiowafnoawhfaoihfoaihfioawhfoia=aaa',
       }, // long url
+      // {url: 'https://mememmememememmmemememmememememmemmemeemememmeemmmmmmememmememe.bit.host/',}, // long url FIXME: check if the URL is inside the box
     ])(`add white :%s`, async ({ url }) => {
       let newPage: Page;
       await step('check url in whitelist,if exist ,remove it', async () => {
@@ -128,6 +129,7 @@ describe('popup', function () {
       await step('send ckb.enable,and approve', async () => {
         await Promise.all([wallet_enable(newPage), nexusWallet.connect()]);
       });
+
       await step('wallet_fullOwnership_getLiveCells enable', async () => {
         await newPage.bringToFront();
         await wallet_fullOwnership_getLiveCells(newPage, {
