@@ -12,6 +12,7 @@ export async function getUserName(page: Page): Promise<string> {
 }
 
 export async function getConnectedStatus(page: Page, expectedStatus = ''): Promise<string> {
+  //FIXME : The page of the query status is not in the current  page ，make it always return disconnected
   if (expectedStatus !== '') {
     await page.getByText(expectedStatus, { exact: true }).innerText();
   }
