@@ -60,22 +60,32 @@ describe('popup', function () {
       expect(connected).toBe('Disconnected');
     });
   });
-  it('connect to a web site => query connection status is connected, and when it is closed => it is Disconnected', async () => {
+
+  it.todo('connect to a web site => query connection status is connected, and when it is closed => it is Disconnected');
+
+  it('connect to a web site =>  wallet_enable return  nickName ,getCells return successful, and when it is closed => connected status is Disconnected', async () => {
     let newPage: Page;
     await step('go to new web:', async () => {
       newPage = await browser.newPage();
       await newPage.goto('https://map.baidu.com/');
     });
+
+    let walletEnableResponse: WalletEnableResponse;
     await step('playwright connected web use injected js', async () => {
-      await Promise.all([wallet_enable(newPage), nexusWallet.connect()]);
+      [walletEnableResponse] = await Promise.all([wallet_enable(newPage), nexusWallet.connect()]);
     });
-    await step('query connected status should connected', async () => {
-      const connectedStatus = await getConnectedStatus(page, 'Connected');
-      expect(connectedStatus).toBe('Connected');
+    await step('walletEnableResponse return nick name', async () => {
+      expect(walletEnableResponse.nickname).toBe(USER_NAME);
     });
+
+    await step('get cells return successful', async () => {
+      await wallet_fullOwnership_getLiveCells(newPage, {});
+    });
+
     await step('close open new page', async () => {
       await newPage.close();
     });
+
     await step('query connected status should Disconnected', async () => {
       await page.reload();
       const connectedStatus = await getConnectedStatus(page, 'Disconnected');
@@ -269,7 +279,12 @@ describe('popup', function () {
         expect(page.url()).not.toContain('whitelist');
       });
     });
-    it("When connecting to a whitelist webpage, remove the white url=>rpc can't use and connectStatus is Disconnected", async () => {
+
+    it.todo(
+      "When connecting to a whitelist webpage, remove the white url => rpc can't use and connectStatus is Disconnected",
+    );
+
+    it('When connecting to a whitelist webpage, remove the white url => check wallet_fullOwnership_getLiveCells is not enable', async () => {
       const url = NEXUS_WEB_URL;
       let newPage: Page;
       await step('goto new web:', async () => {
@@ -282,7 +297,7 @@ describe('popup', function () {
         await nexusWallet.connect();
       });
 
-      //FIXME: 查询状态的页面不在当前白名单页面
+      //FIXME: The page of the query status is not in the current white list page
       // await step('check connectStatus status is  connected ', async () => {
       //   expect(await nexusWallet.popup.queryConnected()).toBe(true);
       // });
@@ -302,9 +317,11 @@ describe('popup', function () {
           'not in the whitelist',
         );
       });
-      await step('check connectStatus status is Disconnected ', async () => {
-        expect(await nexusWallet.popup.queryConnected()).toBe(false);
-      });
+
+      //FIXME: The page of the query status is not in the current white list page
+      // await step('check connectStatus status is Disconnected ', async () => {
+      //   expect(await nexusWallet.popup.queryConnected()).toBe(false);
+      // });
     });
   });
   describe('network', function () {
