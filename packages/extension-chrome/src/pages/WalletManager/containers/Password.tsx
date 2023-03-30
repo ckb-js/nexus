@@ -47,7 +47,7 @@ export const SetPassword: FC<SetPasswordProps> = ({ isImportSeed }) => {
         Create password
       </Heading>
       {isImportSeed && (
-        <Box maxW="502px" mb="16px" fontSize="md">
+        <Box w="502px" mb="16px" fontSize="md">
           This password will unlock your Nexus wallet only on this device. Nexus can not recover this password.
         </Box>
       )}
@@ -84,7 +84,7 @@ export const SetPassword: FC<SetPasswordProps> = ({ isImportSeed }) => {
           rules={{
             required: true,
             validate: (confirmPassword, formValue) => {
-              return confirmPassword === formValue.password || 'Your two passwords are not correspond';
+              return confirmPassword === formValue.password || 'Passwords do not match';
             },
           }}
           render={({ field, fieldState }) => (

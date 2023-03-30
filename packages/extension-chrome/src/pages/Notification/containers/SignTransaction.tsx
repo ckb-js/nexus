@@ -102,7 +102,7 @@ const TransactionIOList: FC<TransactionIOListProps> = ({ type, networkName, tx, 
                   <Box w="60px" p="16px">
                     #{index + 1}
                   </Box>
-                  <Tooltip label={addr}>
+                  <Tooltip hasArrow label={addr}>
                     <Box p="16px">
                       {addr.slice(0, 5)}...{addr.slice(-4)}
                     </Box>

@@ -35,7 +35,7 @@ export const Welcome: FC = () => {
     {
       heading: 'No, I already have a wallet',
       desc: 'Import your existing wallet using Seed',
-      actionText: 'Import wallet',
+      actionText: 'Import a wallet',
       width: '324px',
       paddingX: '68px',
       testId: 'importWallet',

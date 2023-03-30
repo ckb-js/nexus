@@ -41,9 +41,9 @@ const routeConfig: RouteObject[] = [
     loader: () => {
       return {
         steps: [
-          { path: 'account', title: 'Create Username', description: 'Select a username' },
+          { path: 'account', title: 'Create a Username', description: 'Create a username' },
           { path: 'password', title: 'Create Password', description: 'Choose a secure one' },
-          { path: 'seed', title: 'Generate Wallet Seed', description: 'remember it!', displayOnly: true },
+          { path: 'seed', title: 'Generate Wallet Seed', description: 'Remember it!', displayOnly: true },
           { path: 'confirm', title: 'Confirm Seed', description: 'Confirm your seed' },
         ],
         entry: '/',
