@@ -2,6 +2,36 @@ import { Script, Transaction } from '@ckb-lumos/lumos';
 import { createBackend } from '../../../../src/services/ownership/backend';
 import fetchMock from 'jest-fetch-mock';
 import { ScriptConfig, predefined } from '@ckb-lumos/config-manager/lib';
+import { toQueryParam } from '../../../../src/services/ownership/backend/backendUtils';
+
+describe('Query Param', () => {
+  beforeEach(() => {
+    fetchMock.disableMocks();
+  });
+  it('should get correct query params', async () => {
+    const lock: Script = {
+      codeHash: '0x1234',
+      hashType: 'type',
+      args: '0x5678',
+    };
+    const queryParam = toQueryParam({ lock });
+
+    expect(queryParam).toEqual([
+      {
+        script: {
+          code_hash: lock.codeHash,
+          hash_type: lock.hashType,
+          args: lock.args,
+        },
+        script_type: 'lock',
+        script_search_mode: 'exact',
+      },
+      'asc',
+      '0x64',
+      null,
+    ]);
+  });
+});
 
 describe('load secp256k1 cellDeps', () => {
   beforeEach(() => {
