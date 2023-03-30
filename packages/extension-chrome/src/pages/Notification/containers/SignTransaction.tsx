@@ -17,6 +17,7 @@ import {
   FormErrorMessage,
   Flex,
   Spacer,
+  Tooltip,
 } from '@chakra-ui/react';
 import { encodeToAddress, TransactionSkeletonObject } from '@ckb-lumos/helpers';
 import { BI } from '@ckb-lumos/lumos';
@@ -101,9 +102,11 @@ const TransactionIOList: FC<TransactionIOListProps> = ({ type, networkName, tx, 
                   <Box w="60px" p="16px">
                     #{index + 1}
                   </Box>
-                  <Box p="16px">
-                    {addr.slice(0, 5)}...{addr.slice(-4)}
-                  </Box>
+                  <Tooltip label={addr}>
+                    <Box p="16px">
+                      {addr.slice(0, 5)}...{addr.slice(-4)}
+                    </Box>
+                  </Tooltip>
                 </Flex>
               </Td>
               <Td data-test-id={`transaction.${type}[${index}].type`}>{parseCellType(cell)}</Td>

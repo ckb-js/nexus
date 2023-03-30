@@ -70,7 +70,7 @@ const PasswordInput: FC<Omit<InputProps, 'type'>> = ({ onFocus: _onFocus, ...res
 export const RecoveryWallet: FC = () => {
   const setStoreState = useWalletCreationStore((s) => s.set);
   const { formState, handleSubmit, control, setValue } = useForm<FormFields>({
-    defaultValues: {
+    values: {
       seed: times(MNEMONIC_LENGTH, () => ({ value: '' })),
     },
     mode: 'onChange',

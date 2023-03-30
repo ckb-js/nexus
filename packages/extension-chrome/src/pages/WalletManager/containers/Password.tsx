@@ -22,7 +22,7 @@ export const SetPassword: FC<SetPasswordProps> = ({ isImportSeed }) => {
 
   const { control, handleSubmit, formState, trigger } = useForm<FormValues>({
     mode: 'onBlur',
-    defaultValues: {
+    values: {
       password: '',
       confirmPassword: '',
     },
@@ -48,7 +48,7 @@ export const SetPassword: FC<SetPasswordProps> = ({ isImportSeed }) => {
       </Heading>
       {isImportSeed && (
         <Box maxW="502px" mb="16px" fontSize="md">
-          {'Password must be ≥ 8 characters'}
+          This password will unlock your Nexus wallet only on this device. Nexus can not recover this password.
         </Box>
       )}
       <VStack>
@@ -57,7 +57,7 @@ export const SetPassword: FC<SetPasswordProps> = ({ isImportSeed }) => {
           name="password"
           rules={{
             required: true,
-            minLength: 8,
+            minLength: { value: 8, message: 'Password must be ≥ 8 characters' },
           }}
           render={({ field, fieldState }) => (
             <FormControl
@@ -73,7 +73,7 @@ export const SetPassword: FC<SetPasswordProps> = ({ isImportSeed }) => {
                 data-test-id="password"
                 {...field}
               />
-              <FormErrorMessage>Password is too short</FormErrorMessage>
+              <FormErrorMessage>{fieldState.error?.message}</FormErrorMessage>
             </FormControl>
           )}
         />
@@ -81,11 +81,10 @@ export const SetPassword: FC<SetPasswordProps> = ({ isImportSeed }) => {
         <Controller
           control={control}
           name="confirmPassword"
-          defaultValue=""
           rules={{
             required: true,
             validate: (confirmPassword, formValue) => {
-              return confirmPassword === formValue.password;
+              return confirmPassword === formValue.password || 'Your two passwords are not correspond';
             },
           }}
           render={({ field, fieldState }) => (
@@ -102,11 +101,12 @@ export const SetPassword: FC<SetPasswordProps> = ({ isImportSeed }) => {
                 placeholder="input your password"
                 {...field}
                 onChange={(e) => {
+                  // this field need to be validated when password field change
                   field.onChange(e);
                   return trigger('confirmPassword');
                 }}
               />
-              <FormErrorMessage>Your two passwords are not correspond</FormErrorMessage>
+              <FormErrorMessage>{fieldState.error?.message}</FormErrorMessage>
             </FormControl>
           )}
         />

@@ -1,5 +1,5 @@
-import { FormControl, FormLabel, Heading, Input, Box } from '@chakra-ui/react';
-import { useForm } from 'react-hook-form';
+import { FormControl, FormLabel, Heading, Input, Box, FormErrorMessage } from '@chakra-ui/react';
+import { Controller, useForm } from 'react-hook-form';
 import Avatar from '../../Components/icons/Avatar.svg';
 import React, { FC, useEffect } from 'react';
 import { useWalletCreationStore } from '../store';
@@ -10,7 +10,10 @@ export const CreateAccount: FC<{ isImportSeed?: boolean }> = ({ isImportSeed }) 
 
   const { whenSubmit, setNextAvailable } = useOutletContext();
 
-  const { register, formState, handleSubmit } = useForm<{ username: string }>();
+  const { formState, handleSubmit, control } = useForm<{ username: string }>({
+    mode: 'onChange',
+    values: { username: '' },
+  });
 
   useEffect(() => {
     whenSubmit?.(
@@ -33,10 +36,21 @@ export const CreateAccount: FC<{ isImportSeed?: boolean }> = ({ isImportSeed }) 
       <Box as={Avatar} mb="12px" w="96px" h="96px" />
 
       <Box>
-        <FormControl>
-          <FormLabel>A Descriptive Name For Your Wallet</FormLabel>
-          <Input data-test-id="username" {...register('username', { required: true })} placeholder="User name" />
-        </FormControl>
+        <Controller
+          control={control}
+          name="username"
+          rules={{
+            required: true,
+            maxLength: { value: 12, message: 'Username must be ≤ 12 characters' },
+          }}
+          render={({ fieldState, field }) => (
+            <FormControl isInvalid={fieldState.invalid && fieldState.error?.type !== 'required'}>
+              <FormLabel>A Descriptive Name For Your Wallet</FormLabel>
+              <Input data-test-id="username" {...field} />
+              <FormErrorMessage>{fieldState.error?.message}</FormErrorMessage>
+            </FormControl>
+          )}
+        />
       </Box>
     </>
   );
