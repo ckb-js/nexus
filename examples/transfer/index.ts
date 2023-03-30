@@ -1,10 +1,18 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { RPC } from '@ckb-lumos/lumos';
-import { connectWallet, getAnAddress, buildTransferTxSkeleton, signTx, sendTx } from './lib';
+import { RPC } from "@ckb-lumos/lumos";
+import { connectWallet, getAnAddress, buildTransferTxSkeleton, signTx, sendTx } from "./lib";
+import { InjectedCkb } from "@nexus-wallet/protocol/lib/injected";
+
+declare global {
+  interface Window {
+    ckb: InjectedCkb;
+  }
+}
 
 if (!window.ckb) {
-  alert('please install Nexus at first');
+  alert("please install Nexus at first");
 }
+
 // prettier-ignore
 async function main() {
   /**
