@@ -10,6 +10,7 @@ export class InjectedCkbService {
   walletFullOwnershipSignTransactionResponse = '';
   walletFullOwnershipSignDataResponse = '';
   ckbRequestResponse = '';
+
   constructor() {
     makeAutoObservable(this);
   }
@@ -19,7 +20,12 @@ export class InjectedCkbService {
   }
 
   wallet_enable = async () => {
-    this.nicknameResponse = JSON.stringify(await window.ckb.request({ method: 'wallet_enable' }));
+    try {
+      this.nicknameResponse = JSON.stringify(await window.ckb.request({ method: 'wallet_enable' }));
+    } catch (e) {
+      this.nicknameResponse = `${e}`;
+      return;
+    }
     this.enableStatus = true;
     await window.ckb.on('networkChanged', (networkName) => {
       console.log(networkName);
@@ -28,54 +34,78 @@ export class InjectedCkbService {
   };
 
   wallet_fullOwnership_getLiveCells = async (params) => {
-    this.fullOwnershipGetLiveCellsResponse = JSON.stringify(
-      await window.ckb.request({
-        method: 'wallet_fullOwnership_getLiveCells',
-        params: JSON.parse(params),
-      }),
-    );
+    try {
+      this.fullOwnershipGetLiveCellsResponse = JSON.stringify(
+        await window.ckb.request({
+          method: 'wallet_fullOwnership_getLiveCells',
+          params: JSON.parse(params),
+        }),
+      );
+    } catch (e) {
+      this.fullOwnershipGetLiveCellsResponse = `${e}`;
+    }
   };
 
   wallet_fullOwnership_getOffChainLocks = async (params) => {
-    this.fullOwnershipGetOffChainLocksResponse = JSON.stringify(
-      await window.ckb.request({
-        method: 'wallet_fullOwnership_getOffChainLocks',
-        params: JSON.parse(params),
-      }),
-    );
+    try {
+      this.fullOwnershipGetOffChainLocksResponse = JSON.stringify(
+        await window.ckb.request({
+          method: 'wallet_fullOwnership_getOffChainLocks',
+          params: JSON.parse(params),
+        }),
+      );
+    } catch (e) {
+      this.fullOwnershipGetOffChainLocksResponse = `${e}`;
+    }
   };
   wallet_fullOwnership_getOnChainLocks = async (params) => {
-    this.fullOwnershipGetOnChainLocksResponse = JSON.stringify(
-      await window.ckb.request({
-        method: 'wallet_fullOwnership_getOnChainLocks',
-        params: JSON.parse(params),
-      }),
-    );
+    try {
+      this.fullOwnershipGetOnChainLocksResponse = JSON.stringify(
+        await window.ckb.request({
+          method: 'wallet_fullOwnership_getOnChainLocks',
+          params: JSON.parse(params),
+        }),
+      );
+    } catch (e) {
+      this.fullOwnershipGetOnChainLocksResponse = `${e}`;
+    }
   };
   wallet_fullOwnership_signData = async (params) => {
-    this.walletFullOwnershipSignDataResponse = JSON.stringify(
-      await window.ckb.request({
-        method: 'wallet_fullOwnership_signData',
-        params: JSON.parse(params),
-      }),
-    );
+    try {
+      this.walletFullOwnershipSignDataResponse = JSON.stringify(
+        await window.ckb.request({
+          method: 'wallet_fullOwnership_signData',
+          params: JSON.parse(params),
+        }),
+      );
+    } catch (e) {
+      this.walletFullOwnershipSignDataResponse = `${e}`;
+    }
   };
 
   wallet_fullOwnership_signTransaction = async (params) => {
-    this.walletFullOwnershipSignTransactionResponse = JSON.stringify(
-      await window.ckb.request({
-        method: 'wallet_fullOwnership_signTransaction',
-        params: JSON.parse(params),
-      }),
-    );
+    try {
+      this.walletFullOwnershipSignTransactionResponse = JSON.stringify(
+        await window.ckb.request({
+          method: 'wallet_fullOwnership_signTransaction',
+          params: JSON.parse(params),
+        }),
+      );
+    } catch (e) {
+      this.walletFullOwnershipSignTransactionResponse = `${e}`;
+    }
   };
 
   ckb_request = async (method, params) => {
-    this.ckbRequestResponse = JSON.stringify(
-      await window.ckb.request({
-        method: method,
-        params: JSON.parse(params),
-      }),
-    );
+    try {
+      this.ckbRequestResponse = JSON.stringify(
+        await window.ckb.request({
+          method: method,
+          params: JSON.parse(params),
+        }),
+      );
+    } catch (e) {
+      this.ckbRequestResponse = `${e}`;
+    }
   };
 }

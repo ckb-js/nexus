@@ -4,6 +4,7 @@ import { NexusWallet } from '../../src/types';
 import { BrowserContext, Page } from 'playwright';
 import { failedTestScreenshot, injectionTestStatus, step } from '../util';
 import { MNEMONIC, NEXUS_BUILD_PATH, NEXUS_WEB_URL, PASS_WORD, USER_NAME } from '../config/config';
+import { Sleep } from '../../src/nexus/util/helper';
 
 injectionTestStatus();
 describe('nexus-e2e-web', function () {
@@ -41,22 +42,42 @@ describe('nexus-e2e-web', function () {
     test.each([
       {
         inputSignData: '{"data":"0x1234"}',
-        expectedGetResponse: 'mooooock signed data',
+        expectedGetResponse:
+          '0xe83c69c774e3291af933db5b056bc69d91646b783588993ce8acbc0be6e0536b07e4f611d62511ab1b33424633c2935938cc7b1a9480d308f827510885c3816e01',
       },
     ])(`signData test:%s`, async ({ inputSignData, expectedGetResponse }) => {
-      await step(`input:${inputSignData}`, async () => {
-        await page.locator(`#fullOwnership-signDataInput`).type(inputSignData);
+      await step('input {}', async () => {
+        await page.locator('#walletFullOwnershipGetOffChainLocksInput').type('{}');
+      });
+      await step(`get signLock`, async () => {
+        //
+        await page.locator('#walletFullOwnershipGetOffChainLocksButton').click();
+      });
+      let offChainResponse: string;
+      await step('get OnChainLocks response', async () => {
+        offChainResponse = await page.locator('#walletFullOwnershipGetOffChainLocksResponse').innerText();
+      });
+      let signMsg = '';
+      await step('build sign Data with lock params', async () => {
+        offChainResponse = JSON.parse(offChainResponse);
+        const signMsgMap = JSON.parse(inputSignData);
+        signMsgMap['lock'] = offChainResponse[0];
+        signMsg = JSON.stringify(signMsgMap);
+      });
+
+      await step(`input:${signMsg}`, async () => {
+        await page.locator(`#walletFullOwnershipSignDataInput`).type(signMsg);
       });
       await step('click signData', async () => {
-        await page.locator(`#fullOwnership-signDataButton`).click();
+        await page.locator(`#walletFullOwnershipSignDataButton`).click();
       });
 
       await step(`nexus:click approve sign`, async () => {
         await nexusWallet.approve(PASS_WORD);
       });
       await step(`check response  == ${expectedGetResponse}`, async () => {
-        const ret = await page.locator(`#fullOwnership-signDataResult`).innerText();
-        expect(ret).toBe(expectedGetResponse);
+        const ret = await getRpcResponse(page, `#walletFullOwnershipSignDataResponse`);
+        expect(ret).toContain(expectedGetResponse);
       });
     });
   });
@@ -70,3 +91,14 @@ describe('nexus-e2e-web', function () {
     await browser.close();
   });
 });
+
+async function getRpcResponse(page: Page, selector: string): Promise<string> {
+  for (let i = 0; i < 5; i++) {
+    if ((await page.locator(selector).innerText()) === '') {
+      await Sleep(1000);
+      continue;
+    }
+    break;
+  }
+  return (await page.locator(selector).innerText()).replace('\\"', '');
+}

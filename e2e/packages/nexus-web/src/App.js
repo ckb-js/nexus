@@ -74,7 +74,9 @@ function App() {
               ckb request response: <span id={'ckbRequestResponse'}>{injectedCkbService.ckbRequestResponse}</span>
             </p>
           </div>
-
+          <hr />
+          <hr />
+          <hr />
           <div id={`wallet_fullOwnership_getLiveCells-form`}>
             <h4>wallet fullOwnership getLiveCells</h4>
             <input
@@ -93,7 +95,7 @@ function App() {
               }
               disabled={!injectedCkbService.enableStatus}
             >
-              wallet full Ownership getLive Cells
+              get Live Cells
             </button>
             <p className="info-text alert alert-secondary">
               walletFullOwnershipGetLiveCellsResult:{' '}
@@ -102,7 +104,9 @@ function App() {
               </span>
             </p>
           </div>
-
+          <hr />
+          <hr />
+          <hr />
           <div id={`wallet_fullOwnership_getOffChainLocks-form`}>
             <h4>wallet_fullOwnership_getOffChainLocks</h4>
             <input
@@ -121,7 +125,7 @@ function App() {
               }
               disabled={!injectedCkbService.enableStatus}
             >
-              walletFullOwnershipGetOffChainLocksButton
+              Get OffChain Locks
             </button>
             <p className="info-text alert alert-secondary">
               walletFullOwnershipGetOffChainLocksResponse:{' '}
@@ -130,7 +134,9 @@ function App() {
               </span>
             </p>
           </div>
-
+          <hr />
+          <hr />
+          <hr />
           <div id={`wallet_fullOwnership_getOnChainLocks-form`}>
             <h4>wallet_fullOwnership_getOnChainLocks</h4>
             <input
@@ -149,7 +155,7 @@ function App() {
               }
               disabled={!injectedCkbService.enableStatus}
             >
-              walletFullOwnershipGetOnChainLocksButton
+              Get OnChain Locks
             </button>
             <p className="info-text alert alert-secondary">
               walletFullOwnershipGetOnChainLocksResponse:{' '}
@@ -158,9 +164,11 @@ function App() {
               </span>
             </p>
           </div>
-
+          <hr />
+          <hr />
+          <hr />
           <div id={`wallet_fullOwnership_signData-form`}>
-            <h4>wallet_fullOwnership_getOnChainLocks</h4>
+            <h4>wallet_fullOwnership_signData</h4>
             <input className="form-control" type="text" placeholder="payload" id={'walletFullOwnershipSignDataInput'} />
             <button
               className="btn btn-primary btn-lg btn-block mb-3"
@@ -172,7 +180,7 @@ function App() {
               }
               disabled={!injectedCkbService.enableStatus}
             >
-              walletFullOwnershipSignDataButton
+              Sign Data
             </button>
             <p className="info-text alert alert-secondary">
               walletFullOwnershipSignDataResponse:{' '}
@@ -181,9 +189,11 @@ function App() {
               </span>
             </p>
           </div>
-
+          <hr />
+          <hr />
+          <hr />
           <div id={`wallet_fullOwnership_signTransaction-form`}>
-            <h4>wallet_fullOwnership_getOnChainLocks</h4>
+            <h4>wallet_fullOwnership_signTransaction</h4>
             <input
               className="form-control"
               type="text"
@@ -200,7 +210,7 @@ function App() {
               }
               disabled={!injectedCkbService.enableStatus}
             >
-              walletFullOwnershipSignDataButton
+              Sign Transaction
             </button>
             <p className="info-text alert alert-secondary">
               walletFullOwnershipSignTransactionResponse:{' '}
