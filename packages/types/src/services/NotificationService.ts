@@ -1,6 +1,6 @@
 import { TransactionSkeletonObject } from '@ckb-lumos/helpers';
-import { HexString } from '@ckb-lumos/lumos';
-import { Tabs } from 'webextension-polyfill';
+import type { HexString } from '@ckb-lumos/lumos';
+
 export interface PlatformService<Sender = unknown> {
   /**
    * request user to approve for signing a transaction,
@@ -39,7 +39,7 @@ export interface PlatformService<Sender = unknown> {
    * get the active site(the active tab) information
    * @throws if the Chrome extension permission is not granted
    */
-  getActiveSiteInfo(): Promise<Pick<Tabs.Tab, 'favIconUrl' | 'url'> | undefined>;
+  getActiveSiteInfo(): Promise<{ favIconUrl?: string; url?: string } | undefined>;
 }
 
 /**
