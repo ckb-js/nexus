@@ -4,6 +4,7 @@ import { createLogger, errors, LIB_VERSION } from '@nexus-wallet/utils';
 import produce from 'immer';
 import joi from 'joi';
 import { EventHub } from './event';
+import { validateHost } from '../utils/validate';
 
 const logger = createLogger();
 
@@ -14,14 +15,12 @@ const NetworkSchema = joi.object<NetworkConfig>({
   displayName: joi.string().required(),
 });
 
-const TrustedHostSchema = joi
-  .object<TrustedHost>({
-    host: [joi.string().hostname(), joi.string().pattern(new RegExp(`^localhost(:[0-9]{2,5})?$`))],
+const TrustedHostSchema = joi.object<TrustedHost>({
+  host: joi.string().custom(validateHost),
 
-    // TODO: migrate config without favicon field
-    favicon: joi.string().uri().optional(),
-  })
-  .with('favicon', 'host');
+  // TODO: migrate config without favicon field
+  favicon: joi.string().optional(),
+});
 
 const ConfigSchema = joi.object<Config>({
   nickname: joi.string().required(),

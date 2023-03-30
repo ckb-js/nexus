@@ -1,14 +1,15 @@
 import { isJSONRPCResponse, JSONRPCClient } from 'json-rpc-2.0';
 import * as windowMessenger from '../messaging';
-import { asserts } from '@nexus-wallet/utils';
 import { EventEmitter } from 'eventemitter3';
 import { isEventObject } from '../messaging/internal';
 import { createInjectedCkb } from '../injectedCkb';
-import { RpcClient, RpcMethods } from '@nexus-wallet/types';
+import type { RpcClient, RpcMethods } from '@nexus-wallet/types';
 
 const client = new JSONRPCClient(async (req) => {
   const response = await windowMessenger.sendMessage('contentAndInjected', req, 'content-script');
-  asserts.asserts(isJSONRPCResponse(response), `Invalid JSON-RPC response: ${response}`);
+  if (!isJSONRPCResponse(response)) {
+    throw new Error(`Invalid JSON-RPC response: ${response}`);
+  }
   client.receive(response);
 });
 const emitter = new EventEmitter();
