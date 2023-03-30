@@ -41,6 +41,7 @@ const PasswordInput: FC<Omit<InputProps, 'type'>> = ({ onFocus: _onFocus, ...res
   const EyeIcon = reveal ? ViewOffIcon : ViewIcon;
   useClickAway(inputGroupRef, () => {
     setFocused(false);
+    toggleRevealState(false);
   });
   const onFocus: React.FocusEventHandler<HTMLInputElement> = useCallback(
     (e) => {
@@ -58,7 +59,7 @@ const PasswordInput: FC<Omit<InputProps, 'type'>> = ({ onFocus: _onFocus, ...res
     <InputGroup ref={inputGroupRef}>
       <Input type={reveal ? 'text' : 'password'} onFocus={onFocus} {...restProps} />
       <InputRightElement>
-        <EyeIcon opacity={focused ? 1 : 0} cursor="pointer" mr="12px" onClick={toggleVisible} />
+        <EyeIcon display={focused ? 'block' : 'none'} cursor="pointer" mr="12px" onClick={toggleVisible} />
       </InputRightElement>
     </InputGroup>
   );
