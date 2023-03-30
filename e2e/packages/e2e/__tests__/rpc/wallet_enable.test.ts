@@ -7,7 +7,10 @@ import { BrowserContext, Page } from 'playwright';
 import { NexusWallet } from '../../src/types';
 import { urlTransferDomainName } from '../../src/nexus/helper/popup';
 
-injectionTestStatus();
+beforeAll(() => {
+  injectionTestStatus();
+});
+
 describe('wallet_enable', function () {
   let browser: BrowserContext;
   let nexusWallet: NexusWallet;

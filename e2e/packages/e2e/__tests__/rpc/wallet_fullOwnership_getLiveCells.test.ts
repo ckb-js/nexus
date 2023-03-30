@@ -6,7 +6,10 @@ import { MNEMONIC, NEXUS_BUILD_PATH, PASS_WORD, USER_NAME } from '../config/conf
 import { setUpNexus } from '../../src/setup/setup';
 import { wallet_enable, wallet_fullOwnership_getLiveCells } from '../../src/nexus/servicer/rpc';
 
-injectionTestStatus();
+beforeAll(() => {
+  injectionTestStatus();
+});
+
 describe('wallet_fullOwnership_getLiveCells', function () {
   let browser: BrowserContext;
   let nexusWallet: NexusWallet;

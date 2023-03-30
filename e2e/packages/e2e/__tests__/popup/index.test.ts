@@ -21,7 +21,10 @@ import { clickConnect } from '../../src/nexus/helper/notification';
 import { wallet_enable, wallet_fullOwnership_getLiveCells, WalletEnableResponse } from '../../src/nexus/servicer/rpc';
 import { BrowserContext, Page } from 'playwright';
 
-injectionTestStatus();
+beforeAll(() => {
+  injectionTestStatus();
+});
+
 describe('popup', function () {
   let browser: BrowserContext;
   let nexusWallet: NexusWallet;
@@ -279,17 +282,14 @@ describe('popup', function () {
         await nexusWallet.connect();
       });
 
-      await step('check connectStatus status is  connected ', async () => {
-        expect(await nexusWallet.popup.queryConnected()).toBe(true);
-      });
+      //FIXME: 查询状态的页面不在当前白名单页面
+      // await step('check connectStatus status is  connected ', async () => {
+      //   expect(await nexusWallet.popup.queryConnected()).toBe(true);
+      // });
       await step('remove web in whitelist', async () => {
         await nexusWallet.popup.removeWhitelistBySearch(urlTransferDomainName(url));
       });
 
-      // await step("check network is enabled", async () => {
-      //   //todo
-      //
-      // })
       await step(' check wallet_fullOwnership_getLiveCells is not enable', async () => {
         await newPage.bringToFront();
 

@@ -4,9 +4,11 @@ import { NexusWallet } from '../../src/types';
 import { BrowserContext, Page } from 'playwright';
 import { failedTestScreenshot, injectionTestStatus, step } from '../util';
 import { MNEMONIC, NEXUS_BUILD_PATH, NEXUS_WEB_URL, PASS_WORD, USER_NAME } from '../config/config';
-import { Sleep } from '../../src/nexus/util/helper';
 
-injectionTestStatus();
+beforeAll(() => {
+  injectionTestStatus();
+});
+
 describe('nexus-e2e-web', function () {
   let browser: BrowserContext;
   let nexusWallet: NexusWallet;
@@ -94,11 +96,13 @@ describe('nexus-e2e-web', function () {
 
 async function getRpcResponse(page: Page, selector: string): Promise<string> {
   for (let i = 0; i < 5; i++) {
-    if ((await page.locator(selector).innerText()) === '') {
-      await Sleep(1000);
+    const element = await page.locator(selector);
+    const text = await element.innerText();
+    if (text === '') {
+      await page.waitForTimeout(1000);
       continue;
     }
-    break;
+    return text;
   }
-  return (await page.locator(selector).innerText()).replace('\\"', '');
+  return '';
 }

@@ -23,7 +23,9 @@ import {
 import { clickConfirm } from '../../src/nexus/helper/importWallet';
 import { NEXUS_BUILD_PATH } from '../config/config';
 
-injectionTestStatus();
+beforeAll(() => {
+  injectionTestStatus();
+});
 describe('create a wallet', function () {
   let browser: BrowserContext;
   let extensionId;

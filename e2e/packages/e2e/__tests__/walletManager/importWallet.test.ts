@@ -15,7 +15,10 @@ import {
 } from '../../src/nexus/helper/walletManager';
 import { MNEMONIC, NEXUS_BUILD_PATH, PASS_WORD, USER_NAME } from '../config/config';
 
-injectionTestStatus();
+beforeAll(() => {
+  injectionTestStatus();
+});
+
 describe('importWallet', function () {
   let browser: BrowserContext;
   let extensionId;
