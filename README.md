@@ -3,18 +3,16 @@
 ![coverage](https://img.shields.io/codecov/c/github/ckb-js/nexus)
 ![build](https://img.shields.io/github/actions/workflow/status/ckb-js/nexus/test.yaml)
 
-Nexus is an UTxO friendly wallet chrome extension for the CKB blockchain. It is designed to serve both DApp developers and end users.
+Nexus is a user-friendly UTxO-based wallet extension for Nervos CKB that simplifies the management of CKB assets and transactions.
 
-## Usage
+## Features
 
-For end users, Nexus Wallet is a browser extension that can be installed on Chrome. User can create/import a wallet, switch connected network, sign data/transaction, and interact with DApps. To download the latest version of Nexus Wallet, please head over to the [release page](https://github.com/ckb-js/nexus/releases).
+- Seamless integration with various Dapps
+- Secure key and password management
 
-For DApp developers, Nexus is a library that can be used to interact with the CKB blockchain. The instructions below can help you get started with Nexus.
+## Try it Out
 
-## Examples
-
-For DApp developers, we have provided some use cases for Nexus, such as enable wallet, transfer CKBs, etc. Please check it out at the [examples directory](https://github.com/ckb-js/nexus/tree/main/examples).
-
+You can download the latest wallet from the GitHub [release](https://github.com/ckb-js/nexus/releases) to try it out, and we've provided a [demo](https://demo-nexus.vercel.app/) preview of the Nexus features
 ## Quick Start
 
 - Node.js 18+
