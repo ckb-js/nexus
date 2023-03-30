@@ -77,7 +77,7 @@ jobs:
         continue-on-error: true
         with:
           ref: gh-pages
-          repository: gpBlockchain/nexus-e2e-report
+          repository: ckb-js/nexus-e2e-report.github.io
           path: gh-pages
 
       - name: Allure Report action from marketplace
@@ -86,7 +86,7 @@ jobs:
         #id: allure-report
         with:
           allure_results: /home/runner/work/nexus/nexus/allure-results
-          github_repo: gpBlockchain/nexus-e2e-report
+          github_repo: ckb-js/nexus-e2e-report.github.io
           github_repo_owner: ${{ github.repository_owner }}
           gh_pages: gh-pages
           #allure_report: allure-report
@@ -99,7 +99,7 @@ jobs:
         with:
           token: ${{ secrets.E2E_REPORT_TOKEN }}
           folder: allure-history # The folder the action should deploy.
-          repository-name: gpBlockchain/nexus-e2e-report
+          repository-name: ckb-js/nexus-e2e-report.github.io
           branch: gh-pages
 
       - name: Cat report Link
