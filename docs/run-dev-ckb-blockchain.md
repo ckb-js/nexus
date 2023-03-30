@@ -142,28 +142,14 @@ Please follow the [Nexus Wallet README](../README.md) to build the wallet.
 Ideally, you can add the dev blockchain network by clicking the `Add Network` button on the wallet home page.
 
 <img width='200' src='./assets/add-network.png'/>
+<img width='200' src='./assets/add-network-info.png'/>
 
-But, currently the wallet doesn't support adding a custom network(This functionality will be added in the near future), so that you need to modify some code to connect to the dev blockchain.
+Fill in the network information:
 
-Add the dev network config in default networks list after [12th line of src/services/internal.ts](https://github.com/ckb-js/nexus/blob/ba5923525ac7706e5e14834b9c68b4652f4a83db/packages/extension-chrome/src/services/internal.ts#L12):
+- Name: `devnet`
+- URL: `http://localhost:8114`
 
-```diff
-+ {
-+     id: 'devnet',
-+     networkName: 'ckb_devnet',
-+     displayName: 'Devnet',
-+     rpcUrl: 'http://localhost:8114',
-+ }
-```
-
-and change default network to `devnet` in [36th line of src/services/internal.ts](https://github.com/ckb-js/nexus/blob/ba5923525ac7706e5e14834b9c68b4652f4a83db/packages/extension-chrome/src/services/internal.ts#L36)
-
-```diff
-- selectedNetwork: 'testnet',
-+ selectedNetwork: 'devnet',
-```
-
-You may need to remove Nexus Wallet from your browser and reinstall it after the code mofiication.
+to add the dev blockchain network and connect to it.
 
 ## Get CKBs from the genesis block
 
