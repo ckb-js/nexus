@@ -28,9 +28,5 @@
   },
   "bugs": {
     "url": "https://github.com/ckb-js/nexus/issues"
-  },
-  "dependencies": {
-    "@types/lodash": "4.14.191",
-    "lodash": "4.17.21"
   }
 }
