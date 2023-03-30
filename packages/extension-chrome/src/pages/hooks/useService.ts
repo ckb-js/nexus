@@ -1,7 +1,7 @@
 import { createGlobalState } from 'react-use';
-import { createServicesFactory, Modules } from '../../services';
+import { makeBrowserExtensionModulesFactory, Modules } from '../../services';
 
-const useServiceFactory = createGlobalState(createServicesFactory());
+const useServiceFactory = createGlobalState(makeBrowserExtensionModulesFactory());
 
 export function useService<T extends keyof Modules>(name: T): Modules[T] {
   const [serviceFactory] = useServiceFactory();

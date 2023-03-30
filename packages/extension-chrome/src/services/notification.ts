@@ -11,7 +11,7 @@ import { Endpoint } from 'webext-bridge';
 import { NexusCommonErrors } from '../errors';
 
 export type SessionMethods = {
-  session_getRequesterAppInfo: Call<void, { url: string; favicon: string }>;
+  session_getRequesterAppInfo: Call<void, { url: string }>;
   session_approveEnableWallet: Call<void, void>;
 
   /**
@@ -79,7 +79,7 @@ export function createBrowserExtensionPlatformService(): PlatformService<Endpoin
 
       return new Promise((resolve, reject) => {
         messenger.register('session_getRequesterAppInfo', () => {
-          return { url, favicon: `${new URL(url).origin}/favicon.ico` };
+          return { url };
         });
 
         messenger.register('session_approveEnableWallet', () => {
@@ -149,6 +149,21 @@ export function createBrowserExtensionPlatformService(): PlatformService<Endpoin
         errors.throwError(`Cannot get the site information from the request`);
       }
       return { url: tab.url };
+    },
+    getFavicon({ size = 32, host }) {
+      const url = new URL(browser.runtime.getURL('/_favicon/'));
+      url.searchParams.set('pageUrl', `https://${host}`);
+      url.searchParams.set('size', size.toString());
+      return url.toString();
+    },
+    getActiveSiteInfo: async () => {
+      const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
+      return (
+        tab && {
+          faviconUrl: tab.favIconUrl,
+          url: tab.url,
+        }
+      );
     },
   };
 }
