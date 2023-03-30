@@ -96,7 +96,7 @@ export const RecoveryWallet: FC = () => {
   }, [formState.isValid, setNextAvailable]);
   const fillSeedSequence = (seedSequence: string) => {
     seedSequence
-      .split(/\s/)
+      .split(/\s+/)
       .slice(0, MNEMONIC_LENGTH)
       .forEach((seed, index) => {
         setValue(`seed.${index}.value`, seed.trim().toLowerCase(), { shouldValidate: true, shouldDirty: true });
