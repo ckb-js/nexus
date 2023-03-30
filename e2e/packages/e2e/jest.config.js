@@ -13,7 +13,7 @@ module.exports = {
   testMatch: ['**/__tests__/**/*.test.ts'],
   setupFiles: ['<rootDir>/__tests__/setup/setUp.ts'],
   setupFilesAfterEnv: ['jest-allure/dist/setup'],
-  // 3min
+  // test timeout :3min
   testTimeout: 180000,
   // setupFiles: ['./setupJest.js'],
   // coveragePathIgnorePatterns: ['thirdpartyLib'],
