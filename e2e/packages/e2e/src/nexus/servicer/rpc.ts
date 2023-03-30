@@ -18,8 +18,8 @@ export async function wallet_enable(page: Page): Promise<WalletEnableResponse> {
 
 //todo import @nexus-wallet/protocol
 interface WalletFullOwnershipGetLiveCellsRequest {
-  cursor: string;
-  change: 'external' | 'internal';
+  cursor?: string;
+  change?: 'external' | 'internal';
 }
 
 export type WalletFullOwnershipGetLiveCellsResponse = {

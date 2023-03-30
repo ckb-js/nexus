@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { BrowserContext } from 'playwright';
 import { exec } from 'child_process';
+import { createHash } from 'crypto';
 
 declare const reporter: any;
 
@@ -96,18 +97,30 @@ export async function failedTestScreenshot(browser: BrowserContext): Promise<voi
   // eslint-disable-next-line no-console
   console.warn(`failedTestScreenshot case :${suit.fullName}`);
   for (let i = 0; i < browser.pages().length; i++) {
+    if (browser.pages()[i].url() === 'about:blank') {
+      console.log('skip about:blank');
+      continue;
+    }
     const currentPage = browser.pages()[i];
+    const picName = hashString(suit.fullName);
     try {
       const ret = await currentPage.screenshot({
         fullPage: true,
-        path: `allure-results/${suit.fullName}-${i}.png`,
+        path: `allure-results/${picName}-${i}.png`,
       });
-      attachJpeg(`allure-results/${suit.fullName}-${i}`, ret);
+      console.info('ret length:', ret.length);
+      attachJpeg(`allure-results/${picName}-${i}`, ret);
     } catch (e) {
       // eslint-disable-next-line no-console
       console.warn(`failedTestScreenshot failed , page url:${currentPage.url()}`);
     }
   }
+}
+
+function hashString(str: string): string {
+  const md5Hash = createHash('md5');
+  md5Hash.update(str);
+  return md5Hash.digest('hex');
 }
 
 export function attachJpeg(name: string, content: Buffer | string): void {
