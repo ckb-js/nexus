@@ -1,3 +1,26 @@
+# v0.0.8 (Fri Mar 31 2023)
+
+#### 🚀 Enhancement
+
+- feat: supported get blockchain info rpc [#168](https://github.com/ckb-js/nexus/pull/168) ([@homura](https://github.com/homura))
+
+#### 🐛 Bug Fix
+
+- chore(extension-chrome): remove unnecessary accessible [#173](https://github.com/ckb-js/nexus/pull/173) ([@homura](https://github.com/homura))
+- fix: return cells with invalid lock args [#171](https://github.com/ckb-js/nexus/pull/171) ([@zhangyouxin](https://github.com/zhangyouxin))
+- fix(extension-chrome): enable for http and local site [#174](https://github.com/ckb-js/nexus/pull/174) ([@homura](https://github.com/homura))
+
+#### 📝 Documentation
+
+- docs: new readme [#175](https://github.com/ckb-js/nexus/pull/175) ([@zhangyouxin](https://github.com/zhangyouxin))
+
+#### Authors: 2
+
+- Shinya ([@zhangyouxin](https://github.com/zhangyouxin))
+- Yonghui Lin ([@homura](https://github.com/homura))
+
+---
+
 # v0.0.7 (Tue Mar 28 2023)
 
 #### 🐛 Bug Fix
