@@ -1,3 +1,4 @@
+import { NetworkName } from '@nexus-wallet/protocol';
 import { Promisable } from '../base';
 import type { PlatformService } from '../services/NotificationService'; // eslint-disable-line @typescript-eslint/no-unused-vars
 
@@ -102,8 +103,3 @@ export interface NetworkConfig {
   networkName: NetworkName;
   rpcUrl: string;
 }
-
-/**
- * {@link https://github.com/nervosnetwork/ckb/blob/develop/rpc/README.md#type-chaininfo network type}
- */
-export type NetworkName = 'ckb' | 'ckb_testnet' | string;

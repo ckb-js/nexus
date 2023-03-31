@@ -33,15 +33,14 @@ describe('Query Param', () => {
   });
 });
 
+// TODO: replace it with an internal server
+const SNAPSHOT_CKB_RPC = 'https://testnet.ckb.dev';
+
 describe('load secp256k1 cellDeps', () => {
   beforeEach(() => {
     fetchMock.disableMocks();
   });
   it('should backendUtils.loadSecp256k1ScriptDep return expected config', async () => {
-    // this test case will actually fetch on-chain data, so we increase the timeout
-    jest.setTimeout(10000);
-    // TODO: replace it with an internal server
-    const SNAPSHOT_CKB_RPC = 'https://testnet.ckb.dev';
     const backend = createBackend({ nodeUrl: SNAPSHOT_CKB_RPC });
 
     const res = await backend.getSecp256k1Blake160ScriptConfig({ networkId: 'someId' });
@@ -49,7 +48,21 @@ describe('load secp256k1 cellDeps', () => {
     expect(res).toMatchSnapshot();
     const predefinedConfig = predefined.AGGRON4.SCRIPTS.SECP256K1_BLAKE160;
     expect(res).toEqual({ ...predefinedConfig, SHORT_ID: undefined } as ScriptConfig);
+    // this test case will actually fetch on-chain data, so we increase the timeout
+  }, 5000);
+});
+
+describe('getBlockchainInfo', () => {
+  beforeEach(() => {
+    fetchMock.disableMocks();
   });
+
+  it('should backend fetch expected blockchain info', async () => {
+    const backend = createBackend({ nodeUrl: SNAPSHOT_CKB_RPC });
+    const res = await backend.getBlockchainInfo();
+
+    expect(res.chain).toBe('ckb_testnet');
+  }, 5000);
 });
 
 describe('hasHistory', () => {
