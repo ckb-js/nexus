@@ -56,12 +56,6 @@ function createFakeCellWithCapacity(capacity: number, lock = offChainLock1): Cel
   };
 }
 
-const receiverLock: Script = {
-  codeHash: '0x79f90bb5e892d80dd213439eeab551120eb417678824f282b4ffb5f21bad2e1e',
-  hashType: 'type',
-  args: '0x55667788',
-};
-
 const mockRpcRequest = jest.fn();
 
 const mockProviderConfig: FullOwnershipProviderConfig = {
@@ -88,11 +82,11 @@ describe('class FullOwnershipProvider', () => {
   describe('#injectCapacity', () => {
     const emptyTxSkeleton = TransactionSkeleton();
 
-    function initProviderWithCells(cells: Cell[], offChainLock = offChainLock1) {
+    function initProviderWithCells(cells: Cell[], offChainLock = [offChainLock1]) {
       mockRpcRequest.mockImplementation(({ method, params }: { method: string; params: any }) => {
         switch (method) {
           case 'wallet_fullOwnership_getOffChainLocks':
-            return [offChainLock];
+            return offChainLock;
           case 'wallet_fullOwnership_getLiveCells':
             const cursor = parseInt(params.cursor || 0);
             return { objects: cells.slice(cursor, cursor + 1), cursor: cursor + 1 };
@@ -134,6 +128,14 @@ describe('class FullOwnershipProvider', () => {
       expect(skeleton.get('outputs').size).toBe(1);
       expect(skeleton.get('outputs').get(0)?.cellOutput.capacity).toBe(BI.from(500 * 1e8 - 250 * 1e8).toHexString());
     });
+
+    it('Should throw error when changeLock is not found', async () => {
+      const provider = initProviderWithCells([], []);
+      // @ts-expect-error
+      await expect(provider.injectCapacity()).rejects.toThrowError(
+        'No change lock script found, it may be a internal bug',
+      );
+    });
   });
 
   describe('#payFee', () => {
@@ -151,11 +153,11 @@ describe('class FullOwnershipProvider', () => {
 
       return provider;
     }
-    function createFakeSkeleton() {
+    function createFakeSkeleton(inputCells: Cell[], outputCells: Cell[]) {
       const txSkeleton = TransactionSkeleton();
       return txSkeleton
-        .update('inputs', (inputs) => inputs.push(createFakeCellWithCapacity(100 * 1e8)))
-        .update('outputs', (outputs) => outputs.push(createFakeCellWithCapacity(100 * 1e8, receiverLock)))
+        .update('inputs', (inputs) => inputs.push(...inputCells))
+        .update('outputs', (outputs) => outputs.push(...outputCells))
         .update('cellDeps', (cellDeps) =>
           cellDeps.push({
             outPoint: {
@@ -169,7 +171,11 @@ describe('class FullOwnershipProvider', () => {
 
     it('Automatically inject capacity when `autoInject` is true', async () => {
       const provider = buildProvider([createFakeCellWithCapacity(100 * 1e8), createFakeCellWithCapacity(200 * 1e8)]);
-      const txSkeleton = createFakeSkeleton();
+      const txSkeleton = createFakeSkeleton(
+        [createFakeCellWithCapacity(200 * 1e8, offChainLock1)],
+        [createFakeCellWithCapacity(200 * 1e8, onChainLocks2)],
+      );
+
       const withFee = await provider.payFee(txSkeleton, { autoInject: true });
 
       expect(withFee.get('inputs').size).toBe(2);
@@ -179,60 +185,92 @@ describe('class FullOwnershipProvider', () => {
 
     it('Should throw error when autoInject is true but cell is not available', async () => {
       const provider = buildProvider([]);
-      const txSkeleton = createFakeSkeleton();
+      const txSkeleton = createFakeSkeleton(
+        [createFakeCellWithCapacity(200 * 1e8, offChainLock1)],
+        [createFakeCellWithCapacity(200 * 1e8, onChainLocks2)],
+      );
+      // await provider.injectCapacity(txSkeleton, { amount: 150 });
 
       await expect(provider.payFee(txSkeleton, { autoInject: true })).rejects.toThrowError(
         'No cell sufficient to pay fee',
       );
     });
 
-    it('Should use the provided payers lock for paying fee', async () => {
-      const provider = buildProvider([
-        createFakeCellWithCapacity(100 * 1e8, onChainLocks1),
-        createFakeCellWithCapacity(200 * 1e8, onChainLocks2),
-      ]);
-      const txSkeleton = createFakeSkeleton();
-      const withFee = await provider.payFee(txSkeleton, { payers: [onChainLocks2], autoInject: false });
-      expect(withFee.inputs.size).toBe(2);
-      expect(withFee.outputs.size).toBe(2);
-      const payerCell = withFee.inputs.get(1);
-      const changeCell = withFee.outputs.get(1);
-      expect(payerCell?.cellOutput.lock).toEqual(onChainLocks2);
-      expect(changeCell?.cellOutput.lock).toEqual(offChainLock1);
-
-      expect(BI.from(payerCell?.cellOutput.capacity).sub(changeCell?.cellOutput.capacity!).toString()).toBe(
-        getExpectedFee(withFee).toString(),
+    it('Should return directly when sum(inputs_capacity) - sum(outputs_capacity) ≥ fee', async () => {
+      const provider = buildProvider([]);
+      const txSkeleton = createFakeSkeleton(
+        [createFakeCellWithCapacity(200 * 1e8, offChainLock1)],
+        [createFakeCellWithCapacity(100 * 1e8, onChainLocks2)],
       );
+
+      await expect(provider.payFee(txSkeleton, { autoInject: true })).resolves.toEqual(txSkeleton);
+    });
+
+    it('Should use the provided `byOutputIndexes` cell for paying fee', async () => {
+      const provider = buildProvider([]);
+      const txSkeleton = createFakeSkeleton(
+        [createFakeCellWithCapacity(300 * 1e8, offChainLock1)],
+        [
+          createFakeCellWithCapacity(100 * 1e8, onChainLocks2),
+          createFakeCellWithCapacity(100 * 1e8, onChainLocks2),
+          createFakeCellWithCapacity(100 * 1e8, onChainLocks2),
+        ],
+      );
+      const withFee = await provider.payFee(txSkeleton, { byOutPutIndexes: [1, 2], autoInject: false });
+      expect(withFee.inputs.size).toBe(1);
+      expect(withFee.outputs.size).toBe(3);
+      expect(getTxSkeletonFee(withFee)).toEqual(getExpectedFee(txSkeleton));
     });
 
     it('Should throw error when payer lock is not provided and auto inject is false', async () => {
-      const provider = buildProvider([
-        createFakeCellWithCapacity(100 * 1e8, onChainLocks1),
-        createFakeCellWithCapacity(200 * 1e8, onChainLocks2),
-      ]);
-      const txSkeleton = createFakeSkeleton();
-      await expect(provider.payFee(txSkeleton, { autoInject: false, payers: [] })).rejects.toThrowError(
-        'no payer is provided, but autoInject is `false`',
+      const provider = buildProvider([]);
+      const txSkeleton = createFakeSkeleton(
+        [createFakeCellWithCapacity(100 * 1e8, offChainLock1)],
+        [createFakeCellWithCapacity(100 * 1e8, onChainLocks2)],
+      );
+      await expect(provider.payFee(txSkeleton, { autoInject: false, byOutPutIndexes: [] })).rejects.toThrowError(
+        'no byOutPutIndexes is provided, but autoInject is `false`',
       );
     });
 
     it('Should throw error when payer lock is not available and auto inject is false', async () => {
-      const provider = buildProvider([
-        createFakeCellWithCapacity(100 * 1e8, onChainLocks1),
-        createFakeCellWithCapacity(200 * 1e8, onChainLocks2),
-      ]);
-      const txSkeleton = createFakeSkeleton();
-      await expect(provider.payFee(txSkeleton, { autoInject: false, payers: [onChainLocks3] })).rejects.toThrowError(
-        'No payer available to pay fee',
+      const provider = buildProvider([createFakeCellWithCapacity(300 * 1e8, onChainLocks1)]);
+      const txSkeleton = createFakeSkeleton(
+        [createFakeCellWithCapacity(300 * 1e8, offChainLock1)],
+        [createFakeCellWithCapacity(300 * 1e8, offChainLock1), createFakeCellWithCapacity(300, onChainLocks2)],
+      );
+      await expect(provider.payFee(txSkeleton, { autoInject: false, byOutPutIndexes: [1] })).rejects.toThrowError(
+        'cells from `byOutPutIndexes` sufficient to pay fee',
       );
     });
-    it('Should throw error when changeLock is not found', async () => {
-      const provider = buildProvider([createFakeCellWithCapacity(100 * 1e8)], []);
 
-      // @ts-expect-error
-      await expect(provider.injectCapacity()).rejects.toThrowError(
-        'No change lock script found, it may be a internal bug',
+    it('Should throw error when byOutPutIndexes is out of range', async () => {
+      const provider = buildProvider([]);
+      const txSkeleton = createFakeSkeleton(
+        [createFakeCellWithCapacity(300 * 1e8, offChainLock1)],
+        [createFakeCellWithCapacity(300 * 1e8, offChainLock1)],
       );
+
+      await (
+        expect(provider.payFee(txSkeleton, { autoInject: false, byOutPutIndexes: [114514] })) as any
+      ).rejects.toThrowError('`byOutPutIndex` is out of range');
+    });
+
+    it('Should use wallet cell when `byOutputIndexes` is not sufficient', async () => {
+      const provider = buildProvider([createFakeCellWithCapacity(100 * 1e8, onChainLocks1)]);
+      const txSkeleton = createFakeSkeleton(
+        [createFakeCellWithCapacity(190 * 1e8 + 100, offChainLock1)],
+        [
+          createFakeCellWithCapacity(100 * 1e8, onChainLocks2),
+          createFakeCellWithCapacity(45 * 1e8 + 50, onChainLocks3),
+          createFakeCellWithCapacity(45 * 1e8 + 50, onChainLocks3),
+        ],
+      );
+      const withFee = await provider.payFee(txSkeleton, { autoInject: true, byOutPutIndexes: [1, 2], feeRate: 1000 });
+      expect(withFee.inputs.size).toBe(2);
+      expect(withFee.outputs.size).toBe(4);
+
+      expect(getTxSkeletonFee(withFee)).toEqual(getExpectedFee(withFee));
     });
   });
 

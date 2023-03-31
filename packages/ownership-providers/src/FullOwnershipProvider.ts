@@ -13,6 +13,7 @@ import { WitnessArgs } from '@ckb-lumos/base/lib/blockchain';
 import { bytes } from '@ckb-lumos/codec';
 import { prepareSigningEntries } from '@ckb-lumos/common-scripts/lib/secp256k1_blake160';
 import { Config as LumosConfig } from '@ckb-lumos/config-manager/lib';
+
 // util types for FullOwnership
 
 type Suffix<T extends string, P extends string> = T extends `${P}${infer S}` ? S : never;
@@ -31,12 +32,12 @@ export type PayFeeOptions = {
   feeRate?: BIish;
 
   /**
-   * Only cell with these lock scripts can be used to pay fee
+   * Only in these output indexes, can pay fee
    */
-  payers?: LockScriptLike[];
+  byOutPutIndexes?: number[];
 
   /**
-   * if `true`, the fee can be paid by the other wallet owned cells. if {@link PayFeeOptions#payers} is specified, payers lock have higher priority.
+   * if `true`, the fee can be paid by the other wallet owned cells. if {@link PayFeeOptions#byOutPutIndexes} is specified, payers lock have higher priority.
    */
   autoInject: boolean;
 };
@@ -59,6 +60,10 @@ function calculateFeeCompatible(size: number, feeRate: BIish): BI {
     return fee.add(1);
   }
   return BI.from(fee);
+}
+
+function calculateSumCapacity(cells: { reduce: <R>(reducer: (prev: R, cur: Cell) => R, initial: R) => R }) {
+  return cells.reduce((prev, cur) => prev.add(cur.cellOutput.capacity), BI.from(0));
 }
 
 export type FullOwnershipProviderConfig = {
@@ -102,7 +107,11 @@ export class FullOwnershipProvider {
    *   txSkeleton = await provider.injectCapacity(txSkeleton, { amount: capacity });
    *
    */
-  async injectCapacity(
+  injectCapacity(txSkeleton: TransactionSkeletonType, config: { amount: BIish }): Promise<TransactionSkeletonType> {
+    return this._injectCapacity(txSkeleton, config);
+  }
+
+  private async _injectCapacity(
     txSkeleton: TransactionSkeletonType,
     config: {
       /** Inject at least this amount of capacity */
@@ -177,46 +186,75 @@ export class FullOwnershipProvider {
    * ```
    */
   async payFee(txSkeleton: TransactionSkeletonType, options: PayFeeOptions): Promise<TransactionSkeletonType> {
-    if ('payers' in options && options.payers?.length === 0 && !options.autoInject) {
-      errors.throwError('no payer is provided, but autoInject is `false`');
+    if (options.byOutPutIndexes?.length === 0 && !options.autoInject) {
+      errors.throwError('no byOutPutIndexes is provided, but autoInject is `false`');
     }
-
-    let size = 0;
-    let txSkeletonWithFee = txSkeleton;
     const autoInject = !!options.autoInject;
-    const payers = options.payers ? options.payers : [];
     const feeRate = BI.from(options.feeRate || 1000);
     let currentTransactionSize = getTransactionSizeByTx(createTransactionFromSkeleton(txSkeleton));
+    let txSkeletonWithFee = txSkeleton;
+
+    // use existed output cell to pay fee
+    let remainFee = calculateFeeCompatible(currentTransactionSize, feeRate);
+    // sum(inputsCapacity) - sum(outputsCapacity) - fee >= 0
+    if (
+      calculateSumCapacity(txSkeleton.get('inputs'))
+        .sub(calculateSumCapacity(txSkeleton.get('outputs')))
+        .gte(remainFee)
+    ) {
+      return txSkeleton;
+    }
+    let size = 0;
+
+    const byOutPutIndexes = options.byOutPutIndexes ? options.byOutPutIndexes : [];
+
+    for (const byOutPutIndex of byOutPutIndexes) {
+      if (remainFee.lte(0)) {
+        break;
+      }
+      const currentCell = txSkeleton.get('outputs').get(byOutPutIndex);
+      if (!currentCell) {
+        errors.throwError('`byOutPutIndex` is out of range');
+      }
+      const cellCapacity = BI.from(currentCell.cellOutput.capacity);
+      const minimalCapacity = minimalCellCapacityCompatible(currentCell);
+
+      // How many capacity is needed?
+      // cellCapacity - originFee >= minimalCapacity ? originFee : cellCapacity - minimalCapacity
+      const neededCapacity = cellCapacity.sub(remainFee).gte(minimalCapacity)
+        ? remainFee
+        : cellCapacity.sub(minimalCapacity);
+
+      remainFee = remainFee.sub(neededCapacity);
+      txSkeletonWithFee = txSkeletonWithFee.setIn(
+        ['outputs', byOutPutIndex, 'cellOutput', 'capacity'],
+        cellCapacity.sub(neededCapacity).toHexString(),
+      );
+    }
+
+    // all byOutputIndexes are used but still remain fee to pay and disable autoInject
+    if (remainFee.lte(0)) {
+      return txSkeletonWithFee;
+    } else if (autoInject) {
+      txSkeleton = txSkeletonWithFee;
+    } else {
+      errors.throwError('cells from `byOutPutIndexes` sufficient to pay fee');
+    }
+
+    const paidFee = calculateFeeCompatible(currentTransactionSize, feeRate).sub(remainFee);
 
     while (currentTransactionSize > size) {
       size = currentTransactionSize;
-      const fee = calculateFeeCompatible(size, feeRate);
+      const fee = calculateFeeCompatible(size, feeRate).sub(paidFee);
 
-      let injected = false;
-      for (const payer of payers) {
-        try {
-          txSkeletonWithFee = await this.injectCapacity(txSkeleton, { lock: payer, amount: fee });
-          injected = true;
-          break;
-        } catch {
-          // it means the payer can not pay the fee. However, it may be able to pay fee by other injected lock when autoInject is true.
-        }
+      try {
+        txSkeletonWithFee = await this.injectCapacity(txSkeleton, {
+          amount: fee,
+        });
+      } catch {
+        errors.throwError('No cell sufficient to pay fee');
       }
 
-      if (!injected && autoInject) {
-        try {
-          txSkeletonWithFee = await this.injectCapacity(txSkeleton, {
-            amount: fee,
-          });
-          injected = true;
-        } catch {
-          // will throw error on sequence logic
-        }
-      }
-
-      if (!injected) {
-        errors.throwError(autoInject ? 'No cell sufficient to pay fee' : 'No payer available to pay fee');
-      }
       currentTransactionSize = getTransactionSizeByTx(createTransactionFromSkeleton(txSkeletonWithFee));
     }
 
