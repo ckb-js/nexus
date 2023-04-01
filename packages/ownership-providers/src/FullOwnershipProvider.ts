@@ -171,18 +171,19 @@ export class FullOwnershipProvider {
   /**
    * Pay the transaction fee using the specified lock
    * @param txSkeleton The transaction skeleton
-   * @param options.payers if provided, candidates for paying fee will be filtered by these lock scripts
-   * @param options.autoInject if true, wallet owned lock can be payer as fallback
+   * @param options.byOutPutIndexes if provided, The outputs in these indexes will be used to pay fee as much as possible. It is useful when you want to pay fee by other lock scripts.
+   * @param options.autoInject if true, wallet owned lock will be used to pay fee. If `byOutPutIndexes` can not cover all fee, wallet will inject capacity to pay fee.
    * @param options.feeRate The fee rate, in Shannons per byte. If not specified, the fee rate will be calculated automatically.
    * @example
    * ```ts
    * const provider = new FullOwnershipProvider({ ckb });
    * // auto calculate fee rate and use wallet owned lock to pay fee
-   * const txSkeleton = await provider.payFee({ txSkeleton });
-   * // auto inject capacity when payers can not cover the fee
-   * const txSkeleton = await provider.payFee({ txSkeleton, payers: [payer1, payer2], autoInject: true });
-   * // throw error when payers can not cover the fee
-   * const txSkeleton = await provider.payFee({ txSkeleton, payers: [payer1, payer2], autoInject: false });
+   * const txSkeleton = await provider.payFee(txSkeleton, { autoInject: true });
+   * // auto inject capacity when `byOutputIndex` can not cover the fee
+   * const txSkeleton = await provider.payFee(txSkeleton{ byOutputsIndex: [1, 2], autoInject: true });
+   * // return the txSkeleton when `byOutputIndex` can not cover the fee
+   * // or throw error when payers can not cover the fee
+   * const txSkeleton = await provider.payFee(txSkeleton, { payers: [1, 2], autoInject: false });
    * ```
    */
   async payFee(txSkeleton: TransactionSkeletonType, options: PayFeeOptions): Promise<TransactionSkeletonType> {
@@ -204,9 +205,8 @@ export class FullOwnershipProvider {
     ) {
       return txSkeleton;
     }
-    let size = 0;
 
-    const byOutPutIndexes = options.byOutPutIndexes ? options.byOutPutIndexes : [];
+    const byOutPutIndexes = options.byOutPutIndexes ?? [];
 
     for (const byOutPutIndex of byOutPutIndexes) {
       if (remainFee.lte(0)) {
@@ -241,6 +241,7 @@ export class FullOwnershipProvider {
       errors.throwError('cells from `byOutPutIndexes` sufficient to pay fee');
     }
 
+    let size = 0;
     const paidFee = calculateFeeCompatible(currentTransactionSize, feeRate).sub(remainFee);
 
     while (currentTransactionSize > size) {
