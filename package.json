@@ -10,7 +10,8 @@
   "workspaces": [
     "packages/*",
     "lumos",
-    "lumos/packages/*"
+    "lumos/packages/*",
+    "e2e"
   ],
   "devDependencies": {
     "@auto-it/magic-zero": "10.43.0",
