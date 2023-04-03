@@ -62,7 +62,7 @@ function calculateFeeCompatible(size: number, feeRate: BIish): BI {
   return BI.from(fee);
 }
 
-function calculateSumCapacity(cells: { reduce: <R>(reducer: (prev: R, cur: Cell) => R, initial: R) => R }) {
+function sumCapacity(cells: TransactionSkeletonType['inputs' | 'outputs']) {
   return cells.reduce((prev, cur) => prev.add(cur.cellOutput.capacity), BI.from(0));
 }
 
@@ -207,8 +207,8 @@ export class FullOwnershipProvider {
     let remainFee = calculateFeeCompatible(currentTransactionSize, feeRate);
     // sum(inputsCapacity) - sum(outputsCapacity) - fee >= 0
     if (
-      calculateSumCapacity(txSkeleton.get('inputs'))
-        .sub(calculateSumCapacity(txSkeleton.get('outputs')))
+      sumCapacity(txSkeleton.get('inputs'))
+        .sub(sumCapacity(txSkeleton.get('outputs')))
         .gte(remainFee)
     ) {
       return txSkeleton;
