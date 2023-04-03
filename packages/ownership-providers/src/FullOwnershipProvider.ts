@@ -9,7 +9,7 @@ import {
 import { Events, FullOwnership, InjectedCkb } from '@nexus-wallet/protocol';
 import { errors } from '@nexus-wallet/utils';
 import { Address, blockchain, Cell, HexString, Script, Transaction } from '@ckb-lumos/base';
-import { WitnessArgs } from '@ckb-lumos/base/lib/blockchain';
+import { OutPoint, WitnessArgs } from '@ckb-lumos/base/lib/blockchain';
 import { bytes } from '@ckb-lumos/codec';
 import { prepareSigningEntries } from '@ckb-lumos/common-scripts/lib/secp256k1_blake160';
 import { Config as LumosConfig } from '@ckb-lumos/config-manager/lib';
@@ -142,6 +142,14 @@ export class FullOwnershipProvider {
     const payerLock = config.lock ? await this.parseLockScriptLike(config.lock) : undefined;
 
     for await (const cell of this.collector({ lock: payerLock })) {
+      if (
+        inputCells.find(
+          (item) =>
+            !!item.outPoint && cell.outPoint && bytes.equal(OutPoint.pack(item.outPoint), OutPoint.pack(cell.outPoint)),
+        )
+      ) {
+        continue;
+      }
       inputCells.push(cell);
       neededCapacity = neededCapacity.sub(BI.from(cell.cellOutput.capacity));
       if (neededCapacity.lte(0)) {

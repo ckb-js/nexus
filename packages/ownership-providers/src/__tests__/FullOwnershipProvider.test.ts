@@ -42,14 +42,15 @@ const onChainLocks1: Script = createOnchainLock('0x441509af');
 const onChainLocks2: Script = createOnchainLock('0x25061223');
 const onChainLocks3: Script = createOnchainLock('0x25061224');
 
-function createFakeCellWithCapacity(capacity: number, lock = offChainLock1): Cell {
+function createFakeCellWithCapacity(capacity: number, lock = offChainLock1, outpointIndex = 0): Cell {
   return {
     cellOutput: {
       capacity: BI.from(capacity).toHexString(),
       lock: lock,
     },
     outPoint: {
-      index: '0x1',
+      // if we use bytes.hexify(Uint32LE.pack(outpointIndex)), it will throw error because many `0` before the number
+      index: `0x${outpointIndex.toString(16)}`,
       txHash: '0xd2e09c658206d4d0d71c066c46eddaa568d49c09f76b7396ae803dad25850174',
     },
     data: '0x',
@@ -119,9 +120,10 @@ describe('class FullOwnershipProvider', () => {
 
     it('Should pick multiple cells when single cell capacity is not enough', async () => {
       const provider = initProviderWithCells([
-        createFakeCellWithCapacity(100 * 1e8),
-        createFakeCellWithCapacity(100 * 1e8),
-        createFakeCellWithCapacity(300 * 1e8),
+        createFakeCellWithCapacity(100 * 1e8, onChainLocks1, 0),
+        createFakeCellWithCapacity(100 * 1e8, onChainLocks1, 0),
+        createFakeCellWithCapacity(100 * 1e8, onChainLocks2, 1),
+        createFakeCellWithCapacity(300 * 1e8, onChainLocks1, 2),
       ]);
       const skeleton = await provider.injectCapacity(emptyTxSkeleton, { amount: 250 * 1e8 });
       expect(skeleton.get('inputs').size).toBe(3);
