@@ -111,6 +111,14 @@ describe('FullOwnership', () => {
       });
     });
 
+    it('should get live cells with cursor', async () => {
+      await ownershipService.getLiveCells({ cursor: '3:0x1234' });
+      expect(backend.getLiveCellsByLocks).toBeCalledWith({
+        cursor: '0x1234',
+        locks: [scriptInfos[3].lock],
+      });
+    });
+
     it('should get live cells with default change', async () => {
       await ownershipService.getLiveCells({});
       expect(backend.getLiveCellsByLocks).toBeCalledWith({
