@@ -1,3 +1,15 @@
+# v0.0.9 (Tue Apr 04 2023)
+
+#### 🐛 Bug Fix
+
+- fix: UI bugs and improvements [#177](https://github.com/ckb-js/nexus/pull/177) ([@IronLu233](https://github.com/IronLu233))
+
+#### Authors: 1
+
+- Iron Lu ([@IronLu233](https://github.com/IronLu233))
+
+---
+
 # v0.0.8 (Fri Mar 31 2023)
 
 #### 🚀 Enhancement
