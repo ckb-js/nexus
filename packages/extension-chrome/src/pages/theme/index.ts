@@ -9,30 +9,12 @@ export const theme = extendTheme(
     semanticTokens: {
       colors: {
         accent: '#FFC255',
-        'accent.100': '#FFC255',
-        'accent.200': '#FFC255',
-        'accent.300': '#FFC255',
-        'accent.400': '#FFC255',
-        'accent.500': '#FFC255',
-        'accent.600': '#FFC255',
-        'accent.700': '#FFC255',
-        'accent.800': '#FFC255',
-        'accent.900': '#FFC255',
 
         'accent.hover': '#ECB451',
         'accent.active': '#C79949',
         'accent.lighter': '#FFD285',
 
         primary: '#805AD5',
-        'primary.100': '#805AD5',
-        'primary.200': '#805AD5',
-        'primary.300': '#805AD5',
-        'primary.400': '#805AD5',
-        'primary.500': '#805AD5',
-        'primary.600': '#805AD5',
-        'primary.700': '#805AD5',
-        'primary.800': '#805AD5',
-        'primary.900': '#805AD5',
 
         'primary.hover': '#8A67D8',
         'primary.active': '#9E82DF',
@@ -66,7 +48,12 @@ export const theme = extendTheme(
     },
   },
   withDefaultColorScheme({
+    components: ['Button', 'Radio', 'Input'],
     colorScheme: 'primary',
+  }),
+  withDefaultVariant({
+    components: ['Button', 'Radio', 'Input'],
+    variant: 'primary',
   }),
 );
 
@@ -78,5 +65,6 @@ export const solidBackgroundTheme = extendTheme(
   }),
   withDefaultVariant({
     variant: 'accent',
+    components: ['Button', 'Radio', 'Input'],
   }),
 );
