@@ -163,7 +163,13 @@ export const CreateProcessFrame: FC = () => {
         </Center>
         <HStack spacing="24px" mb="32px">
           {(!isLastStep || !flowConfig.disableBackOnExit) && (
-            <Button data-test-id="back" onClick={goBack} variant="outline" leftIcon={<ChevronLeftIcon />}>
+            <Button
+              data-test-id="back"
+              onClick={goBack}
+              colorScheme="primary"
+              variant="outline"
+              leftIcon={<ChevronLeftIcon />}
+            >
               Back
             </Button>
           )}

@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import { Flex, Spacer, Button, Radio, RadioGroup, Skeleton, Icon, useToast, VStack, Box } from '@chakra-ui/react';
+import { Flex, Spacer, Button, Radio, RadioGroup, Skeleton, Icon, useToast, VStack } from '@chakra-ui/react';
 import { AddIcon, DeleteIcon } from '@chakra-ui/icons';
 import EditIcon from '../../../Components/icons/Edit.svg';
 import { useNavigate } from 'react-router-dom';
@@ -67,7 +67,7 @@ export const NetworkConfig: FC = () => {
           w="100%"
           flexDirection="column"
         >
-          <VStack spacing="20px" flexDir="column">
+          <VStack spacing="16px" flexDir="column">
             {networks?.map((network, index) => (
               <Flex
                 sx={{
@@ -86,20 +86,20 @@ export const NetworkConfig: FC = () => {
                 alignItems="center"
                 justifyContent="space-between"
               >
-                <Radio colorScheme="cyan" data-test-id={`networkRadio[${index}]`} value={network.id}>
-                  <Box marginLeft="12px">{network.displayName}</Box>
+                <Radio data-test-id={`networkRadio[${index}]`} value={network.id}>
+                  {network.displayName}
                 </Radio>
                 <Spacer />
                 {!PERSIST_IDS.has(network.id) && (
                   <Flex className="operations">
-                    <Icon as={EditIcon} onClick={gotoEdit(network.id)} w="24px" h="24px" mr="20px" />
+                    <Icon as={EditIcon} onClick={gotoEdit(network.id)} w="20px" h="20px" mr="20px" />
                     <DeleteIcon
                       onClick={async () => {
                         await removeNetworkMutation.mutateAsync(network.id);
                         await configQuery.invalidate();
                       }}
-                      w="24px"
-                      h="24px"
+                      w="20px"
+                      h="20px"
                       color="white"
                     />
                   </Flex>

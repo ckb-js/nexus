@@ -12,7 +12,7 @@ import { useQuery } from '@tanstack/react-query';
 
 const FeedbackButton: FC<ButtonProps> = (props) => {
   return (
-    <Button size="xs" {...props} as="a">
+    <Button variant="outline" size="xs" {...props} as="a">
       Feedback
     </Button>
   );

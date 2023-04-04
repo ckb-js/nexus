@@ -205,8 +205,8 @@ export const SignTransaction: FC = () => {
             isDisabled={formState.isSubmitting}
             onClick={onReject}
             w="220px"
-            color="gray.800"
-            colorScheme="gray"
+            colorScheme="white"
+            variant="outline"
           >
             Reject
           </Button>

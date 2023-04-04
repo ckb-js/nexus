@@ -56,7 +56,7 @@ export const Grant: React.FC = () => {
       </Box>
 
       <ButtonGroup mt="32px" size="md">
-        <Button data-test-id="cancel" onClick={() => window.close()} w="220px" color="gray.800" colorScheme="gray">
+        <Button data-test-id="cancel" onClick={() => window.close()} w="220px" variant="outline" colorScheme="white">
           Cancel
         </Button>
 

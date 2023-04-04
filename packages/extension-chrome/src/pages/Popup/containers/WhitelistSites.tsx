@@ -69,9 +69,10 @@ export const WhitelistSites: FC = () => {
           data-test-id="siteSearch"
           size="lg"
           w="452px"
+          background="transparent"
+          color="white"
           onChange={(e) => setSearchQuery(e.target.value)}
           value={searchQuery}
-          colorScheme="white"
           h="60px"
           pl="48px"
         />

@@ -92,7 +92,7 @@ export const ConfirmMnemonic: FC = () => {
               <Button
                 size="lg"
                 w="108px"
-                variant={hasChosen ? 'solid' : 'outline'}
+                variant={hasChosen ? 'primary' : 'outline'}
                 onClick={hasChosen ? removeChosenIndex(index) : addChosenIndex(index)}
                 // for preventing the button size change
                 borderWidth="1px"

@@ -106,5 +106,9 @@
         "releaseType": "none"
       }
     ]
+  },
+  "dependencies": {
+    "@chakra-ui/anatomy": "2.1.2",
+    "@chakra-ui/theme-tools": "2.0.17"
   }
 }
