@@ -215,14 +215,14 @@ export class FullOwnershipProvider {
 
       // How many capacity is needed?
       // cellCapacity - originFee >= minimalCapacity ? originFee : cellCapacity - minimalCapacity
-      const affordCapacity = cellCapacity.sub(requireFee).gte(minimalCapacity)
+      const affordedFee = cellCapacity.sub(requireFee).gte(minimalCapacity)
         ? requireFee
         : cellCapacity.sub(minimalCapacity);
 
-      requireFee = requireFee.sub(affordCapacity);
+      requireFee = requireFee.sub(affordedFee);
       txSkeleton = txSkeleton.setIn(
         ['outputs', byOutPutIndex, 'cellOutput', 'capacity'],
-        cellCapacity.sub(affordCapacity).toHexString(),
+        cellCapacity.sub(affordedFee).toHexString(),
       );
     }
 
