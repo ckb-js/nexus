@@ -17,19 +17,30 @@ import {
   FormErrorMessage,
   Flex,
   Spacer,
+  Tooltip,
 } from '@chakra-ui/react';
 import { encodeToAddress, TransactionSkeletonObject } from '@ckb-lumos/helpers';
 import { BI } from '@ckb-lumos/lumos';
+import { predefined } from '@ckb-lumos/config-manager';
 import { useQuery } from '@tanstack/react-query';
-import React, { FC } from 'react';
+import React, { FC, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { useCheckPassword } from '../../hooks/useCheckPassword';
 import { useSessionMessenger } from '../../hooks/useSessionMessenger';
 import { parseCellType } from '../utils/parseCellType';
+import { useConfigQuery } from '../../hooks/useConfigQuery';
+import { NetworkName } from '@nexus-wallet/protocol';
 
-const TransactionIOList: FC<
-  { type: 'inputs' | 'outputs'; tx: Pick<TransactionSkeletonObject, 'inputs' | 'outputs'> } & TableProps
-> = ({ type, tx, ...rest }) => {
+type TransactionIOListProps = {
+  type: 'inputs' | 'outputs';
+  tx: Pick<TransactionSkeletonObject, 'inputs' | 'outputs'>;
+  networkName?: NetworkName;
+} & TableProps;
+
+const TransactionIOList: FC<TransactionIOListProps> = ({ type, networkName, tx, ...rest }) => {
+  // TODO: a better way to implement: use a config provider to get the config better.
+  const lumosConfig = networkName === 'ckb' ? predefined.LINA : predefined.AGGRON4;
+
   const headers = [
     {
       title: `${type}(${tx[type].length})`,
@@ -83,8 +94,7 @@ const TransactionIOList: FC<
       </Thead>
       <Tbody>
         {tx[type].map((cell, index) => {
-          // FIXME: need check if it's a testnet address or mainnet address
-          const addr = encodeToAddress(cell.cellOutput.lock);
+          const addr = encodeToAddress(cell.cellOutput.lock, { config: lumosConfig });
           return (
             <Tr h="50px" key={index} data-test-id={`transaction.${type}[${index}]`}>
               <Td p="0" data-test-id={`transaction.${type}[${index}].address`}>
@@ -92,9 +102,11 @@ const TransactionIOList: FC<
                   <Box w="60px" p="16px">
                     #{index + 1}
                   </Box>
-                  <Box p="16px">
-                    {addr.slice(0, 5)}...{addr.slice(-4)}
-                  </Box>
+                  <Tooltip hasArrow label={addr}>
+                    <Box p="16px">
+                      {addr.slice(0, 5)}...{addr.slice(-4)}
+                    </Box>
+                  </Tooltip>
                 </Flex>
               </Td>
               <Td data-test-id={`transaction.${type}[${index}].type`}>{parseCellType(cell)}</Td>
@@ -117,6 +129,14 @@ type FormState = { password: string };
 export const SignTransaction: FC = () => {
   const messenger = useSessionMessenger();
   const checkPassword = useCheckPassword();
+  const walletConfigQuery = useConfigQuery();
+  const networkName = useMemo(() => {
+    if (!walletConfigQuery.data) return undefined;
+    const { networks, selectedNetwork } = walletConfigQuery.data;
+    const currentNetwork = networks.find((network) => network.id === selectedNetwork);
+    return currentNetwork?.networkName;
+  }, [walletConfigQuery.data]);
+
   const transactionQuery = useQuery({
     queryKey: ['transaction', messenger.sessionId()] as const,
     queryFn: async () => messenger.send('session_getUnsignedTransaction'),
@@ -161,8 +181,8 @@ export const SignTransaction: FC = () => {
           px="4px"
           overflow="auto"
         >
-          <TransactionIOList type="inputs" tx={transactionQuery.data.tx} />
-          <TransactionIOList type="outputs" tx={transactionQuery.data.tx} mt="12px" />
+          <TransactionIOList networkName={networkName} type="inputs" tx={transactionQuery.data.tx} />
+          <TransactionIOList networkName={networkName} type="outputs" tx={transactionQuery.data.tx} mt="12px" />
         </Box>
       )}
       <Spacer />

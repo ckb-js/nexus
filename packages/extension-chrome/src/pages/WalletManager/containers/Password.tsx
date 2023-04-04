@@ -20,9 +20,9 @@ export const SetPassword: FC<SetPasswordProps> = ({ isImportSeed }) => {
   const setStore = useWalletCreationStore((s) => s.set);
   const { whenSubmit, setNextAvailable } = useOutletContext() as OutletContext;
 
-  const { control, handleSubmit, formState } = useForm<FormValues>({
-    mode: 'onChange',
-    defaultValues: {
+  const { control, handleSubmit, formState, trigger } = useForm<FormValues>({
+    mode: 'onBlur',
+    values: {
       password: '',
       confirmPassword: '',
     },
@@ -47,7 +47,7 @@ export const SetPassword: FC<SetPasswordProps> = ({ isImportSeed }) => {
         Create password
       </Heading>
       {isImportSeed && (
-        <Box maxW="502px" mb="16px" fontSize="md">
+        <Box w="502px" mb="16px" fontSize="md">
           This password will unlock your Nexus wallet only on this device. Nexus can not recover this password.
         </Box>
       )}
@@ -57,10 +57,11 @@ export const SetPassword: FC<SetPasswordProps> = ({ isImportSeed }) => {
           name="password"
           rules={{
             required: true,
-            minLength: 8,
+            minLength: { value: 8, message: 'Password must be ≥ 8 characters' },
           }}
           render={({ field, fieldState }) => (
             <FormControl
+              minH="98px"
               isInvalid={fieldState.invalid && field.value.length > 0 && fieldState.error?.type !== 'required'}
             >
               <FormLabel fontSize="sm">New password (8 characters minimum)</FormLabel>
@@ -72,7 +73,7 @@ export const SetPassword: FC<SetPasswordProps> = ({ isImportSeed }) => {
                 data-test-id="password"
                 {...field}
               />
-              <FormErrorMessage>Your password must be at least 8 characters long.</FormErrorMessage>
+              <FormErrorMessage>{fieldState.error?.message}</FormErrorMessage>
             </FormControl>
           )}
         />
@@ -83,11 +84,12 @@ export const SetPassword: FC<SetPasswordProps> = ({ isImportSeed }) => {
           rules={{
             required: true,
             validate: (confirmPassword, formValue) => {
-              return confirmPassword === formValue.password;
+              return confirmPassword === formValue.password || 'Passwords do not match';
             },
           }}
           render={({ field, fieldState }) => (
             <FormControl
+              minHeight="98px"
               isInvalid={fieldState.invalid && field.value.length > 0 && fieldState.error?.type !== 'required'}
             >
               <FormLabel fontSize="sm">Confirm password</FormLabel>
@@ -98,8 +100,13 @@ export const SetPassword: FC<SetPasswordProps> = ({ isImportSeed }) => {
                 data-test-id="confirmPassword"
                 placeholder="input your password"
                 {...field}
+                onChange={(e) => {
+                  // this field need to be validated when password field change
+                  field.onChange(e);
+                  return trigger('confirmPassword');
+                }}
               />
-              <FormErrorMessage>Your two passwords are not correspond</FormErrorMessage>
+              <FormErrorMessage>{fieldState.error?.message}</FormErrorMessage>
             </FormControl>
           )}
         />

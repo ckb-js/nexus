@@ -76,35 +76,43 @@ export const WhitelistSites: FC = () => {
           pl="48px"
         />
       </InputGroup>
-      <VStack
-        data-test-id="siteList"
-        overflowY="auto"
-        padding="30px 20px"
-        as={WhiteAlphaBox}
-        spacing="12px"
-        maxH="288px"
-        flexDirection="column"
-      >
-        {filteredSites?.map((site, index) => (
-          <Flex data-test-id={`site[${index}]`} alignItems="center" h="48px" w="100%" key={site.host}>
-            <Center w="48px" borderRadius="50%" padding="4px" h="48px" backgroundColor="whiteAlpha.300">
-              <SiteFavicon data-test-id={`site[${index}].favicon`} size={32} host={site.host} />
-            </Center>
-            <Flex ml="20px" data-test-id={`site[${index}].url`} flex={1} fontSize="lg" alignItems="center">
-              <Highlight query={searchQuery} styles={{ bg: 'white' }}>
-                {site.host}
-              </Highlight>
+      {!filteredSites?.length ? (
+        <Center as={WhiteAlphaBox} data-test-id="siteList" h="288px">
+          <Box color="whiteAlpha.700" height="20px" fontSize="sm">
+            No whitelist sites found.
+          </Box>
+        </Center>
+      ) : (
+        <VStack
+          data-test-id="siteList"
+          overflowY="auto"
+          padding="30px 20px"
+          as={WhiteAlphaBox}
+          spacing="12px"
+          h="288px"
+          flexDirection="column"
+        >
+          {filteredSites?.map((site, index) => (
+            <Flex data-test-id={`site[${index}]`} alignItems="center" h="48px" w="100%" key={site.host}>
+              <Center w="48px" borderRadius="50%" padding="4px" h="48px" backgroundColor="whiteAlpha.300">
+                <SiteFavicon data-test-id={`site[${index}].favicon`} size={32} host={site.host} />
+              </Center>
+              <Flex ml="20px" data-test-id={`site[${index}].url`} flex={1} fontSize="lg" alignItems="center">
+                <Highlight query={searchQuery} styles={{ bg: 'white' }}>
+                  {site.host}
+                </Highlight>
+              </Flex>
+              <DeleteIcon
+                data-test-id={`site[${index}].remove`}
+                cursor="pointer"
+                w="20px"
+                h="20px"
+                onClick={removeSite(site.host)}
+              />
             </Flex>
-            <DeleteIcon
-              data-test-id={`site[${index}].remove`}
-              cursor="pointer"
-              w="20px"
-              h="20px"
-              onClick={removeSite(site.host)}
-            />
-          </Flex>
-        ))}
-      </VStack>
+          ))}
+        </VStack>
+      )}
     </Skeleton>
   );
 };

@@ -62,7 +62,7 @@ export const ConfirmMnemonic: FC = () => {
         Confirm your Seed
       </Heading>
       <Box fontSize="md" w="480px" mb="8px">
-        Please select words below to form the correct Seed.
+        Please select words in correct order to form your seed.
       </Box>
 
       <Textarea data-test-id="selectedSeed" as="div" w="480px" h="200px">

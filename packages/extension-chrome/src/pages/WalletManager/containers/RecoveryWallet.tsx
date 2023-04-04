@@ -10,14 +10,19 @@ import {
   Alert,
   AlertIcon,
   AlertDescription,
+  InputProps,
+  InputGroup,
+  InputRightElement,
 } from '@chakra-ui/react';
 import times from 'lodash.times';
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { FC } from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import wordList from '@ckb-lumos/hd/lib/mnemonic/word_list';
 import { useWalletCreationStore } from '../store';
 import { useOutletContext } from './CreateProcessFrame';
+import { useClickAway, useToggle } from 'react-use';
+import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 
 const MNEMONIC_LENGTH = 12;
 
@@ -27,19 +32,37 @@ const validateWordInList = (word: string) => {
   return wordSet.has(word);
 };
 
-const validateUniqueWord = (index: number) => (word: string, formValues: FormFields) => {
-  if (index === 0) return true;
-
-  return formValues.seed.slice(0, index).every((s) => s.value !== word);
-};
-
 type FormFields = { seed: { value: string }[] };
 
-type ValidateErrorType = 'wordInList' | 'unique';
+const PasswordInput: FC<Omit<InputProps, 'type'>> = ({ onFocus: _onFocus, ...restProps }) => {
+  const [reveal, toggleRevealState] = useToggle(false);
+  const [focused, setFocused] = useToggle(false);
+  const inputGroupRef = useRef<HTMLInputElement>(null);
+  const EyeIcon = reveal ? ViewOffIcon : ViewIcon;
+  useClickAway(inputGroupRef, () => {
+    setFocused(false);
+    toggleRevealState(false);
+  });
+  const onFocus: React.FocusEventHandler<HTMLInputElement> = useCallback(
+    (e) => {
+      setFocused(true);
+      _onFocus?.(e);
+    },
+    [_onFocus, setFocused],
+  );
 
-const _ErrorMessageMap: Record<ValidateErrorType, string | undefined> = {
-  unique: 'Seed words must be unique',
-  wordInList: 'Seed words must be in the word list',
+  const toggleVisible: React.MouseEventHandler<SVGElement> = () => {
+    toggleRevealState();
+  };
+
+  return (
+    <InputGroup ref={inputGroupRef}>
+      <Input type={reveal ? 'text' : 'password'} onFocus={onFocus} {...restProps} />
+      <InputRightElement>
+        <EyeIcon display={focused ? 'block' : 'none'} cursor="pointer" mr="12px" onClick={toggleVisible} />
+      </InputRightElement>
+    </InputGroup>
+  );
 };
 
 /**
@@ -47,8 +70,8 @@ const _ErrorMessageMap: Record<ValidateErrorType, string | undefined> = {
  */
 export const RecoveryWallet: FC = () => {
   const setStoreState = useWalletCreationStore((s) => s.set);
-  const { formState, handleSubmit, control } = useForm<FormFields>({
-    defaultValues: {
+  const { formState, handleSubmit, control, setValue } = useForm<FormFields>({
+    values: {
       seed: times(MNEMONIC_LENGTH, () => ({ value: '' })),
     },
     mode: 'onChange',
@@ -71,6 +94,14 @@ export const RecoveryWallet: FC = () => {
   useEffect(() => {
     setNextAvailable(formState.isValid);
   }, [formState.isValid, setNextAvailable]);
+  const fillSeedSequence = (seedSequence: string) => {
+    seedSequence
+      .split(/\s+/)
+      .slice(0, MNEMONIC_LENGTH)
+      .forEach((seed, index) => {
+        setValue(`seed.${index}.value`, seed.trim().toLowerCase(), { shouldValidate: true, shouldDirty: true });
+      });
+  };
 
   const inputs = fields.map((field, index) => {
     return (
@@ -82,21 +113,26 @@ export const RecoveryWallet: FC = () => {
           required: true,
           validate: {
             wordInList: validateWordInList,
-            unique: validateUniqueWord(index),
-          } as Record<ValidateErrorType, (value: string, formValues: FormFields) => boolean>,
+          },
         }}
         render={({ field, fieldState }) => (
           <FormControl isInvalid={fieldState.invalid && field.value.length > 0} as={Flex} alignItems="center">
             <FormLabel mr="8px" w="16px">
               {`${index + 1}`.padStart(2, ' ')}
             </FormLabel>
-            <Input
+            <PasswordInput
               mr="8px"
               autoFocus={index === 0}
-              type="password"
               w="186px"
               data-test-id={`seed[${index}]`}
               {...field}
+              onChange={(e) => {
+                if (/\s/.test(e.target.value)) {
+                  fillSeedSequence(e.target.value);
+                } else {
+                  field.onChange(e);
+                }
+              }}
             />
           </FormControl>
         )}
