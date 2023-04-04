@@ -109,21 +109,9 @@ export class FullOwnershipProvider {
    *   txSkeleton = await provider.injectCapacity(txSkeleton, { amount: capacity });
    *
    */
-  injectCapacity(txSkeleton: TransactionSkeletonType, config: { amount: BIish }): Promise<TransactionSkeletonType> {
-    return this._injectCapacity(txSkeleton, config);
-  }
-
-  private async _injectCapacity(
+  async injectCapacity(
     txSkeleton: TransactionSkeletonType,
-    config: {
-      /** Inject at least this amount of capacity */
-      amount: BIish;
-
-      /**
-       * If specified, candidate cells for injecting will be filtered by this lock script.
-       */
-      lock?: LockScriptLike;
-    },
+    config: { amount: BIish },
   ): Promise<TransactionSkeletonType> {
     const changeLock = (await this.getOffChainLocks({ change: 'internal' }))[0];
     if (!changeLock) {
@@ -141,9 +129,8 @@ export class FullOwnershipProvider {
 
     let neededCapacity = BI.from(config.amount).add(minimalChangeCapacity);
     const inputCells: Cell[] = [];
-    const payerLock = config.lock ? await this.parseLockScriptLike(config.lock) : undefined;
 
-    for await (const cell of this.collector({ lock: payerLock })) {
+    for await (const cell of this.collector()) {
       if (
         inputCells.find(
           (item) =>
