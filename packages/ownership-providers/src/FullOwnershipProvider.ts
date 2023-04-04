@@ -13,6 +13,8 @@ import { OutPoint, WitnessArgs } from '@ckb-lumos/base/lib/blockchain';
 import { bytes } from '@ckb-lumos/codec';
 import { prepareSigningEntries } from '@ckb-lumos/common-scripts/lib/secp256k1_blake160';
 import { Config as LumosConfig } from '@ckb-lumos/config-manager/lib';
+import { config } from '@ckb-lumos/lumos';
+import range from 'lodash.range';
 
 // util types for FullOwnership
 
@@ -34,10 +36,10 @@ export type PayFeeOptions = {
   /**
    * Only in these output indexes, can pay fee
    */
-  byOutPutIndexes?: number[];
+  byOutputIndexes?: number[];
 
   /**
-   * if `true`, the fee can be paid by the other wallet owned cells. if {@link PayFeeOptions#byOutPutIndexes} is specified, payers lock have higher priority.
+   * if `true`, the fee can be paid by the other wallet owned cells. if {@link PayFeeOptions#byOutputIndexes} is specified, payers lock have higher priority.
    */
   autoInject: boolean;
 };
@@ -179,8 +181,8 @@ export class FullOwnershipProvider {
   /**
    * Pay the transaction fee using the specified lock
    * @param txSkeleton The transaction skeleton
-   * @param options.byOutPutIndexes if provided, The outputs in these indexes will be used to pay fee as much as possible. It is useful when you want to pay fee by other lock scripts.
-   * @param options.autoInject if true, wallet owned lock will be used to pay fee. If `byOutPutIndexes` can not cover all fee, wallet will inject capacity to pay fee.
+   * @param options.byOutputIndexes if provided, The outputs in these indexes will be used to pay fee as much as possible. It is useful when you want to pay fee by other lock scripts.
+   * @param options.autoInject if true, wallet owned lock will be used to pay fee. If `byOutputIndexes` can not cover all fee, wallet will inject capacity to pay fee.
    * @param options.feeRate The fee rate, in Shannons per byte. If not specified, the fee rate will be calculated automatically.
    * @example
    * ```ts
@@ -195,29 +197,26 @@ export class FullOwnershipProvider {
    * ```
    */
   async payFee(txSkeleton: TransactionSkeletonType, options: PayFeeOptions): Promise<TransactionSkeletonType> {
-    if (options.byOutPutIndexes?.length === 0 && !options.autoInject) {
-      errors.throwError('no byOutPutIndexes is provided, but autoInject is `false`');
+    if (options.byOutputIndexes?.length === 0 && !options.autoInject) {
+      errors.throwError('no byOutputIndexes is provided, but autoInject is `false`');
     }
     const autoInject = !!options.autoInject;
     const feeRate = BI.from(options.feeRate || 1000);
     let currentTransactionSize = getTransactionSizeByTx(createTransactionFromSkeleton(txSkeleton));
-    let txSkeletonWithFee = txSkeleton;
 
-    // use existed output cell to pay fee
-    let remainFee = calculateFeeCompatible(currentTransactionSize, feeRate);
-    // sum(inputsCapacity) - sum(outputsCapacity) - fee >= 0
-    if (
-      sumCapacity(txSkeleton.get('inputs'))
-        .sub(sumCapacity(txSkeleton.get('outputs')))
-        .gte(remainFee)
-    ) {
+    // feeFromTransactionSize -  (sum(inputsCapacity) - sum(outputsCapacity))
+    let requireFee = calculateFeeCompatible(currentTransactionSize, feeRate).sub(
+      sumCapacity(txSkeleton.get('inputs')).sub(sumCapacity(txSkeleton.get('outputs'))),
+    );
+
+    if (requireFee.lte(0)) {
       return txSkeleton;
     }
 
-    const byOutPutIndexes = options.byOutPutIndexes ?? [];
-
-    for (const byOutPutIndex of byOutPutIndexes) {
-      if (remainFee.lte(0)) {
+    // use existed output cell to pay fee
+    const byOutputIndexes = options.byOutputIndexes ?? [];
+    for (const byOutPutIndex of byOutputIndexes) {
+      if (requireFee.lte(0)) {
         break;
       }
       const currentCell = txSkeleton.get('outputs').get(byOutPutIndex);
@@ -229,45 +228,33 @@ export class FullOwnershipProvider {
 
       // How many capacity is needed?
       // cellCapacity - originFee >= minimalCapacity ? originFee : cellCapacity - minimalCapacity
-      const neededCapacity = cellCapacity.sub(remainFee).gte(minimalCapacity)
-        ? remainFee
+      const affordCapacity = cellCapacity.sub(requireFee).gte(minimalCapacity)
+        ? requireFee
         : cellCapacity.sub(minimalCapacity);
 
-      remainFee = remainFee.sub(neededCapacity);
-      txSkeletonWithFee = txSkeletonWithFee.setIn(
+      requireFee = requireFee.sub(affordCapacity);
+      txSkeleton = txSkeleton.setIn(
         ['outputs', byOutPutIndex, 'cellOutput', 'capacity'],
-        cellCapacity.sub(neededCapacity).toHexString(),
+        cellCapacity.sub(affordCapacity).toHexString(),
       );
     }
 
     // all byOutputIndexes are used but still remain fee to pay and disable autoInject
-    if (remainFee.lte(0)) {
-      return txSkeletonWithFee;
-    } else if (autoInject) {
-      txSkeleton = txSkeletonWithFee;
-    } else {
-      errors.throwError('cells from `byOutPutIndexes` sufficient to pay fee');
+    if (requireFee.lte(0)) {
+      return txSkeleton;
+    } else if (!autoInject) {
+      errors.throwError('cells from `byOutputIndexes` sufficient to pay fee');
     }
 
-    let size = 0;
-    const paidFee = calculateFeeCompatible(currentTransactionSize, feeRate).sub(remainFee);
-
-    while (currentTransactionSize > size) {
-      size = currentTransactionSize;
-      const fee = calculateFeeCompatible(size, feeRate).sub(paidFee);
-
-      try {
-        txSkeletonWithFee = await this.injectCapacity(txSkeleton, {
-          amount: fee,
-        });
-      } catch {
-        errors.throwError('No cell sufficient to pay fee');
-      }
-
-      currentTransactionSize = getTransactionSizeByTx(createTransactionFromSkeleton(txSkeletonWithFee));
+    try {
+      const txSkeletonInjected = await this.injectCapacity(txSkeleton, { amount: requireFee });
+      return this.payFee(txSkeletonInjected, {
+        autoInject: true,
+        byOutputIndexes: range(txSkeleton.outputs.size, txSkeletonInjected.outputs.size),
+      });
+    } catch {
+      throw new Error('No cell sufficient to pay fee in your wallet');
     }
-
-    return txSkeletonWithFee;
   }
 
   /**
@@ -338,7 +325,7 @@ export class FullOwnershipProvider {
 
   // TODO: wait for wallet provide a API to get genesis block hash
   private async getLumosConfig(): Promise<LumosConfig> {
-    errors.unimplemented();
+    return config.getConfig();
   }
 
   private async parseLockScriptLike(lock: LockScriptLike) {

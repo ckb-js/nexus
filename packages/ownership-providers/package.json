@@ -29,11 +29,13 @@
     "@nexus-wallet/protocol": "*",
     "@nexus-wallet/utils": "*",
     "@types/lodash.isequal": "4.5.6",
-    "lodash.isequal": "4.5.0"
+    "lodash.isequal": "4.5.0",
+    "lodash.range": "3.2.0"
   },
   "devDependencies": {
     "@ckb-lumos/bi": "*",
-    "@ckb-lumos/helpers": "*"
+    "@ckb-lumos/helpers": "*",
+    "@types/lodash.range": "3.2.7"
   },
   "peerDependencies": {
     "@ckb-lumos/bi": "^0.20.0-alpha.1",

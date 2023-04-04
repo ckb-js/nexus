@@ -194,7 +194,7 @@ describe('class FullOwnershipProvider', () => {
       // await provider.injectCapacity(txSkeleton, { amount: 150 });
 
       await expect(provider.payFee(txSkeleton, { autoInject: true })).rejects.toThrowError(
-        'No cell sufficient to pay fee',
+        'No cell sufficient to pay fee in your wallet',
       );
     });
 
@@ -218,7 +218,7 @@ describe('class FullOwnershipProvider', () => {
           createFakeCellWithCapacity(100 * 1e8, onChainLocks2),
         ],
       );
-      const withFee = await provider.payFee(txSkeleton, { byOutPutIndexes: [1, 2], autoInject: false });
+      const withFee = await provider.payFee(txSkeleton, { byOutputIndexes: [1, 2], autoInject: false });
       expect(withFee.inputs.size).toBe(1);
       expect(withFee.outputs.size).toBe(3);
       expect(getTxSkeletonFee(withFee)).toEqual(getExpectedFee(txSkeleton));
@@ -230,8 +230,8 @@ describe('class FullOwnershipProvider', () => {
         [createFakeCellWithCapacity(100 * 1e8, offChainLock1)],
         [createFakeCellWithCapacity(100 * 1e8, onChainLocks2)],
       );
-      await expect(provider.payFee(txSkeleton, { autoInject: false, byOutPutIndexes: [] })).rejects.toThrowError(
-        'no byOutPutIndexes is provided, but autoInject is `false`',
+      await expect(provider.payFee(txSkeleton, { autoInject: false, byOutputIndexes: [] })).rejects.toThrowError(
+        'no byOutputIndexes is provided, but autoInject is `false`',
       );
     });
 
@@ -241,12 +241,12 @@ describe('class FullOwnershipProvider', () => {
         [createFakeCellWithCapacity(300 * 1e8, offChainLock1)],
         [createFakeCellWithCapacity(300 * 1e8, offChainLock1), createFakeCellWithCapacity(300, onChainLocks2)],
       );
-      await expect(provider.payFee(txSkeleton, { autoInject: false, byOutPutIndexes: [1] })).rejects.toThrowError(
-        'cells from `byOutPutIndexes` sufficient to pay fee',
+      await expect(provider.payFee(txSkeleton, { autoInject: false, byOutputIndexes: [1] })).rejects.toThrowError(
+        'cells from `byOutputIndexes` sufficient to pay fee',
       );
     });
 
-    it('Should throw error when byOutPutIndexes is out of range', async () => {
+    it('Should throw error when byOutputIndexes is out of range', async () => {
       const provider = buildProvider([]);
       const txSkeleton = createFakeSkeleton(
         [createFakeCellWithCapacity(300 * 1e8, offChainLock1)],
@@ -254,7 +254,7 @@ describe('class FullOwnershipProvider', () => {
       );
 
       await (
-        expect(provider.payFee(txSkeleton, { autoInject: false, byOutPutIndexes: [114514] })) as any
+        expect(provider.payFee(txSkeleton, { autoInject: false, byOutputIndexes: [114514] })) as any
       ).rejects.toThrowError('`byOutPutIndex` is out of range');
     });
 
@@ -268,7 +268,7 @@ describe('class FullOwnershipProvider', () => {
           createFakeCellWithCapacity(45 * 1e8 + 50, onChainLocks3),
         ],
       );
-      const withFee = await provider.payFee(txSkeleton, { autoInject: true, byOutPutIndexes: [1, 2], feeRate: 1000 });
+      const withFee = await provider.payFee(txSkeleton, { autoInject: true, byOutputIndexes: [1, 2], feeRate: 1000 });
       expect(withFee.inputs.size).toBe(2);
       expect(withFee.outputs.size).toBe(4);
 
@@ -427,7 +427,7 @@ describe('class FullOwnershipProvider', () => {
   // TODO: when get lumos config implementation is read, add more test
   it('#getLumosConfig', async () => {
     const provider = new FullOwnershipProvider(mockProviderConfig);
-    await expect(() => provider['getLumosConfig']()).rejects.toThrow();
+    await expect(provider['getLumosConfig']()).resolves.toBe(predefined.LINA);
   });
 
   describe('#parseLockScriptLike', () => {
