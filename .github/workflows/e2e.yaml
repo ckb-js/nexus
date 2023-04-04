@@ -24,4 +24,4 @@ jobs:
       - name: E2E
         run: |
           npx playwright install
-          xvfb-run --auto-servernum npm run test -w @nexus-wallet/e2e
+          xvfb-run --auto-servernum npm run e2e
