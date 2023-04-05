@@ -94,6 +94,9 @@ export class FullOwnershipProvider {
   /**
    * Inject capacity to the transaction's inputs at least equal to the `amount`,
    * if the collected capacity is over the `amount`, a change cell will be added to the transaction's outputs.
+   *
+   * only lock-only cell(without data and cell's type script) will be injected
+   *
    * @param txSkeleton
    * @param config
    * @example
@@ -139,6 +142,12 @@ export class FullOwnershipProvider {
       ) {
         continue;
       }
+
+      // a cell with lock-only will be injected
+      if (cell.cellOutput.type || cell.data !== '0x') {
+        continue;
+      }
+
       inputCells.push(cell);
       neededCapacity = neededCapacity.sub(BI.from(cell.cellOutput.capacity));
       if (neededCapacity.lte(0)) {
@@ -187,6 +196,8 @@ export class FullOwnershipProvider {
     if (options.byOutputIndexes?.length === 0 && !options.autoInject) {
       errors.throwError('no byOutputIndexes is provided, but autoInject is `false`');
     }
+
+    // FIXME detect if it is a DAO unlock transaction first
     const autoInject = !!options.autoInject;
     const feeRate = BI.from(options.feeRate || 1000);
     let currentTransactionSize = getTransactionSizeByTx(createTransactionFromSkeleton(txSkeleton));

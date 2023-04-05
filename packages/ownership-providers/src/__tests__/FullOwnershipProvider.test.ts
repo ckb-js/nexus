@@ -42,18 +42,25 @@ const onChainLocks1: Script = createOnchainLock('0x441509af');
 const onChainLocks2: Script = createOnchainLock('0x25061223');
 const onChainLocks3: Script = createOnchainLock('0x25061224');
 
-function createFakeCellWithCapacity(capacity: number, lock = offChainLock1, outpointIndex = 0): Cell {
+function createFakeCellWithCapacity(
+  capacity: number,
+  lock = offChainLock1,
+  type: Script | undefined = undefined,
+  outpointIndex = 0,
+  data = '0x',
+): Cell {
   return {
     cellOutput: {
       capacity: BI.from(capacity).toHexString(),
       lock: lock,
+      type,
     },
     outPoint: {
       // if we use bytes.hexify(Uint32LE.pack(outpointIndex)), it will throw error because many `0` before the number
       index: `0x${outpointIndex.toString(16)}`,
       txHash: '0xd2e09c658206d4d0d71c066c46eddaa568d49c09f76b7396ae803dad25850174',
     },
-    data: '0x',
+    data: data,
   };
 }
 
@@ -105,6 +112,20 @@ describe('class FullOwnershipProvider', () => {
         /No cell sufficient to inject/,
       );
     });
+    it('Should pick lock-only cell', async () => {
+      const provider = initProviderWithCells([
+        createFakeCellWithCapacity(500000 * 1e8, offChainLock1, offChainLock1),
+        createFakeCellWithCapacity(500000 * 1e8, onChainLocks1, undefined, 0, '0x123321'),
+        createFakeCellWithCapacity(500 * 1e8, offChainLock1),
+        createFakeCellWithCapacity(200 * 1e8, onChainLocks2),
+      ]);
+
+      const skeleton = await provider.injectCapacity(emptyTxSkeleton, { amount: 144 * 1e8 });
+      expect(skeleton.get('inputs').size).toBe(1);
+      expect(skeleton.get('inputs').get(0)?.cellOutput.capacity).toBe(BI.from(500 * 1e8).toHexString());
+      expect(skeleton.get('outputs').size).toBe(1);
+      expect(skeleton.get('outputs').get(0)?.cellOutput.capacity).toBe(BI.from(500 * 1e8 - 144 * 1e8).toHexString());
+    });
 
     it('Should pick one cell when capacity is enough', async () => {
       const provider = initProviderWithCells([
@@ -120,10 +141,10 @@ describe('class FullOwnershipProvider', () => {
 
     it('Should pick multiple cells when single cell capacity is not enough', async () => {
       const provider = initProviderWithCells([
-        createFakeCellWithCapacity(100 * 1e8, onChainLocks1, 0),
-        createFakeCellWithCapacity(100 * 1e8, onChainLocks1, 0),
-        createFakeCellWithCapacity(100 * 1e8, onChainLocks2, 1),
-        createFakeCellWithCapacity(300 * 1e8, onChainLocks1, 2),
+        createFakeCellWithCapacity(100 * 1e8, onChainLocks1, undefined, 0),
+        createFakeCellWithCapacity(100 * 1e8, onChainLocks1, undefined, 0),
+        createFakeCellWithCapacity(100 * 1e8, onChainLocks2, undefined, 1),
+        createFakeCellWithCapacity(300 * 1e8, onChainLocks1, undefined, 2),
       ]);
       const skeleton = await provider.injectCapacity(emptyTxSkeleton, { amount: 250 * 1e8 });
       expect(skeleton.get('inputs').size).toBe(3);
