@@ -20,7 +20,7 @@ const primary = definePartsStyle(() => ({
   },
   element: {
     _invalid: {
-      color: 'error.lighter',
+      color: 'error.darker',
     },
   },
 }));
