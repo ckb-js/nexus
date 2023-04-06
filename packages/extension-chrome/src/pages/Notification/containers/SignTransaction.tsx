@@ -37,6 +37,30 @@ type TransactionIOListProps = {
   networkName?: NetworkName;
 } & TableProps;
 
+const capacityFormatter = new Intl.NumberFormat('en-US', { style: 'decimal' });
+
+const CellCapacity: FC<{ capacity: string }> = ({ capacity }) => {
+  const amount = BI.from(capacity);
+  const integerPart = amount.div(10 ** 8);
+  const hasDecimal = amount.mod(10 ** 8).gt(0);
+
+  const integerFormatted = capacityFormatter.format(integerPart.toBigInt());
+
+  return (
+    <>
+      {hasDecimal ? (
+        <Tooltip hasArrow label={`${capacityFormatter.format(amount.toNumber() / 1e8)} CKB`}>
+          <Box>
+            ≈{integerFormatted}
+            {' CKB'}
+          </Box>
+        </Tooltip>
+      ) : (
+        <Box>{integerFormatted} CKB</Box>
+      )}
+    </>
+  );
+};
 const TransactionIOList: FC<TransactionIOListProps> = ({ type, networkName, tx, ...rest }) => {
   // TODO: a better way to implement: use a config provider to get the config better.
   const lumosConfig = networkName === 'ckb' ? predefined.LINA : predefined.AGGRON4;
@@ -111,10 +135,7 @@ const TransactionIOList: FC<TransactionIOListProps> = ({ type, networkName, tx, 
               </Td>
               <Td data-test-id={`transaction.${type}[${index}].type`}>{parseCellType(cell)}</Td>
               <Td data-test-id={`transaction.${type}[${index}].capacity`}>
-                {BI.from(cell.cellOutput.capacity)
-                  .div(10 ** 8)
-                  .toString()}{' '}
-                CKB
+                <CellCapacity capacity={cell.cellOutput.capacity} />
               </Td>
             </Tr>
           );
