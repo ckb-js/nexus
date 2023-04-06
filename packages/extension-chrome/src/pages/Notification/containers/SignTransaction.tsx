@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import {
   Table,
   Skeleton,
@@ -19,8 +20,8 @@ import {
   Spacer,
   Tooltip,
 } from '@chakra-ui/react';
+import numeral from 'numeral';
 import { encodeToAddress, TransactionSkeletonObject } from '@ckb-lumos/helpers';
-import { BI } from '@ckb-lumos/lumos';
 import { predefined } from '@ckb-lumos/config-manager';
 import { useQuery } from '@tanstack/react-query';
 import React, { FC, useMemo } from 'react';
@@ -30,6 +31,7 @@ import { useSessionMessenger } from '../../hooks/useSessionMessenger';
 import { parseCellType } from '../utils/parseCellType';
 import { useConfigQuery } from '../../hooks/useConfigQuery';
 import { NetworkName } from '@nexus-wallet/protocol';
+import { formatUnit } from '@ckb-lumos/bi';
 
 type TransactionIOListProps = {
   type: 'inputs' | 'outputs';
@@ -37,26 +39,22 @@ type TransactionIOListProps = {
   networkName?: NetworkName;
 } & TableProps;
 
-const capacityFormatter = new Intl.NumberFormat('en-US', { style: 'decimal' });
-
 const CellCapacity: FC<{ capacity: string }> = ({ capacity }) => {
-  const amount = BI.from(capacity);
-  const integerPart = amount.div(10 ** 8);
-  const hasDecimal = amount.mod(10 ** 8).gt(0);
+  const amount = numeral(formatUnit(capacity, 'ckb')).format('0,0[.][00000000]');
 
-  const integerFormatted = capacityFormatter.format(integerPart.toBigInt());
+  const [integerPart, decimalPart = ''] = amount.split('.');
 
   return (
     <>
-      {hasDecimal ? (
-        <Tooltip hasArrow label={`${capacityFormatter.format(amount.toNumber() / 1e8)} CKB`}>
+      {decimalPart ? (
+        <Tooltip hasArrow label={`${amount} CKB`}>
           <Box>
-            ≈{integerFormatted}
+            ≈{integerPart}
             {' CKB'}
           </Box>
         </Tooltip>
       ) : (
-        <Box>{integerFormatted} CKB</Box>
+        <Box>{amount} CKB</Box>
       )}
     </>
   );
