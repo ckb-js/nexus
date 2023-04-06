@@ -1,5 +1,18 @@
 # E2E
 
+## Quick Start
+
+```sh
+npm run test -w @nexus-wallet/e2e
+
+# run in headless mode
+HEADLESS=true npm run test -w @nexus-wallet/e2e
+
+# any jest cli options can be passed to the test command, e.g.
+# increase timeout, default is 5s, the following example is 20s
+npm run test -w @nexus-wallet/e2e -- --testTimeout 20000
+```
+
 ## Add a New Case
 
 Cases are located in [tests](./tests) directory. We have provided an example
@@ -29,6 +42,29 @@ describe('Some scenario', () => {
     // or you can use the playwright via testEnv.context
     const page = await testEnv.context.newPage();
     const ckbInPage2 = testEnv.getInjectedCkb(page);
+  });
+});
+```
+
+The `DefaultTestEnv.setup` will inject a `ckb` and `testEnv` object to the global scope, and also create a new wallet for EACH test case.
+If you want to use one wallet in multiple test cases, you can use `new DefaultTestEnv` to instead of `DefaultTestEnv.setup`
+
+```ts
+describe('Some scenario', () => {
+  it('should do something', async () => {
+    const testEnv = new DefaultTestEnv();
+    const ckb = testEnv.getInjectedCkb();
+    await ckb.request({ method: 'some_method' });
+
+    testEnv.dispose();
+  });
+
+  it('should do something else', async () => {
+    const testEnv = new DefaultTestEnv();
+    const ckb = testEnv.getInjectedCkb();
+    await ckb.request({ method: 'some_method' });
+
+    testEnv.dispose();
   });
 });
 ```
