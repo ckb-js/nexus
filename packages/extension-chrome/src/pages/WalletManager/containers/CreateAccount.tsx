@@ -1,4 +1,4 @@
-import { FormControl, FormLabel, Heading, Input, Box, FormErrorMessage } from '@chakra-ui/react';
+import { FormControl, FormLabel, Heading, Input, Box, FormErrorMessage, Center } from '@chakra-ui/react';
 import { Controller, useForm } from 'react-hook-form';
 import Avatar from '../../Components/icons/Avatar.svg';
 import React, { FC, useEffect } from 'react';
@@ -29,7 +29,7 @@ export const CreateAccount: FC<{ isImportSeed?: boolean }> = ({ isImportSeed }) 
   }, [formState.isValid, setNextAvailable]);
 
   return (
-    <>
+    <Center flexDir="column">
       <Heading mb="48px" lineHeight="111%" fontWeight="semibold">
         Create Username
       </Heading>
@@ -52,6 +52,6 @@ export const CreateAccount: FC<{ isImportSeed?: boolean }> = ({ isImportSeed }) 
           )}
         />
       </Box>
-    </>
+    </Center>
   );
 };

@@ -1,5 +1,5 @@
 import React, { FC, useEffect } from 'react';
-import { FormControl, FormLabel, Input, Heading, VStack, Box, FormErrorMessage } from '@chakra-ui/react';
+import { FormControl, FormLabel, Input, Heading, VStack, Box, FormErrorMessage, Center } from '@chakra-ui/react';
 import { Controller, useForm } from 'react-hook-form';
 
 import { useWalletCreationStore } from '../store';
@@ -42,7 +42,7 @@ export const SetPassword: FC<SetPasswordProps> = ({ isImportSeed }) => {
   }, [setNextAvailable, formState]);
 
   return (
-    <>
+    <Center flexDir="column">
       <Heading mb="48px" lineHeight="111%" fontWeight="semibold">
         Create password
       </Heading>
@@ -121,6 +121,6 @@ export const SetPassword: FC<SetPasswordProps> = ({ isImportSeed }) => {
             </Checkbox>
           </FormControl> */}
       </VStack>
-    </>
+    </Center>
   );
 };

@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
-import { Card, ListItem, Heading, Text, UnorderedList, ListIcon, Button } from '@chakra-ui/react';
+import { Card, ListItem, Heading, Text, UnorderedList, ListIcon, Button, Center } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
-import { Marker } from '../../Components/ListMarker';
+import { CircleMarker } from '../../Components/CircleMarker';
 
 const texts = [
   'We do not send any clicks, page views or events to a central server',
@@ -12,7 +12,7 @@ const texts = [
 export const BeforeStart: FC = () => {
   const navigate = useNavigate();
   return (
-    <>
+    <Center flexDir="column">
       <Heading mb="48px" fontSize="4xl" fontWeight="semibold">
         Before We Start
       </Heading>
@@ -23,7 +23,7 @@ export const BeforeStart: FC = () => {
         <UnorderedList spacing="12px" ml="0">
           {texts.map((t) => (
             <ListItem display="flex" fontSize="md" key={t}>
-              <ListIcon as={Marker} mt="4px" />
+              <ListIcon as={CircleMarker} mt="4px" />
               {t}
             </ListItem>
           ))}
@@ -43,6 +43,6 @@ export const BeforeStart: FC = () => {
       >
         Get Started
       </Button>
-    </>
+    </Center>
   );
 };

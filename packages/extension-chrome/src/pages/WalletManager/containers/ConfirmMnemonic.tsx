@@ -1,4 +1,4 @@
-import { Badge, Box, Button, Heading, SimpleGrid, Textarea } from '@chakra-ui/react';
+import { Box, Button, Center, Heading, SimpleGrid, Textarea } from '@chakra-ui/react';
 import React, { FC, ReactElement, useEffect, useMemo } from 'react';
 import { useList } from 'react-use';
 import shuffle from 'lodash.shuffle';
@@ -6,6 +6,7 @@ import zip from 'lodash.zip';
 import { useWalletCreationStore } from '../store';
 import range from 'lodash.range';
 import { useOutletContext } from './CreateProcessFrame';
+import { CircleMarker } from '../../Components/CircleMarker';
 
 export const ConfirmMnemonic: FC = () => {
   const { initWallet, seed } = useWalletCreationStore();
@@ -40,8 +41,15 @@ export const ConfirmMnemonic: FC = () => {
         isAllCorrect = false;
       }
       wordElements.push(
-        <Box as="span" key={index} data-test-id={`selectedSeed[${index}]`} color={isCorrect ? 'black' : 'red'}>
-          {chosenWord}{' '}
+        <Box
+          as="span"
+          display="inline-block"
+          pl={index !== 0 ? '12px' : 0}
+          key={index}
+          data-test-id={`selectedSeed[${index}]`}
+          color={isCorrect ? 'black' : 'red'}
+        >
+          {chosenWord}
         </Box>,
       );
     });
@@ -57,7 +65,7 @@ export const ConfirmMnemonic: FC = () => {
   }, [isAllCorrect, setNextAvailable]);
 
   return (
-    <>
+    <Center w="480px" flexDir="column">
       <Heading mb="48px" lineHeight="111%" fontWeight="semibold">
         Confirm your Seed
       </Heading>
@@ -65,7 +73,7 @@ export const ConfirmMnemonic: FC = () => {
         Please select words in correct order to form your seed.
       </Box>
 
-      <Textarea data-test-id="selectedSeed" as="div" w="480px" h="200px">
+      <Textarea data-test-id="selectedSeed" as="div" p="16px" w="480px" h="200px">
         {wordElements}
       </Textarea>
 
@@ -73,26 +81,30 @@ export const ConfirmMnemonic: FC = () => {
         {word4Choose.map((word, index) => {
           const chosenOrder = chosenIndex.findIndex((i) => i === index);
           const hasChosen = chosenOrder !== -1;
+          const isCorrect = seed[chosenOrder] === word;
           return (
             <Box position="relative" key={word} data-test-id={`seed[${index}]`} data-test-selected={hasChosen}>
               {hasChosen && (
-                <Badge
-                  borderRadius="18px"
+                <CircleMarker
                   w="18px"
                   h="18px"
-                  colorScheme="purple"
+                  background={isCorrect ? 'primary' : 'error.darker'}
                   position="absolute"
+                  color="white"
                   top="-4px"
                   right="-4px"
                   zIndex="1"
+                  as={Center}
                 >
                   {chosenOrder + 1}
-                </Badge>
+                </CircleMarker>
               )}
               <Button
+                aria-selected={hasChosen}
                 size="lg"
                 w="108px"
-                variant={hasChosen ? 'primary' : 'outline'}
+                variant={'outline'}
+                colorScheme="primary"
                 onClick={hasChosen ? removeChosenIndex(index) : addChosenIndex(index)}
                 // for preventing the button size change
                 borderWidth="1px"
@@ -103,6 +115,6 @@ export const ConfirmMnemonic: FC = () => {
           );
         })}
       </SimpleGrid>
-    </>
+    </Center>
   );
 };
