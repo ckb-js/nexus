@@ -4,7 +4,7 @@ export const FormLabel = defineStyle({
   baseStyle: {
     fontSize: '14px',
     height: '20px',
-    fontWeight: 600,
+    fontWeight: 400,
     mb: '4px',
   },
 });
