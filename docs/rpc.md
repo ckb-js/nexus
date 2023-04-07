@@ -21,12 +21,15 @@ await window.ckb.request({ method: "wallet_enable" })
 
 - `FullOwnership`
 
+- `CkbMethods`
+
   ↳ **`RpcMethods`**
 
 ## Table of contents
 
 ### Methods
 
+- [ckb\_getBlockchainInfo](#ckb_getblockchaininfo)
 - [wallet\_enable](#wallet_enable)
 - [wallet\_fullOwnership\_getLiveCells](#wallet_fullownership_getlivecells)
 - [wallet\_fullOwnership\_getOffChainLocks](#wallet_fullownership_getoffchainlocks)
@@ -35,6 +38,52 @@ await window.ckb.request({ method: "wallet_enable" })
 - [wallet\_fullOwnership\_signTransaction](#wallet_fullownership_signtransaction)
 
 ## Methods
+
+### ckb\_getBlockchainInfo
+
+**ckb_getBlockchainInfo**(): `Promise`<`ChainInfo`\>
+
+get the current chain info, useful when the app needs to determine what network Nexus is connected to.
+
+**`Example`**
+
+```ts
+await window.ckb.request({ method: "ckb_getBlockchainInfo" })
+```
+
+#### Returns
+
+`Promise`<`ChainInfo`\>
+
+[ChainInfo](https://github.com/nervosnetwork/ckb/blob/develop/rpc/README.md#method-get_blockchain_info)
+<details>
+<summary>show return data example</summary>
+
+```json
+{
+  "alerts": [
+    {
+      "id": "0x2a",
+      "message": "An example alert message!",
+      "notice_until": "0x24bcca57c00",
+      "priority": "0x1"
+    }
+  ],
+  "chain": "ckb",
+  "difficulty": "0x1f4003",
+  "epoch": "0x7080018000001",
+  "isInitialBlockDownload": true,
+  "medianime": "0x5cd2b105"
+}
+```
+
+</details>
+
+#### Inherited from
+
+CkbMethods.ckb\_getBlockchainInfo
+
+___
 
 ### wallet\_enable
 

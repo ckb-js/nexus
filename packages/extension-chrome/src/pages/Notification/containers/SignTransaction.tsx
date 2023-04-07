@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import {
   Table,
   Skeleton,
@@ -19,8 +20,8 @@ import {
   Spacer,
   Tooltip,
 } from '@chakra-ui/react';
+import numeral from 'numeral';
 import { encodeToAddress, TransactionSkeletonObject } from '@ckb-lumos/helpers';
-import { BI } from '@ckb-lumos/lumos';
 import { predefined } from '@ckb-lumos/config-manager';
 import { useQuery } from '@tanstack/react-query';
 import React, { FC, useMemo } from 'react';
@@ -30,6 +31,7 @@ import { useSessionMessenger } from '../../hooks/useSessionMessenger';
 import { parseCellType } from '../utils/parseCellType';
 import { useConfigQuery } from '../../hooks/useConfigQuery';
 import { NetworkName } from '@nexus-wallet/protocol';
+import { formatUnit } from '@ckb-lumos/bi';
 
 type TransactionIOListProps = {
   type: 'inputs' | 'outputs';
@@ -37,6 +39,26 @@ type TransactionIOListProps = {
   networkName?: NetworkName;
 } & TableProps;
 
+const CellCapacity: FC<{ capacity: string }> = ({ capacity }) => {
+  const amount = numeral(formatUnit(capacity, 'ckb')).format('0,0[.][00000000]');
+
+  const [integerPart, decimalPart = ''] = amount.split('.');
+
+  return (
+    <>
+      {decimalPart ? (
+        <Tooltip hasArrow label={`${amount} CKB`}>
+          <Box>
+            ≈{integerPart}
+            {' CKB'}
+          </Box>
+        </Tooltip>
+      ) : (
+        <Box>{amount} CKB</Box>
+      )}
+    </>
+  );
+};
 const TransactionIOList: FC<TransactionIOListProps> = ({ type, networkName, tx, ...rest }) => {
   // TODO: a better way to implement: use a config provider to get the config better.
   const lumosConfig = networkName === 'ckb' ? predefined.LINA : predefined.AGGRON4;
@@ -111,10 +133,7 @@ const TransactionIOList: FC<TransactionIOListProps> = ({ type, networkName, tx, 
               </Td>
               <Td data-test-id={`transaction.${type}[${index}].type`}>{parseCellType(cell)}</Td>
               <Td data-test-id={`transaction.${type}[${index}].capacity`}>
-                {BI.from(cell.cellOutput.capacity)
-                  .div(10 ** 8)
-                  .toString()}{' '}
-                CKB
+                <CellCapacity capacity={cell.cellOutput.capacity} />
               </Td>
             </Tr>
           );

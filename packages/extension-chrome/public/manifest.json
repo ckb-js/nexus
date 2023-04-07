@@ -4,18 +4,7 @@
   "manifest_version": 3,
   "name": "Nexus Wallet",
   "description": "An UTxO friendly wallet extension for CKB",
-  "permissions": [
-    "tabs",
-    "activeTab",
-    "alarms",
-    "clipboardWrite",
-    "notifications",
-    "scripting",
-    "storage",
-    "unlimitedStorage",
-    "webRequest",
-    "favicon"
-  ],
+  "permissions": ["tabs", "activeTab", "clipboardWrite", "storage", "unlimitedStorage", "favicon"],
   "background": {
     "service_worker": "background.js"
   },
@@ -33,16 +22,7 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": [
-        "*.hot-update.json",
-        "popup.html",
-        "inpage.js",
-        "notification.html",
-        "inpage.js.map",
-        "content.js.map",
-        "walletManager.html",
-        "_favicon"
-      ],
+      "resources": ["inpage.js", "inpage.js.map"],
       "matches": ["<all_urls>"],
       "all_frames": true
     }

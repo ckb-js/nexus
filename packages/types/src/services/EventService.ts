@@ -1,4 +1,4 @@
-import { NetworkName } from './ConfigService';
+import { NetworkName } from '@nexus-wallet/protocol';
 
 /**
  * emit event to injected CKB provider

@@ -1,5 +1,6 @@
 import { FullOwnership } from './ownership';
 import { Wallet } from './wallet';
+import { CkbMethods } from './ckb';
 
 /**
  * Exposed RPC methods for the wallet, the `debug_` prefix is for development purpose only,
@@ -12,4 +13,4 @@ import { Wallet } from './wallet';
  * await window.ckb.request({ method: "wallet_enable" })
  * ```
  */
-export interface RpcMethods extends Wallet, FullOwnership {}
+export interface RpcMethods extends Wallet, FullOwnership, CkbMethods {}

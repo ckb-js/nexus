@@ -16,6 +16,9 @@ const primary = definePartsStyle(() => ({
       borderWidth: '2px',
       borderColor: 'primary',
       boxShadow: `0 0 0 1px var(--focus-border-color)`,
+      _invalid: {
+        borderColor: 'error.darker',
+      },
     },
   },
   element: {
@@ -41,6 +44,10 @@ const accent = definePartsStyle(() => ({
       borderWidth: '2px',
       borderColor: 'accent',
       boxShadow: `0 0 0 1px var(--focus-border-color)`,
+
+      _invalid: {
+        borderColor: 'error.lighter',
+      },
     },
   },
   element: {
