@@ -1,12 +1,11 @@
 import { inputAnatomy } from '@chakra-ui/anatomy';
 import { createMultiStyleConfigHelpers } from '@chakra-ui/react';
+import { getColor } from '@chakra-ui/theme-tools';
 
 const { defineMultiStyleConfig, definePartsStyle } = createMultiStyleConfigHelpers(inputAnatomy.keys);
 
-const primary = definePartsStyle(() => ({
+const primary = definePartsStyle(({ theme }) => ({
   field: {
-    // chaka-ui's getColor not work here, use css variable to workaround
-    '--focus-border-color': 'primary',
     color: 'black',
     borderWidth: '2px',
     _invalid: {
@@ -15,7 +14,7 @@ const primary = definePartsStyle(() => ({
     _focusVisible: {
       borderWidth: '2px',
       borderColor: 'primary',
-      boxShadow: `0 0 0 1px var(--focus-border-color)`,
+      boxShadow: `0 0 0 1px ${getColor(theme, 'primary')}`,
       _invalid: {
         borderColor: 'error.darker',
       },
@@ -28,10 +27,8 @@ const primary = definePartsStyle(() => ({
   },
 }));
 
-const accent = definePartsStyle(() => ({
+const accent = definePartsStyle(({ theme }) => ({
   field: {
-    // chaka-ui's getColor not work here, use css variable to workaround
-    '--focus-border-color': 'accent',
     color: 'black',
     borderWidth: '2px',
     _invalid: {
@@ -43,7 +40,7 @@ const accent = definePartsStyle(() => ({
     _focusVisible: {
       borderWidth: '2px',
       borderColor: 'accent',
-      boxShadow: `0 0 0 1px var(--focus-border-color)`,
+      boxShadow: `0 0 0 1px ${getColor(theme, 'accent')}`,
 
       _invalid: {
         borderColor: 'error.lighter',
