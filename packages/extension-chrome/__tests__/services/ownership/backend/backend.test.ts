@@ -2,16 +2,45 @@ import { Script, Transaction } from '@ckb-lumos/lumos';
 import { createBackend } from '../../../../src/services/ownership/backend';
 import fetchMock from 'jest-fetch-mock';
 import { ScriptConfig, predefined } from '@ckb-lumos/config-manager/lib';
+import { toQueryParam } from '../../../../src/services/ownership/backend/backendUtils';
+
+describe('Query Param', () => {
+  beforeEach(() => {
+    fetchMock.disableMocks();
+  });
+  it('should get correct query params', async () => {
+    const lock: Script = {
+      codeHash: '0x1234',
+      hashType: 'type',
+      args: '0x5678',
+    };
+    const queryParam = toQueryParam({ lock });
+
+    expect(queryParam).toEqual([
+      {
+        script: {
+          code_hash: lock.codeHash,
+          hash_type: lock.hashType,
+          args: lock.args,
+        },
+        script_type: 'lock',
+        script_search_mode: 'exact',
+      },
+      'asc',
+      '0x64',
+      null,
+    ]);
+  });
+});
+
+// TODO: replace it with an internal server
+const SNAPSHOT_CKB_RPC = 'https://testnet.ckb.dev';
 
 describe('load secp256k1 cellDeps', () => {
   beforeEach(() => {
     fetchMock.disableMocks();
   });
   it('should backendUtils.loadSecp256k1ScriptDep return expected config', async () => {
-    // this test case will actually fetch on-chain data, so we increase the timeout
-    jest.setTimeout(10000);
-    // TODO: replace it with an internal server
-    const SNAPSHOT_CKB_RPC = 'https://testnet.ckb.dev';
     const backend = createBackend({ nodeUrl: SNAPSHOT_CKB_RPC });
 
     const res = await backend.getSecp256k1Blake160ScriptConfig({ networkId: 'someId' });
@@ -19,7 +48,21 @@ describe('load secp256k1 cellDeps', () => {
     expect(res).toMatchSnapshot();
     const predefinedConfig = predefined.AGGRON4.SCRIPTS.SECP256K1_BLAKE160;
     expect(res).toEqual({ ...predefinedConfig, SHORT_ID: undefined } as ScriptConfig);
+    // this test case will actually fetch on-chain data, so we increase the timeout
+  }, 5000);
+});
+
+describe('getBlockchainInfo', () => {
+  beforeEach(() => {
+    fetchMock.disableMocks();
   });
+
+  it('should backend fetch expected blockchain info', async () => {
+    const backend = createBackend({ nodeUrl: SNAPSHOT_CKB_RPC });
+    const res = await backend.getBlockchainInfo();
+
+    expect(res.chain).toBe('ckb_testnet');
+  }, 5000);
 });
 
 describe('hasHistory', () => {

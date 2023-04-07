@@ -18,5 +18,6 @@ export function createMockBackend(options?: { hasHistory(lock: Script): Promisab
     hasHistories: async ({ locks }) => Promise.all(locks.map((lock) => options?.hasHistory(lock) ?? false)),
     resolveTx: errors.unimplemented,
     getLiveCellsByLocks: errors.unimplemented,
+    getBlockchainInfo: errors.unimplemented,
   };
 }
