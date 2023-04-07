@@ -176,6 +176,7 @@ export class FullOwnershipProvider {
 
   /**
    * Pay the transaction fee using the specified lock
+   * **NOT** support DAO unlock transaction yet, please consider using `lumos`'s `payFee`
    * @param txSkeleton The transaction skeleton
    * @param options.byOutputIndexes if provided, The outputs in these indexes will be used to pay fee as much as possible. It is useful when you want to pay fee by other lock scripts.
    * @param options.autoInject if true, wallet owned lock will be used to pay fee. If `byOutputIndexes` can not cover all fee, wallet will inject capacity to pay fee.
