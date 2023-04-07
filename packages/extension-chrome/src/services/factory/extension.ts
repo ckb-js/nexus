@@ -1,5 +1,5 @@
 import { createModulesFactory, ModulesFactory } from '.';
-import { createBrowserExtensionPlatformService } from '../notification';
+import { createBrowserExtensionPlatformService } from '../notification/notification';
 import { createBrowserExtensionStorage } from '../storage/extension';
 import { createBrowserExtensionEventHub } from '../event/extension';
 

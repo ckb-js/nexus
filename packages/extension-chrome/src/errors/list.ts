@@ -17,6 +17,9 @@ function prepareNexusError<T>(opts: {
  * and provide some suggestions to resolve the problem.
  */
 export const NexusCommonErrors = {
+  DuplicateRequest: prepareNexusError({
+    reason: 'There is a same request in the queue',
+  }),
   ApproveRejected: prepareNexusError({
     reason: 'The approval was rejected',
   }),
