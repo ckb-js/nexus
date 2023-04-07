@@ -36,7 +36,7 @@ const outline = defineStyle(({ colorScheme, theme }) => {
       _disabled: { bg: 'transparent' },
     },
     _active: {
-      bg: transparentize(colorScheme, 0.16)(theme),
+      bg: transparentize(colorScheme, 0.24)(theme),
       _disabled: { bg: 'transparent' },
     },
   };
