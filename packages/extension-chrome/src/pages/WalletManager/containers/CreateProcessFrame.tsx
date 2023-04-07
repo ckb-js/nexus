@@ -18,16 +18,18 @@ import Steps from 'rc-steps';
 import { StepsProps } from 'rc-steps/lib/Steps';
 
 const ProcessIndicator: FC<{ total: number; current: number } & FlexProps> = ({ total, current }) => {
+  const getIndicatorColor = (index: number) => {
+    if (index < current) {
+      return 'primary.lighter';
+    } else if (index > current) {
+      return 'gray.300';
+    }
+    return 'primary';
+  };
   return (
     <HStack spacing="12px" paddingY="4px" mb="48px">
       {range(0, total).map((index) => (
-        <Box
-          key={index}
-          w="66px"
-          h="5px"
-          borderRadius="5px"
-          backgroundColor={index === current ? 'purple.500' : 'purple.200'}
-        />
+        <Box key={index} w="66px" h="5px" borderRadius="5px" backgroundColor={getIndicatorColor(index)} />
       ))}
     </HStack>
   );
@@ -37,7 +39,7 @@ const renderSingleStep: StepsProps['itemRender'] = ({ title, description, status
   const icon = {
     wait: <Icon as={StepWaitingIcon} w="24px" h="24px" />,
     process: <Icon as={StepProcessingIcon} w="24px" h="24px" />,
-    finish: <CheckCircleIcon w="24px" h="24px" color="white" />,
+    finish: <CheckCircleIcon w="20px" h="20px" color="white" />,
     error: <></>,
   }[status ?? 'wait'];
   return (
@@ -53,7 +55,9 @@ const renderSingleStep: StepsProps['itemRender'] = ({ title, description, status
       templateRows="auto"
       templateColumns="24px auto"
     >
-      {icon}
+      <Box alignSelf="center" justifySelf="center">
+        {icon}
+      </Box>
       <Text as={Box} ml="4px" alignSelf="center" fontWeight="semibold" fontSize="md">
         {title}
       </Text>
@@ -142,7 +146,7 @@ export const CreateProcessFrame: FC = () => {
         alignItems="center"
         pl="80px"
         position="relative"
-        backgroundColor="purple.700"
+        backgroundColor="primary.darker"
         height="100vh"
       >
         <Logo position="absolute" left="80px" top="48px" />

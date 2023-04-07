@@ -46,7 +46,7 @@ export const CreateAccount: FC<{ isImportSeed?: boolean }> = ({ isImportSeed }) 
           render={({ fieldState, field }) => (
             <FormControl isInvalid={fieldState.invalid && fieldState.error?.type !== 'required'}>
               <FormLabel>A Descriptive Name For Your Wallet</FormLabel>
-              <Input data-test-id="username" {...field} />
+              <Input data-test-id="username" placeholder="Username" {...field} />
               <FormErrorMessage>{fieldState.error?.message}</FormErrorMessage>
             </FormControl>
           )}

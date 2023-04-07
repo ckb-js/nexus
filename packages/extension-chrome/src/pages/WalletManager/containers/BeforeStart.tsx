@@ -1,8 +1,7 @@
 import React, { FC } from 'react';
-import { Card, Box, ListItem, Heading, Text, UnorderedList, ListIcon, Button } from '@chakra-ui/react';
+import { Card, ListItem, Heading, Text, UnorderedList, ListIcon, Button } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
-
-const Marker: FC = (props) => <Box as="span" w="20px" h="20px" borderRadius="50%" background="purple.500" {...props} />;
+import { Marker } from '../../Components/ListMarker';
 
 const texts = [
   'We do not send any clicks, page views or events to a central server',
@@ -21,7 +20,7 @@ export const BeforeStart: FC = () => {
         We want you to know that we prioritize your privacy:
       </Text>
       <Card borderRadius="8px" my="12px" w="568px" p="20px">
-        <UnorderedList spacing="12px">
+        <UnorderedList spacing="12px" ml="0">
           {texts.map((t) => (
             <ListItem display="flex" fontSize="md" key={t}>
               <ListIcon as={Marker} mt="4px" />

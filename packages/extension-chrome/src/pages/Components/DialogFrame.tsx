@@ -28,7 +28,7 @@ export const DialogFrame: FC<DialogFrameProps> = ({ meta }) => {
   };
 
   return (
-    <Flex w="100vw" justifyContent="center" backgroundColor="purple.700">
+    <Flex w="100vw" justifyContent="center" backgroundColor="primary.darker">
       <Flex
         alignItems="center"
         direction="column"
