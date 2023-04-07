@@ -42,7 +42,7 @@ export function createFullOwnershipService({
   }
 
   return {
-    getLiveCells: async ({ cursor: encodedCursor } = {}) => {
+    getLiveCells: async ({ cursor: encodedCursor, change } = {}) => {
       const db = await getDb();
       const backend = await backendProvider.resolve();
 
@@ -50,14 +50,19 @@ export function createFullOwnershipService({
 
       const queryCursor: CellCursor = encodedCursor ? decodeCursor(encodedCursor) : { indexerCursor: '', localId: 0 };
 
-      const onChainLocks = infos
-        .filter(
-          (info) =>
-            info.status === 'OnChain' &&
-            // only fetch cells after or containing this lock
-            info.id >= queryCursor.localId,
-        )
-        .map((info) => info.lock);
+      let onChainInfos = infos.filter(
+        (info) =>
+          info.status === 'OnChain' &&
+          // only fetch cells after or containing this lock
+          info.id >= queryCursor.localId,
+      );
+
+      // by default, will return both `external` and `internal` cells. If `change` is specified, will only return cells of the specified type.
+      if (change) {
+        onChainInfos = onChainInfos.filter(filterByChange(change));
+      }
+
+      const onChainLocks = onChainInfos.map((info) => info.lock);
 
       const { objects, cursor, lastLock } = await backend.getLiveCellsByLocks({
         locks: onChainLocks,
