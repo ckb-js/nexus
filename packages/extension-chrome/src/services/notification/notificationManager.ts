@@ -36,7 +36,8 @@ export class NotificationManager {
     const _this = this;
     if (
       options?.preventDuplicate &&
-      (isEqual(notification, this.currentNotification) || this.hasTheSameInQueue(notification))
+      (isEqual(omit(notification, 'sessionId'), omit(this.currentNotification, 'sessionId')) ||
+        this.hasTheSameInQueue(notification))
     ) {
       throw NexusCommonErrors.DuplicateRequest();
     }
@@ -77,13 +78,8 @@ export class NotificationManager {
     } else {
       this.notificationInfoQueue.push(notification);
       return new Promise((resolve) => {
-        this.eventEmitter.on(NOTIFICATION_MANAGER_EVENTS.POPUP_CLOSED, ({ sessionId }) => {
+        this.eventEmitter.on(NOTIFICATION_MANAGER_EVENTS.POPUP_CLOSED, () => {
           if (this.notificationInfoQueue[0]?.sessionId !== notification.sessionId) return;
-          if (this.currentNotification?.sessionId !== sessionId) {
-            throw new Error(
-              `Should close current notification first: ${this.currentNotification?.sessionId}, but got ${sessionId}`,
-            );
-          }
           const nextNotification = this.notificationInfoQueue.shift()!;
           this.currentNotification = nextNotification;
           resolve(_createNotificationWindow(nextNotification));
