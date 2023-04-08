@@ -66,7 +66,7 @@ export function createBrowserExtensionPlatformService(): PlatformService<Endpoin
     async requestSignData(payload) {
       const sessionId = nanoid();
       const { messenger, window: notificationWindow } = await notificationManager.createNotificationWindow({
-        path: 'sign-transaction',
+        path: 'sign-data',
         sessionId,
         metaData: {},
       });
