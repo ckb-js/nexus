@@ -29,25 +29,19 @@ export class NotificationManager {
   notificationInfoQueue: NotificationInfo[] = [];
   eventEmitter: EventEmitter = new EventEmitter();
 
-  constructor() {
-    this.eventEmitter.on(NOTIFICATION_MANAGER_EVENTS.POPUP_CLOSED, () => {
-      this.currentNotification = undefined;
-    });
-  }
-
   async createNotificationWindow(
     notification: NotificationInfo,
     options?: CreateNotificationOptions,
   ): Promise<{ messenger: SessionMessenger<SessionMethods>; window: Windows.Window }> {
+    const _this = this;
     if (
       options?.preventDuplicate &&
       (isEqual(notification, this.currentNotification) || this.hasTheSameInQueue(notification))
     ) {
       throw NexusCommonErrors.DuplicateRequest();
     }
-    const _this = this;
 
-    async function _createNotificationWindow(): Promise<{
+    async function _createNotificationWindow(payload: NotificationInfo): Promise<{
       messenger: SessionMessenger<SessionMethods>;
       window: Windows.Window;
     }> {
@@ -57,7 +51,7 @@ export class NotificationManager {
         sessionId: notification.sessionId,
       });
       const lastFocused = await browser.windows.getLastFocused();
-      const windowSize = NotificationWindowSizeMap[notification.path];
+      const windowSize = NotificationWindowSizeMap[payload.path];
       const window = await browser.windows.create({
         type: 'popup',
         focused: true,
@@ -65,31 +59,34 @@ export class NotificationManager {
         left: lastFocused.left! + (lastFocused.width! - 360),
         width: windowSize.w,
         height: windowSize.h + 28,
-        url: `notification.html#/${notification.path}?sessionId=${notification.sessionId}`,
+        url: `notification.html#/${payload.path}?sessionId=${payload.sessionId}`,
       });
 
-      browser.windows.onRemoved.addListener(() => {
-        _this.eventEmitter.emit(NOTIFICATION_MANAGER_EVENTS.POPUP_CLOSED, { sessionId: messenger.sessionId() });
+      browser.windows.onRemoved.addListener((windowId) => {
+        if (windowId === window.id) {
+          _this.currentNotification = undefined;
+          _this.eventEmitter.emit(NOTIFICATION_MANAGER_EVENTS.POPUP_CLOSED, { sessionId: messenger.sessionId() });
+        }
       });
-
       return { window, messenger };
     }
 
-    this.eventEmitter.on(NOTIFICATION_MANAGER_EVENTS.POPUP_CLOSED, ({ sessionId }) => {
-      if (this.notificationInfoQueue[0].sessionId === sessionId) {
-        this.currentNotification = undefined;
-      }
-    });
-
     if (!this.currentNotification) {
       this.currentNotification = notification;
-      return _createNotificationWindow();
+      return _createNotificationWindow(notification);
     } else {
       this.notificationInfoQueue.push(notification);
       return new Promise((resolve) => {
         this.eventEmitter.on(NOTIFICATION_MANAGER_EVENTS.POPUP_CLOSED, ({ sessionId }) => {
-          if (this.notificationInfoQueue[0].sessionId !== sessionId) return;
-          resolve(_createNotificationWindow());
+          if (this.notificationInfoQueue[0]?.sessionId !== notification.sessionId) return;
+          if (this.currentNotification?.sessionId !== sessionId) {
+            throw new Error(
+              `Should close current notification first: ${this.currentNotification?.sessionId}, but got ${sessionId}`,
+            );
+          }
+          const nextNotification = this.notificationInfoQueue.shift()!;
+          this.currentNotification = nextNotification;
+          resolve(_createNotificationWindow(nextNotification));
         });
       });
     }
