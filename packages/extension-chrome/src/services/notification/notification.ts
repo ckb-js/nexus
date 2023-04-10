@@ -15,7 +15,7 @@ export function createBrowserExtensionPlatformService(): PlatformService<Endpoin
         {
           path: 'grant',
           sessionId,
-          metaData: { host: url },
+          metadata: { host: url },
         },
         { preventDuplicate: true },
       );
@@ -40,7 +40,7 @@ export function createBrowserExtensionPlatformService(): PlatformService<Endpoin
       const { messenger, window: notificationWindow } = await notificationManager.createNotificationWindow({
         path: 'sign-transaction',
         sessionId,
-        metaData: {},
+        metadata: {},
       });
 
       return new Promise((resolve, reject) => {
@@ -68,7 +68,7 @@ export function createBrowserExtensionPlatformService(): PlatformService<Endpoin
       const { messenger, window: notificationWindow } = await notificationManager.createNotificationWindow({
         path: 'sign-data',
         sessionId,
-        metaData: {},
+        metadata: {},
       });
 
       return new Promise((resolve, reject) => {

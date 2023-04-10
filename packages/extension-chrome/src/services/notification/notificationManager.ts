@@ -25,7 +25,7 @@ const NotificationWindowSizeMap: Record<NotificationPath, { w: number; h: number
 type NotificationInfo = {
   path: NotificationPath;
   sessionId: string;
-  metaData: {
+  metadata: {
     chainId?: string;
     host?: string;
   };

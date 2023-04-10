@@ -18,21 +18,22 @@ function prepareNexusError<T>(opts: {
  */
 export const NexusCommonErrors = {
   DuplicateRequest: prepareNexusError({
-    reason: 'There is a same request in the queue',
+    reason: 'A request is still in pending',
+    suggestion: 'Please handle requests that are still pending first',
   }),
   ApproveRejected: prepareNexusError({
     reason: 'The approval was rejected',
   }),
   RequestTimeout: prepareNexusError({
     reason: 'The request was timeout',
-    suggestion: 'please try later',
+    suggestion: 'Please try later',
   }),
   RequestCkbFailed: prepareNexusError({
     reason: 'Request CKB node failed, the connected node is not available now',
-    suggestion: 'please try later or switch to another node',
+    suggestion: 'Please try later or switch to another node',
   }),
   CellNotFound: prepareNexusError<OutPoint>({
     reason: 'Cannot resolve the cell',
-    suggestion: 'please check if the selected network is correct or the cell is still live',
+    suggestion: 'Please check if the selected network is correct or the cell is still live',
   }),
 };
