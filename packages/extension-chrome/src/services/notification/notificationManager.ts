@@ -20,12 +20,17 @@ export type NotificationInfo = {
   };
 };
 
+export type NotificationInfoWithStatus = {
+  notification: NotificationInfo;
+  status: 'active' | 'closed';
+};
+
 type CreateNotificationOptions = {
   preventDuplicate?: boolean;
 };
 
 export class NotificationManager {
-  currentNotification: NotificationInfo | undefined = undefined;
+  currentNotification: NotificationInfoWithStatus | undefined = undefined;
   notificationInfoQueue: NotificationInfo[] = [];
   eventEmitter: EventEmitter = new EventEmitter();
 
@@ -36,8 +41,7 @@ export class NotificationManager {
     const _this = this;
     if (
       options?.preventDuplicate &&
-      (isEqual(omit(notification, 'sessionId'), omit(this.currentNotification, 'sessionId')) ||
-        this.hasTheSameInQueue(notification))
+      (this.isCurrentNotification(notification) || this.hasTheSameInQueue(notification))
     ) {
       throw NexusCommonErrors.DuplicateRequest();
     }
@@ -46,10 +50,11 @@ export class NotificationManager {
       messenger: SessionMessenger<SessionMethods>;
       window: Windows.Window;
     }> {
+      _this.openCurrentNotification(payload);
       // chrome popup window
       const messenger = createSessionMessenger<SessionMethods>({
         adapter: browserExtensionAdapter,
-        sessionId: notification.sessionId,
+        sessionId: payload.sessionId,
       });
       const lastFocused = await browser.windows.getLastFocused();
       const windowSize = NotificationWindowSizeMap[payload.path];
@@ -65,27 +70,56 @@ export class NotificationManager {
 
       browser.windows.onRemoved.addListener((windowId) => {
         if (windowId === window.id) {
-          _this.currentNotification = undefined;
+          _this.closeCurrentNotification();
           _this.eventEmitter.emit(NOTIFICATION_MANAGER_EVENTS.POPUP_CLOSED, { sessionId: messenger.sessionId() });
         }
       });
       return { window, messenger };
     }
 
-    if (!this.currentNotification) {
-      this.currentNotification = notification;
+    if (!this.isCurrentNotificationActive()) {
       return _createNotificationWindow(notification);
     } else {
       this.notificationInfoQueue.push(notification);
       return new Promise((resolve) => {
-        this.eventEmitter.on(NOTIFICATION_MANAGER_EVENTS.POPUP_CLOSED, () => {
-          if (this.notificationInfoQueue[0]?.sessionId !== notification.sessionId) return;
+        this.eventEmitter.on(NOTIFICATION_MANAGER_EVENTS.POPUP_CLOSED, ({ sessionId }) => {
+          // only process when the notification is at the top of the queue
+          if (
+            !this.isAtTopOfQueue(notification) ||
+            this.isCurrentNotificationActive() ||
+            sessionId !== this.currentNotification?.notification.sessionId
+          )
+            return;
           const nextNotification = this.notificationInfoQueue.shift()!;
-          this.currentNotification = nextNotification;
           resolve(_createNotificationWindow(nextNotification));
         });
       });
     }
+  }
+
+  isAtTopOfQueue(notification: NotificationInfo): boolean {
+    return this.notificationInfoQueue[0]?.sessionId === notification.sessionId;
+  }
+
+  openCurrentNotification(notification: NotificationInfo): void {
+    this.currentNotification = { notification, status: 'active' };
+  }
+
+  closeCurrentNotification(): void {
+    if (this.currentNotification?.status === 'active') {
+      this.currentNotification = { notification: this.currentNotification!.notification, status: 'closed' };
+    }
+  }
+
+  isCurrentNotificationActive(): boolean {
+    return this.currentNotification?.status === 'active';
+  }
+
+  isCurrentNotification(notification: NotificationInfo): boolean {
+    return (
+      this.currentNotification?.status === 'active' &&
+      isEqual(omit(notification, 'sessionId'), omit(this.currentNotification?.notification, 'sessionId'))
+    );
   }
 
   hasTheSameInQueue(notification: NotificationInfo): boolean {
