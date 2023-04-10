@@ -2,6 +2,7 @@
 import { Transaction } from '@ckb-lumos/lumos';
 import { MOCK_PLATFORM_URL } from '../helpers';
 import { createTestRpcServer } from './helper';
+import { NexusCommonErrors } from '../../src/errors';
 
 describe('RPC wallet_enable', () => {
   it('should request be allowed when Nexus is initialized', async () => {
@@ -11,9 +12,11 @@ describe('RPC wallet_enable', () => {
     await expect(Promise.resolve(keystoreService.hasInitialized())).resolves.toBe(true);
 
     const platformService = factory.get('platformService');
-    jest.spyOn(platformService, 'requestGrant').mockImplementation(() => Promise.reject());
+    jest
+      .spyOn(platformService, 'requestGrant')
+      .mockImplementation(() => Promise.reject(NexusCommonErrors.ApproveRejected));
 
-    await expect(request('wallet_enable')).rejects.toThrowError(/has rejected/);
+    await expect(request('wallet_enable')).rejects.toThrowError(/The approval was rejected/);
 
     jest.spyOn(platformService, 'requestGrant').mockImplementation(() => Promise.resolve());
     await expect(request('wallet_enable')).resolves.not.toThrowError();
