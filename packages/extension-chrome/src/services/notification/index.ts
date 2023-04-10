@@ -3,18 +3,15 @@ import { errors } from '@nexus-wallet/utils';
 import browser from 'webextension-polyfill';
 import { Endpoint } from 'webext-bridge';
 import { NexusCommonErrors } from '../../errors';
-import { nanoid } from 'nanoid';
 import { NotificationManager } from './notificationManager';
 
 export function createBrowserExtensionPlatformService(): PlatformService<Endpoint> {
   const notificationManager = new NotificationManager();
   return {
     async requestGrant({ url }) {
-      const sessionId = nanoid();
       const { messenger, window: notificationWindow } = await notificationManager.createNotificationWindow(
         {
           path: 'grant',
-          sessionId,
           metadata: { host: url },
         },
         { preventDuplicate: true },
@@ -36,10 +33,8 @@ export function createBrowserExtensionPlatformService(): PlatformService<Endpoin
       });
     },
     async requestSignTransaction({ tx }) {
-      const sessionId = nanoid();
       const { messenger, window: notificationWindow } = await notificationManager.createNotificationWindow({
         path: 'sign-transaction',
-        sessionId,
         metadata: {},
       });
 
@@ -64,10 +59,8 @@ export function createBrowserExtensionPlatformService(): PlatformService<Endpoin
     },
 
     async requestSignData(payload) {
-      const sessionId = nanoid();
       const { messenger, window: notificationWindow } = await notificationManager.createNotificationWindow({
         path: 'sign-data',
-        sessionId,
         metadata: {},
       });
 

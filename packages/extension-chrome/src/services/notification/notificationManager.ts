@@ -6,6 +6,7 @@ import { NotificationPath, SessionMethods } from './common';
 import isEqual from 'lodash.isequal';
 import omit from 'lodash/omit';
 import { NexusCommonErrors } from '../../errors';
+import { nanoid } from 'nanoid';
 
 const NotificationWindowSizeMap: Record<NotificationPath, { w: number; h: number }> = {
   grant: {
@@ -53,10 +54,10 @@ class NotificationManager {
   eventEmitter: NotificationManagerEventEmitter = new EventEmitter();
 
   async createNotificationWindow(
-    notification: NotificationInfo,
+    _notification: Omit<NotificationInfo, 'sessionId'>,
     options?: CreateNotificationOptions,
   ): Promise<{ messenger: SessionMessenger<SessionMethods>; window: Windows.Window }> {
-    const _this = this;
+    const notification: NotificationInfo = { ..._notification, sessionId: nanoid() };
     if (
       options?.preventDuplicate &&
       (this.isCurrentNotification(notification) || this.hasTheSameInQueue(notification))
@@ -64,12 +65,13 @@ class NotificationManager {
       throw NexusCommonErrors.DuplicateRequest();
     }
 
-    async function _createNotificationWindow(payload: NotificationInfo): Promise<{
+    const _createNotificationWindow = async (
+      payload: NotificationInfo,
+    ): Promise<{
       messenger: SessionMessenger<SessionMethods>;
       window: Windows.Window;
-    }> {
-      _this.openCurrentNotification(payload);
-      // chrome popup window
+    }> => {
+      this.openCurrentNotification(payload);
       const messenger = createSessionMessenger<SessionMethods>({
         adapter: browserExtensionAdapter,
         sessionId: payload.sessionId,
@@ -88,12 +90,12 @@ class NotificationManager {
 
       browser.windows.onRemoved.addListener((windowId) => {
         if (windowId === window.id) {
-          _this.closeCurrentNotification();
-          _this.eventEmitter.emit('onPopupClosed', { sessionId: messenger.sessionId() });
+          this.closeCurrentNotification();
+          this.eventEmitter.emit('onPopupClosed', { sessionId: messenger.sessionId() });
         }
       });
       return { window, messenger };
-    }
+    };
 
     if (!this.isCurrentNotificationActive()) {
       return _createNotificationWindow(notification);
@@ -106,8 +108,10 @@ class NotificationManager {
             !this.isAtTopOfQueue(notification) ||
             this.isCurrentNotificationActive() ||
             sessionId !== this.currentNotification?.notification.sessionId
-          )
+          ) {
             return;
+          }
+
           const nextNotification = this.notificationInfoQueue.shift()!;
           resolve(_createNotificationWindow(nextNotification));
         });
