@@ -1,3 +1,22 @@
+# v0.0.10 (Mon Apr 10 2023)
+
+#### 🔨 Breaking Minor Change
+
+- feat: ownership provider to work with Lumos [#127](https://github.com/ckb-js/nexus/pull/127) ([@homura](https://github.com/homura) [@IronLu233](https://github.com/IronLu233))
+
+#### 🐛 Bug Fix
+
+- fix: getLiveCells returns specified change type cells [#183](https://github.com/ckb-js/nexus/pull/183) ([@zhangyouxin](https://github.com/zhangyouxin))
+- feat(extension-chrome): optimize displaying amount of asset [#187](https://github.com/ckb-js/nexus/pull/187) ([@IronLu233](https://github.com/IronLu233))
+
+#### Authors: 3
+
+- Iron Lu ([@IronLu233](https://github.com/IronLu233))
+- Shinya ([@zhangyouxin](https://github.com/zhangyouxin))
+- Yonghui Lin ([@homura](https://github.com/homura))
+
+---
+
 # v0.0.9 (Tue Apr 04 2023)
 
 #### 🐛 Bug Fix

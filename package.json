@@ -1,6 +1,6 @@
 {
   "name": "@nexus-wallet/nexus",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "An UTxO friendly wallet extension for CKB",
   "private": true,
   "engines": {
