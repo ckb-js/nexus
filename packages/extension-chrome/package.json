@@ -56,7 +56,7 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-hook-form": "7.43.1",
-    "react-router-dom": "6.8.0",
+    "react-router-dom": "6.10.0",
     "react-use": "17.4.0",
     "retry": "0.13.1",
     "sanitize.css": "13.0.0",
