@@ -1,7 +1,7 @@
 import type { BytesLike } from '@ckb-lumos/codec';
 import type { HexString } from '@ckb-lumos/lumos';
 import type { Promisable } from '../base';
-import { Provider } from './common';
+import { Resolvable } from '../base';
 
 export interface KeystoreService {
   /**
@@ -99,4 +99,4 @@ export type HardenedPath = string;
  * checkout BIP-32 learn more about the {@link https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki#extended-keys non-hardened key}
  */
 export type NonHardenedPath = string;
-export type PasswordProvider = Provider<string>;
+export type PasswordProvider = Resolvable<string>;

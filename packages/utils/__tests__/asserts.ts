@@ -1,12 +1,6 @@
-import { asserts } from '../src';
+import { assert } from '../src';
 
 it('utils#asserts', () => {
-  expect(() => asserts.nonFalsy(0)).toThrow();
-  expect(() => asserts.nonFalsy('')).toThrow();
-  expect(() => asserts.nonFalsy(undefined)).toThrow();
-  expect(() => asserts.nonFalsy(null)).toThrow();
-
-  expect(() => asserts.nonFalsy(1)).not.toThrow();
-
-  expect(() => asserts.asserts(1 + 1 === 3)).toThrow();
+  expect(() => assert(1 + 1 === 2)).not.toThrow();
+  expect(() => assert(1 + 1 === 3)).toThrow();
 });

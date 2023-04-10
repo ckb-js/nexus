@@ -1,9 +1,10 @@
-import type { Provider } from '@nexus-wallet/types/lib/services/common';
-import type { Promisable } from '@nexus-wallet/types';
-import { bytes, BytesLike } from '@ckb-lumos/codec';
-
-export function resolveProvider<T>(provider: Provider<T>): Promisable<T> {
-  return provider instanceof Function ? provider() : provider;
+function hexify(x: Uint8Array): string {
+  return (
+    '0x' +
+    Array.from(x)
+      .map((x) => x.toString(16).padStart(2, '0'))
+      .join('')
+  );
 }
 
 function formatArgs(arg: unknown): string {
@@ -16,7 +17,7 @@ function formatArgs(arg: unknown): string {
   }
 
   if (arg instanceof Uint8Array) {
-    return bytes.hexify(bytes.bytify(arg as BytesLike));
+    return hexify(arg);
   }
 
   return JSON.stringify(arg);
@@ -25,9 +26,8 @@ function formatArgs(arg: unknown): string {
 /**
  * format message with args, the %s will be replaced with args in order
  * @example
- * ```js
- * formatMessage('hello %s', 'world') // => 'hello world'
- * ```
+ *   formatMessage('hello %s', 'world') // => 'hello world'
+ *   formatMessage(Buffer.from([1,2,3,4])) // => '0x01020304'
  * @param args
  */
 export function formatMessage(...args: unknown[]): string {
@@ -46,12 +46,4 @@ export function formatMessage(...args: unknown[]): string {
     formatted += ' ' + args.slice(replaced).map(formatArgs).join(' ');
   }
   return formatted;
-}
-
-export function formatMessageWithPrefix(prefix: string, ...args: unknown[]): string {
-  const firstArg = args[0];
-  if (typeof firstArg === 'string') {
-    return formatMessage(prefix + firstArg, ...args.slice(1));
-  }
-  return formatMessage(prefix, ...args);
 }
