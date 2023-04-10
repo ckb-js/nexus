@@ -32,6 +32,7 @@ addMethod('wallet_enable', async (_, { getRequesterAppInfo, resolveService }) =>
     if (typeof error === 'function') {
       errors.throwError(error());
     } else {
+      /* istanbul ignore next */
       errors.throwError(error);
     }
   }
