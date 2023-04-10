@@ -22,18 +22,3 @@ export type SessionMethods = {
 };
 
 export type NotificationPath = 'grant' | 'sign-data' | 'sign-transaction';
-
-export const NotificationWindowSizeMap: Record<NotificationPath, { w: number; h: number }> = {
-  grant: {
-    w: 500,
-    h: 600,
-  },
-  'sign-data': {
-    w: 500,
-    h: 722,
-  },
-  'sign-transaction': {
-    w: 500,
-    h: 722,
-  },
-};

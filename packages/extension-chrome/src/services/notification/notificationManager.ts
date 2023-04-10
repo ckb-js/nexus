@@ -2,10 +2,25 @@ import { EventEmitter } from 'events';
 import browser, { Windows } from 'webextension-polyfill';
 import { createSessionMessenger, SessionMessenger } from '../../messaging/session';
 import { browserExtensionAdapter } from '../../messaging/adapters';
-import { NotificationPath, SessionMethods, NotificationWindowSizeMap } from './common';
+import { NotificationPath, SessionMethods } from './common';
 import isEqual from 'lodash.isequal';
 import omit from 'lodash/omit';
 import { NexusCommonErrors } from '../../errors';
+
+const NotificationWindowSizeMap: Record<NotificationPath, { w: number; h: number }> = {
+  grant: {
+    w: 500,
+    h: 600,
+  },
+  'sign-data': {
+    w: 500,
+    h: 722,
+  },
+  'sign-transaction': {
+    w: 500,
+    h: 722,
+  },
+};
 
 type NotificationInfo = {
   path: NotificationPath;
