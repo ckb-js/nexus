@@ -7,11 +7,7 @@ import isEqual from 'lodash.isequal';
 import omit from 'lodash/omit';
 import { NexusCommonErrors } from '../../errors';
 
-export const NOTIFICATION_MANAGER_EVENTS = {
-  POPUP_CLOSED: 'onPopupClosed',
-};
-
-export type NotificationInfo = {
+type NotificationInfo = {
   path: NotificationPath;
   sessionId: string;
   metaData: {
@@ -20,19 +16,26 @@ export type NotificationInfo = {
   };
 };
 
-export type NotificationInfoWithStatus = {
-  notification: NotificationInfo;
-  status: 'active' | 'closed';
-};
-
 type CreateNotificationOptions = {
   preventDuplicate?: boolean;
 };
 
-export class NotificationManager {
+type NotificationInfoWithStatus = {
+  notification: NotificationInfo;
+  status: 'active' | 'closed';
+};
+
+type NotificationEventName = 'onPopupClosed';
+
+type NotificationManagerEventEmitter = {
+  on(event: NotificationEventName, listener: (payload: { sessionId: string }) => void): void;
+  emit(event: NotificationEventName, payload: { sessionId: string }): void;
+};
+
+class NotificationManager {
   currentNotification: NotificationInfoWithStatus | undefined = undefined;
   notificationInfoQueue: NotificationInfo[] = [];
-  eventEmitter: EventEmitter = new EventEmitter();
+  eventEmitter: NotificationManagerEventEmitter = new EventEmitter();
 
   async createNotificationWindow(
     notification: NotificationInfo,
@@ -71,7 +74,7 @@ export class NotificationManager {
       browser.windows.onRemoved.addListener((windowId) => {
         if (windowId === window.id) {
           _this.closeCurrentNotification();
-          _this.eventEmitter.emit(NOTIFICATION_MANAGER_EVENTS.POPUP_CLOSED, { sessionId: messenger.sessionId() });
+          _this.eventEmitter.emit('onPopupClosed', { sessionId: messenger.sessionId() });
         }
       });
       return { window, messenger };
@@ -82,7 +85,7 @@ export class NotificationManager {
     } else {
       this.notificationInfoQueue.push(notification);
       return new Promise((resolve) => {
-        this.eventEmitter.on(NOTIFICATION_MANAGER_EVENTS.POPUP_CLOSED, ({ sessionId }) => {
+        this.eventEmitter.on('onPopupClosed', ({ sessionId }) => {
           // only process when the notification is at the top of the queue
           if (
             !this.isAtTopOfQueue(notification) ||
@@ -128,3 +131,6 @@ export class NotificationManager {
     });
   }
 }
+
+export type { NotificationInfo, CreateNotificationOptions };
+export { NotificationManager };
