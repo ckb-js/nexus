@@ -102,8 +102,6 @@ export const CreateProcessFrame: FC = () => {
   );
   const currentStep = flowConfig.steps[currentPathIndex];
 
-  const isLastStep = currentPathIndex === flowPaths.length - 1;
-
   const goBack = () => {
     setNextAvailable(false);
     navigate(currentPathIndex === 0 ? flowConfig.entry : flowPaths[currentPathIndex - 1], { replace: true });
@@ -166,7 +164,7 @@ export const CreateProcessFrame: FC = () => {
           </Flex>
         </Center>
         <HStack spacing="24px" mb="32px">
-          {(!isLastStep || !flowConfig.disableBackOnExit) && (
+          {!currentStep.disableBack && (
             <Button
               data-test-id="back"
               onClick={goBack}
@@ -182,9 +180,9 @@ export const CreateProcessFrame: FC = () => {
             data-test-id="next"
             isLoading={submitting}
             isDisabled={!nextAvailable && !currentStep.displayOnly}
-            rightIcon={<ChevronRightIcon />}
+            rightIcon={!currentStep.disableBack ? <ChevronRightIcon /> : undefined}
           >
-            {isLastStep && flowConfig.exitButtonText ? flowConfig.exitButtonText : 'Next'}
+            {currentStep.nextButtonText || 'Next'}
           </Button>
         </HStack>
 

@@ -17,6 +17,7 @@ const primary = definePartsStyle(({ theme }) => ({
       boxShadow: `0 0 0 1px ${getColor(theme, 'primary')}`,
       _invalid: {
         borderColor: 'error.darker',
+        boxShadow: 'none',
       },
     },
   },
@@ -44,6 +45,7 @@ const accent = definePartsStyle(({ theme }) => ({
 
       _invalid: {
         borderColor: 'error.lighter',
+        boxShadow: 'none',
       },
     },
   },

@@ -112,7 +112,7 @@ export const SignData: FC = () => {
               maxW="100%"
               overflow="hidden"
               whiteSpace="nowrap"
-              color="yellow.200"
+              color="accent"
               as={RouteLink}
               to="/sign-transaction/view-data"
               cursor="pointer"

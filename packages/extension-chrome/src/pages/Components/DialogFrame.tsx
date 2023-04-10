@@ -34,7 +34,7 @@ export const DialogFrame: FC<DialogFrameProps> = ({ meta }) => {
         direction="column"
         position="relative"
         maxW="500px"
-        pt={title ? '28px' : '44px'}
+        pt="32px"
         h="100vh"
         px="24px"
         pb="72px"

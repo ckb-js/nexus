@@ -47,7 +47,7 @@ const CellCapacity: FC<{ capacity: string }> = ({ capacity }) => {
   return (
     <>
       {decimalPart ? (
-        <Tooltip hasArrow label={`${amount} CKB`}>
+        <Tooltip hasArrow placement="top" label={`${amount} CKB`}>
           <Box>
             ≈{integerPart}
             {' CKB'}
@@ -124,7 +124,7 @@ const TransactionIOList: FC<TransactionIOListProps> = ({ type, networkName, tx, 
                   <Box w="60px" p="16px">
                     #{index + 1}
                   </Box>
-                  <Tooltip hasArrow label={addr}>
+                  <Tooltip hasArrow placement="top" label={addr}>
                     <Box p="16px">
                       {addr.slice(0, 5)}...{addr.slice(-4)}
                     </Box>

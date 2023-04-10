@@ -1,7 +1,6 @@
 import React, { FC, useMemo, useState } from 'react';
 import {
   Flex,
-  VStack,
   Center,
   Box,
   Text,
@@ -11,6 +10,7 @@ import {
   Highlight,
   Skeleton,
   useToast,
+  Grid,
 } from '@chakra-ui/react';
 import { DeleteIcon, SearchIcon } from '@chakra-ui/icons';
 import { useMutation } from '@tanstack/react-query';
@@ -50,10 +50,10 @@ export const WhitelistSites: FC = () => {
 
   return (
     <Skeleton isLoaded={!!filteredSites}>
-      <Text as={Box} fontSize="md" mb="20px" w="100%">
+      <Text as={Box} fontSize="md" mb="24px" w="100%">
         {configQuery.data?.nickname} is connected to these sites. They can view your account address
       </Text>
-      <InputGroup alignItems="center" h="60px" mb="20px">
+      <InputGroup alignItems="center" h="60px" mb="24px">
         <InputLeftElement
           borderRadius="8px"
           top="10px"
@@ -70,6 +70,8 @@ export const WhitelistSites: FC = () => {
           size="lg"
           w="452px"
           background="transparent"
+          borderColor="white.300"
+          borderWidth="1px !important"
           color="white"
           onChange={(e) => setSearchQuery(e.target.value)}
           value={searchQuery}
@@ -84,35 +86,46 @@ export const WhitelistSites: FC = () => {
           </Box>
         </Center>
       ) : (
-        <VStack
+        <Grid
           data-test-id="siteList"
           overflowY="auto"
-          padding="30px 20px"
           as={WhiteAlphaBox}
-          spacing="12px"
-          h="288px"
+          h="268px"
           flexDirection="column"
+          templateRows="repeat(3, 64px)"
+          autoRows="64px"
+          py="8px"
         >
           {filteredSites?.map((site, index) => (
-            <Flex data-test-id={`site[${index}]`} alignItems="center" h="48px" w="100%" key={site.host}>
-              <Center w="48px" borderRadius="50%" padding="4px" h="48px" backgroundColor="whiteAlpha.300">
-                <SiteFavicon data-test-id={`site[${index}].favicon`} size={32} host={site.host} />
+            <Flex
+              _hover={{ background: 'white.200' }}
+              data-test-id={`site[${index}]`}
+              alignItems="center"
+              h="100%"
+              w="100%"
+              p="8px 20px"
+              key={site.host}
+            >
+              <Center w="100%">
+                <Center w="48px" borderRadius="50%" padding="4px" h="48px" backgroundColor="white.200">
+                  <SiteFavicon data-test-id={`site[${index}].favicon`} size={32} host={site.host} />
+                </Center>
+                <Flex ml="20px" data-test-id={`site[${index}].url`} flex={1} fontSize="lg" alignItems="center">
+                  <Highlight query={searchQuery} styles={{ bg: 'white' }}>
+                    {site.host}
+                  </Highlight>
+                </Flex>
+                <DeleteIcon
+                  data-test-id={`site[${index}].remove`}
+                  cursor="pointer"
+                  w="20px"
+                  h="20px"
+                  onClick={removeSite(site.host)}
+                />
               </Center>
-              <Flex ml="20px" data-test-id={`site[${index}].url`} flex={1} fontSize="lg" alignItems="center">
-                <Highlight query={searchQuery} styles={{ bg: 'white' }}>
-                  {site.host}
-                </Highlight>
-              </Flex>
-              <DeleteIcon
-                data-test-id={`site[${index}].remove`}
-                cursor="pointer"
-                w="20px"
-                h="20px"
-                onClick={removeSite(site.host)}
-              />
             </Flex>
           ))}
-        </VStack>
+        </Grid>
       )}
     </Skeleton>
   );
