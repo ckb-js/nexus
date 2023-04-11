@@ -15,6 +15,7 @@
     "lib",
     "src"
   ],
+  "main": "lib",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ckb-js/nexus.git"
