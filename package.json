@@ -44,10 +44,9 @@
   },
   "scripts": {
     "prepare": "husky install",
-    "build": "run-s build:lumos build:libs build:extension-chrome",
+    "build": "run-s build:libs build:extension-chrome",
     "build:nexus": "echo -e '[DEPRECATED]: please migrate to build:libs' && npm run build:libs",
-    "build:libs": "npm run build -w @nexus-wallet/protocol -w @nexus-wallet/types -w @nexus-wallet/utils",
-    "build:lumos": "cd lumos && npm run build",
+    "build:libs": "lerna run build --ignore '@nexus-wallet/extension-chrome'",
     "build:extension-chrome": "npm run build -w @nexus-wallet/extension-chrome",
     "test": "jest",
     "start": "npm run start -w @nexus-wallet/extension-chrome",
