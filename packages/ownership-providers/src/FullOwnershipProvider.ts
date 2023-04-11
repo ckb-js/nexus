@@ -1,20 +1,22 @@
-import { BIish, BI } from '@ckb-lumos/bi';
-import isEqual from 'lodash.isequal';
+import range from 'lodash.range';
+import { Events, FullOwnership, InjectedCkb } from '@nexus-wallet/protocol';
+import { BI, BIish } from '@ckb-lumos/bi';
+import { errors } from '@nexus-wallet/utils';
 import {
   createTransactionFromSkeleton,
   minimalCellCapacityCompatible,
   parseAddress,
   TransactionSkeletonType,
 } from '@ckb-lumos/helpers';
-import { Events, FullOwnership, InjectedCkb } from '@nexus-wallet/protocol';
-import { errors } from '@nexus-wallet/utils';
 import { Address, blockchain, Cell, HexString, Script, Transaction } from '@ckb-lumos/base';
-import { OutPoint, WitnessArgs } from '@ckb-lumos/base/lib/blockchain';
-import { bytes } from '@ckb-lumos/codec';
-import { prepareSigningEntries } from '@ckb-lumos/common-scripts/lib/secp256k1_blake160';
-import { Config as LumosConfig } from '@ckb-lumos/config-manager/lib';
-import { config } from '@ckb-lumos/lumos';
-import range from 'lodash.range';
+import { bytes, PackParam } from '@ckb-lumos/codec';
+import { secp256k1Blake160 } from '@ckb-lumos/common-scripts';
+import { Config as LumosConfig, getConfig as getLumosConfig } from '@ckb-lumos/config-manager';
+import { Uint8ArrayCodec } from '@ckb-lumos/codec/lib/base';
+
+function equalPack<C extends Uint8ArrayCodec>(codec: C, a: PackParam<C>, b: PackParam<C>): boolean {
+  return bytes.equal(codec.pack(a), codec.pack(b));
+}
 
 // util types for FullOwnership
 
@@ -136,8 +138,7 @@ export class FullOwnershipProvider {
     for await (const cell of this.collector()) {
       if (
         inputCells.find(
-          (item) =>
-            !!item.outPoint && cell.outPoint && bytes.equal(OutPoint.pack(item.outPoint), OutPoint.pack(cell.outPoint)),
+          (item) => !!item.outPoint && cell.outPoint && equalPack(blockchain.OutPoint, item.outPoint, cell.outPoint),
         )
       ) {
         continue;
@@ -178,6 +179,7 @@ export class FullOwnershipProvider {
    * Pay the transaction fee using the specified lock
    * **NOT** support DAO unlock transaction yet, please consider using `lumos`'s `payFee`
    * @param txSkeleton The transaction skeleton
+   * @param options
    * @param options.byOutputIndexes if provided, The outputs in these indexes will be used to pay fee as much as possible. It is useful when you want to pay fee by other lock scripts.
    * @param options.autoInject if true, wallet owned lock will be used to pay fee. If `byOutputIndexes` can not cover all fee, wallet will inject capacity to pay fee.
    * @param options.feeRate The fee rate, in Shannons per byte. If not specified, the fee rate will be calculated automatically.
@@ -282,7 +284,7 @@ export class FullOwnershipProvider {
       }
       cursor = page.cursor;
       for (const cell of page.objects) {
-        if (!lock || isEqual(lock, cell.cellOutput.lock)) {
+        if (!lock || equalPack(blockchain.Script, lock, cell.cellOutput.lock)) {
           yield cell;
         }
       }
@@ -296,7 +298,7 @@ export class FullOwnershipProvider {
    */
   async signTransaction(txSkeleton: TransactionSkeletonType): Promise<TransactionSkeletonType> {
     const lumosConfig = await this.getLumosConfig();
-    txSkeleton = prepareSigningEntries(txSkeleton, { config: lumosConfig });
+    txSkeleton = secp256k1Blake160.prepareSigningEntries(txSkeleton, { config: lumosConfig });
 
     const groupedSignature = await this.ckb.request({
       method: 'wallet_fullOwnership_signTransaction',
@@ -304,16 +306,21 @@ export class FullOwnershipProvider {
     });
 
     for (let [lock, signature] of groupedSignature) {
-      const witnessIndex = txSkeleton.inputs.findIndex((input) => isEqual(input.cellOutput.lock, lock));
+      const witnessIndex = txSkeleton.inputs.findIndex((input) =>
+        equalPack(blockchain.Script, input.cellOutput.lock, lock),
+      );
 
       /* istanbul ignore next */
       if (witnessIndex === -1) {
         continue;
       }
 
-      const witnessArgs = WitnessArgs.unpack(txSkeleton.witnesses.get(witnessIndex) as HexString);
+      const witnessArgs = blockchain.WitnessArgs.unpack(txSkeleton.witnesses.get(witnessIndex) as HexString);
       let witnesses = txSkeleton.witnesses;
-      witnesses = witnesses.set(witnessIndex, bytes.hexify(WitnessArgs.pack({ ...witnessArgs, lock: signature })));
+      witnesses = witnesses.set(
+        witnessIndex,
+        bytes.hexify(blockchain.WitnessArgs.pack({ ...witnessArgs, lock: signature })),
+      );
       txSkeleton = txSkeleton.set('witnesses', witnesses);
     }
 
@@ -324,7 +331,7 @@ export class FullOwnershipProvider {
 
   // TODO: wait for wallet provide a API to get genesis block hash
   private async getLumosConfig(): Promise<LumosConfig> {
-    return config.getConfig();
+    return getLumosConfig();
   }
 
   private async parseLockScriptLike(lock: LockScriptLike) {
