@@ -11,7 +11,7 @@ import {
 import { Logo } from '../../Components/Logo';
 import { ChevronLeftIcon, ChevronRightIcon } from '@chakra-ui/icons';
 import { CreateFlowConfig } from '../types';
-import { ProcessIndicator } from '../../Components/ProgressLine';
+import { ProgressIndicator } from '../../Components/ProgressIndicator';
 import { ProgressSteps } from '../../Components/ProgressSteps';
 
 export type OutletContext = {
@@ -115,7 +115,7 @@ export const CreateProcessFrame: FC = () => {
           </Button>
         </HStack>
 
-        <ProcessIndicator total={flowPaths.length} current={currentPathIndex} />
+        <ProgressIndicator total={flowPaths.length} current={currentPathIndex} />
       </Flex>
     </Flex>
   );

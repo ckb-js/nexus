@@ -11,7 +11,6 @@ export const Radio = defineMultiStyleConfig({
         transitionProperty: 'border',
         transitionDuration: 'normal',
 
-        boxShadow: 'none !important',
         _checked: {
           borderColor: colorScheme,
           borderWidth,

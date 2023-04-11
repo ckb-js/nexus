@@ -21,7 +21,7 @@ export const theme = extendTheme(
       'primary.lighter': '#B794F4',
       'primary.darker': '#553C9A',
 
-      'info.darker': '#718096',
+      'info.darker': '#3182CE',
       'info.lighter': '#63B3ED',
       'info.bg': '#BEE3F8',
 
@@ -58,9 +58,6 @@ export const theme = extendTheme(
       'gray.200': '#E2E8F0',
       'gray.100': '#EDF2F7',
       'gray.50': '#F7FAFC',
-    },
-    symantecTokens: {
-      'transaction.normal': 'var(--chakra-transition-property-normal) var(--chakra-transition-duration-normal)',
     },
   },
   {

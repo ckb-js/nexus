@@ -1,6 +1,6 @@
 import { inputAnatomy } from '@chakra-ui/anatomy';
 import { createMultiStyleConfigHelpers } from '@chakra-ui/react';
-import { getColor } from '@chakra-ui/theme-tools';
+import { getColor } from './utils';
 
 const { defineMultiStyleConfig, definePartsStyle } = createMultiStyleConfigHelpers(inputAnatomy.keys);
 
@@ -15,18 +15,12 @@ const primary = definePartsStyle(({ theme }) => ({
     },
 
     _invalid: {
+      borderWidth: '2px',
       borderColor: `${getColor(theme, 'error.darker')} !important`,
-      boxShadow: 'none !important',
     },
     _focusVisible: {
       borderWidth: '2px',
       borderColor: 'primary',
-      boxShadow: `0 0 0 1px ${getColor(theme, 'primary')}`,
-    },
-  },
-  element: {
-    _invalid: {
-      color: 'error.darker',
     },
   },
 }));
@@ -40,13 +34,12 @@ const accent = definePartsStyle(({ theme }) => ({
       borderColor: 'white.700',
     },
     _invalid: {
+      borderWidth: '2px',
       borderColor: `${getColor(theme, 'error.lighter')} !important`,
-      boxShadow: 'none !important',
     },
     _focusVisible: {
       borderWidth: '2px',
       borderColor: 'accent',
-      boxShadow: `0 0 0 1px ${getColor(theme, 'accent')}`,
     },
   },
   element: {

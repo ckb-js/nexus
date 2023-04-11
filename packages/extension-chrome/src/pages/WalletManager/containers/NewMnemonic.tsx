@@ -11,7 +11,6 @@ import {
   Flex,
   Text,
   useToast,
-  Center,
   List,
   ListItem,
   ListIcon,
@@ -47,7 +46,7 @@ export const CreateMnemonic: FC = () => {
   }, [mnemonic, clipboard, setWalletStore]);
 
   return (
-    <Center flexDir="column" w="532px">
+    <Box w="532px">
       <Heading mb="48px" lineHeight="111%" fontWeight="semibold">
         Generate Wallet Seed
       </Heading>
@@ -92,16 +91,6 @@ export const CreateMnemonic: FC = () => {
           </Box>
         </ListItem>
       </List>
-      {/* <Flex>
-        <ListMarker />
-        <Text w="100%" fontSize="md" mt="-2px">
-          Store this Seed in a password manager like 1Password.
-          <br />
-          <br />
-          Please write this Seed on a piece of paper and store in a secure location. If you want even stronger security,
-          write it down on multiple pieces of paper and store them in at least 2-3 different locations.
-        </Text>
-      </Flex> */}
-    </Center>
+    </Box>
   );
 };

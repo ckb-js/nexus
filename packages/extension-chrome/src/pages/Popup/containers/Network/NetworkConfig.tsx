@@ -115,7 +115,6 @@ export const NetworkConfig: FC = () => {
           </Flex>
         ))}
       </RadioGroup>
-      {/* </WhiteAlphaBox> */}
       <Spacer />
       <Button
         data-test-id="addNetwork"

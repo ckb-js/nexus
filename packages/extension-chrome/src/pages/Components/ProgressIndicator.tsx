@@ -4,7 +4,7 @@ import React, { FC } from 'react';
 
 export type ProgressIndicatorProps = { total: number; current: number } & BoxProps;
 
-export const ProcessIndicator: FC<ProgressIndicatorProps> = ({ total, current }) => {
+export const ProgressIndicator: FC<ProgressIndicatorProps> = ({ total, current, ...rest }) => {
   const getIndicatorColor = (index: number) => {
     if (index < current) {
       return 'primary.lighter';
@@ -24,6 +24,7 @@ export const ProcessIndicator: FC<ProgressIndicatorProps> = ({ total, current })
           h="5px"
           borderRadius="5px"
           backgroundColor={getIndicatorColor(index)}
+          {...rest}
         />
       ))}
     </HStack>

@@ -13,7 +13,6 @@ import {
   InputProps,
   InputGroup,
   InputRightElement,
-  Center,
 } from '@chakra-ui/react';
 import times from 'lodash.times';
 import React, { useCallback, useEffect, useRef } from 'react';
@@ -142,7 +141,7 @@ export const RecoveryWallet: FC = () => {
   });
 
   return (
-    <Center flexDir="column" w="672px">
+    <Box w="672px">
       <Heading fontWeight="semibold" lineHeight="111%" mb="48px">
         Access Wallet With Your Seed
       </Heading>
@@ -159,7 +158,7 @@ export const RecoveryWallet: FC = () => {
         <AlertDescription fontSize="md">You can paste your entire Seed into any field</AlertDescription>
       </Alert>
       <Box display="grid">
-        <Grid templateColumns="repeat(3, 1fr)" column={3} gap="12px">
+        <Grid gridTemplate="repeat(4, 1fr) / repeat(3, 1fr)" column={3} gap="12px">
           {inputs}
         </Grid>
       </Box>
@@ -182,6 +181,6 @@ export const RecoveryWallet: FC = () => {
           );
         }}
       />
-    </Center>
+    </Box>
   );
 };

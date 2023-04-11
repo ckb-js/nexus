@@ -82,7 +82,6 @@ const App: FC = () => {
 
   return (
     <React.StrictMode>
-      {/* eslint-disable-next-line @typescript-eslint/no-unsafe-assignment */}
       <ChakraProvider theme={solidBackgroundTheme}>
         <QueryClientProvider client={queryClient}>
           <RouterProvider router={hashRouter} />

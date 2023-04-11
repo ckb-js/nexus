@@ -62,7 +62,6 @@ const router = createHashRouter(routes);
 
 const App = () => {
   return (
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     <ChakraProvider theme={solidBackgroundTheme}>
       <QueryClientProvider client={queryClient}>
         <RouterProvider router={router} />

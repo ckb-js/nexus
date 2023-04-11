@@ -65,19 +65,19 @@ export const ConfirmMnemonic: FC = () => {
   }, [isAllCorrect, setNextAvailable]);
 
   return (
-    <Center w="480px" flexDir="column">
+    <Box w="480px" flexDir="column">
       <Heading mb="48px" lineHeight="111%" fontWeight="semibold">
         Confirm your Seed
       </Heading>
-      <Box fontSize="md" w="480px" mb="8px">
+      <Box fontSize="md" mb="8px">
         Please select words in correct order to form your seed.
       </Box>
 
-      <Textarea data-test-id="selectedSeed" as="div" p="16px" w="480px" h="200px">
+      <Textarea data-test-id="selectedSeed" as="div" p="16px" h="200px">
         {wordElements}
       </Textarea>
 
-      <SimpleGrid spacing="12px" marginTop="32px" columns={4} w="480px">
+      <SimpleGrid spacing="12px" marginTop="32px" columns={4}>
         {word4Choose.map((word, index) => {
           const chosenOrder = chosenIndex.findIndex((i) => i === index);
           const hasChosen = chosenOrder !== -1;
@@ -115,6 +115,6 @@ export const ConfirmMnemonic: FC = () => {
           );
         })}
       </SimpleGrid>
-    </Center>
+    </Box>
   );
 };

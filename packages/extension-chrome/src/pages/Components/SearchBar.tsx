@@ -2,11 +2,11 @@ import { SearchIcon } from '@chakra-ui/icons';
 import { Center, Input, InputGroup, InputGroupProps, InputLeftElement, InputProps } from '@chakra-ui/react';
 import React, { FC } from 'react';
 
-type InputPickedFields = 'onChange' | 'onBlur' | 'onFocus' | 'onClick' | 'value' | 'defaultValue';
+type InputPickedFields = 'onChange' | 'onBlur' | 'onFocus' | 'value' | 'defaultValue';
 
 type SearchBarProps = Omit<InputGroupProps, InputPickedFields> & Pick<InputProps, InputPickedFields>;
 
-export const SearchBar: FC<SearchBarProps> = ({ onChange, onBlur, onFocus, onClick, value, defaultValue, ...rest }) => (
+export const SearchBar: FC<SearchBarProps> = ({ onChange, onBlur, onFocus, value, defaultValue, ...rest }) => (
   <InputGroup w="100%" {...rest}>
     <InputLeftElement h="100%" px="8px" w="60px">
       <Center w="40px" h="40px" bg="white.300" borderRadius="8px">
@@ -28,7 +28,6 @@ export const SearchBar: FC<SearchBarProps> = ({ onChange, onBlur, onFocus, onCli
       onChange={onChange}
       onBlur={onBlur}
       onFocus={onFocus}
-      onClick={onClick}
       value={value}
       defaultValue={defaultValue}
     />

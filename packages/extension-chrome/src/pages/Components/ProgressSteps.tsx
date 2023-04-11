@@ -23,6 +23,8 @@ const renderSingleStep: StepsProps['itemRender'] = ({ title, description, status
           border: 'none',
         },
       }}
+      transitionDuration="common"
+      transitionProperty="opacity"
       opacity={status === 'wait' ? 0.7 : 1}
       color="white"
       templateRows="auto"
@@ -43,6 +45,9 @@ const renderSingleStep: StepsProps['itemRender'] = ({ title, description, status
         border="1px solid white"
         borderRadius="2px"
         my="1px"
+        transitionDuration="common"
+        transitionProperty="opacity"
+        opacity={status === 'finish' ? 1 : 0.7}
       />
       <Text as={Box} lineHeight="4" ml="8px" fontSize="sm">
         {description}
