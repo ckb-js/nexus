@@ -5,7 +5,9 @@
   "homepage": "https://github.com/ckb-js/nexus/tree/main/utils#readme",
   "license": "MIT",
   "main": "lib",
-  "private": true,
+  "publishConfig": {
+    "access": "public"
+  },
   "directories": {
     "lib": "lib",
     "test": "__tests__"

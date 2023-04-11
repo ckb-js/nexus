@@ -6,6 +6,9 @@
   "license": "MIT",
   "typings": "./lib/index.d.ts",
   "main": "lib",
+  "publishConfig": {
+    "access": "public"
+  },
   "directories": {
     "lib": "lib"
   },
@@ -26,5 +29,11 @@
   },
   "bugs": {
     "url": "https://github.com/ckb-js/nexus/issues"
+  },
+  "devDependencies": {
+    "@ckb-lumos/base": "0.20.0-alpha.1"
+  },
+  "peerDependencies": {
+    "@ckb-lumos/base": "0.20.0-alpha.1"
   }
 }
