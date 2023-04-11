@@ -8,9 +8,7 @@
     "npm": ">=9.4"
   },
   "workspaces": [
-    "packages/*",
-    "lumos",
-    "lumos/packages/*"
+    "packages/*"
   ],
   "devDependencies": {
     "@auto-it/magic-zero": "10.43.0",
@@ -55,7 +53,8 @@
     "start": "npm run start -w @nexus-wallet/extension-chrome",
     "lint": "eslint 'packages/*/{src,__tests__}/**/*.{js,ts,jsx,tsx}'",
     "check": "npm run check:types",
-    "check:types": "npm run check:types -w @nexus-wallet/types -w @nexus-wallet/utils -w @nexus-wallet/extension-chrome"
+    "check:types": "npm run check:types -w @nexus-wallet/types -w @nexus-wallet/utils -w @nexus-wallet/extension-chrome",
+    "clean": "rimraf packages/*/lib"
   },
   "repository": {
     "type": "git",

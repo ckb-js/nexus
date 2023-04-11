@@ -34,20 +34,20 @@
     "lodash.range": "3.2.0"
   },
   "devDependencies": {
-    "@ckb-lumos/base": "0.20.0-alpha.1",
-    "@ckb-lumos/bi": "0.20.0-alpha.1",
-    "@ckb-lumos/codec": "0.20.0-alpha.1",
-    "@ckb-lumos/config-manager": "0.20.0-alpha.1",
-    "@ckb-lumos/common-scripts": "0.20.0-alpha.1",
-    "@ckb-lumos/helpers": "0.20.0-alpha.1",
+    "@ckb-lumos/base": "0.20.0-alpha.2",
+    "@ckb-lumos/bi": "0.20.0-alpha.2",
+    "@ckb-lumos/codec": "0.20.0-alpha.2",
+    "@ckb-lumos/config-manager": "0.20.0-alpha.2",
+    "@ckb-lumos/common-scripts": "0.20.0-alpha.2",
+    "@ckb-lumos/helpers": "0.20.0-alpha.2",
     "@types/lodash.range": "3.2.7"
   },
   "peerDependencies": {
-    "@ckb-lumos/base": "0.20.0-alpha.1",
-    "@ckb-lumos/bi": "0.20.0-alpha.1",
-    "@ckb-lumos/codec": "0.20.0-alpha.1",
-    "@ckb-lumos/config-manager": "0.20.0-alpha.1",
-    "@ckb-lumos/common-scripts": "0.20.0-alpha.1",
-    "@ckb-lumos/helpers": "0.20.0-alpha.1"
+    "@ckb-lumos/base": "0.20.0-alpha.2",
+    "@ckb-lumos/bi": "0.20.0-alpha.2",
+    "@ckb-lumos/codec": "0.20.0-alpha.2",
+    "@ckb-lumos/config-manager": "0.20.0-alpha.2",
+    "@ckb-lumos/common-scripts": "0.20.0-alpha.2",
+    "@ckb-lumos/helpers": "0.20.0-alpha.2"
   }
 }

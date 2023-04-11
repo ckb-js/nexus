@@ -32,6 +32,12 @@
   "dependencies": {
     "@chakra-ui/icons": "2.0.17",
     "@chakra-ui/react": "2.4.9",
+    "@ckb-lumos/base": "0.20.0-alpha.2",
+    "@ckb-lumos/bi": "0.20.0-alpha.2",
+    "@ckb-lumos/config-manager": "0.20.0-alpha.2",
+    "@ckb-lumos/hd": "0.20.0-alpha.2",
+    "@ckb-lumos/lumos": "0.20.0-alpha.2",
+    "@ckb-lumos/rpc": "0.20.0-alpha.2",
     "@nexus-wallet/protocol": "*",
     "@nexus-wallet/types": "*",
     "@nexus-wallet/utils": "*",
@@ -69,7 +75,6 @@
     "zustand": "4.3.2"
   },
   "devDependencies": {
-    "@ckb-lumos/lumos": "*",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.10",
     "@svgr/webpack": "6.5.1",
     "@types/is-utf8": "0.2.1",

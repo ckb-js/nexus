@@ -31,9 +31,9 @@
     "url": "https://github.com/ckb-js/nexus/issues"
   },
   "devDependencies": {
-    "@ckb-lumos/base": "0.20.0-alpha.1"
+    "@ckb-lumos/base": "0.20.0-alpha.2"
   },
   "peerDependencies": {
-    "@ckb-lumos/base": "0.20.0-alpha.1"
+    "@ckb-lumos/base": "0.20.0-alpha.2"
   }
 }

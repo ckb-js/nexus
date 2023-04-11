@@ -20,6 +20,14 @@
   "dependencies": {
     "@nexus-wallet/protocol": "*"
   },
+  "devDependencies": {
+    "@ckb-lumos/codec": "0.20.0-alpha.2",
+    "@ckb-lumos/helpers": "0.20.0-alpha.2"
+  },
+  "peerDependencies": {
+    "@ckb-lumos/codec": "0.20.0-alpha.2",
+    "@ckb-lumos/helpers": "0.20.0-alpha.2"
+  },
   "scripts": {
     "start": "cross-env NODE_ENV=development npm run start:webpack",
     "start:webpack": "ts-node ./scripts/start.ts",
