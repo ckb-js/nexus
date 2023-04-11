@@ -31,6 +31,11 @@ export const Radio = defineMultiStyleConfig({
           },
         },
       },
+      container: {
+        _disabled: {
+          opacity: 0.5,
+        },
+      },
     };
   }),
 });

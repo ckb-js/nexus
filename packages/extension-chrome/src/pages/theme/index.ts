@@ -1,4 +1,5 @@
 import { extendTheme, withDefaultColorScheme, withDefaultVariant } from '@chakra-ui/react';
+import { Alert } from './Alert';
 import { Button } from './Button';
 import { FormLabel } from './FormLabel';
 import { Input } from './Input';
@@ -68,6 +69,7 @@ export const theme = extendTheme(
       Radio: Radio,
       FormLabel: FormLabel,
       Input: Input,
+      Alert: Alert,
     },
   },
   withDefaultColorScheme({

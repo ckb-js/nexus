@@ -1,24 +1,13 @@
 import React, { FC, useMemo, useState } from 'react';
-import {
-  Flex,
-  Center,
-  Box,
-  Text,
-  Input,
-  InputGroup,
-  InputLeftElement,
-  Highlight,
-  Skeleton,
-  useToast,
-  Grid,
-} from '@chakra-ui/react';
-import { DeleteIcon, SearchIcon } from '@chakra-ui/icons';
+import { Flex, Center, Box, Text, Highlight, Skeleton, useToast, Grid } from '@chakra-ui/react';
+import { DeleteIcon } from '@chakra-ui/icons';
 import { useMutation } from '@tanstack/react-query';
 
 import { WhiteAlphaBox } from '../../Components/WhiteAlphaBox';
 import { useConfigQuery } from '../../hooks/useConfigQuery';
 import { useService } from '../../hooks/useService';
 import { SiteFavicon } from '../../Components/SiteFavicon';
+import { SearchBar } from '../../Components/SearchBar';
 
 export const WhitelistSites: FC = () => {
   const configQuery = useConfigQuery();
@@ -53,34 +42,9 @@ export const WhitelistSites: FC = () => {
       <Text as={Box} fontSize="md" mb="24px" w="100%">
         {configQuery.data?.nickname} is connected to these sites. They can view your account address
       </Text>
-      <InputGroup alignItems="center" h="60px" mb="24px">
-        <InputLeftElement
-          borderRadius="8px"
-          top="10px"
-          left="6px"
-          w="40px"
-          h="40px"
-          backgroundColor="purple.500"
-          as={Center}
-        >
-          <SearchIcon w="24px" h="24px" />
-        </InputLeftElement>
-        <Input
-          data-test-id="siteSearch"
-          size="lg"
-          w="452px"
-          background="transparent"
-          borderColor="white.300"
-          borderWidth="1px !important"
-          color="white"
-          onChange={(e) => setSearchQuery(e.target.value)}
-          value={searchQuery}
-          h="60px"
-          pl="48px"
-        />
-      </InputGroup>
+      <SearchBar mb="24px" onChange={(e) => setSearchQuery(e.target.value)} value={searchQuery} />
       {!filteredSites?.length ? (
-        <Center as={WhiteAlphaBox} data-test-id="siteList" h="288px">
+        <Center as={WhiteAlphaBox} data-test-id="siteList" h="268px">
           <Box color="whiteAlpha.700" height="20px" fontSize="sm">
             No whitelist sites found.
           </Box>

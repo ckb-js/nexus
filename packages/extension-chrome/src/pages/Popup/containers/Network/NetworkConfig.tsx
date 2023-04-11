@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import { Flex, Spacer, Button, Radio, RadioGroup, Skeleton, Icon, useToast, Grid } from '@chakra-ui/react';
+import { Flex, Spacer, Button, Radio, RadioGroup, Skeleton, Icon, useToast } from '@chakra-ui/react';
 import { AddIcon, DeleteIcon } from '@chakra-ui/icons';
 import EditIcon from '../../../Components/icons/Edit.svg';
 import { useNavigate } from 'react-router-dom';
@@ -58,61 +58,62 @@ export const NetworkConfig: FC = () => {
 
   return (
     <Skeleton h="100%" as={Flex} flexDirection="column" alignItems="center" isLoaded={!!networks}>
-      {/* <WhiteAlphaBox overflowY="auto" maxH="500px" p="20px"> */}
       <RadioGroup
         as={WhiteAlphaBox}
+        maxH="562px"
+        overflow="auto"
         value={currentNetwork}
         data-test-id="networkRadio"
         onChange={onToggle}
-        display="flex"
         flexDirection="column"
         py="8px"
+        display="grid"
+        gridAutoRows="40px"
+        gridTemplateRows="repeat(2, 40px)"
       >
-        <Grid autoRows="40px" gridTemplateRows="repeat(2, 40px)" flexDir="column">
-          {networks?.map((network, index) => (
-            <Flex
-              sx={{
-                '&:hover .operations': {
-                  opacity: 1,
+        {networks?.map((network, index) => (
+          <Flex
+            sx={{
+              '&:hover .operations': {
+                opacity: 1,
+              },
+              '& .operations': {
+                opacity: 0,
+                '& svg': {
+                  cursor: 'pointer',
                 },
-                '& .operations': {
-                  opacity: 0,
-                  '& svg': {
-                    cursor: 'pointer',
-                  },
-                },
-              }}
-              _hover={{
-                backgroundColor: 'white.200',
-              }}
-              transitionProperty="common"
-              transitionDuration="normal"
-              key={network.id}
-              w="100%"
-              alignItems="center"
-              justifyContent="space-between"
-              px="20px"
-            >
-              <Radio flex="1" h="100%" data-test-id={`networkRadio[${index}]`} value={network.id}>
-                {network.displayName}
-              </Radio>
-              {!PERSIST_IDS.has(network.id) && (
-                <Flex className="operations">
-                  <Icon as={EditIcon} onClick={gotoEdit(network.id)} w="20px" h="20px" mr="20px" />
-                  <DeleteIcon
-                    onClick={async () => {
-                      await removeNetworkMutation.mutateAsync(network.id);
-                      await configQuery.invalidate();
-                    }}
-                    w="20px"
-                    h="20px"
-                    color="white"
-                  />
-                </Flex>
-              )}
-            </Flex>
-          ))}
-        </Grid>
+              },
+            }}
+            _hover={{
+              backgroundColor: 'white.200',
+            }}
+            transitionProperty="common"
+            transitionDuration="normal"
+            key={network.id}
+            w="100%"
+            alignItems="center"
+            justifyContent="space-between"
+            px="20px"
+          >
+            <Radio flex="1" h="100%" data-test-id={`networkRadio[${index}]`} value={network.id}>
+              {network.displayName}
+            </Radio>
+            {!PERSIST_IDS.has(network.id) && (
+              <Flex className="operations">
+                <Icon as={EditIcon} onClick={gotoEdit(network.id)} w="20px" h="20px" mr="20px" />
+                <DeleteIcon
+                  onClick={async () => {
+                    await removeNetworkMutation.mutateAsync(network.id);
+                    await configQuery.invalidate();
+                  }}
+                  w="20px"
+                  h="20px"
+                  color="white"
+                />
+              </Flex>
+            )}
+          </Flex>
+        ))}
       </RadioGroup>
       {/* </WhiteAlphaBox> */}
       <Spacer />

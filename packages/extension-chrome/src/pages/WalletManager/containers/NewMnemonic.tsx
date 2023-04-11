@@ -51,7 +51,7 @@ export const CreateMnemonic: FC = () => {
       <Heading mb="48px" lineHeight="111%" fontWeight="semibold">
         Generate Wallet Seed
       </Heading>
-      <Alert variant="left-accent" status="warning" mb="12px">
+      <Alert status="warning" mb="12px">
         <AlertIcon />
         <Box>
           <AlertTitle fontSize="md">Warning</AlertTitle>

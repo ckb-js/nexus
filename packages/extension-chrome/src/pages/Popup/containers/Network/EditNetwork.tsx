@@ -95,7 +95,7 @@ export const EditNetwork: FC<EditNetworkProps> = ({ mode }) => {
 
   return (
     <Flex direction="column" h="100%" as="form" onSubmit={onSubmit}>
-      <VStack as={WhiteAlphaBox} spacing="16px" p="35px 20px" direction="column">
+      <VStack as={WhiteAlphaBox} spacing="16px" p="16px 20px" direction="column">
         <FormControl>
           <FormLabel>Name</FormLabel>
           <Input {...register('name', { required: true })} name="name" />

@@ -199,6 +199,7 @@ export const SignTransaction: FC = () => {
           mx="-4px"
           px="4px"
           overflow="auto"
+          maxH="420px"
         >
           <TransactionIOList networkName={networkName} type="inputs" tx={transactionQuery.data.tx} />
           <TransactionIOList networkName={networkName} type="outputs" tx={transactionQuery.data.tx} mt="12px" />

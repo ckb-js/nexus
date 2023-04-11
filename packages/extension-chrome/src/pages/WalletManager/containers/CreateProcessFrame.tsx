@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useMemo, useState } from 'react';
-import { Box, Button, Center, Flex, FlexProps, Grid, HStack, Icon, Text, useToast } from '@chakra-ui/react';
+import { Button, Center, Flex, HStack, useToast } from '@chakra-ui/react';
 import {
   Outlet,
   useLoaderData,
@@ -7,76 +7,12 @@ import {
   useNavigate,
   useOutletContext as _useOutletContext,
 } from 'react-router-dom';
-import StepProcessingIcon from '../../Components/icons/StepProcessing.svg';
-import StepWaitingIcon from '../../Components/icons/StepWaiting.svg';
 
-import range from 'lodash.range';
 import { Logo } from '../../Components/Logo';
-import { CheckCircleIcon, ChevronLeftIcon, ChevronRightIcon } from '@chakra-ui/icons';
+import { ChevronLeftIcon, ChevronRightIcon } from '@chakra-ui/icons';
 import { CreateFlowConfig } from '../types';
-import Steps from 'rc-steps';
-import { StepsProps } from 'rc-steps/lib/Steps';
-
-const ProcessIndicator: FC<{ total: number; current: number } & FlexProps> = ({ total, current }) => {
-  const getIndicatorColor = (index: number) => {
-    if (index < current) {
-      return 'primary.lighter';
-    } else if (index > current) {
-      return 'gray.300';
-    }
-    return 'primary';
-  };
-  return (
-    <HStack spacing="12px" paddingY="4px" mb="48px">
-      {range(0, total).map((index) => (
-        <Box key={index} w="66px" h="5px" borderRadius="5px" backgroundColor={getIndicatorColor(index)} />
-      ))}
-    </HStack>
-  );
-};
-
-const renderSingleStep: StepsProps['itemRender'] = ({ title, description, status }) => {
-  const icon = {
-    wait: <Icon as={StepWaitingIcon} w="24px" h="24px" />,
-    process: <Icon as={StepProcessingIcon} w="24px" h="24px" />,
-    finish: <CheckCircleIcon w="20px" h="20px" color="white" />,
-    error: <></>,
-  }[status ?? 'wait'];
-  return (
-    <Grid
-      sx={{
-        '&:last-child .rc-steps-item-tail': {
-          height: 0,
-          width: 0,
-          border: 'none',
-        },
-      }}
-      color="white"
-      templateRows="auto"
-      templateColumns="24px auto"
-    >
-      <Box alignSelf="center" justifySelf="center">
-        {icon}
-      </Box>
-      <Text as={Box} ml="4px" alignSelf="center" fontWeight="semibold" fontSize="md">
-        {title}
-      </Text>
-      <Box
-        className="rc-steps-item-tail"
-        w="0"
-        alignSelf="center"
-        justifySelf="center"
-        h="43px"
-        border="1px solid white"
-        borderRadius="2px"
-        my="1px"
-      />
-      <Text as={Box} lineHeight="4" ml="8px" fontSize="sm">
-        {description}
-      </Text>
-    </Grid>
-  );
-};
+import { ProcessIndicator } from '../../Components/ProgressLine';
+import { ProgressSteps } from '../../Components/ProgressSteps';
 
 export type OutletContext = {
   whenSubmit: (cb: () => Promise<unknown>) => void;
@@ -148,14 +84,7 @@ export const CreateProcessFrame: FC = () => {
         height="100vh"
       >
         <Logo position="absolute" left="80px" top="48px" />
-        <Box minH="520px">
-          <Steps
-            current={currentPathIndex}
-            direction="vertical"
-            itemRender={renderSingleStep}
-            items={flowConfig.steps}
-          />
-        </Box>
+        <ProgressSteps minH="520px" current={currentPathIndex} items={flowConfig.steps} />
       </Flex>
       <Flex flex={1} as="form" onSubmit={onSubmit} direction="column" justifyContent="center" alignItems="center">
         <Center flexDirection="column" flex={1}>

@@ -7,18 +7,21 @@ const { defineMultiStyleConfig, definePartsStyle } = createMultiStyleConfigHelpe
 const primary = definePartsStyle(({ theme }) => ({
   field: {
     color: 'black',
-    borderWidth: '2px',
+    borderWidth: '1px',
+    borderColor: 'gray.100',
+
+    _hover: {
+      borderColor: 'gray.300',
+    },
+
     _invalid: {
-      borderColor: 'error.darker',
+      borderColor: `${getColor(theme, 'error.darker')} !important`,
+      boxShadow: 'none !important',
     },
     _focusVisible: {
       borderWidth: '2px',
       borderColor: 'primary',
       boxShadow: `0 0 0 1px ${getColor(theme, 'primary')}`,
-      _invalid: {
-        borderColor: 'error.darker',
-        boxShadow: 'none',
-      },
     },
   },
   element: {
@@ -31,22 +34,19 @@ const primary = definePartsStyle(({ theme }) => ({
 const accent = definePartsStyle(({ theme }) => ({
   field: {
     color: 'black',
-    borderWidth: '2px',
+    borderWidth: '1px',
+    borderColor: 'white.300',
+    _hover: {
+      borderColor: 'white.700',
+    },
     _invalid: {
-      borderColor: 'error.lighter',
-      _focus: {
-        borderColor: 'error.lighter',
-      },
+      borderColor: `${getColor(theme, 'error.lighter')} !important`,
+      boxShadow: 'none !important',
     },
     _focusVisible: {
       borderWidth: '2px',
       borderColor: 'accent',
       boxShadow: `0 0 0 1px ${getColor(theme, 'accent')}`,
-
-      _invalid: {
-        borderColor: 'error.lighter',
-        boxShadow: 'none',
-      },
     },
   },
   element: {
@@ -57,5 +57,13 @@ const accent = definePartsStyle(({ theme }) => ({
 }));
 
 export const Input = defineMultiStyleConfig({
+  baseStyle: {
+    field: {
+      _placeholder: {
+        color: 'gray.400',
+      },
+      color: 'gray.900',
+    },
+  },
   variants: { primary, accent },
 });
