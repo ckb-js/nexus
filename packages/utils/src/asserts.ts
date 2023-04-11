@@ -1,4 +1,5 @@
 import { throwError } from './error';
+import { formatMessage } from './internal';
 
 /**
  * Assert condition is truthy, otherwise throw error.
@@ -10,7 +11,11 @@ import { throwError } from './error';
  * @param args
  */
 export function assert(condition: unknown, ...args: unknown[]): asserts condition {
-  if (!condition) throwError('Assertion failed', args);
+  if (!condition) {
+    const colon = args.length ? ':' : '';
+    const prefix = `Assertion failed${colon}`;
+    throwError(prefix, formatMessage(...args));
+  }
 }
 
 /**
