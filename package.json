@@ -10,7 +10,8 @@
   "workspaces": [
     "packages/*",
     "lumos",
-    "lumos/packages/*"
+    "lumos/packages/*",
+    "e2e"
   ],
   "devDependencies": {
     "@auto-it/magic-zero": "10.43.0",
@@ -52,6 +53,7 @@
     "build:lumos": "cd lumos && npm run build",
     "build:extension-chrome": "npm run build -w @nexus-wallet/extension-chrome",
     "test": "jest",
+    "e2e": "npm run test -w=@nexus-wallet/e2e",
     "start": "npm run start -w @nexus-wallet/extension-chrome",
     "lint": "eslint 'packages/*/{src,__tests__}/**/*.{js,ts,jsx,tsx}'",
     "check": "npm run check:types",
