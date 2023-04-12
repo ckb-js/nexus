@@ -35,6 +35,7 @@
     "@ckb-lumos/base": "0.20.0-alpha.2",
     "@ckb-lumos/bi": "0.20.0-alpha.2",
     "@ckb-lumos/config-manager": "0.20.0-alpha.2",
+    "@ckb-lumos/helpers": "0.20.0-alpha.2",
     "@ckb-lumos/hd": "0.20.0-alpha.2",
     "@ckb-lumos/lumos": "0.20.0-alpha.2",
     "@ckb-lumos/rpc": "0.20.0-alpha.2",
