@@ -6,7 +6,7 @@ import type {
   SignMessagePayload,
   NonHardenedPath,
 } from '@nexus-wallet/types/lib/services/KeystoreService';
-import { asserts, errors, resolveProvider } from '@nexus-wallet/utils';
+import { asserts, errors, resolveValue } from '@nexus-wallet/utils';
 import { hd } from '@ckb-lumos/lumos';
 import { bytes } from '@ckb-lumos/codec';
 import { key, Keystore } from '@ckb-lumos/hd';
@@ -98,7 +98,7 @@ export function createKeystoreService(config: { storage: Storage<KeystoreData> }
       const keystoreData = await resolveKeystoreData();
 
       const keystore = Keystore.fromJson(keystoreData.wss);
-      const extendedPrivateKey = keystore.extendedPrivateKey(await resolveProvider(payload.password));
+      const extendedPrivateKey = keystore.extendedPrivateKey(await resolveValue(payload.password));
 
       return key.signRecoverable(
         bytes.hexify(payload.message),

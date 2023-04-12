@@ -1,4 +1,4 @@
-import { LIB_VERSION } from './version';
+import { LIB_VERSION } from './env';
 import { formatMessage } from './internal';
 
 export function makeError(...args: unknown[]): Error {
