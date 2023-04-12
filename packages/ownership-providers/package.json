@@ -1,6 +1,6 @@
 {
   "name": "@nexus-wallet/ownership-providers",
-  "version": "0.0.1",
+  "version": "0.0.10",
   "description": "Simple wrapper to work with Nexus",
   "homepage": "https://github.com/ckb-js/nexus/tree/main/extension-chrome#readme",
   "license": "MIT",
@@ -8,10 +8,15 @@
   "directories": {
     "lib": "lib"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "files": [
     "lib",
-    "src"
+    "src",
+    "README.md"
   ],
+  "main": "lib",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ckb-js/nexus.git"
@@ -26,19 +31,25 @@
     "url": "https://github.com/ckb-js/nexus/issues"
   },
   "dependencies": {
-    "@nexus-wallet/protocol": "*",
-    "@nexus-wallet/utils": "*",
-    "@types/lodash.isequal": "4.5.6",
-    "lodash.isequal": "4.5.0",
+    "@nexus-wallet/protocol": "0.0.10",
+    "@nexus-wallet/utils": "0.0.10",
     "lodash.range": "3.2.0"
   },
   "devDependencies": {
-    "@ckb-lumos/bi": "*",
-    "@ckb-lumos/helpers": "*",
+    "@ckb-lumos/base": "0.20.0-alpha.2",
+    "@ckb-lumos/bi": "0.20.0-alpha.2",
+    "@ckb-lumos/codec": "0.20.0-alpha.2",
+    "@ckb-lumos/common-scripts": "0.20.0-alpha.2",
+    "@ckb-lumos/config-manager": "0.20.0-alpha.2",
+    "@ckb-lumos/helpers": "0.20.0-alpha.2",
     "@types/lodash.range": "3.2.7"
   },
   "peerDependencies": {
-    "@ckb-lumos/bi": "^0.20.0-alpha.1",
-    "@ckb-lumos/helpers": "^0.20.0-alpha.1"
+    "@ckb-lumos/base": "0.20.0-alpha.2",
+    "@ckb-lumos/bi": "0.20.0-alpha.2",
+    "@ckb-lumos/codec": "0.20.0-alpha.2",
+    "@ckb-lumos/common-scripts": "0.20.0-alpha.2",
+    "@ckb-lumos/config-manager": "0.20.0-alpha.2",
+    "@ckb-lumos/helpers": "0.20.0-alpha.2"
   }
 }

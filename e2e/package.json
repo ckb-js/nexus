@@ -1,17 +1,14 @@
 {
   "name": "@nexus-wallet/e2e",
-  "version": "1.0.0",
+  "version": "0.0.10",
   "description": "E2E testing for Nexus",
-  "main": "index.js",
+  "private": true,
   "directories": {
     "test": "tests"
   },
   "scripts": {
     "test": "jest"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "devDependencies": {
     "playwright": "1.32.1"
   }

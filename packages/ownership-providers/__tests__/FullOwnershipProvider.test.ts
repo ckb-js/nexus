@@ -4,11 +4,11 @@ import { parseAddress, TransactionSkeleton, TransactionSkeletonType } from '@ckb
 import { common } from '@ckb-lumos/common-scripts';
 import { Cell, Script } from '@nexus-wallet/protocol';
 import { predefined } from '@ckb-lumos/config-manager';
-import * as secp256k1Blake160 from '@ckb-lumos/common-scripts/lib/secp256k1_blake160';
-import { FullOwnershipProvider } from '..';
+import { secp256k1Blake160 } from '@ckb-lumos/common-scripts';
+import { FullOwnershipProvider } from '../src';
 import { WitnessArgs } from '@ckb-lumos/base/lib/blockchain';
 import { bytes } from '@ckb-lumos/codec';
-import { FullOwnershipProviderConfig } from '../FullOwnershipProvider';
+import { FullOwnershipProviderConfig } from '../src/FullOwnershipProvider';
 
 function getExpectedFee(txSkeleton: TransactionSkeletonType, feeRate = BI.from(1000)): BI {
   return BI.from(
