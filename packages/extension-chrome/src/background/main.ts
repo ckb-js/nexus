@@ -3,7 +3,8 @@ import '../rpc/walletImpl';
 import '../rpc/debugImpl';
 import '../rpc/ckbImpl';
 import { createLogger, LIB_VERSION } from '@nexus-wallet/utils';
-import { Endpoint, onMessage } from 'webext-bridge';
+import { Endpoint } from 'webext-bridge';
+import { onMessage } from 'webext-bridge/background';
 import { createServer } from '../rpc';
 import { makeBrowserExtensionModulesFactory } from '../services';
 import { createDaemonWatchtower } from '../services/ownership/watchtower/daemon';
@@ -20,6 +21,7 @@ const server = createServer<Endpoint>(factory);
 void createDaemonWatchtower(factory).run();
 
 // listen message from content script
+// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 onMessage('rpc', async ({ data, sender }) => {
   logger.info(`RPC start`, data);
   try {
