@@ -83,6 +83,7 @@
   "auto": {
     "plugins": [
       "magic-zero",
+      "./scripts/update-version.ts",
       "./scripts/build-extension.ts",
       "protected-branch",
       [

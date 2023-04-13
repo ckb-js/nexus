@@ -31,7 +31,7 @@ module.exports = {
       },
     },
     {
-      files: '**/__tests__/**/*.{ts,tsx}',
+      files: ['**/__tests__/**/*.{ts,tsx}', 'scripts/**/*.ts'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'off',
         '@typescript-eslint/no-unsafe-argument': 'off',

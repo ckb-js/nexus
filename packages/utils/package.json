@@ -22,9 +22,6 @@
     "url": "git+https://github.com/ckb-js/nexus.git"
   },
   "scripts": {
-    "prepare": "npm run bump",
-    "version": "npm run bump",
-    "bump": "node -p \"'export const LIB_VERSION = ' + JSON.stringify(require('./package.json').version) + ';'\" > src/env.ts && prettier --write src/env.ts",
     "start": "cross-env NODE_ENV=development npm run start:webpack",
     "start:webpack": "ts-node ./scripts/start.ts",
     "build": "tsc",
