@@ -111,11 +111,35 @@ describe('FullOwnership', () => {
       });
     });
 
-    it('should get live cells', async () => {
+    it('should get live cells with cursor', async () => {
+      await ownershipService.getLiveCells({ cursor: '3:0x1234' });
+      expect(backend.getLiveCellsByLocks).toBeCalledWith({
+        cursor: '0x1234',
+        locks: [scriptInfos[3].lock],
+      });
+    });
+
+    it('should get live cells with default change', async () => {
       await ownershipService.getLiveCells({});
       expect(backend.getLiveCellsByLocks).toBeCalledWith({
         cursor: '',
         locks: [scriptInfos[1].lock, scriptInfos[3].lock],
+      });
+    });
+
+    it('should get external live cells with change set to external', async () => {
+      await ownershipService.getLiveCells({ change: 'external' });
+      expect(backend.getLiveCellsByLocks).toBeCalledWith({
+        cursor: '',
+        locks: [scriptInfos[1].lock],
+      });
+    });
+
+    it('should get internal live cells with change set to internal', async () => {
+      await ownershipService.getLiveCells({ change: 'internal' });
+      expect(backend.getLiveCellsByLocks).toBeCalledWith({
+        cursor: '',
+        locks: [scriptInfos[3].lock],
       });
     });
 
