@@ -176,7 +176,7 @@ export const RecoveryWallet: FC = () => {
           return (
             <Alert visibility={hasInvalidWord ? 'visible' : 'hidden'} mt="16px" status="error">
               <AlertIcon />
-              <AlertDescription fontSize="md">Please check your Seed</AlertDescription>
+              <AlertDescription fontSize="md">Please check your seed phrase</AlertDescription>
             </Alert>
           );
         }}
