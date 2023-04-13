@@ -18,9 +18,10 @@
     "url": "git+https://github.com/ckb-js/nexus.git"
   },
   "scripts": {
-    "start": "cross-env NODE_ENV=development npm run start:webpack",
-    "start:webpack": "ts-node ./scripts/start.ts",
-    "build": "npm run clean && webpack --config=config/webpack.config.prod.ts",
+    "prepare": "ts-node ./scripts/updateExtensionVersion.ts",
+    "start": "npm run prepare && cross-env NODE_ENV=development npm run start:webpack",
+    "start:webpack": "npm run prepare && ts-node ./scripts/start.ts",
+    "build": "npm run clean && npm run prepare && webpack --config=config/webpack.config.prod.ts",
     "zip": "bestzip nexus.zip build/",
     "clean": "rimraf build/*",
     "check": "npm run check:types",
