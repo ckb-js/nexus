@@ -15,6 +15,7 @@ module.exports = {
       },
     ],
     'import/no-extraneous-dependencies': ['error', { devDependencies: ['**/*.test.ts'] }],
+    'import/no-named-as-default': 'off',
   },
   overrides: [
     {
