@@ -65,6 +65,8 @@ class ConfigService {
   }
 }
 
-export default new ConfigService();
+const configService = new ConfigService();
+
+export default configService;
 
 export type { NetworkConfig };

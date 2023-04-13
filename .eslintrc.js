@@ -1,6 +1,6 @@
 module.exports = {
   root: true,
-  extends: ['react-app'],
+  extends: ['react-app', 'plugin:import/recommended', 'plugin:import/typescript'],
   parserOptions: {
     ecmaVersion: 2020,
     project: ['tsconfig.json', 'tsconfig.test.json'],
@@ -14,6 +14,8 @@ module.exports = {
         argsIgnorePattern: '^_',
       },
     ],
+    'import/no-extraneous-dependencies': ['error', { devDependencies: ['**/*.test.ts'] }],
+    'import/no-named-as-default': 'off',
   },
   overrides: [
     {
