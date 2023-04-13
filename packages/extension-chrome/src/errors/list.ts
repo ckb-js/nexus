@@ -7,7 +7,7 @@ function prepareNexusError<T>(opts: {
   suggestion?: string;
 }): (data?: T) => NexusError<T> {
   return (data?: T) => {
-    const message = opts.suggestion ? `${opts.reason}, ${opts.suggestion}` : opts.reason;
+    const message = opts.suggestion ? `${opts.reason}. ${opts.suggestion}` : opts.reason;
     return NexusError.create({ code: opts.code, message, data });
   };
 }
