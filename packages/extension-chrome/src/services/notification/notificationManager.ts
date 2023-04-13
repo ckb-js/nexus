@@ -1,4 +1,3 @@
-import { EventEmitter } from 'events';
 import browser, { Windows } from 'webextension-polyfill';
 import { createSessionMessenger, SessionMessenger } from '../../messaging/session';
 import { browserExtensionAdapter } from '../../messaging/adapters';
@@ -7,6 +6,7 @@ import isEqual from 'lodash.isequal';
 import omit from 'lodash/omit';
 import { NexusCommonErrors } from '../../errors';
 import { nanoid } from 'nanoid';
+import { EventEmitter } from 'eventemitter3';
 
 const NotificationWindowSizeMap: Record<NotificationPath, { w: number; h: number }> = {
   grant: {
@@ -27,7 +27,6 @@ type NotificationInfo = {
   path: NotificationPath;
   sessionId: string;
   metadata: {
-    chainId?: string;
     host?: string;
   };
 };
@@ -41,17 +40,14 @@ type NotificationInfoWithStatus = {
   status: 'active' | 'closed';
 };
 
-type NotificationEventName = 'onPopupClosed';
-
-type NotificationManagerEventEmitter = {
-  on(event: NotificationEventName, listener: (payload: { sessionId: string }) => void): void;
-  emit(event: NotificationEventName, payload: { sessionId: string }): void;
+type NotificationEvents = {
+  finish(payload: { sessionId: string }): void;
 };
 
 class NotificationManager {
   currentNotification: NotificationInfoWithStatus | undefined = undefined;
   notificationInfoQueue: NotificationInfo[] = [];
-  eventEmitter: NotificationManagerEventEmitter = new EventEmitter();
+  eventEmitter = new EventEmitter<NotificationEvents>();
 
   async createNotificationWindow(
     _notification: Omit<NotificationInfo, 'sessionId'>,
@@ -72,7 +68,7 @@ class NotificationManager {
     } else {
       this.notificationInfoQueue.push(notification);
       return new Promise((resolve) => {
-        this.eventEmitter.on('onPopupClosed', ({ sessionId }) => {
+        this.eventEmitter.on('finish', ({ sessionId }) => {
           // only process when the notification is at the top of the queue
           if (
             !this.isAtTopOfQueue(notification) ||
@@ -89,7 +85,7 @@ class NotificationManager {
     }
   }
 
-  async _createNotificationWindow(payload: NotificationInfo): Promise<{
+  private async _createNotificationWindow(payload: NotificationInfo): Promise<{
     messenger: SessionMessenger<SessionMethods>;
     window: Windows.Window;
   }> {
@@ -113,38 +109,38 @@ class NotificationManager {
     browser.windows.onRemoved.addListener((windowId) => {
       if (windowId === window.id) {
         this.closeCurrentNotification();
-        this.eventEmitter.emit('onPopupClosed', { sessionId: messenger.sessionId() });
+        this.eventEmitter.emit('finish', { sessionId: messenger.sessionId() });
       }
     });
     return { window, messenger };
   }
 
-  isAtTopOfQueue(notification: NotificationInfo): boolean {
+  private isAtTopOfQueue(notification: NotificationInfo): boolean {
     return this.notificationInfoQueue[0]?.sessionId === notification.sessionId;
   }
 
-  openCurrentNotification(notification: NotificationInfo): void {
+  private openCurrentNotification(notification: NotificationInfo): void {
     this.currentNotification = { notification, status: 'active' };
   }
 
-  closeCurrentNotification(): void {
+  private closeCurrentNotification(): void {
     if (this.currentNotification?.status === 'active') {
       this.currentNotification = { notification: this.currentNotification!.notification, status: 'closed' };
     }
   }
 
-  isCurrentNotificationActive(): boolean {
+  private isCurrentNotificationActive(): boolean {
     return this.currentNotification?.status === 'active';
   }
 
-  isCurrentNotification(notification: NotificationInfo): boolean {
+  private isCurrentNotification(notification: NotificationInfo): boolean {
     return (
       this.currentNotification?.status === 'active' &&
       isEqual(omit(notification, 'sessionId'), omit(this.currentNotification?.notification, 'sessionId'))
     );
   }
 
-  hasTheSameInQueue(notification: NotificationInfo): boolean {
+  private hasTheSameInQueue(notification: NotificationInfo): boolean {
     return !!this.notificationInfoQueue.find((info) => {
       return isEqual(omit(notification, 'sessionId'), omit(info, 'sessionId'));
     });
