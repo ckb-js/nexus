@@ -53,7 +53,7 @@
     "@types/webextension-polyfill": "0.10.0",
     "awilix": "8.0.0",
     "eventemitter3": "5.0.0",
-    "immer": "9.0.19",
+    "immer": "9.0.21",
     "is-utf8": "0.2.1",
     "joi": "17.7.1",
     "json-rpc-2.0": "1.4.2",
