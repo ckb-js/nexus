@@ -1,6 +1,6 @@
 {
   "name": "@nexus-wallet/protocol",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "Nexus Wallet Protocol",
   "homepage": "https://github.com/ckb-js/nexus/tree/main/extension-chrome#readme",
   "license": "MIT",
