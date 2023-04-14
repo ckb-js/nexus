@@ -35,19 +35,14 @@ type CreateNotificationOptions = {
   preventDuplicate?: boolean;
 };
 
-type NotificationInfoWithStatus = {
-  notification: NotificationInfo;
-  status: 'active' | 'closed';
-};
-
 type NotificationEvents = {
-  finish(payload: { sessionId: string }): void;
+  finish(payload: { nextSessionId: string | undefined }): void;
 };
 
 class NotificationManager {
-  currentNotification: NotificationInfoWithStatus | undefined = undefined;
-  notificationInfoQueue: NotificationInfo[] = [];
-  eventEmitter = new EventEmitter<NotificationEvents>();
+  private currentNotification: NotificationInfo | undefined = undefined;
+  private notificationInfoQueue: NotificationInfo[] = [];
+  private eventEmitter = new EventEmitter<NotificationEvents>();
 
   async createNotificationWindow(
     _notification: Omit<NotificationInfo, 'sessionId'>,
@@ -68,12 +63,12 @@ class NotificationManager {
     } else {
       this.notificationInfoQueue.push(notification);
       return new Promise((resolve) => {
-        this.eventEmitter.on('finish', ({ sessionId }) => {
+        this.eventEmitter.on('finish', ({ nextSessionId }) => {
           // only process when the notification is at the top of the queue
           if (
             !this.isAtTopOfQueue(notification) ||
             this.isCurrentNotificationActive() ||
-            sessionId !== this.currentNotification?.notification.sessionId
+            nextSessionId !== notification.sessionId
           ) {
             return;
           }
@@ -109,7 +104,7 @@ class NotificationManager {
     browser.windows.onRemoved.addListener((windowId) => {
       if (windowId === window.id) {
         this.closeCurrentNotification();
-        this.eventEmitter.emit('finish', { sessionId: messenger.sessionId() });
+        this.eventEmitter.emit('finish', { nextSessionId: this.notificationInfoQueue[0]?.sessionId });
       }
     });
     return { window, messenger };
@@ -120,23 +115,21 @@ class NotificationManager {
   }
 
   private openCurrentNotification(notification: NotificationInfo): void {
-    this.currentNotification = { notification, status: 'active' };
+    this.currentNotification = notification;
   }
 
   private closeCurrentNotification(): void {
-    if (this.currentNotification?.status === 'active') {
-      this.currentNotification = { notification: this.currentNotification!.notification, status: 'closed' };
-    }
+    this.currentNotification = undefined;
   }
 
   private isCurrentNotificationActive(): boolean {
-    return this.currentNotification?.status === 'active';
+    return !!this.currentNotification;
   }
 
   private isCurrentNotification(notification: NotificationInfo): boolean {
     return (
-      this.currentNotification?.status === 'active' &&
-      isEqual(omit(notification, 'sessionId'), omit(this.currentNotification?.notification, 'sessionId'))
+      !!this.currentNotification &&
+      isEqual(omit(notification, 'sessionId'), omit(this.currentNotification, 'sessionId'))
     );
   }
 
