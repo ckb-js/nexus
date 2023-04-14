@@ -1,3 +1,24 @@
+# v0.0.13 (Fri Apr 14 2023)
+
+#### 🔨 Breaking Minor Change
+
+- Merge remote-tracking branch 'upstream/main' into ui-refine ([@IronLu233](https://github.com/IronLu233))
+
+#### 🚀 Enhancement
+
+- feat(ownership-providers): intro an accent color to inputs and buttons [#186](https://github.com/ckb-js/nexus/pull/186) ([@IronLu233](https://github.com/IronLu233))
+
+#### 🔩 Dependency Updates
+
+- fix(deps): update dependency awilix to v8.0.1 [#203](https://github.com/ckb-js/nexus/pull/203) ([@renovate[bot]](https://github.com/renovate[bot]))
+
+#### Authors: 2
+
+- [@renovate[bot]](https://github.com/renovate[bot])
+- Iron Lu ([@IronLu233](https://github.com/IronLu233))
+
+---
+
 # v0.0.12 (Fri Apr 14 2023)
 
 #### 🔨 Breaking Minor Change
