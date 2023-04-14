@@ -7,7 +7,6 @@ import { browserExtensionAdapter } from '../messaging/adapters';
 import { nanoid } from 'nanoid';
 import type { Windows } from 'webextension-polyfill';
 import browser from 'webextension-polyfill';
-// eslint-disable-next-line import/no-unresolved
 import { Endpoint } from 'webext-bridge';
 import { NexusCommonErrors } from '../errors';
 

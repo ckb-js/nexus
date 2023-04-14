@@ -1,5 +1,4 @@
 import { isJSONRPCRequest, isJSONRPCResponse, JSONRPCClient } from 'json-rpc-2.0';
-// eslint-disable-next-line import/no-unresolved
 import * as bridgeMessenger from 'webext-bridge/content-script';
 import * as windowMessenger from '../messaging';
 import { errors } from '@nexus-wallet/utils';

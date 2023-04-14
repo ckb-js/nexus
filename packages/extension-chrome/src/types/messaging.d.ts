@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-unresolved
 import { ProtocolWithReturn } from 'webext-bridge';
 
 type TabId = number;
