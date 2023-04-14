@@ -133,4 +133,18 @@ describe('ConfigService', () => {
 
     await expect(wrongSetConfig).rejects.toThrowError();
   });
+
+  it('should not add to whitelist if already exists', async () => {
+    await service.addWhitelistItem({
+      host: 'baidu.com',
+    });
+
+    await expect(service.getWhitelist()).resolves.toEqual([{ host: 'google.com' }, { host: 'baidu.com' }]);
+
+    // won't add to whitelist if already exists
+    await service.addWhitelistItem({
+      host: 'baidu.com',
+    });
+    await expect(service.getWhitelist()).resolves.toEqual([{ host: 'google.com' }, { host: 'baidu.com' }]);
+  });
 });

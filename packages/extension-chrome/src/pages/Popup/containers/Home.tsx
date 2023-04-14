@@ -1,7 +1,6 @@
 import React, { FC } from 'react';
-import { Flex, Box, Icon, Center, Link } from '@chakra-ui/react';
+import { Flex, Box, Icon, Center, Link, Button, ButtonProps } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
-import { Button, ButtonProps } from '@chakra-ui/react';
 import TerminalIcon from '../../Components/icons/Terminal.svg';
 import NetworkIcon from '../../Components/icons/Network.svg';
 import { WhiteAlphaBox } from '../../Components/WhiteAlphaBox';

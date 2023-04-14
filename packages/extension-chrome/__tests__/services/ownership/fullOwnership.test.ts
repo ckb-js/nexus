@@ -1,7 +1,6 @@
-import { config } from '@ckb-lumos/lumos';
+import { config, Script, utils, Transaction } from '@ckb-lumos/lumos';
 import { Backend } from './../../../src/services/ownership/backend';
-import { TransactionSkeletonType } from '@ckb-lumos/helpers';
-import { TransactionSkeleton } from '@ckb-lumos/helpers';
+import { TransactionSkeletonType, TransactionSkeleton } from '@ckb-lumos/helpers';
 import {
   createFullOwnershipService,
   createWatchtower,
@@ -17,7 +16,6 @@ import { asyncSleep } from '../../helpers/utils';
 import { mockBackend } from '../../helpers/mockBackend';
 import { mockPlatformService, MOCK_PLATFORM_URL } from '../../helpers';
 import { bytes } from '@ckb-lumos/codec';
-import { Script, utils, Transaction } from '@ckb-lumos/lumos';
 import { common } from '@ckb-lumos/common-scripts';
 import { createEventHub } from '../../../src/services/event';
 import { SIGN_DATA_MAGIC } from '@nexus-wallet/protocol';
@@ -111,11 +109,35 @@ describe('FullOwnership', () => {
       });
     });
 
-    it('should get live cells', async () => {
+    it('should get live cells with cursor', async () => {
+      await ownershipService.getLiveCells({ cursor: '3:0x1234' });
+      expect(backend.getLiveCellsByLocks).toBeCalledWith({
+        cursor: '0x1234',
+        locks: [scriptInfos[3].lock],
+      });
+    });
+
+    it('should get live cells with default change', async () => {
       await ownershipService.getLiveCells({});
       expect(backend.getLiveCellsByLocks).toBeCalledWith({
         cursor: '',
         locks: [scriptInfos[1].lock, scriptInfos[3].lock],
+      });
+    });
+
+    it('should get external live cells with change set to external', async () => {
+      await ownershipService.getLiveCells({ change: 'external' });
+      expect(backend.getLiveCellsByLocks).toBeCalledWith({
+        cursor: '',
+        locks: [scriptInfos[1].lock],
+      });
+    });
+
+    it('should get internal live cells with change set to internal', async () => {
+      await ownershipService.getLiveCells({ change: 'internal' });
+      expect(backend.getLiveCellsByLocks).toBeCalledWith({
+        cursor: '',
+        locks: [scriptInfos[3].lock],
       });
     });
 

@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { createSessionMessenger, SessionMessenger } from '../../messaging/session';
-import { SessionMethods } from '../../services/notification';
+import { SessionMethods } from '../../services/notification/common';
 import { browserExtensionAdapter } from '../../messaging/adapters';
 
 /**

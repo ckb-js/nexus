@@ -1,6 +1,6 @@
 {
   "name": "@nexus-wallet/types",
-  "version": "0.0.1",
+  "version": "0.0.12",
   "description": "",
   "homepage": "https://github.com/ckb-js/nexus/tree/main/extension-chrome#readme",
   "license": "MIT",
@@ -18,7 +18,15 @@
     "url": "git+https://github.com/ckb-js/nexus.git"
   },
   "dependencies": {
-    "@nexus-wallet/protocol": "*"
+    "@nexus-wallet/protocol": "0.0.12"
+  },
+  "devDependencies": {
+    "@ckb-lumos/codec": "0.20.0-alpha.2",
+    "@ckb-lumos/helpers": "0.20.0-alpha.2"
+  },
+  "peerDependencies": {
+    "@ckb-lumos/codec": "0.20.0-alpha.2",
+    "@ckb-lumos/helpers": "0.20.0-alpha.2"
   },
   "scripts": {
     "start": "cross-env NODE_ENV=development npm run start:webpack",
