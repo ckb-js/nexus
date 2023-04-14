@@ -1,6 +1,8 @@
-# Nexus with Delegated Ownership
+# Nexus Working with Custody Unlocking
 
-The `secp256k1_blake160` lock script is the most commonly used lock script in the CKB. It is also the lock that Nexus is
+## Custody Unlocking
+
+The `secp256k1_blake160` lock script is the most commonly used lock script in the CKB. It is also a lock that Nexus is
 using. A cell locked by a `secp256k1_blake160` lock can only be unlocked by the owner of the key.
 
 For a platform with smart contract capabilities, assets ownership is often controlled by contracts. For such assets, we
@@ -13,8 +15,13 @@ cheque](https://github.com/duanyytop/ckb-cheque-script/blob/89c0ef98e161882a374e
 lock is an example, its unlocking(claiming) rule is:
 
 ```ts
-// when claiming a cheque
-if (tx.inputs.map(to_script_hash).contains(receiver_lock_hash)) {
+declare const receiver_lock_script_hash: Hash;
+declare const tx: Transaction;
+
+declare function to_script_hash(script: Script): Hash;
+
+const inputs_lock_hashes = tx.inputs.map(to_script_hash);
+if (inputs_lock_hashes.contains(receiver_lock_script_hash)) {
   return true;
 }
 ```
@@ -23,13 +30,10 @@ The advantage of this unlocking method is that it is extremely flexible, and alm
 implemented, whether it is a simple signature verification or a complex multi-signature verification. The cheque lock
 does not care about the way the signature is made, it is a way to decouple the program.
 
-The unlocking rule seems to have no name yet, so we will call it P2SH(Pay to Script Hash) for now, so that the document
-here can be simpler.
-
 ## Working With Existing Contracts
 
-However, not all systems have implemented P2SH, but adding P2SH unlocking rules may not be difficult. In general, the
-contracts will have a design similar to `flag`/`version` for extensibility.
+However, not all systems have implemented custody unlocking, but adding custody unlocking rules may not be difficult. In
+general, the contracts will have a design similar to `flag`/`version` for extensibility.
 
 Here is an example of the .bit's account cell. The DAS signature verification is performed in the type script,
 but this does not affect our discussion.
@@ -64,9 +68,10 @@ but this does not affect our discussion.
 supports [multiple chains](https://github.com/dotbitHQ/das-contracts/blob/15ae8f4376e31bf57dc99cb09472de3732d5cb5f/libs/das-dynamic-libs/src/constants.rs#L7-L15)
 signature algorithm, so the .bit's _das-lock_ args contains a flag `algorithm_id` to indicate which signature algorithm
 is used by the current account cell, which provides the possibility of upgrading. In short, the .bit account type script
-can add an `algorithm_id` to indicate that the current lock is using P2SH, and then implement the P2SH.
+can add an `algorithm_id` to indicate that the current lock is using custody-unlocking, and then implement the
+custody-unlocking.
 
-This is an example of the .bit account cell that uses P2SH
+This is an example of the .bit account cell that uses custody-unlocking
 to [edit_record](https://github.com/dotbitHQ/das-contracts/blob/15ae8f4376e31bf57dc99cb09472de3732d5cb5f/contracts/account-cell-type/src/entry.rs#L115)
 
 ```yaml
@@ -76,7 +81,7 @@ inputs:
       code_hash: <das-lock>
       type: type
       args:
-        0x06 # P2SH
+        0x06 # custody-unlocking
         lock_hash # the hash of the lock script that will be used to unlock the cell
         manager_algorithm_id
         manager_pubkey_hash
@@ -104,7 +109,7 @@ inputs:
       code_hash: <das-lock>
       type: type
       args:
-        0x06 # P2SH
+        0x06 # custody-unlocking
         lock_hash # the hash of the lock script that will be used to unlock the cell
         manager_algorithm_id
         manager_pubkey_hash
@@ -121,16 +126,26 @@ outputs:
   ...
 ```
 
-But unfortunately, Omnilock currently does not support EIP-712 signatures.
+Unfortunately, Omnilock currently does not support EIP-712 signatures.
 
-## Working With Batching
+## Working With Concurrency
 
-// TODO: explain how to handle batching
-// 1. sign off-chain message(for single aggregator system)
-// 2. use a messaging cell(for multiple aggregator system)
+We often state that the UTxO system is inherently parallel, but it requires additional design for concurrent scenarios.
+How do we understand that UTxO can be parallel but not straightforward to be concurrent? Let's imagine that there is a
+certain NFT issuance limit. To prevent the issuance of NFTs from exceeding the limit, when minting a new NFT, we need to
+check if the number of NFTs already issued exceeds the limit. At this point, we need to rely on a shared state, which is
+the number of NFTs currently issued. In other words, we need to serialize these operations. So how should we use
+custody-unlocking in such scenarios?
 
-## Warning
+### Chained Transactions
 
-### Anyone Can Pay
+[Chained transaction](https://talk.nervos.org/t/non-blocking-chained-transaction-and-its-applications-in-ckb/6649), if
+the system uses this solution as the serializing solution, then custody-unlocking can still be used.
 
-// TODO: explain why anyone can pay is dangerous
+### Aggregator + Messaging Cell(TODO)
+
+// TODO with a messaging cell example
+
+### Aggregator + Verifying Off-chain Signed Messages(TODO)
+
+// TODO with a signData example
