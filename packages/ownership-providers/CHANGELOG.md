@@ -1,3 +1,22 @@
+# v0.0.12 (Fri Apr 14 2023)
+
+#### 🔨 Breaking Minor Change
+
+- Merge remote-tracking branch 'upstream/main' into notification-manager ([@zhangyouxin](https://github.com/zhangyouxin))
+- Merge branch 'main' of https://github.com/ckb-js/nexus into no-extraneous-dependencies ([@IronLu233](https://github.com/IronLu233))
+- chore: add eslint import plugin ([@IronLu233](https://github.com/IronLu233))
+
+#### 🏠 Internal
+
+- chore: add eslint import plugin [#208](https://github.com/ckb-js/nexus/pull/208) ([@IronLu233](https://github.com/IronLu233))
+
+#### Authors: 2
+
+- Iron Lu ([@IronLu233](https://github.com/IronLu233))
+- Shinya ([@zhangyouxin](https://github.com/zhangyouxin))
+
+---
+
 # v0.0.11 (Thu Apr 13 2023)
 
 #### 🔨 Breaking Minor Change
