@@ -47,7 +47,7 @@
     "@nexus-wallet/types": "0.0.12",
     "@nexus-wallet/utils": "0.0.12",
     "@tanstack/react-query": "4.29.1",
-    "awilix": "8.0.0",
+    "awilix": "8.0.1",
     "eventemitter3": "5.0.0",
     "immer": "9.0.19",
     "is-utf8": "0.2.1",
