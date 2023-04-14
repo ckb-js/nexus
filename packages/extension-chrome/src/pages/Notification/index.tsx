@@ -5,7 +5,7 @@ import { Grant } from './containers/Grant';
 import { RouteObject, RouterProvider, createHashRouter } from 'react-router-dom';
 import { SignData } from './containers/SignData/SignData';
 import { SignTransaction } from './containers/SignTransaction';
-import { theme } from '../theme';
+import { solidBackgroundTheme } from '../theme';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { DialogFrame } from '../Components/DialogFrame';
 import { ViewData } from './containers/SignData/ViewData';
@@ -62,7 +62,8 @@ const router = createHashRouter(routes);
 
 const App = () => {
   return (
-    <ChakraProvider theme={theme}>
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    <ChakraProvider theme={solidBackgroundTheme}>
       <QueryClientProvider client={queryClient}>
         <RouterProvider router={router} />
       </QueryClientProvider>

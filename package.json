@@ -12,6 +12,7 @@
     "e2e"
   ],
   "devDependencies": {
+    "@auto-it/core": "10.44.0",
     "@auto-it/magic-zero": "10.43.0",
     "@auto-it/npm": "10.43.0",
     "@auto-it/protected-branch": "10.43.0",
@@ -38,6 +39,7 @@
     "npm-run-all": "4.1.5",
     "prettier": "2.8.7",
     "rimraf": "4.1.2",
+    "semver": "7.4.0",
     "ts-jest": "29.0.5",
     "ts-node": "10.9.1",
     "typedoc": "0.23.26",
