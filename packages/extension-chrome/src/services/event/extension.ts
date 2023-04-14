@@ -1,6 +1,6 @@
 import { createEventHub, EventHub } from './';
 import browser from 'webextension-polyfill';
-import { sendMessage } from 'webext-bridge';
+import { sendMessage } from 'webext-bridge/background';
 
 export function createBrowserExtensionEventHub(): EventHub {
   const hub = createEventHub();
@@ -11,6 +11,7 @@ export function createBrowserExtensionEventHub(): EventHub {
     // TODO optimize me, only send to subscribed tabs
     tabs.forEach((tab) => {
       if (!tab.id) return;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       void sendMessage('event', { eventName: 'networkChanged', params: [networkName] }, `content-script@${tab.id}`);
     });
   });
