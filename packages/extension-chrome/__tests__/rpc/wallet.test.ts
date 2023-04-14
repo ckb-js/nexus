@@ -14,7 +14,7 @@ describe('RPC wallet_enable', () => {
     const platformService = factory.get('platformService');
     jest
       .spyOn(platformService, 'requestGrant')
-      .mockImplementation(() => Promise.reject(NexusCommonErrors.ApproveRejected));
+      .mockImplementation(() => Promise.reject(NexusCommonErrors.ApproveRejected()));
 
     await expect(request('wallet_enable')).rejects.toThrowError(/The approval was rejected/);
 

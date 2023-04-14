@@ -1,4 +1,4 @@
-import { createLogger, errors } from '@nexus-wallet/utils';
+import { createLogger } from '@nexus-wallet/utils';
 import {
   ZGetLiveCellsPayload,
   ZGetOffChainLocksPayload,
@@ -25,17 +25,8 @@ addMethod('wallet_enable', async (_, { getRequesterAppInfo, resolveService }) =>
     return { nickname: await configService.getNickname() };
   }
 
-  try {
-    const notificationService = resolveService('notificationService');
-    await notificationService.requestGrant({ url });
-  } catch (error) {
-    if (typeof error === 'function') {
-      errors.throwError(error());
-    } else {
-      /* istanbul ignore next */
-      errors.throwError(error);
-    }
-  }
+  const notificationService = resolveService('notificationService');
+  await notificationService.requestGrant({ url });
 
   await configService.addWhitelistItem({ host: host });
   return { nickname: await configService.getNickname() };
