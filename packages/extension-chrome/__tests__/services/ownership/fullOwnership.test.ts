@@ -1,7 +1,6 @@
-import { config } from '@ckb-lumos/lumos';
+import { config, Script, utils, Transaction } from '@ckb-lumos/lumos';
 import { Backend } from './../../../src/services/ownership/backend';
-import { TransactionSkeletonType } from '@ckb-lumos/helpers';
-import { TransactionSkeleton } from '@ckb-lumos/helpers';
+import { TransactionSkeletonType, TransactionSkeleton } from '@ckb-lumos/helpers';
 import {
   createFullOwnershipService,
   createWatchtower,
@@ -17,7 +16,6 @@ import { asyncSleep } from '../../helpers/utils';
 import { mockBackend } from '../../helpers/mockBackend';
 import { mockPlatformService, MOCK_PLATFORM_URL } from '../../helpers';
 import { bytes } from '@ckb-lumos/codec';
-import { Script, utils, Transaction } from '@ckb-lumos/lumos';
 import { common } from '@ckb-lumos/common-scripts';
 import { createEventHub } from '../../../src/services/event';
 import { SIGN_DATA_MAGIC } from '@nexus-wallet/protocol';
