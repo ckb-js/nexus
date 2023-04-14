@@ -61,7 +61,7 @@ class NotificationManager {
     if (!this.isCurrentNotificationActive()) {
       return this._createNotificationWindow(notification);
     } else {
-      this.notificationInfoQueue.push(notification);
+      this.addNotificationToQueue(notification);
       return new Promise((resolve) => {
         this.eventEmitter.on('finish', ({ nextSessionId }) => {
           // only process when the notification is at the top of the queue
@@ -110,20 +110,45 @@ class NotificationManager {
     return { window, messenger };
   }
 
+  private getNotificationCount(): number {
+    return this.currentNotification ? 1 + this.notificationInfoQueue.length : this.notificationInfoQueue.length;
+  }
+
+  /**
+   * Updates the Web Extension's "badge" number, on the Nexus Logo in the toolbar.
+   * The number reflects the current number of pending notifications needing user approval.
+   */
+  private async updateBadge(): Promise<void> {
+    let label = '';
+    const count = this.getNotificationCount();
+    if (count) {
+      label = String(count);
+    }
+    await browser.action.setBadgeText({ text: label });
+    await browser.action.setBadgeBackgroundColor({ color: '#037DD6' });
+  }
+
   private isAtTopOfQueue(notification: NotificationInfo): boolean {
     return this.notificationInfoQueue[0]?.sessionId === notification.sessionId;
   }
 
   private openCurrentNotification(notification: NotificationInfo): void {
     this.currentNotification = notification;
+    void this.updateBadge();
   }
 
   private closeCurrentNotification(): void {
     this.currentNotification = undefined;
+    void this.updateBadge();
   }
 
   private isCurrentNotificationActive(): boolean {
     return !!this.currentNotification;
+  }
+
+  private addNotificationToQueue(notification: NotificationInfo) {
+    this.notificationInfoQueue.push(notification);
+    void this.updateBadge();
   }
 
   private isCurrentNotification(notification: NotificationInfo): boolean {
