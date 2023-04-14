@@ -15,8 +15,7 @@ import {
   InputRightElement,
 } from '@chakra-ui/react';
 import times from 'lodash.times';
-import React, { useCallback, useEffect, useRef } from 'react';
-import { FC } from 'react';
+import React, { useCallback, useEffect, useRef, FC } from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import wordList from '@ckb-lumos/hd/lib/mnemonic/word_list';
 import { useWalletCreationStore } from '../store';

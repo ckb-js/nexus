@@ -1,3 +1,52 @@
+# v0.0.12 (Fri Apr 14 2023)
+
+#### 🚀 Enhancement
+
+- feat: serial notif windows to avoid confusion from multiple notif [#189](https://github.com/ckb-js/nexus/pull/189) ([@zhangyouxin](https://github.com/zhangyouxin))
+
+#### 🏠 Internal
+
+- chore: avoid canary for renovate pr [#212](https://github.com/ckb-js/nexus/pull/212) ([@homura](https://github.com/homura))
+- `@nexus-wallet/ownership-providers`
+  - chore: add eslint import plugin [#208](https://github.com/ckb-js/nexus/pull/208) ([@IronLu233](https://github.com/IronLu233))
+
+#### Authors: 3
+
+- Iron Lu ([@IronLu233](https://github.com/IronLu233))
+- Shinya ([@zhangyouxin](https://github.com/zhangyouxin))
+- Yonghui Lin ([@homura](https://github.com/homura))
+
+---
+
+# v0.0.11 (Thu Apr 13 2023)
+
+#### 🚀 Enhancement
+
+- `@nexus-wallet/ownership-providers`, `@nexus-wallet/protocol`, `@nexus-wallet/utils`
+  - chore: publish modules to npm [#196](https://github.com/ckb-js/nexus/pull/196) ([@homura](https://github.com/homura))
+
+#### 🐛 Bug Fix
+
+- `@nexus-wallet/utils`
+  - chore: bump manifest version in ci [#210](https://github.com/ckb-js/nexus/pull/210) ([@homura](https://github.com/homura))
+
+#### 🏠 Internal
+
+- test: e2e test scaffolding [#184](https://github.com/ckb-js/nexus/pull/184) ([@homura](https://github.com/homura))
+- `@nexus-wallet/utils`
+  - refactor: make utils flatten [#194](https://github.com/ckb-js/nexus/pull/194) ([@homura](https://github.com/homura))
+
+#### 📝 Documentation
+
+- docs: run with the local devnet [#145](https://github.com/ckb-js/nexus/pull/145) ([@zhangyouxin](https://github.com/zhangyouxin))
+
+#### Authors: 2
+
+- Shinya ([@zhangyouxin](https://github.com/zhangyouxin))
+- Yonghui Lin ([@homura](https://github.com/homura))
+
+---
+
 # v0.0.10 (Mon Apr 10 2023)
 
 #### 🔨 Breaking Minor Change
