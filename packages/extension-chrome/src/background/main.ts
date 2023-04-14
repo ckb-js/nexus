@@ -3,7 +3,9 @@ import '../rpc/walletImpl';
 import '../rpc/debugImpl';
 import '../rpc/ckbImpl';
 import { createLogger, LIB_VERSION } from '@nexus-wallet/utils';
+// eslint-disable-next-line import/no-unresolved
 import { Endpoint } from 'webext-bridge';
+// eslint-disable-next-line import/no-unresolved
 import { onMessage } from 'webext-bridge/background';
 import { createServer } from '../rpc';
 import { makeBrowserExtensionModulesFactory } from '../services';

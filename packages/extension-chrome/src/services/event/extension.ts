@@ -1,5 +1,6 @@
 import { createEventHub, EventHub } from './';
 import browser from 'webextension-polyfill';
+// eslint-disable-next-line import/no-unresolved
 import { sendMessage } from 'webext-bridge/background';
 
 export function createBrowserExtensionEventHub(): EventHub {
