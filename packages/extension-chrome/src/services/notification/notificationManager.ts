@@ -3,7 +3,7 @@ import { createSessionMessenger, SessionMessenger } from '../../messaging/sessio
 import { browserExtensionAdapter } from '../../messaging/adapters';
 import { NotificationPath, SessionMethods } from './common';
 import isEqual from 'lodash.isequal';
-import omit from 'lodash/omit';
+import omit from 'lodash.omit';
 import { NexusCommonErrors } from '../../errors';
 import { nanoid } from 'nanoid';
 import { EventEmitter } from 'eventemitter3';
