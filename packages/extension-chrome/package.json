@@ -34,6 +34,7 @@
     "@chakra-ui/icons": "2.0.17",
     "@chakra-ui/react": "2.4.9",
     "@chakra-ui/theme-tools": "2.0.17",
+    "@chakra-ui/utils": "2.0.15",
     "@ckb-lumos/base": "0.20.0-alpha.2",
     "@ckb-lumos/bi": "0.20.0-alpha.2",
     "@ckb-lumos/codec": "0.20.0-alpha.2",
