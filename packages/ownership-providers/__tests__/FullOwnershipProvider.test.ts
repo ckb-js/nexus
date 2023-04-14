@@ -1,10 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { BI } from '@ckb-lumos/bi';
 import { parseAddress, TransactionSkeleton, TransactionSkeletonType } from '@ckb-lumos/helpers';
-import { common } from '@ckb-lumos/common-scripts';
+import { common, secp256k1Blake160 } from '@ckb-lumos/common-scripts';
 import { Cell, Script } from '@nexus-wallet/protocol';
 import { predefined } from '@ckb-lumos/config-manager';
-import { secp256k1Blake160 } from '@ckb-lumos/common-scripts';
 import { FullOwnershipProvider } from '../src';
 import { WitnessArgs } from '@ckb-lumos/base/lib/blockchain';
 import { bytes } from '@ckb-lumos/codec';
