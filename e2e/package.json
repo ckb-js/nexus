@@ -10,6 +10,6 @@
     "test": "jest"
   },
   "devDependencies": {
-    "playwright": "1.32.1"
+    "playwright": "1.32.3"
   }
 }
