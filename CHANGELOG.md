@@ -1,3 +1,23 @@
+# v0.0.14 (Mon Apr 17 2023)
+
+#### 🚀 Enhancement
+
+- feat: badge to show how many notif window is pending [#216](https://github.com/ckb-js/nexus/pull/216) ([@zhangyouxin](https://github.com/zhangyouxin))
+
+#### 🏎 Performance
+
+- perf: support sign message in batch [#225](https://github.com/ckb-js/nexus/pull/225) ([@zhangyouxin](https://github.com/zhangyouxin))
+
+#### 🏠 Internal
+
+- chore: update webext-bridge to v6 [#209](https://github.com/ckb-js/nexus/pull/209) ([@zhangyouxin](https://github.com/zhangyouxin))
+
+#### Authors: 1
+
+- Shinya ([@zhangyouxin](https://github.com/zhangyouxin))
+
+---
+
 # v0.0.13 (Fri Apr 14 2023)
 
 #### 🚀 Enhancement
