@@ -6,6 +6,7 @@ import { createModulesFactory, ModuleProviderMap, ModulesFactory } from '../../s
 import { mockPlatformService, mockStorage } from '../helpers';
 import '../../src/rpc/debugImpl';
 import '../../src/rpc/walletImpl';
+import '../../src/rpc/ckbImpl';
 import { createInjectedCkb } from '../../src/injectedCkb';
 import { errors } from '@nexus-wallet/utils';
 import { RpcMethods } from '../../src/rpc/types';

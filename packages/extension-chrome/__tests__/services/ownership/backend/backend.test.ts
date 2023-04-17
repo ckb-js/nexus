@@ -3,6 +3,7 @@ import { createBackend } from '../../../../src/services/ownership/backend';
 import fetchMock from 'jest-fetch-mock';
 import { ScriptConfig, predefined } from '@ckb-lumos/config-manager/lib';
 import { toQueryParam } from '../../../../src/services/ownership/backend/backendUtils';
+import { createTransactionFromSkeleton, TransactionSkeleton } from '@ckb-lumos/helpers';
 
 describe('Query Param', () => {
   beforeEach(() => {
@@ -63,6 +64,26 @@ describe('getBlockchainInfo', () => {
 
     expect(res.chain).toBe('ckb_testnet');
   }, 5000);
+});
+
+describe('sendTransaction', () => {
+  beforeAll(() => {
+    fetchMock.enableMocks();
+  });
+  it('should send transaction', async () => {
+    const txHash = '0xa0ef4eb5f4ceeb08a4c8524d84c5da95dce2f608e0ca2ec8091191b0f330c6e3';
+    fetchMock.mockResponse(
+      JSON.stringify({
+        jsonrpc: '2.0',
+        result: txHash,
+        id: 0,
+      }),
+    );
+    const tx = createTransactionFromSkeleton(TransactionSkeleton());
+    const backend = createBackend({ nodeUrl: '' });
+    const result = await backend.sendTransaction(tx);
+    expect(result).toBe(txHash);
+  });
 });
 
 describe('hasHistory', () => {

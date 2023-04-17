@@ -31,6 +31,8 @@ export interface Backend {
   resolveTx(tx: Transaction): Promise<TransactionSkeletonType>;
 
   getBlockchainInfo(): Promise<ChainInfo>;
+
+  sendTransaction(tx: Transaction): Promise<string>;
 }
 
 // TODO better make it persisted in localstorage/db
@@ -89,7 +91,7 @@ export function createBackend(_payload: { nodeUrl: string }): Backend {
         return emptyReturnValue;
       }
 
-      const requetParams = locks.map((lock, i) => {
+      const requestParams = locks.map((lock, i) => {
         if (i === 0) {
           // only first lock could use the cursor
           return toQueryParam({ lock, cursor });
@@ -97,7 +99,7 @@ export function createBackend(_payload: { nodeUrl: string }): Backend {
         return toQueryParam({ lock });
       });
       // TODO make chunk size configurable, default to 10
-      const chunkedRequestParams = chunk(requetParams, 10);
+      const chunkedRequestParams = chunk(requestParams, 10);
       const chunkedLocks = chunk(locks, 10);
 
       const responsePromises = chunkedRequestParams.map((chunkedRequestParam) =>
@@ -169,6 +171,9 @@ export function createBackend(_payload: { nodeUrl: string }): Backend {
     getBlockchainInfo: async () => {
       const res = await client.request<RpcType.BlockchainInfo>('get_blockchain_info', null);
       return ResultFormatter.toBlockchainInfo(res);
+    },
+    sendTransaction(tx: Transaction) {
+      return client.request<string, Transaction>('send_transaction', tx);
     },
   };
 }
