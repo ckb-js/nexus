@@ -94,16 +94,17 @@ export function createKeystoreService(config: { storage: Storage<KeystoreData> }
       return storage.hasItem('keystore');
     },
 
-    signMessage: async (payload: SignMessagePayload): Promise<HexString> => {
+    signMessage: async (payload: SignMessagePayload): Promise<HexString[]> => {
       const keystoreData = await resolveKeystoreData();
-
       const keystore = Keystore.fromJson(keystoreData.wss);
       const extendedPrivateKey = keystore.extendedPrivateKey(await resolveValue(payload.password));
 
-      return key.signRecoverable(
-        bytes.hexify(payload.message),
-        extendedPrivateKey.privateKeyInfoByPath(payload.path).privateKey,
-      );
+      return payload.messageInfos.map((messageInfo) => {
+        return key.signRecoverable(
+          bytes.hexify(messageInfo.message),
+          extendedPrivateKey.privateKeyInfoByPath(messageInfo.path).privateKey,
+        );
+      });
     },
 
     reset: async () => {

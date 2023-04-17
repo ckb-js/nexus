@@ -144,9 +144,13 @@ describe('FullOwnership', () => {
     it('should signData by keystore service with proper params', async () => {
       await ownershipService.signData({ data: '0x1234', lock: scriptInfos[0].lock, url: MOCK_PLATFORM_URL });
       expect(keystoreService.signMessage).toBeCalledWith({
-        message: bytes.hexify(bytes.concat(SIGN_DATA_MAGIC, '0x1234')),
+        messageInfos: [
+          {
+            message: bytes.hexify(bytes.concat(SIGN_DATA_MAGIC, '0x1234')),
+            path: `${scriptInfos[0].parentPath}/${scriptInfos[0].childIndex}`,
+          },
+        ],
         password: '12345678',
-        path: `${scriptInfos[0].parentPath}/${scriptInfos[0].childIndex}`,
       });
       jest.clearAllMocks();
     });
@@ -154,16 +158,19 @@ describe('FullOwnership', () => {
     it('should signTx by keystore service with proper params', async () => {
       jest.spyOn(common, 'prepareSigningEntries').mockImplementation(() => createMockTxSkeleton());
       await ownershipService.signTransaction({ tx: {} as Transaction, url: MOCK_PLATFORM_URL });
-      expect(keystoreService.signMessage).toHaveBeenCalledTimes(2);
+      expect(keystoreService.signMessage).toHaveBeenCalledTimes(1);
       expect(keystoreService.signMessage).nthCalledWith(1, {
-        message: '0x1234',
+        messageInfos: [
+          {
+            message: '0x1234',
+            path: "m/44'/309'/0'/0/0",
+          },
+          {
+            message: '0x5678',
+            path: "m/44'/309'/0'/0/0",
+          },
+        ],
         password: '12345678',
-        path: `${scriptInfos[0].parentPath}/${scriptInfos[0].childIndex}`,
-      });
-      expect(keystoreService.signMessage).nthCalledWith(2, {
-        message: '0x5678',
-        password: '12345678',
-        path: `${scriptInfos[1].parentPath}/${scriptInfos[1].childIndex}`,
       });
       jest.clearAllMocks();
     });

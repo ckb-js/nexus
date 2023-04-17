@@ -32,7 +32,7 @@ export interface KeystoreService {
    *
    * @param payload {@link SignMessagePayload}
    */
-  signMessage(payload: SignMessagePayload): Promisable<HexString>;
+  signMessage(payload: SignMessagePayload): Promisable<HexString[]>;
 
   /**
    * clear all data about the keystore, including the mnemonic, extended public keys, etc.
@@ -76,7 +76,7 @@ export interface InitKeystorePayload {
   paths: NonHardenedPath[];
 }
 
-export interface SignMessagePayload {
+interface MessageInfo {
   /**
    * message be to signed
    */
@@ -85,6 +85,10 @@ export interface SignMessagePayload {
    * derivation path of the private key, will be used to sign the message
    */
   path: HardenedPath | NonHardenedPath;
+}
+
+export interface SignMessagePayload {
+  messageInfos: MessageInfo[];
   /**
    * password to decrypt the keystore
    */
