@@ -6,10 +6,10 @@ import { asserts, errors } from '@nexus-wallet/utils';
 import { FULL_OWNERSHIP_EXTERNAL_PARENT_PATH, FULL_OWNERSHIP_INTERNAL_PARENT_PATH } from './constants';
 import { CellCursor, decodeCursor, encodeCursor } from './cursor';
 import { BackendProvider } from './backend';
-import { HexString, Script, utils } from '@ckb-lumos/lumos';
+import { Script, utils } from '@ckb-lumos/lumos';
 import { common } from '@ckb-lumos/common-scripts';
 import { Config } from '@ckb-lumos/config-manager';
-import { SIGN_DATA_MAGIC } from '@nexus-wallet/protocol';
+import { GroupedSignature, SIGN_DATA_MAGIC } from '@nexus-wallet/protocol';
 
 export function createFullOwnershipService({
   storage,
@@ -109,7 +109,7 @@ export function createFullOwnershipService({
         tx: transactionSkeletonToObject(txSkeleton),
       });
 
-      const signatures = await Promise.all(
+      const groupedSignMessageInfos = await Promise.all(
         txSkeleton
           .get('signingEntries')
           .map(async (entry) => {
@@ -122,19 +122,22 @@ export function createFullOwnershipService({
               'Cannot find script info associated with lock %s, this error is unlikely to occur, have you changed the data in storage or have you manually built the data in storage?',
               lock,
             );
-
-            const signature = await keystoreService.signMessage({
+            const signMessageInfo = {
               message: entry.message,
-              password,
               path: `${info.parentPath}/${info.childIndex}`,
-            });
+            };
 
-            return [lock, signature] satisfies [Script, HexString];
+            return [lock, signMessageInfo] satisfies [Script, { message: string; path: string }];
           })
           .toArray(),
       );
 
-      return signatures;
+      const signatures = await keystoreService.signMessage({
+        messageInfos: groupedSignMessageInfos.map(([_, signMessageInfo]) => signMessageInfo),
+        password,
+      });
+
+      return groupedSignMessageInfos.map(([lock, _], index) => [lock, signatures[index]]) satisfies GroupedSignature;
     },
     signData: async (payload) => {
       const { password } = await platformService.requestSignData({
@@ -151,11 +154,10 @@ export function createFullOwnershipService({
 
       const prefixedData = bytes.concat(SIGN_DATA_MAGIC, payload.data);
       const signature = await keystoreService.signMessage({
-        message: bytes.hexify(prefixedData),
+        messageInfos: [{ message: bytes.hexify(prefixedData), path: `${info.parentPath}/${info.childIndex}` }],
         password,
-        path: `${info.parentPath}/${info.childIndex}`,
       });
-      return signature;
+      return signature[0];
     },
     getOffChainLocks: async ({ change }) => {
       const db = await getDb();
