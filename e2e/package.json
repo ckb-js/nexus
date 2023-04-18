@@ -1,6 +1,6 @@
 {
   "name": "@nexus-wallet/e2e",
-  "version": "0.0.10",
+  "version": "0.0.14",
   "description": "E2E testing for Nexus",
   "private": true,
   "directories": {
@@ -10,6 +10,6 @@
     "test": "jest"
   },
   "devDependencies": {
-    "playwright": "1.32.1"
+    "playwright": "1.32.3"
   }
 }

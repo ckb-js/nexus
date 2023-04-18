@@ -1,8 +1,6 @@
-import React from 'react';
-import { config } from '@ckb-lumos/lumos';
+import React, { ReactNode } from 'react';
+import { config, Cell, Script } from '@ckb-lumos/lumos';
 import { bytes } from '@ckb-lumos/codec';
-import { Cell, Script } from '@ckb-lumos/lumos';
-import { ReactNode } from 'react';
 import { Tooltip } from '@chakra-ui/react';
 
 const DEPOSIT_CELL_DATA = '0x0000000000000000';

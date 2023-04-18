@@ -98,8 +98,7 @@ describe('KeystoreService', () => {
 
     const child = fixture.derived[1];
     const signMessagePromise = service.signMessage({
-      path: child.path,
-      message: mockedMessage,
+      messageInfos: [{ path: child.path, message: mockedMessage }],
       password: MOCK_PLATFORM_PASSWORD,
     });
     await expect(Promise.resolve(signMessagePromise)).resolves.not.toThrowError();
@@ -110,7 +109,10 @@ describe('KeystoreService', () => {
 
   test('should throw when the password is incorrect', async () => {
     await expect(
-      service.signMessage({ path: `m/44'/309'/0'/0/0`, message: '0x00', password: 'incorrect password' }),
+      service.signMessage({
+        messageInfos: [{ path: `m/44'/309'/0'/0/0`, message: '0x00' }],
+        password: 'incorrect password',
+      }),
     ).rejects.toThrow();
   });
 

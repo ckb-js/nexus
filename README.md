@@ -13,6 +13,7 @@ Nexus is a user-friendly UTxO-based wallet extension for Nervos CKB that simplif
 ## Try it Out
 
 You can download the latest wallet from the GitHub [release](https://github.com/ckb-js/nexus/releases) to try it out, and we've provided a [demo](https://demo-nexus.vercel.app/) preview of the Nexus features
+
 ## Quick Start
 
 - Node.js 18+

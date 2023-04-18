@@ -1,6 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/chrome-manifest",
-  "version": "0.0.1",
+  "version": "0.0.14",
   "manifest_version": 3,
   "name": "Nexus Wallet",
   "description": "An UTxO friendly wallet extension for CKB",
