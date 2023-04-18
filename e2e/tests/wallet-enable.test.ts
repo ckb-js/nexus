@@ -3,7 +3,7 @@ import { DefaultTestEnv } from '../helpers';
 DefaultTestEnv.setupTest({ initWalletWithDefaults: true });
 
 describe('Enable wallet', function () {
-  test('should get the nickname when approved', async () => {
+  it('should get the nickname when approved', async () => {
     const enableTask = ckb.request({ method: 'wallet_enable' });
 
     const notificationPage = await testEnv.getNotificationPage();
@@ -17,7 +17,7 @@ describe('Enable wallet', function () {
     expect(res2.nickname).toBe(testEnv.defaultE2eData.nickname);
   });
 
-  test('should throw when user reject approval', async () => {
+  it('should throw when user reject approval', async () => {
     const enableTask = ckb.request({ method: 'wallet_enable' });
 
     const notificationPage = await testEnv.getNotificationPage();
@@ -25,4 +25,6 @@ describe('Enable wallet', function () {
 
     await expect(enableTask).rejects.toThrowError(/reject/);
   });
+
+  it.todo('should connected after enable ');
 });
