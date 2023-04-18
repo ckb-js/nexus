@@ -127,7 +127,9 @@ export class DefaultTestEnv implements TestEnv {
         `--disable-extensions-except=${this.options.extensionDirPath}`,
         `--load-extension=${this.options.extensionDirPath}`,
       ],
+      permissions: ['clipboard-read'],
     });
+    this._context.setDefaultTimeout(5000);
 
     let [background] = this.context.serviceWorkers();
     if (!background) background = await this.context.waitForEvent('serviceworker');

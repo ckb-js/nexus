@@ -5,6 +5,7 @@ const config: JestConfigWithTsJest = {
   transform: {
     '^.+\\.ts$': 'ts-jest',
   },
+  testTimeout: 15000,
 };
 
 export default config;
