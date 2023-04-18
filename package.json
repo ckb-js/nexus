@@ -77,7 +77,7 @@
     "**/*.{js,jsx,ts,tsx}": [
       "npx eslint"
     ],
-    "packages/types/**/*": [
+    "packages/protocol/**/*": [
       "npm run build:docs -w @nexus-wallet/protocol",
       "prettier --write",
       "git add docs/rpc.md"

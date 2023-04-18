@@ -32,12 +32,12 @@ export interface CkbMethods {
   ckb_getBlockchainInfo(): Promise<ChainInfo>;
 
   /**
-   * send a transaction to current network.
+   * send a transaction to current network. Currently it is **not** support to send transaction to a light client node.
    * @returns transaction hash of the sent transaction
    * @throws when the transaction is invalid, or meets network issue
    * @example
    * ```ts
-   * const signedTransaction;// you have a signed transaction.
+   * const signedTransaction;// signed transaction with your business logic
    * const txHash = await window.ckb.request({ method: "ckb_sendTransaction", params: { tx: signedTransaction } });
    * // if your transaction is to mainnet or testnet, you can view it on https://explorer.nervos.org/transaction/${txHash}
    * ```
