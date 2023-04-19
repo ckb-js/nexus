@@ -61,10 +61,7 @@ describe('Enable wallet', function () {
     await testEnv.getNotificationPage();
     const page1 = await testEnv.context.newPage();
     await page1.goto(page.url());
-
-    await page1.evaluate(() => {
-      // @ts-ignore
-      return window.ckb.request({ method: 'wallet_enable' });
-    });
+    const ckbInPage1 = testEnv.getInjectedCkb(page1);
+    await ckbInPage1.request({ method: 'wallet_enable' });
   });
 });
