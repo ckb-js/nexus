@@ -14,9 +14,40 @@ describe('add whitelist  site', function () {
     expect('').toBe('failed');
   });
 
-  it.todo('should get networkChange that the url is not in whitelist');
+  it('should get networkChange that the url is not in whitelist', async () => {
+    await page.evaluate(() => {
+      // @ts-ignore
+      window.ckbNetworkName = '';
+      window.ckb.on('networkChanged', (networkName: string) => {
+        // @ts-ignore
+        window.ckbNetworkName = networkName;
+      });
+    });
+    const extensionIdPage = await testEnv.context.newPage();
+    const extensionId = testEnv.extensionId;
+    await extensionIdPage.goto(`chrome-extension://${extensionId}/popup.html`);
+    await extensionIdPage.getByRole('button', { name: 'Network' }).click();
+    await extensionIdPage.getByText('Mainnet').click();
+    let ckbNetworkName = await page.evaluate(() => {
+      // @ts-ignore
+      return window.ckbNetworkName;
+    });
+    expect(ckbNetworkName).toBe('ckb');
+    await extensionIdPage.getByText('Testnet').click();
+    ckbNetworkName = await page.evaluate(() => {
+      // @ts-ignore
+      return window.ckbNetworkName;
+    });
+    expect(ckbNetworkName).toBe('ckb_testnet');
+  });
 
+  /**
+   * TODO: impl localhost  can be visited
+   */
   it.todo('should work that add localhost url');
+  /**
+   * TODO: impl 192.168  can be visited
+   */
   it.todo('should work that add 192.168.. url');
 
   it('should work that add url is http', async () => {
@@ -32,7 +63,7 @@ describe('add whitelist  site', function () {
   });
 
   it('should work that add url is https', async () => {
-    const httpsUrl = 'https://www.baidu.com/';
+    const httpsUrl = 'https://github.com';
     await page.goto(httpsUrl);
     const enableTask = ckb.request({ method: 'wallet_enable' });
 
@@ -44,7 +75,7 @@ describe('add whitelist  site', function () {
   });
 
   /**
-   * check url is in the box
+   * skip reason :TODO: check url is in the box
    */
   it.skip('should work that add url is too long', async () => {
     const tooLongUrl = 'https://mememmememememmemememmememememmemememmememememme.bit.cc/';

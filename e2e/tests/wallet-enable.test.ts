@@ -26,5 +26,45 @@ describe('Enable wallet', function () {
     await expect(enableTask).rejects.toThrowError(/reject/);
   });
 
-  it.todo('should connected after enable ');
+  /**
+   *  skip: Unable to open the plugin wallet on the current page to query the wallet's connection status
+   * 1. request  wallet_enable
+   * 2. approved
+   * expected
+   * 1. popup.html: connect status => connected
+   */
+  it.todo('should connected after approved');
+
+  it('should warn when wallet_enable again', async () => {
+    const enableTask = ckb.request({ method: 'wallet_enable' });
+    const notificationPage = await testEnv.getNotificationPage();
+    try {
+      //request wallet_enable again
+      await ckb.request({ method: 'wallet_enable' });
+    } catch (e) {
+      expect(`${e}`).toMatch(/A request is still in pending./);
+
+      await notificationPage.getByRole('button', { name: 'Connect' }).click();
+      const res = await enableTask;
+      expect(res.nickname).toBe(testEnv.defaultE2eData.nickname);
+      return;
+    }
+    expect('').toBe('failed');
+  });
+
+  /**
+   * skip reason: Error: [webext-bridge] No handler registered in 'background' to accept messages with id 'rpc'
+   *
+   */
+  it.skip('should not warn when 2 pages requested wallet', async () => {
+    void ckb.request({ method: 'wallet_enable' });
+    await testEnv.getNotificationPage();
+    const page1 = await testEnv.context.newPage();
+    await page1.goto(page.url());
+
+    await page1.evaluate(() => {
+      // @ts-ignore
+      return window.ckb.request({ method: 'wallet_enable' });
+    });
+  });
 });
