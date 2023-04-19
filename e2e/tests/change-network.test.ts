@@ -45,7 +45,7 @@ describe('Change network', function () {
     await extensionIdPage.getByRole('button', { name: 'Add Network' }).click();
     const notCkbName = 'user add not ckb test net name';
     await extensionIdPage.getByLabel('Name').fill(notCkbName);
-    await extensionIdPage.getByLabel('URL').fill('https://www.baidu.com');
+    await extensionIdPage.getByLabel('URL').fill('https://github.com');
     await extensionIdPage.getByRole('button', { name: 'Add' }).click();
     await extensionIdPage.getByText(notCkbName).allInnerTexts();
     await page.evaluate(() => {
