@@ -36,7 +36,7 @@ describe('Create a wallet', function () {
     let seedArr = clipboard.split(' ');
     seedArr = seedArr.sort();
     for (let i = 0; i < seedArr.length; i++) {
-      await page.getByText(seedArr[i]).click();
+      await page.getByText(seedArr[i], { exact: true }).click();
     }
     await page.getByRole('button', { name: 'Confirm' }).isDisabled();
   });
@@ -56,7 +56,7 @@ describe('Create a wallet', function () {
     await page.getByRole('button', { name: 'Next' }).click();
     let seedArr = clipboard.split(' ');
     for (let i = 0; i < seedArr.length; i++) {
-      await page.getByText(seedArr[i]).click();
+      await page.getByText(seedArr[i], { exact: true }).click();
     }
     await page.getByRole('button', { name: 'Confirm' }).click();
     await page.getByRole('button', { name: 'All Done' }).click();
