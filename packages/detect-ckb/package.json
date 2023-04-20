@@ -32,7 +32,7 @@
     "url": "https://github.com/ckb-js/nexus/issues"
   },
   "dependencies": {
-    "@nexus-wallet/protocol": "0.0.14",
-    "@nexus-wallet/utils": "0.0.14"
+    "@nexus-wallet/protocol": "*",
+    "@nexus-wallet/utils": "*"
   }
 }

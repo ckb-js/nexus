@@ -13,8 +13,8 @@
     "@ckb-lumos/common-scripts": "0.20.0-alpha.2",
     "@ckb-lumos/config-manager": "0.20.0-alpha.2",
     "@ckb-lumos/helpers": "0.20.0-alpha.2",
-    "@nexus-wallet/detect-ckb": "0.0.14",
-    "@nexus-wallet/ownership-providers": "0.0.14",
+    "@nexus-wallet/detect-ckb": "*",
+    "@nexus-wallet/ownership-providers": "*",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "buffer": "^5.7.1"
