@@ -19,14 +19,15 @@
   },
   "dependencies": {
     "@ckb-lumos/base": "0.20.0-alpha.2",
+    "@ckb-lumos/bi": "0.20.0-alpha.2",
     "@ckb-lumos/codec": "0.20.0-alpha.2",
+    "@ckb-lumos/helpers": "0.20.0-alpha.2",
     "@nexus-wallet/protocol": "0.0.15",
     "@nexus-wallet/utils": "0.0.15",
     "eventemitter3": "5.0.0"
   },
   "scripts": {
     "start": "cross-env NODE_ENV=development npm run start:webpack",
-    "start:webpack": "ts-node ./scripts/start.ts",
     "test": "jest",
     "build": "tsc",
     "clean": "rimraf build/*",

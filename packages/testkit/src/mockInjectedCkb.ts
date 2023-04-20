@@ -1,11 +1,11 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { InjectedCkb } from '@nexus-wallet/protocol';
 import { EventEmitter } from 'eventemitter3';
 import { LIB_VERSION } from '@nexus-wallet/utils';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyFn = (...args: any[]) => any;
 type StrKeyOf<T> = Extract<keyof T, string>;
-type CallMap<T> = { [key in keyof T]: T[key] extends (...args: any[]) => any ? T[key] : never };
+type CallMap<T> = { [key in keyof T]: T[key] extends AnyFn ? T[key] : never };
 
 interface MockInjectedCkb<Rpc, Evt> extends InjectedCkb<Rpc, Evt> {
   addMethod: <K extends StrKeyOf<Rpc>>(
@@ -16,7 +16,7 @@ interface MockInjectedCkb<Rpc, Evt> extends InjectedCkb<Rpc, Evt> {
 }
 
 export function mockInjectedCkb<Rpc extends object = object, Evt extends object = object>(): MockInjectedCkb<Rpc, Evt> {
-  const handlers = new Map<string, any>();
+  const handlers = new Map<string, AnyFn>();
   const emitter = new EventEmitter();
 
   const injectedCkb: MockInjectedCkb<Rpc, Evt> = {
