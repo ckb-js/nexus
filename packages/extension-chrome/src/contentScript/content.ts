@@ -13,8 +13,7 @@ function injectScript(): void {
 
 const client = new JSONRPCClient(async (req) => {
   // content script -> background service worker
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-  const response = await bridgeMessenger.sendMessage('rpc', req, 'background');
+  const response: unknown = await bridgeMessenger.sendMessage('rpc', req, 'background');
   if (!isJSONRPCResponse(response)) {
     errors.throwError(`Invalid JSON-RPC response: ${response}`);
   }
@@ -22,7 +21,6 @@ const client = new JSONRPCClient(async (req) => {
 });
 
 // background service worker -> content script
-// eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
 bridgeMessenger.onMessage('event', ({ data }) => {
   // content script -> injected script
   void windowMessenger.sendMessage('event', data, 'website');
