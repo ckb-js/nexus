@@ -2,12 +2,4 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  moduleNameMapper: {
-    // Force module uuid to resolve with the CJS entry point, because Jest does not support package.json.exports.
-    // See https://github.com/uuidjs/uuid/issues/451
-    uuid: require.resolve('uuid'),
-
-    '@vespaiach/axios-fetch-adapter': '<rootDir>/__mocks__/axiosAdapter.js',
-  },
-  testMatch: ['**/__tests__/**/*.test.ts'],
 };
