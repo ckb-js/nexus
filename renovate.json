@@ -1,27 +1,5 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:base"],
-  "ignoreDeps": [
-    "@ckb-lumos/base",
-    "@ckb-lumos/bi",
-    "@ckb-lumos/ckb-indexer",
-    "@ckb-lumos/codec",
-    "@ckb-lumos/common-script",
-    "@ckb-lumos/config-manager",
-    "@ckb-lumos/debugger",
-    "@ckb-lumos/experiment-tx-assembler",
-    "@ckb-lumos/hd",
-    "@ckb-lumos/hd-cache",
-    "@ckb-lumos/helpers",
-    "@ckb-lumos/light-client",
-    "@ckb-lumos/lumos",
-    "@ckb-lumos/molecule",
-    "@ckb-lumos/rpc",
-    "@ckb-lumos/testkit",
-    "@ckb-lumos/toolkit",
-    "@ckb-lumos/transaction-manager"
-  ],
-  "git-submodules": {
-    "enabled": true
-  }
+  "addLabels": ["dependencies"]
 }

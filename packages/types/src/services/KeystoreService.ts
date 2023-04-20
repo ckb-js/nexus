@@ -1,7 +1,7 @@
 import type { BytesLike } from '@ckb-lumos/codec';
 import type { HexString } from '@ckb-lumos/lumos';
 import type { Promisable } from '../base';
-import { Provider } from './common';
+import { Resolvable } from '../base';
 
 export interface KeystoreService {
   /**
@@ -32,7 +32,7 @@ export interface KeystoreService {
    *
    * @param payload {@link SignMessagePayload}
    */
-  signMessage(payload: SignMessagePayload): Promisable<HexString>;
+  signMessage(payload: SignMessagePayload): Promisable<HexString[]>;
 
   /**
    * clear all data about the keystore, including the mnemonic, extended public keys, etc.
@@ -76,7 +76,7 @@ export interface InitKeystorePayload {
   paths: NonHardenedPath[];
 }
 
-export interface SignMessagePayload {
+interface MessageInfo {
   /**
    * message be to signed
    */
@@ -85,6 +85,10 @@ export interface SignMessagePayload {
    * derivation path of the private key, will be used to sign the message
    */
   path: HardenedPath | NonHardenedPath;
+}
+
+export interface SignMessagePayload {
+  messageInfos: MessageInfo[];
   /**
    * password to decrypt the keystore
    */
@@ -99,4 +103,4 @@ export type HardenedPath = string;
  * checkout BIP-32 learn more about the {@link https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki#extended-keys non-hardened key}
  */
 export type NonHardenedPath = string;
-export type PasswordProvider = Provider<string>;
+export type PasswordProvider = Resolvable<string>;

@@ -3,6 +3,7 @@ import { Flex, Icon, Box, FlexProps } from '@chakra-ui/react';
 import { CheckCircleIcon } from '@chakra-ui/icons';
 import { WhiteAlphaBox } from './WhiteAlphaBox';
 import AvatarIcon from './icons/Avatar.svg';
+import MinusCircle from '../Components/icons/MinusCircle.svg';
 
 export type ConnectStatusCardProps = {
   name: string;
@@ -30,7 +31,11 @@ export const ConnectStatusCard: FC<ConnectStatusCardProps> = ({ name, connected,
       <Flex alignItems="center">
         {connected !== undefined && (
           <>
-            <CheckCircleIcon mr="4px" data-test-id="connectedStatusIndicator" w="16px" h="16px" color={'green.300'} />
+            {connected ? (
+              <CheckCircleIcon mr="4px" data-test-id="connectedStatusIndicator" w="16px" h="16px" color={'green.300'} />
+            ) : (
+              <Icon as={MinusCircle} w="16px" h="16px" mr="4px" />
+            )}
             <Box fontSize="sm" data-test-id="connectedStatusText">
               {connected ? 'Connected' : 'Disconnected'}
             </Box>

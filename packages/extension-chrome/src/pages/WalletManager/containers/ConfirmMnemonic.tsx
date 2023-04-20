@@ -62,7 +62,7 @@ export const ConfirmMnemonic: FC = () => {
         Confirm your Seed
       </Heading>
       <Box fontSize="md" w="480px" mb="8px">
-        Please select words below to form the correct Seed.
+        Please select words in correct order to form your seed.
       </Box>
 
       <Textarea data-test-id="selectedSeed" as="div" w="480px" h="200px">
@@ -92,7 +92,7 @@ export const ConfirmMnemonic: FC = () => {
               <Button
                 size="lg"
                 w="108px"
-                variant={hasChosen ? 'solid' : 'outline'}
+                variant={hasChosen ? 'primary' : 'outline'}
                 onClick={hasChosen ? removeChosenIndex(index) : addChosenIndex(index)}
                 // for preventing the button size change
                 borderWidth="1px"

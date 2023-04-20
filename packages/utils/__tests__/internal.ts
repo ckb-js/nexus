@@ -1,12 +1,12 @@
-import { formatMessage, resolveProvider } from '../src';
+import { formatMessage, resolveValue } from '../src';
 
-test('resolveProvider', async () => {
-  const password = '123456';
+test('resolveValue', async () => {
+  const value = '123456';
 
-  // sync provider
-  expect(resolveProvider(password)).toBe(password);
-  // async provider
-  await expect(resolveProvider(() => Promise.resolve(password))).resolves.toBe(password);
+  await expect(resolveValue(value)).resolves.toBe(value);
+  await expect(resolveValue(() => value)).resolves.toBe(value);
+  await expect(resolveValue(Promise.resolve(value))).resolves.toBe(value);
+  await expect(resolveValue(() => Promise.resolve(value))).resolves.toBe(value);
 });
 
 describe('formatMessage', () => {

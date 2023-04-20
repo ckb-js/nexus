@@ -1,9 +1,8 @@
 import React, { FC, useEffect } from 'react';
-import { HStack, Icon } from '@chakra-ui/react';
+import { HStack, Icon, Text, Card, Heading, Button, Spacer } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import HardDrive from '../../Components/icons/HardDrive.svg';
 import { PlusSquareIcon } from '@chakra-ui/icons';
-import { Text, Card, Heading, Button, Spacer } from '@chakra-ui/react';
 import { useWalletCreationStore } from '../store';
 
 export const Welcome: FC = () => {
@@ -35,7 +34,7 @@ export const Welcome: FC = () => {
     {
       heading: 'No, I already have a wallet',
       desc: 'Import your existing wallet using Seed',
-      actionText: 'Import wallet',
+      actionText: 'Import a wallet',
       width: '324px',
       paddingX: '68px',
       testId: 'importWallet',

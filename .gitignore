@@ -38,3 +38,6 @@ lib
 
 # MacOS
 .DS_Store
+
+# Vscode
+.vscode

@@ -12,8 +12,7 @@ import {
   Text,
   useToast,
 } from '@chakra-ui/react';
-import React, { useEffect, useState } from 'react';
-import { FC } from 'react';
+import React, { useEffect, useState, FC } from 'react';
 import { hd } from '@ckb-lumos/lumos';
 import FileCopyIcon from '../../Components/icons/FileCopy.svg';
 
