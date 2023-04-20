@@ -9,7 +9,8 @@
   },
   "workspaces": [
     "packages/*",
-    "e2e"
+    "e2e",
+    "examples/*"
   ],
   "devDependencies": {
     "@auto-it/core": "10.44.0",
@@ -18,15 +19,11 @@
     "@auto-it/protected-branch": "10.44.0",
     "@auto-it/released": "10.44.0",
     "@auto-it/upload-assets": "10.43.0",
-    "@babel/preset-env": "7.20.2",
-    "@babel/preset-react": "7.18.6",
-    "@babel/preset-typescript": "7.18.6",
     "@types/jest": "29.4.0",
     "@types/lodash.times": "4.3.7",
     "@typescript-eslint/eslint-plugin": "5.58.0",
     "@typescript-eslint/parser": "5.58.0",
     "concat-md": "0.5.1",
-    "concurrently": "7.6.0",
     "cross-env": "7.0.3",
     "eslint": "8.38.0",
     "eslint-config-react-app": "7.0.1",
