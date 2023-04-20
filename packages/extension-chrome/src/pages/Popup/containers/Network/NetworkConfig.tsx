@@ -17,8 +17,8 @@ export const NetworkConfig: FC = () => {
   const configService = useService('configService');
   const toast = useToast();
   const toggleNetworkMutation = useMutation({
-    mutationFn: (id: string) => {
-      return configService.setSelectedNetwork({ id }) as Promise<void>;
+    mutationFn: async (id: string) => {
+      await configService.setSelectedNetwork({ id });
     },
   });
 
