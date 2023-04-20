@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { FullOwnershipProvider } from '@nexus-wallet/ownership-providers';
 import { useAsyncState } from './useAsyncState';
 import { detectCkb } from '@nexus-wallet/detect-ckb';
@@ -8,12 +8,19 @@ const context = createContext<FullOwnershipProvider | null>(null);
 
 export function NexusProvider({ children }: React.PropsWithChildren) {
   const { Provider } = context;
+  const [detectFailed, setDetectFailed] = useState(false);
   const provider = useAsyncState(async () => {
-    const ckb = await detectCkb();
-    return new FullOwnershipProvider({ ckb: ckb });
+    try {
+      const ckb = await detectCkb();
+      return new FullOwnershipProvider({ ckb: ckb });
+    } catch {
+      setDetectFailed(true);
+      return null;
+    }
   });
 
-  if (!provider) return null;
+  if (detectFailed) return <div>Please install the Nexus first</div>;
+  if (!provider) return <div>Waiting</div>;
 
   return <Provider value={provider}>{children}</Provider>;
 }
