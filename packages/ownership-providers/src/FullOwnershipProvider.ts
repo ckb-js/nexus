@@ -1,17 +1,17 @@
 import range from 'lodash.range';
-import { Events, FullOwnership, InjectedCkb } from '@nexus-wallet/protocol';
+import { Events, FullOwnership, InjectedCkb, RpcMethods } from '@nexus-wallet/protocol';
 import { BI, BIish } from '@ckb-lumos/bi';
-import { errors } from '@nexus-wallet/utils';
+import { assert, errors } from '@nexus-wallet/utils';
 import {
   createTransactionFromSkeleton,
   minimalCellCapacityCompatible,
   parseAddress,
   TransactionSkeletonType,
 } from '@ckb-lumos/helpers';
-import { Address, blockchain, Cell, HexString, Script, Transaction } from '@ckb-lumos/base';
+import { Address, blockchain, Cell, CellDep, HexString, Script, Transaction } from '@ckb-lumos/base';
 import { bytes, PackParam } from '@ckb-lumos/codec';
 import { secp256k1Blake160 } from '@ckb-lumos/common-scripts';
-import { Config as LumosConfig, getConfig as getLumosConfig } from '@ckb-lumos/config-manager';
+import { Config as LumosConfig, getConfig as getLumosConfig, ScriptConfig } from '@ckb-lumos/config-manager';
 import { Uint8ArrayCodec } from '@ckb-lumos/codec/lib/base';
 
 function equalPack<C extends Uint8ArrayCodec>(codec: C, a: PackParam<C>, b: PackParam<C>): boolean {
@@ -28,6 +28,13 @@ type ReturnOf<K extends OwnershipMethodNames> = ReturnType<FullOwnership[`${Full
 
 /** Must be a full format address if it's an address */
 export type LockScriptLike = Address | Script;
+
+const SECP256K1_SIGNATURE_SIZE = 65;
+const SECP256K1_BLAKE160_WITNESS_PLACEHOLDER = bytes.hexify(
+  blockchain.WitnessArgs.pack({
+    lock: new Uint8Array(SECP256K1_SIGNATURE_SIZE),
+  }),
+);
 
 export type PayFeeOptions = {
   /**
@@ -71,14 +78,18 @@ function sumCapacity(cells: TransactionSkeletonType['inputs' | 'outputs']) {
 }
 
 export type FullOwnershipProviderConfig = {
-  ckb: InjectedCkb<FullOwnership, Events>;
+  ckb: InjectedCkb<RpcMethods, Events>;
 };
 
 export class FullOwnershipProvider {
-  private ckb: InjectedCkb<FullOwnership, Events>;
+  private ckb: InjectedCkb<RpcMethods, Events>;
 
   constructor(config: FullOwnershipProviderConfig) {
     this.ckb = config.ckb;
+  }
+
+  async enable(): Promise<{ nickname: string }> {
+    return this.ckb.request({ method: 'wallet_enable' });
   }
 
   async getLiveCells(params?: ParamOf<'getLiveCells'>): ReturnOf<'getLiveCells'> {
@@ -133,13 +144,16 @@ export class FullOwnershipProvider {
     const minimalChangeCapacity = minimalCellCapacityCompatible(changeCell);
 
     let neededCapacity = BI.from(config.amount).add(minimalChangeCapacity);
-    const inputCells: Cell[] = [];
+    const inputCells: Cell[] = txSkeleton.inputs.toArray();
+    const injectedCells: Cell[] = [];
 
     for await (const cell of this.collector()) {
       if (
-        inputCells.find(
-          (item) => !!item.outPoint && cell.outPoint && equalPack(blockchain.OutPoint, item.outPoint, cell.outPoint),
-        )
+        inputCells
+          .concat(injectedCells)
+          .find(
+            (item) => !!item.outPoint && cell.outPoint && equalPack(blockchain.OutPoint, item.outPoint, cell.outPoint),
+          )
       ) {
         continue;
       }
@@ -149,7 +163,7 @@ export class FullOwnershipProvider {
         continue;
       }
 
-      inputCells.push(cell);
+      injectedCells.push(cell);
       neededCapacity = neededCapacity.sub(BI.from(cell.cellOutput.capacity));
       if (neededCapacity.lte(0)) {
         break;
@@ -159,17 +173,32 @@ export class FullOwnershipProvider {
       errors.throwError('No cell sufficient to inject');
     }
 
-    const totalInputs = inputCells.reduce((sum, cell) => sum.add(BI.from(cell.cellOutput.capacity)), BI.from(0));
+    const totalInputs = injectedCells.reduce((sum, cell) => sum.add(BI.from(cell.cellOutput.capacity)), BI.from(0));
     const changeAmount = totalInputs.sub(BI.from(config.amount));
 
     changeCell.cellOutput.capacity = changeAmount.toHexString();
 
+    const cellDep = await this.getSecp256k1Blake160CellDep();
+
     txSkeleton = txSkeleton
       .update('inputs', (inputs) => {
-        return inputs.push(...inputCells);
+        return inputs.push(...injectedCells);
+      })
+      .update('witnesses', (witnesses) => {
+        const inputWitnesses = injectedCells.map(() => SECP256K1_BLAKE160_WITNESS_PLACEHOLDER);
+        return witnesses.push(...inputWitnesses);
       })
       .update('outputs', (outputs) => {
         return outputs.push(changeCell);
+      })
+      .update('cellDeps', (cellDeps) => {
+        const hasSecp256k1Dep = cellDeps.find((item) =>
+          equalPack(blockchain.OutPoint, item.outPoint, cellDep.outPoint),
+        );
+        if (hasSecp256k1Dep) {
+          return cellDeps;
+        }
+        return cellDeps.push(cellDep);
       });
 
     return txSkeleton;
@@ -327,6 +356,19 @@ export class FullOwnershipProvider {
     txSkeleton = txSkeleton.update('signingEntries', (entries) => entries.clear());
 
     return txSkeleton;
+  }
+
+  private async getSecp256k1Blake160CellDep(): Promise<CellDep> {
+    const config = await this.getSecp256k1Blake160Config();
+    return { depType: config.DEP_TYPE, outPoint: { txHash: config.TX_HASH, index: config.INDEX } };
+  }
+
+  // TODO: wait for wallet provider a API to get genesis block
+  private async getSecp256k1Blake160Config(): Promise<ScriptConfig> {
+    const config = await this.getLumosConfig();
+    const result = config.SCRIPTS.SECP256K1_BLAKE160;
+    assert(result, 'Cannot find secp256k1_blake160 config in lumos config');
+    return result;
   }
 
   // TODO: wait for wallet provide a API to get genesis block hash
