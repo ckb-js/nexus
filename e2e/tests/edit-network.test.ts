@@ -13,5 +13,5 @@ describe('Edit network', function () {
    * expected
    * 1. successful
    */
-  it.todo('should work when editing a network that is not currently in use', async () => {});
+  it.todo('should work when editing a network that is not currently in use');
 });
