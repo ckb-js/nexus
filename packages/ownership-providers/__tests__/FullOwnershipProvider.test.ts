@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { BI } from '@ckb-lumos/bi';
+import { BI, BIish, parseUnit } from '@ckb-lumos/bi';
 import { parseAddress, TransactionSkeleton, TransactionSkeletonType } from '@ckb-lumos/helpers';
 import { common, secp256k1Blake160 } from '@ckb-lumos/common-scripts';
 import { Cell, Script } from '@nexus-wallet/protocol';
@@ -37,17 +37,35 @@ function createOnchainLock(args: string): Script {
 }
 
 const onChainLocks1: Script = createOnchainLock('0x441509af');
-
 const onChainLocks2: Script = createOnchainLock('0x25061223');
 const onChainLocks3: Script = createOnchainLock('0x25061224');
 
+function parseCapacity(capacity: string): BI {
+  if (/&\d+$/.test(capacity)) {
+    return BI.from(capacity);
+  }
+  const matched = capacity.match(/^(\d+)(ckb|shannon)?$/);
+  if (!matched) {
+    throw new Error('Unknown capacity format');
+  }
+  const [, number, unit] = matched;
+  return parseUnit(number, unit as 'ckb' | 'shannon');
+}
+
 function createFakeCellWithCapacity(
-  capacity: number,
+  capacity: BIish,
   lock = offChainLock1,
   type: Script | undefined = undefined,
   outpointIndex = 0,
   data = '0x',
 ): Cell {
+  capacity = (() => {
+    if (typeof capacity === 'string') {
+      return parseCapacity(capacity);
+    }
+    return capacity;
+  })();
+
   return {
     cellOutput: {
       capacity: BI.from(capacity).toHexString(),
@@ -139,16 +157,18 @@ describe('class FullOwnershipProvider', () => {
     });
 
     it('Should pick multiple cells when single cell capacity is not enough', async () => {
-      const provider = initProviderWithCells([
-        createFakeCellWithCapacity(100 * 1e8, onChainLocks1, undefined, 0),
-        createFakeCellWithCapacity(100 * 1e8, onChainLocks1, undefined, 0),
-        createFakeCellWithCapacity(100 * 1e8, onChainLocks2, undefined, 1),
-        createFakeCellWithCapacity(300 * 1e8, onChainLocks1, undefined, 2),
-      ]);
-      const skeleton = await provider.injectCapacity(emptyTxSkeleton, { amount: 250 * 1e8 });
+      const cell1 = createFakeCellWithCapacity('100ckb', onChainLocks1, undefined, 0);
+      const cell2 = createFakeCellWithCapacity('100ckb', onChainLocks2, undefined, 1);
+      const cell3 = createFakeCellWithCapacity('300ckb', onChainLocks1, undefined, 2);
+
+      const provider = initProviderWithCells([cell1, cell2, cell3]);
+
+      const injectAmount = parseUnit('250', 'ckb');
+      const skeleton = await provider.injectCapacity(emptyTxSkeleton, { amount: injectAmount });
       expect(skeleton.get('inputs').size).toBe(3);
       expect(skeleton.get('outputs').size).toBe(1);
-      expect(skeleton.get('outputs').get(0)?.cellOutput.capacity).toBe(BI.from(500 * 1e8 - 250 * 1e8).toHexString());
+
+      expect(skeleton.get('outputs').get(0)?.cellOutput.capacity).toBe(injectAmount.toHexString());
     });
 
     it('Should throw error when changeLock is not found', async () => {
@@ -191,16 +211,19 @@ describe('class FullOwnershipProvider', () => {
         );
     }
 
-    it('Automatically inject capacity when `autoInject` is true', async () => {
-      const provider = buildProvider([createFakeCellWithCapacity(100 * 1e8), createFakeCellWithCapacity(200 * 1e8)]);
-      const txSkeleton = createFakeSkeleton(
-        [createFakeCellWithCapacity(200 * 1e8, offChainLock1)],
-        [createFakeCellWithCapacity(200 * 1e8, onChainLocks2)],
-      );
+    it('Should skip the cell which already in inputs', async () => {
+      // the collected1 is already in inputs
+      const txInputCell = createFakeCellWithCapacity(100 * 1e8, onChainLocks1, undefined, 0);
+      const collectedCell = createFakeCellWithCapacity(200 * 1e8, onChainLocks1, undefined, 1);
+
+      const txSkeleton = createFakeSkeleton([txInputCell], [createFakeCellWithCapacity(200 * 1e8, onChainLocks2)]);
+      const provider = buildProvider([txInputCell, collectedCell]);
 
       const withFee = await provider.payFee(txSkeleton, { autoInject: true });
 
       expect(withFee.get('inputs').size).toBe(2);
+      expect(withFee.get('inputs').get(0)).toEqual(txInputCell);
+      expect(withFee.get('inputs').get(1)).toEqual(collectedCell);
       expect(withFee.get('outputs').size).toBe(2);
       expect(getTxSkeletonFee(withFee)).toEqual(getExpectedFee(withFee));
     });
@@ -279,9 +302,11 @@ describe('class FullOwnershipProvider', () => {
     });
 
     it('Should use wallet cell when `byOutputIndexes` is not sufficient', async () => {
-      const provider = buildProvider([createFakeCellWithCapacity(100 * 1e8, onChainLocks1)]);
+      const txInputCell = createFakeCellWithCapacity(190 * 1e8 + 100, onChainLocks1, undefined, 0);
+      const collectedCell = createFakeCellWithCapacity(100 * 1e8, onChainLocks1, undefined, 1);
+      const provider = buildProvider([collectedCell]);
       const txSkeleton = createFakeSkeleton(
-        [createFakeCellWithCapacity(190 * 1e8 + 100, offChainLock1)],
+        [txInputCell],
         [
           createFakeCellWithCapacity(100 * 1e8, onChainLocks2),
           createFakeCellWithCapacity(45 * 1e8 + 50, onChainLocks3),
