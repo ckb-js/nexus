@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Box, Button, ButtonGroup, Flex, Image, Skeleton, VStack } from '@chakra-ui/react';
+import { Box, Button, ButtonGroup, Flex, Skeleton, VStack } from '@chakra-ui/react';
 import { CheckCircleIcon } from '@chakra-ui/icons';
 import { useQuery } from '@tanstack/react-query';
 
@@ -7,6 +7,7 @@ import { ConnectStatusCard } from '../../Components/ConnectStatusCard';
 import { WhiteAlphaBox } from '../../Components/WhiteAlphaBox';
 import { useSessionMessenger } from '../../hooks/useSessionMessenger';
 import { useConfigQuery } from '../../hooks/useConfigQuery';
+import { SiteFavicon } from '../../Components/SiteFavicon';
 
 export const Grant: React.FC = () => {
   const messenger = useSessionMessenger();
@@ -17,11 +18,10 @@ export const Grant: React.FC = () => {
 
   const configQuery = useConfigQuery();
 
-  const { favicon } = requestAppInfoQuery.data || {};
   const url = useMemo(() => {
-    if (!requestAppInfoQuery.data?.url) return '';
+    if (!requestAppInfoQuery.data?.url) return null;
     const url = new URL(requestAppInfoQuery.data?.url);
-    return url.hostname;
+    return url;
   }, [requestAppInfoQuery.data?.url]);
 
   const permissions = ['View your addresses', 'Request approval for transactions'];
@@ -31,10 +31,10 @@ export const Grant: React.FC = () => {
       <ConnectStatusCard name={configQuery.data?.nickname!} />
 
       <Flex py="32px" alignItems="center" direction="column">
-        <Image data-test-id="requester.favicon" w="40px" mb="8px" h="40px" src={favicon} />
+        <SiteFavicon data-test-id="requester.favicon" mb="8px" host={url?.host!} size={40} />
 
         <Box fontSize="md" data-test-id="requester.url" fontWeight="semibold">
-          {url}
+          {url?.hostname}
         </Box>
       </Flex>
 
@@ -56,7 +56,7 @@ export const Grant: React.FC = () => {
       </Box>
 
       <ButtonGroup mt="32px" size="md">
-        <Button data-test-id="cancel" onClick={() => window.close()} w="220px" color="gray.800" colorScheme="gray">
+        <Button data-test-id="cancel" onClick={() => window.close()} w="220px" variant="outline" colorScheme="white">
           Cancel
         </Button>
 

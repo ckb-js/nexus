@@ -1,4 +1,6 @@
+import { NetworkName } from '@nexus-wallet/protocol';
 import { Promisable } from '../base';
+import type { PlatformService } from '../services/NotificationService'; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface ConfigService {
   /**
@@ -89,7 +91,10 @@ export interface Config {
 
 export interface TrustedHost {
   host: string;
-  favicon: string;
+  /**
+   * @deprecated please use {@link PlatformService.getFavicon}
+   */
+  favicon?: string;
 }
 
 export interface NetworkConfig {
@@ -98,8 +103,3 @@ export interface NetworkConfig {
   networkName: NetworkName;
   rpcUrl: string;
 }
-
-/**
- * {@link https://github.com/nervosnetwork/ckb/blob/develop/rpc/README.md#type-chaininfo network type}
- */
-export type NetworkName = 'ckb' | 'ckb_testnet' | string;

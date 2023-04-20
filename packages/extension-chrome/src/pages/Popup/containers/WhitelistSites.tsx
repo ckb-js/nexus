@@ -2,7 +2,6 @@ import React, { FC, useMemo, useState } from 'react';
 import {
   Flex,
   VStack,
-  Image,
   Center,
   Box,
   Text,
@@ -19,6 +18,7 @@ import { useMutation } from '@tanstack/react-query';
 import { WhiteAlphaBox } from '../../Components/WhiteAlphaBox';
 import { useConfigQuery } from '../../hooks/useConfigQuery';
 import { useService } from '../../hooks/useService';
+import { SiteFavicon } from '../../Components/SiteFavicon';
 
 export const WhitelistSites: FC = () => {
   const configQuery = useConfigQuery();
@@ -51,7 +51,7 @@ export const WhitelistSites: FC = () => {
   return (
     <Skeleton isLoaded={!!filteredSites}>
       <Text as={Box} fontSize="md" mb="20px" w="100%">
-        Yan is connected to these sites. They can view your account address
+        {configQuery.data?.nickname} is connected to these sites. They can view your account address
       </Text>
       <InputGroup alignItems="center" h="60px" mb="20px">
         <InputLeftElement
@@ -69,42 +69,51 @@ export const WhitelistSites: FC = () => {
           data-test-id="siteSearch"
           size="lg"
           w="452px"
+          background="transparent"
+          color="white"
           onChange={(e) => setSearchQuery(e.target.value)}
           value={searchQuery}
-          colorScheme="white"
           h="60px"
           pl="48px"
         />
       </InputGroup>
-      <VStack
-        data-test-id="siteList"
-        overflowY="auto"
-        padding="30px 20px"
-        as={WhiteAlphaBox}
-        spacing="12px"
-        maxH="288px"
-        flexDirection="column"
-      >
-        {filteredSites?.map((site, index) => (
-          <Flex data-test-id={`site[${index}]`} alignItems="center" h="48px" w="100%" key={site.host}>
-            <Center w="48px" borderRadius="50%" padding="4px" h="48px" backgroundColor="whiteAlpha.300">
-              <Image data-test-id={`site[${index}].favicon`} w="32px" h="32px" src={site.favicon} />
-            </Center>
-            <Flex ml="20px" data-test-id={`site[${index}].url`} flex={1} fontSize="lg" alignItems="center">
-              <Highlight query={searchQuery} styles={{ bg: 'white' }}>
-                {site.host}
-              </Highlight>
+      {!filteredSites?.length ? (
+        <Center as={WhiteAlphaBox} data-test-id="siteList" h="288px">
+          <Box color="whiteAlpha.700" height="20px" fontSize="sm">
+            No whitelist sites found.
+          </Box>
+        </Center>
+      ) : (
+        <VStack
+          data-test-id="siteList"
+          overflowY="auto"
+          padding="30px 20px"
+          as={WhiteAlphaBox}
+          spacing="12px"
+          h="288px"
+          flexDirection="column"
+        >
+          {filteredSites?.map((site, index) => (
+            <Flex data-test-id={`site[${index}]`} alignItems="center" h="48px" w="100%" key={site.host}>
+              <Center w="48px" borderRadius="50%" padding="4px" h="48px" backgroundColor="whiteAlpha.300">
+                <SiteFavicon data-test-id={`site[${index}].favicon`} size={32} host={site.host} />
+              </Center>
+              <Flex ml="20px" data-test-id={`site[${index}].url`} flex={1} fontSize="lg" alignItems="center">
+                <Highlight query={searchQuery} styles={{ bg: 'white' }}>
+                  {site.host}
+                </Highlight>
+              </Flex>
+              <DeleteIcon
+                data-test-id={`site[${index}].remove`}
+                cursor="pointer"
+                w="20px"
+                h="20px"
+                onClick={removeSite(site.host)}
+              />
             </Flex>
-            <DeleteIcon
-              data-test-id={`site[${index}].remove`}
-              cursor="pointer"
-              w="20px"
-              h="20px"
-              onClick={removeSite(site.host)}
-            />
-          </Flex>
-        ))}
-      </VStack>
+          ))}
+        </VStack>
+      )}
     </Skeleton>
   );
 };

@@ -1,7 +1,6 @@
-import { config } from '@ckb-lumos/lumos';
+import { config, Script, utils, Transaction } from '@ckb-lumos/lumos';
 import { Backend } from './../../../src/services/ownership/backend';
-import { TransactionSkeletonType } from '@ckb-lumos/helpers';
-import { TransactionSkeleton } from '@ckb-lumos/helpers';
+import { TransactionSkeletonType, TransactionSkeleton } from '@ckb-lumos/helpers';
 import {
   createFullOwnershipService,
   createWatchtower,
@@ -17,7 +16,6 @@ import { asyncSleep } from '../../helpers/utils';
 import { mockBackend } from '../../helpers/mockBackend';
 import { mockPlatformService, MOCK_PLATFORM_URL } from '../../helpers';
 import { bytes } from '@ckb-lumos/codec';
-import { Script, utils, Transaction } from '@ckb-lumos/lumos';
 import { common } from '@ckb-lumos/common-scripts';
 import { createEventHub } from '../../../src/services/event';
 import { SIGN_DATA_MAGIC } from '@nexus-wallet/protocol';
@@ -111,7 +109,15 @@ describe('FullOwnership', () => {
       });
     });
 
-    it('should get live cells', async () => {
+    it('should get live cells with cursor', async () => {
+      await ownershipService.getLiveCells({ cursor: '3:0x1234' });
+      expect(backend.getLiveCellsByLocks).toBeCalledWith({
+        cursor: '0x1234',
+        locks: [scriptInfos[3].lock],
+      });
+    });
+
+    it('should get live cells with default change', async () => {
       await ownershipService.getLiveCells({});
       expect(backend.getLiveCellsByLocks).toBeCalledWith({
         cursor: '',
@@ -119,12 +125,32 @@ describe('FullOwnership', () => {
       });
     });
 
+    it('should get external live cells with change set to external', async () => {
+      await ownershipService.getLiveCells({ change: 'external' });
+      expect(backend.getLiveCellsByLocks).toBeCalledWith({
+        cursor: '',
+        locks: [scriptInfos[1].lock],
+      });
+    });
+
+    it('should get internal live cells with change set to internal', async () => {
+      await ownershipService.getLiveCells({ change: 'internal' });
+      expect(backend.getLiveCellsByLocks).toBeCalledWith({
+        cursor: '',
+        locks: [scriptInfos[3].lock],
+      });
+    });
+
     it('should signData by keystore service with proper params', async () => {
       await ownershipService.signData({ data: '0x1234', lock: scriptInfos[0].lock, url: MOCK_PLATFORM_URL });
       expect(keystoreService.signMessage).toBeCalledWith({
-        message: bytes.hexify(bytes.concat(SIGN_DATA_MAGIC, '0x1234')),
+        messageInfos: [
+          {
+            message: bytes.hexify(bytes.concat(SIGN_DATA_MAGIC, '0x1234')),
+            path: `${scriptInfos[0].parentPath}/${scriptInfos[0].childIndex}`,
+          },
+        ],
         password: '12345678',
-        path: `${scriptInfos[0].parentPath}/${scriptInfos[0].childIndex}`,
       });
       jest.clearAllMocks();
     });
@@ -132,16 +158,19 @@ describe('FullOwnership', () => {
     it('should signTx by keystore service with proper params', async () => {
       jest.spyOn(common, 'prepareSigningEntries').mockImplementation(() => createMockTxSkeleton());
       await ownershipService.signTransaction({ tx: {} as Transaction, url: MOCK_PLATFORM_URL });
-      expect(keystoreService.signMessage).toHaveBeenCalledTimes(2);
+      expect(keystoreService.signMessage).toHaveBeenCalledTimes(1);
       expect(keystoreService.signMessage).nthCalledWith(1, {
-        message: '0x1234',
+        messageInfos: [
+          {
+            message: '0x1234',
+            path: "m/44'/309'/0'/0/0",
+          },
+          {
+            message: '0x5678',
+            path: "m/44'/309'/0'/0/0",
+          },
+        ],
         password: '12345678',
-        path: `${scriptInfos[0].parentPath}/${scriptInfos[0].childIndex}`,
-      });
-      expect(keystoreService.signMessage).nthCalledWith(2, {
-        message: '0x5678',
-        password: '12345678',
-        path: `${scriptInfos[1].parentPath}/${scriptInfos[1].childIndex}`,
       });
       jest.clearAllMocks();
     });

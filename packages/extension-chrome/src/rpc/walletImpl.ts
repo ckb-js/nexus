@@ -1,4 +1,4 @@
-import { createLogger, errors } from '@nexus-wallet/utils';
+import { createLogger } from '@nexus-wallet/utils';
 import {
   ZGetLiveCellsPayload,
   ZGetOffChainLocksPayload,
@@ -14,7 +14,7 @@ addMethod('wallet_enable', async (_, { getRequesterAppInfo, resolveService }) =>
   const configService = resolveService('configService');
 
   const { url } = await getRequesterAppInfo();
-  const { host, protocol } = new URL(url);
+  const { host } = new URL(url);
 
   logger.info(`wallet_enable: %s`, url);
 
@@ -25,14 +25,10 @@ addMethod('wallet_enable', async (_, { getRequesterAppInfo, resolveService }) =>
     return { nickname: await configService.getNickname() };
   }
 
-  try {
-    const notificationService = resolveService('notificationService');
-    await notificationService.requestGrant({ url });
-  } catch {
-    errors.throwError('User has rejected');
-  }
+  const notificationService = resolveService('notificationService');
+  await notificationService.requestGrant({ url });
 
-  await configService.addWhitelistItem({ host: host, favicon: `${protocol}//${host}/favicon.ico` });
+  await configService.addWhitelistItem({ host: host });
   return { nickname: await configService.getNickname() };
 });
 

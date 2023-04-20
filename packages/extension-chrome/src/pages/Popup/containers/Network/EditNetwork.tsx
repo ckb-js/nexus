@@ -98,21 +98,12 @@ export const EditNetwork: FC<EditNetworkProps> = ({ mode }) => {
       <VStack as={WhiteAlphaBox} spacing="16px" p="35px 20px" direction="column">
         <FormControl>
           <FormLabel>Name</FormLabel>
-          <Input
-            color="black"
-            variant="outline"
-            backgroundColor="white"
-            {...register('name', { required: true })}
-            name="name"
-          />
+          <Input {...register('name', { required: true })} name="name" />
         </FormControl>
 
         <FormControl>
           <FormLabel>URL</FormLabel>
           <Input
-            color="black"
-            variant="outline"
-            backgroundColor="white"
             {...register('rpcUrl', {
               required: true,
               pattern: HTTP_URL_PATTERN,
@@ -142,10 +133,10 @@ export const EditNetwork: FC<EditNetworkProps> = ({ mode }) => {
               onClick={() => {
                 navigate(-1);
               }}
-              colorScheme="gray"
-              color="gray.800"
               data-test-id="add"
               width="220px"
+              colorScheme="white"
+              variant="outline"
             >
               Cancel
             </Button>

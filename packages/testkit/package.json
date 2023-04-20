@@ -18,10 +18,10 @@
     "url": "git+https://github.com/ckb-js/nexus.git"
   },
   "dependencies": {
-    "@ckb-lumos/base": "0.20.0-alpha.1",
-    "@ckb-lumos/codec": "0.20.0-alpha.1",
-    "@nexus-wallet/protocol": "*",
-    "@nexus-wallet/utils": "*",
+    "@ckb-lumos/base": "0.20.0-alpha.2",
+    "@ckb-lumos/codec": "0.20.0-alpha.2",
+    "@nexus-wallet/protocol": "0.0.15",
+    "@nexus-wallet/utils": "0.0.15",
     "eventemitter3": "5.0.0"
   },
   "scripts": {

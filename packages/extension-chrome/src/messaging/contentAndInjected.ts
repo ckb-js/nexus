@@ -47,7 +47,7 @@ export function sendMessage<Req, Res>(
 
   return new Promise((resolve) => {
     posterAndListener.addEventListener('message', (event) => {
-      const receivedMessage = event.data;
+      const receivedMessage: unknown = event.data;
       if (!isNexusMessage(receivedMessage)) return;
 
       if (receivedMessage.target !== currentContext) return;
@@ -75,7 +75,7 @@ export function onMessage<Req, Res>(
   const posterAndListener = options?.eventPosterAndListener || window;
 
   posterAndListener.addEventListener('message', async (event) => {
-    const receivedMessage = event.data;
+    const receivedMessage: unknown = event.data;
     if (!isNexusMessage(receivedMessage)) return;
 
     const receivedMessageType = typeOfNexusMessage(receivedMessage);

@@ -1,6 +1,9 @@
-import { formatMessageWithPrefix } from './internal';
+import { formatMessage } from './internal';
 
-let adapter: Logger = console;
+const noop = () => {};
+const noopAdapter: Logger = { trace: noop, debug: noop, info: noop, warn: noop, error: noop };
+
+let adapter: Logger = typeof console === 'undefined' ? noopAdapter : console;
 let loglevel: LogLevel = 'info';
 
 export function createLogger(module = 'Nexus'): Logger {
@@ -10,12 +13,10 @@ export function createLogger(module = 'Nexus'): Logger {
       const currentLogLevel = typeof loglevel === 'string' ? LOG_LEVELS[loglevel] : loglevel;
       if (LOG_LEVELS[method] < currentLogLevel || !args.length) return;
 
-      const log = adapter[method];
-
       const level = method.toUpperCase();
       const prefix = `[${module}]\t[${level}]\t`;
 
-      log(formatMessageWithPrefix(prefix, ...args));
+      adapter[method](`${prefix}${formatMessage(...args)}`);
     };
 
   return {

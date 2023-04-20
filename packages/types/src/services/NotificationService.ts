@@ -1,5 +1,5 @@
 import { TransactionSkeletonObject } from '@ckb-lumos/helpers';
-import { HexString } from '@ckb-lumos/lumos';
+import type { HexString } from '@ckb-lumos/lumos';
 
 export interface PlatformService<Sender = unknown> {
   /**
@@ -30,6 +30,16 @@ export interface PlatformService<Sender = unknown> {
    * @throws if the Chrome extension permission is not granted, e.g. favicon
    */
   getRequesterAppInfo(sender: Sender): Promise<{ url: string }>;
+
+  /**
+   * get the favicon URL of the given host
+   */
+  getFavicon(options: { host: string; size?: number }): string;
+  /**
+   * get the active site(the active tab) information
+   * @throws if the Chrome extension permission is not granted
+   */
+  getActiveSiteInfo(): Promise<{ favIconUrl?: string; url?: string } | undefined>;
 }
 
 /**

@@ -14,7 +14,7 @@ type RpcQueryType = [
   {
     script: RpcType.Script;
     script_type: 'lock' | 'type';
-    search_type: 'exact' | 'prefix';
+    script_search_mode: 'exact' | 'prefix';
   },
   Order,
   Limit,
@@ -34,7 +34,7 @@ const toQueryParam = (payload: {
       args: payload.lock.args,
     },
     script_type: 'lock',
-    search_type: 'exact',
+    script_search_mode: 'exact',
   },
   payload.order ?? 'asc',
   payload.limit ?? '0x64',
@@ -102,15 +102,14 @@ function createRpcClient(url: string, options?: RpcClientOptions): RpcClient {
 
   async function _request(body: JSONRPCRequest | JSONRPCRequest[]): Promise<JSONRPCResponse | JSONRPCResponse[]> {
     ++jsonRpcId;
-    const fetchPromise = fetch(url, {
-      method: 'POST',
-      body: JSON.stringify(body),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
     const retryRunner = async () => {
-      const res = await fetchPromise;
+      const res = await fetch(url, {
+        method: 'POST',
+        body: JSON.stringify(body),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
       // Abort retrying if the resource doesn't exist
       if (res.status >= 300) {
         /* istanbul ignore next */

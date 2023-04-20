@@ -1,24 +1,27 @@
 {
   "name": "@nexus-wallet/utils",
-  "version": "0.0.1",
+  "version": "0.0.15",
   "description": "",
   "homepage": "https://github.com/ckb-js/nexus/tree/main/utils#readme",
   "license": "MIT",
   "main": "lib",
-  "private": true,
+  "publishConfig": {
+    "access": "public"
+  },
   "directories": {
     "lib": "lib",
     "test": "__tests__"
   },
   "files": [
-    "lib"
+    "lib",
+    "src",
+    "README.md"
   ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ckb-js/nexus.git"
   },
   "scripts": {
-    "prepare": "node -p \"'export const LIB_VERSION = ' + JSON.stringify(require('./package.json').version) + ';'\" > src/version.ts && prettier --write src/version.ts",
     "start": "cross-env NODE_ENV=development npm run start:webpack",
     "start:webpack": "ts-node ./scripts/start.ts",
     "build": "tsc",
@@ -28,9 +31,5 @@
   },
   "bugs": {
     "url": "https://github.com/ckb-js/nexus/issues"
-  },
-  "dependencies": {
-    "@types/lodash": "4.14.191",
-    "lodash": "4.17.21"
   }
 }

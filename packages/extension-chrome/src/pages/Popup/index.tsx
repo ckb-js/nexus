@@ -8,7 +8,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { Home } from './containers/Home';
 import { EditNetwork } from './containers/Network/EditNetwork';
-import { theme } from '../theme';
+import { solidBackgroundTheme } from '../theme';
 import { DialogFrame } from '../Components/DialogFrame';
 import { useStartInitIfNotInitialized } from '../hooks/useStartInitIfNotInitialized';
 
@@ -82,7 +82,8 @@ const App: FC = () => {
 
   return (
     <React.StrictMode>
-      <ChakraProvider theme={theme}>
+      {/* eslint-disable-next-line @typescript-eslint/no-unsafe-assignment */}
+      <ChakraProvider theme={solidBackgroundTheme}>
         <QueryClientProvider client={queryClient}>
           <RouterProvider router={hashRouter} />
         </QueryClientProvider>
