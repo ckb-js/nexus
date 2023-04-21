@@ -1,18 +1,21 @@
 import { createEventHub, EventHub } from './';
 import browser from 'webextension-polyfill';
-// FIXME re-implement this by popup -> background -> content-script
-import { sendMessage as popupSendMessage } from 'webext-bridge/popup';
-import { sendMessage as backgroundSendMessage } from 'webext-bridge/background';
 
 export function createBrowserExtensionEventHub(): EventHub {
   const hub = createEventHub();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let sendMessage: (...args: any[]) => any = () => {};
 
-  const sendMessage = (() => {
-    if (typeof ServiceWorkerGlobalScope !== 'undefined' && globalThis instanceof ServiceWorkerGlobalScope) {
-      return backgroundSendMessage;
-    }
-    return popupSendMessage;
-  })();
+  // FIXME re-implement this by popup -> background -> content-script
+  if (typeof ServiceWorkerGlobalScope !== 'undefined' && globalThis instanceof ServiceWorkerGlobalScope) {
+    void import('webext-bridge/background').then((module) => {
+      sendMessage = module.sendMessage;
+    });
+  } else {
+    void import('webext-bridge/popup').then((module) => {
+      sendMessage = module.sendMessage;
+    });
+  }
 
   // send event data to content script
   hub.on('networkChanged', async (networkName) => {
