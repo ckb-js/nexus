@@ -9,7 +9,7 @@ import isEqual from 'lodash.isequal';
 import { RPC as RpcType } from '@ckb-lumos/rpc/lib/types/rpc';
 import { NexusCommonErrors } from '../../../errors';
 import { createRpcClient, loadSecp256k1ScriptDep, toCell, toQueryParam, toScript } from './backendUtils';
-import { ChainInfo } from '@ckb-lumos/base';
+import { ChainInfo, Hash } from '@ckb-lumos/base';
 import { ResultFormatter } from '@ckb-lumos/rpc';
 
 type GetLiveCellsResult = Paginate<Cell> & { lastLock?: Script };
@@ -173,7 +173,7 @@ export function createBackend(_payload: { nodeUrl: string }): Backend {
       return ResultFormatter.toBlockchainInfo(res);
     },
     sendTransaction(tx: Transaction) {
-      return client.request<string, Transaction>('send_transaction', tx);
+      return client.request<Hash, Transaction>('send_transaction', tx);
     },
   };
 }

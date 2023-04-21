@@ -41,7 +41,7 @@ describe('CKB method', () => {
     expect(mockBackend.getBlockchainInfo).toBeCalledTimes(1);
   });
 
-  it('ckb_signTransaction', async () => {
+  it('ckb_sendTransaction', async () => {
     const { request } = server;
     const tx = createTransactionFromSkeleton(TransactionSkeleton());
     await expect(request('ckb_sendTransaction', { tx })).resolves.toBe(txHash);

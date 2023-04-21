@@ -71,7 +71,7 @@ describe('sendTransaction', () => {
     fetchMock.enableMocks();
   });
   it('should send transaction', async () => {
-    const txHash = '0xa0ef4eb5f4ceeb08a4c8524d84c5da95dce2f608e0ca2ec8091191b0f330c6e3';
+    const txHash = '';
     fetchMock.mockResponse(
       JSON.stringify({
         jsonrpc: '2.0',
