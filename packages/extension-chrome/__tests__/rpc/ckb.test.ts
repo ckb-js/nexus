@@ -44,7 +44,7 @@ describe('CKB method', () => {
   it('ckb_sendTransaction', async () => {
     const { request } = server;
     const tx = createTransactionFromSkeleton(TransactionSkeleton());
-    await expect(request('ckb_sendTransaction', { tx })).resolves.toBe(txHash);
-    expect(mockBackend.sendTransaction).toBeCalledWith(tx);
+    await expect(request('ckb_sendTransaction', { tx, outputsValidator: 'passthrough' })).resolves.toBe(txHash);
+    expect(mockBackend.sendTransaction).toBeCalledWith(tx, 'passthrough');
   });
 });

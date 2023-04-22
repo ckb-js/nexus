@@ -1,4 +1,5 @@
 import type { ChainInfo, Transaction } from '@ckb-lumos/base';
+import { OutputValidator } from './base';
 
 export interface CkbMethods {
   /**
@@ -44,8 +45,5 @@ export interface CkbMethods {
    * // if your transaction is to mainnet or testnet, you can view it on https://explorer.nervos.org/transaction/${txHash}
    * ```
    */
-  ckb_sendTransaction(payload: {
-    tx: Transaction;
-    outputsValidator?: 'passthrough' | 'well_known_scripts_only';
-  }): Promise<string>;
+  ckb_sendTransaction(payload: { tx: Transaction; outputsValidator?: OutputValidator }): Promise<string>;
 }

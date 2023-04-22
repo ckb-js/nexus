@@ -1,6 +1,7 @@
 import { Cell, Script, Transaction } from '@ckb-lumos/lumos';
 import type { ConfigService, Paginate, Promisable } from '@nexus-wallet/types';
 import { asserts } from '@nexus-wallet/utils';
+import { OutputValidator } from '@nexus-wallet/protocol/lib/base';
 import { NetworkId } from '../storage';
 import { createTransactionSkeleton, LiveCellFetcher, TransactionSkeletonType } from '@ckb-lumos/helpers';
 import { ScriptConfig } from '@ckb-lumos/config-manager';
@@ -39,7 +40,7 @@ export interface Backend {
 
   getBlockchainInfo(): Promise<ChainInfo>;
 
-  sendTransaction(tx: Transaction): Promise<string>;
+  sendTransaction(tx: Transaction, outputsValidator?: OutputValidator): Promise<string>;
 }
 
 // TODO better make it persisted in localstorage/db
@@ -179,11 +180,11 @@ export function createBackend(_payload: { nodeUrl: string }): Backend {
       const res = await client.request<RpcType.BlockchainInfo>('get_blockchain_info', null);
       return ResultFormatter.toBlockchainInfo(res);
     },
-    sendTransaction(tx: Transaction) {
-      return client.request<Hash, [RpcType.RawTransaction, 'well_known_scripts_only' | 'passthrough' | null]>(
-        'send_transaction',
-        [toRpcTransaction(tx), 'passthrough'],
-      );
+    sendTransaction(tx: Transaction, outputsValidator = 'well_known_scripts_only') {
+      return client.request<Hash, [RpcType.RawTransaction, OutputValidator]>('send_transaction', [
+        toRpcTransaction(tx),
+        outputsValidator,
+      ]);
     },
   };
 }

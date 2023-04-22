@@ -6,9 +6,9 @@ addMethod('ckb_getBlockchainInfo', async (_, { resolveService }) => {
   return backend.getBlockchainInfo();
 });
 
-addMethod('ckb_sendTransaction', async ({ tx }, { resolveService }) => {
+addMethod('ckb_sendTransaction', async ({ tx, outputsValidator }, { resolveService }) => {
   const backendProvider = await resolveService('backendProvider').resolve();
-  return backendProvider.sendTransaction(tx);
+  return backendProvider.sendTransaction(tx, outputsValidator);
 });
 
 // FIXME: the type system is not working here
@@ -16,4 +16,4 @@ addMethod('ckb_sendTransaction', async ({ tx }, { resolveService }) => {
 // type T1 = Parameters<RpcMethods['ckb_sendTransaction']>[0];
 // type T2 = z.infer<typeof ZSendTransactionPayload>
 // type T3 = ObjectEquals<T1, T2> // true?
-addMethodValidator('ckb_getBlockchainInfo', ZSendTransactionPayload as never);
+addMethodValidator('ckb_sendTransaction', ZSendTransactionPayload as never);

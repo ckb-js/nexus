@@ -81,8 +81,24 @@ describe('sendTransaction', () => {
     );
     const tx = createTransactionFromSkeleton(TransactionSkeleton());
     const backend = createBackend({ nodeUrl: '' });
-    const result = await backend.sendTransaction(tx);
+    const result = await backend.sendTransaction(tx, 'passthrough');
     expect(result).toBe(txHash);
+    const params = JSON.parse(fetchMock.mock.calls?.[0][1]?.body as any).params;
+    expect(params[1]).toBe('passthrough');
+  });
+  it('default second parameter', async () => {
+    fetchMock.mockResponse(
+      JSON.stringify({
+        jsonrpc: '2.0',
+        result: '',
+        id: 0,
+      }),
+    );
+    const tx = createTransactionFromSkeleton(TransactionSkeleton());
+    const backend = createBackend({ nodeUrl: '' });
+    await backend.sendTransaction(tx);
+    const params = JSON.parse(fetchMock.mock.calls?.[0][1]?.body as any).params;
+    expect(params[1]).toBe('passthrough');
   });
 });
 

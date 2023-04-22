@@ -111,7 +111,7 @@ const txHash = await window.ckb.request({ method: "ckb_sendTransaction", params:
 | Name | Type |
 | :------ | :------ |
 | `payload` | `Object` |
-| `payload.outputsValidator?` | ``"passthrough"`` \| ``"well_known_scripts_only"`` |
+| `payload.outputsValidator?` | `OutputValidator` |
 | `payload.tx` | `Transaction` |
 
 #### Returns
