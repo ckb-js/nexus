@@ -90,7 +90,9 @@ ___
 
 **ckb_sendTransaction**(`payload`): `Promise`<`string`\>
 
-send a transaction to current network. Currently it is **not** support to send transaction to a light client node.
+Send a transaction to current network
+It's a proxy method of [CKB send_transaction](https://github.com/nervosnetwork/ckb/blob/master/rpc/README.md#method-send_transaction)
+Currently it is **not** support to send transaction to a light client node.
 
 **`Throws`**
 
@@ -109,6 +111,7 @@ const txHash = await window.ckb.request({ method: "ckb_sendTransaction", params:
 | Name | Type |
 | :------ | :------ |
 | `payload` | `Object` |
+| `payload.outputsValidator?` | ``"passthrough"`` \| ``"well_known_scripts_only"`` |
 | `payload.tx` | `Transaction` |
 
 #### Returns

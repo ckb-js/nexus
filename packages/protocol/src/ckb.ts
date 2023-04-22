@@ -32,7 +32,9 @@ export interface CkbMethods {
   ckb_getBlockchainInfo(): Promise<ChainInfo>;
 
   /**
-   * send a transaction to current network. Currently it is **not** support to send transaction to a light client node.
+   * Send a transaction to current network
+   * It's a proxy method of {@link https://github.com/nervosnetwork/ckb/blob/master/rpc/README.md#method-send_transaction | CKB send_transaction}
+   * Currently it is **not** support to send transaction to a light client node.
    * @returns transaction hash of the sent transaction
    * @throws when the transaction is invalid, or meets network issue
    * @example
@@ -42,5 +44,8 @@ export interface CkbMethods {
    * // if your transaction is to mainnet or testnet, you can view it on https://explorer.nervos.org/transaction/${txHash}
    * ```
    */
-  ckb_sendTransaction(payload: { tx: Transaction }): Promise<string>;
+  ckb_sendTransaction(payload: {
+    tx: Transaction;
+    outputsValidator?: 'passthrough' | 'well_known_scripts_only';
+  }): Promise<string>;
 }

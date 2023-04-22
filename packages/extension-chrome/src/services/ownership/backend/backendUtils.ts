@@ -1,4 +1,4 @@
-import { Cell, HexNumber, HexString, OutPoint, Script, utils } from '@ckb-lumos/lumos';
+import { Cell, HexNumber, HexString, OutPoint, Script, Transaction, utils } from '@ckb-lumos/lumos';
 import { asserts } from '@nexus-wallet/utils';
 import { ScriptConfig } from '@ckb-lumos/config-manager';
 import { JSONRPCRequest, JSONRPCResponse } from 'json-rpc-2.0';
@@ -6,7 +6,7 @@ import { RPC as RpcType } from '@ckb-lumos/rpc/lib/types/rpc';
 import { NexusCommonErrors } from '../../../errors';
 import pTimeout from './thirdpartyLib/p-timeout';
 import pRetry from './thirdpartyLib/p-retry';
-
+import snakeCase from 'lodash.snakecase';
 type Order = 'asc' | 'desc';
 type Limit = HexNumber;
 type CursorType = HexString | null;
@@ -159,6 +159,47 @@ function createRpcClient(url: string, options?: RpcClientOptions): RpcClient {
   }
 
   return { request, batchRequest };
+}
+
+export function toRpcTransaction({
+  version,
+  cellDeps,
+  headerDeps,
+  inputs,
+  outputs,
+  witnesses,
+  outputsData,
+}: Transaction): RpcType.RawTransaction {
+  function fromOutpoint(outPoint: OutPoint) {
+    return {
+      tx_hash: outPoint.txHash,
+      index: outPoint.index,
+    };
+  }
+
+  function fromScript(script: Script) {
+    return {
+      code_hash: script.codeHash,
+      hash_type: script.hashType,
+      args: script.args,
+    };
+  }
+  return {
+    version,
+    cell_deps: cellDeps.map(({ outPoint, depType }) => ({
+      out_point: fromOutpoint(outPoint),
+      dep_type: snakeCase(depType) as 'code' | 'dep_group',
+    })),
+    header_deps: headerDeps,
+    inputs: inputs.map(({ previousOutput, since }) => ({ previous_output: fromOutpoint(previousOutput), since })),
+    outputs: outputs.map(({ capacity, lock, type }) => ({
+      capacity,
+      lock: fromScript(lock),
+      type: type && fromScript(type),
+    })),
+    witnesses,
+    outputs_data: outputsData,
+  };
 }
 
 export { createRpcClient, loadSecp256k1ScriptDep, toCell, toScript, toQueryParam };
