@@ -9,17 +9,9 @@ import chunk from 'lodash.chunk';
 import isEqual from 'lodash.isequal';
 import { RPC as RpcType } from '@ckb-lumos/rpc/lib/types/rpc';
 import { NexusCommonErrors } from '../../../errors';
-import {
-  createRpcClient,
-  loadSecp256k1ScriptDep,
-  toCell,
-  toQueryParam,
-  toScript,
-  toRpcTransaction,
-} from './backendUtils';
+import { createRpcClient, loadSecp256k1ScriptDep, toCell, toQueryParam } from './backendUtils';
 import { ChainInfo, Hash } from '@ckb-lumos/base';
-import { ResultFormatter } from '@ckb-lumos/rpc';
-
+import { ParamsFormatter, ResultFormatter } from '@ckb-lumos/rpc';
 type GetLiveCellsResult = Paginate<Cell> & { lastLock?: Script };
 
 export interface Backend {
@@ -167,8 +159,8 @@ export function createBackend(_payload: { nodeUrl: string }): Backend {
           outPoint,
           cellOutput: {
             capacity: rpcCell.output.capacity,
-            lock: toScript(rpcCell.output.lock),
-            type: rpcCell.output.type ? toScript(rpcCell.output.type) : undefined,
+            lock: ResultFormatter.toScript(rpcCell.output.lock),
+            type: rpcCell.output.type ? ResultFormatter.toScript(rpcCell.output.type) : undefined,
           },
           data: rpcCell.data.content,
         };
@@ -182,7 +174,7 @@ export function createBackend(_payload: { nodeUrl: string }): Backend {
     },
     sendTransaction(tx: Transaction, outputsValidator = 'well_known_scripts_only') {
       return client.request<Hash, [RpcType.RawTransaction, OutputValidator]>('send_transaction', [
-        toRpcTransaction(tx),
+        ParamsFormatter.toRawTransaction(tx),
         outputsValidator,
       ]);
     },
