@@ -1,9 +1,18 @@
 import { createEventHub, EventHub } from './';
 import browser from 'webextension-polyfill';
-import { sendMessage } from 'webext-bridge/background';
+// FIXME re-implement this by popup -> background -> content-script
+import { sendMessage as popupSendMessage } from 'webext-bridge/popup';
+import { sendMessage as backgroundSendMessage } from 'webext-bridge/background';
 
 export function createBrowserExtensionEventHub(): EventHub {
   const hub = createEventHub();
+
+  const sendMessage = (() => {
+    if (typeof ServiceWorkerGlobalScope !== 'undefined' && globalThis instanceof ServiceWorkerGlobalScope) {
+      return backgroundSendMessage;
+    }
+    return popupSendMessage;
+  })();
 
   // send event data to content script
   hub.on('networkChanged', async (networkName) => {
@@ -11,7 +20,6 @@ export function createBrowserExtensionEventHub(): EventHub {
     // TODO optimize me, only send to subscribed tabs
     tabs.forEach((tab) => {
       if (!tab.id) return;
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       void sendMessage('event', { eventName: 'networkChanged', params: [networkName] }, `content-script@${tab.id}`);
     });
   });

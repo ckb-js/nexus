@@ -1,3 +1,32 @@
+# v0.0.15 (Thu Apr 20 2023)
+
+#### 🐛 Bug Fix
+
+- fix: network changed event does'n trigger [#244](https://github.com/ckb-js/nexus/pull/244) ([@homura](https://github.com/homura))
+
+#### 🔩 Dependency Updates
+
+- chore(deps): update dependency rimraf to v4.4.1 [#242](https://github.com/ckb-js/nexus/pull/242) ([@renovate[bot]](https://github.com/renovate[bot]))
+- chore(deps): update dependency @auto-it/npm to v10.44.0 [#234](https://github.com/ckb-js/nexus/pull/234) ([@renovate[bot]](https://github.com/renovate[bot]))
+- chore(deps): update dependency @auto-it/released to v10.44.0 [#236](https://github.com/ckb-js/nexus/pull/236) ([@renovate[bot]](https://github.com/renovate[bot]))
+- chore(deps): update dependency @auto-it/protected-branch to v10.44.0 [#235](https://github.com/ckb-js/nexus/pull/235) ([@renovate[bot]](https://github.com/renovate[bot]))
+- chore(deps): update dependency style-loader to v3.3.2 [#200](https://github.com/ckb-js/nexus/pull/200) ([@renovate[bot]](https://github.com/renovate[bot]))
+- fix(deps): update dependency immer to v9.0.21 [#205](https://github.com/ckb-js/nexus/pull/205) ([@renovate[bot]](https://github.com/renovate[bot]))
+- chore(deps): update dependency html-webpack-plugin to v5.5.1 [#228](https://github.com/ckb-js/nexus/pull/228) ([@renovate[bot]](https://github.com/renovate[bot]))
+- chore(deps): update dependency @types/chrome to v0.0.231 [#62](https://github.com/ckb-js/nexus/pull/62) ([@renovate[bot]](https://github.com/renovate[bot]))
+- fix(deps): update dependency nanoid to v3.3.6 [#206](https://github.com/ckb-js/nexus/pull/206) ([@renovate[bot]](https://github.com/renovate[bot]))
+- chore(deps): update dependency terser-webpack-plugin to v5.3.7 [#201](https://github.com/ckb-js/nexus/pull/201) ([@renovate[bot]](https://github.com/renovate[bot]))
+- chore(deps): update dependency playwright to v1.32.3 [#199](https://github.com/ckb-js/nexus/pull/199) ([@renovate[bot]](https://github.com/renovate[bot]))
+- chore(deps): update react monorepo [#214](https://github.com/ckb-js/nexus/pull/214) ([@renovate[bot]](https://github.com/renovate[bot]))
+- chore(deps): update typescript-eslint monorepo to v5.58.0 [#61](https://github.com/ckb-js/nexus/pull/61) ([@renovate[bot]](https://github.com/renovate[bot]))
+
+#### Authors: 2
+
+- [@renovate[bot]](https://github.com/renovate[bot])
+- Yonghui Lin ([@homura](https://github.com/homura))
+
+---
+
 # v0.0.14 (Mon Apr 17 2023)
 
 #### 🚀 Enhancement
