@@ -14,7 +14,7 @@ import { z, ZodType } from 'zod';
 import { ZHexString, ZHexNumber, ZHash } from './primitives';
 
 export const ZPackedSince: ZodType<PackedSince> = ZHexNumber;
-export const ZHashType: ZodType<HashType> = z.union([z.literal('type'), z.literal('data'), z.literal('data1')]);
+export const ZHashType: ZodType<HashType> = z.enum(['type', 'data', 'data1']);
 
 export const ZScript: ZodType<Script> = z.object({
   codeHash: ZHash,
@@ -27,7 +27,7 @@ const ZOutPoint: ZodType<OutPoint> = z.object({
   index: ZHexNumber,
 });
 
-export const ZDepType: ZodType<DepType> = z.union([z.literal('depGroup'), z.literal('code')]);
+export const ZDepType: ZodType<DepType> = z.enum(['depGroup', 'code']);
 
 export const ZCellDep: ZodType<CellDep> = z.object({
   outPoint: ZOutPoint,
@@ -60,3 +60,5 @@ export const ZTransaction: ZodType<Transaction> = z.object({
   version: ZHexNumber,
   witnesses: z.array(ZHexString),
 });
+
+export const ZOutputsValidator = z.enum(['passthrough', 'well_known_scripts_only']);

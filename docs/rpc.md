@@ -30,6 +30,7 @@ await window.ckb.request({ method: "wallet_enable" })
 ### Methods
 
 - [ckb\_getBlockchainInfo](#ckb_getblockchaininfo)
+- [ckb\_sendTransaction](#ckb_sendtransaction)
 - [wallet\_enable](#wallet_enable)
 - [wallet\_fullOwnership\_getLiveCells](#wallet_fullownership_getlivecells)
 - [wallet\_fullOwnership\_getOffChainLocks](#wallet_fullownership_getoffchainlocks)
@@ -82,6 +83,46 @@ await window.ckb.request({ method: "ckb_getBlockchainInfo" })
 #### Inherited from
 
 CkbMethods.ckb\_getBlockchainInfo
+
+___
+
+### ckb\_sendTransaction
+
+**ckb_sendTransaction**(`payload`): `Promise`<`string`\>
+
+Send a transaction to current network
+It's a proxy method of [CKB send_transaction](https://github.com/nervosnetwork/ckb/blob/master/rpc/README.md#method-send_transaction)
+Currently it is **not** support to send transaction to a light client node.
+
+**`Throws`**
+
+when the transaction is invalid, or meets network issue
+
+**`Example`**
+
+```ts
+const signedTransaction;// signed transaction with your business logic
+const txHash = await window.ckb.request({ method: "ckb_sendTransaction", params: { tx: signedTransaction } });
+// if your transaction is to mainnet or testnet, you can view it on https://explorer.nervos.org/transaction/${txHash}
+```
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `payload` | `Object` |
+| `payload.outputsValidator?` | `OutputValidator` |
+| `payload.tx` | `Transaction` |
+
+#### Returns
+
+`Promise`<`string`\>
+
+transaction hash of the sent transaction
+
+#### Inherited from
+
+CkbMethods.ckb\_sendTransaction
 
 ___
 

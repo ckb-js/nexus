@@ -25,3 +25,4 @@ export type Paginate<T> = {
 export type Signature = HexString;
 
 export type { HexString, Transaction, Script, Cell } from '@ckb-lumos/base';
+export type OutputValidator = 'passthrough' | 'well_known_scripts_only';
