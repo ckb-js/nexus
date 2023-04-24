@@ -8,6 +8,7 @@ import { FullOwnershipProvider } from '../src';
 import { WitnessArgs } from '@ckb-lumos/base/lib/blockchain';
 import { bytes } from '@ckb-lumos/codec';
 import { FullOwnershipProviderConfig } from '../src/FullOwnershipProvider';
+import { blockchain } from '@ckb-lumos/base';
 
 function getExpectedFee(txSkeleton: TransactionSkeletonType, feeRate = BI.from(1000)): BI {
   return BI.from(
@@ -169,6 +170,30 @@ describe('class FullOwnershipProvider', () => {
       expect(skeleton.get('outputs').size).toBe(1);
 
       expect(skeleton.get('outputs').get(0)?.cellOutput.capacity).toBe(injectAmount.toHexString());
+    });
+
+    it('Should insert witnesses when injectCapacity', async () => {
+      const cell1 = createFakeCellWithCapacity('100ckb', onChainLocks1, undefined, 0);
+      const cell2 = createFakeCellWithCapacity('300ckb', onChainLocks1, undefined, 1);
+      const cell3 = createFakeCellWithCapacity('100ckb', onChainLocks2, undefined, 2);
+      const cell4 = createFakeCellWithCapacity('300ckb', onChainLocks2, undefined, 3);
+
+      const provider = initProviderWithCells([cell1, cell2, cell3, cell4]);
+
+      const injectAmount = parseUnit('550', 'ckb');
+      const skeleton = await provider.injectCapacity(emptyTxSkeleton, { amount: injectAmount });
+      const SECP256K1_SIGNATURE_SIZE = 65;
+      const SECP256K1_BLAKE160_WITNESS_PLACEHOLDER = bytes.hexify(
+        blockchain.WitnessArgs.pack({
+          lock: new Uint8Array(SECP256K1_SIGNATURE_SIZE),
+        }),
+      );
+      expect(skeleton.get('witnesses').toArray()).toEqual([
+        SECP256K1_BLAKE160_WITNESS_PLACEHOLDER,
+        '0x',
+        SECP256K1_BLAKE160_WITNESS_PLACEHOLDER,
+        '0x',
+      ]);
     });
 
     it('Should throw error when changeLock is not found', async () => {

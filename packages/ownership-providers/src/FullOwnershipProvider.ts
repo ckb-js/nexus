@@ -185,7 +185,20 @@ export class FullOwnershipProvider {
         return inputs.push(...injectedCells);
       })
       .update('witnesses', (witnesses) => {
-        const inputWitnesses = injectedCells.map(() => SECP256K1_BLAKE160_WITNESS_PLACEHOLDER);
+        const serializedCellLocks = new Set(
+          txSkeleton
+            .get('inputs')
+            .toArray()
+            .map((cell) => bytes.hexify(blockchain.Script.pack(cell.cellOutput.lock))),
+        );
+        const inputWitnesses = injectedCells.map((cell) => {
+          const serializedCellLock = bytes.hexify(blockchain.Script.pack(cell.cellOutput.lock));
+          if (serializedCellLocks.has(serializedCellLock)) {
+            return '0x';
+          }
+          serializedCellLocks.add(serializedCellLock);
+          return SECP256K1_BLAKE160_WITNESS_PLACEHOLDER;
+        });
         return witnesses.push(...inputWitnesses);
       })
       .update('outputs', (outputs) => {
