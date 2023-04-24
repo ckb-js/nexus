@@ -12,7 +12,7 @@ can use the `debug_*` methods to speed up the process.
 //    "mnemonic": "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
 //    "password": "12345678"
 // }
-ckb.request({ method: 'debug_initWallet' });
+await window.ckb.request({ method: 'debug_initWallet' });
 ```
 
 ## Logs
