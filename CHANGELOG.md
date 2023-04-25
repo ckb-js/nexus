@@ -1,3 +1,35 @@
+# v0.0.16 (Tue Apr 25 2023)
+
+#### 🚀 Enhancement
+
+- `@nexus-wallet/protocol`
+  - feat(extension-chrome): support send transaction [#227](https://github.com/ckb-js/nexus/pull/227) ([@IronLu233](https://github.com/IronLu233))
+
+#### 🐛 Bug Fix
+
+- fix(extension-chrome): receiving end does not exist [#253](https://github.com/ckb-js/nexus/pull/253) ([@homura](https://github.com/homura))
+
+#### 📝 Documentation
+
+- docs: nexus works with custody unlocking [#152](https://github.com/ckb-js/nexus/pull/152) ([@homura](https://github.com/homura))
+
+#### 🧪 Tests
+
+- feat(testkit): a testkit pkg for unit test [#161](https://github.com/ckb-js/nexus/pull/161) ([@homura](https://github.com/homura))
+
+#### 🔩 Dependency Updates
+
+- chore(deps): update dependency @auto-it/upload-assets to v10.45.0 [#241](https://github.com/ckb-js/nexus/pull/241) ([@renovate[bot]](https://github.com/renovate[bot]))
+- fix(deps): update dependency zustand to v4.3.7 [#230](https://github.com/ckb-js/nexus/pull/230) ([@renovate[bot]](https://github.com/renovate[bot]))
+
+#### Authors: 3
+
+- [@renovate[bot]](https://github.com/renovate[bot])
+- Iron Lu ([@IronLu233](https://github.com/IronLu233))
+- Yonghui Lin ([@homura](https://github.com/homura))
+
+---
+
 # v0.0.15 (Thu Apr 20 2023)
 
 #### 🐛 Bug Fix

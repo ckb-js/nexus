@@ -1,3 +1,26 @@
+# v0.0.16 (Tue Apr 25 2023)
+
+#### 🔨 Breaking Minor Change
+
+- chore: update dependencies ([@homura](https://github.com/homura))
+- Merge branch 'main' into testkit ([@homura](https://github.com/homura))
+
+#### 📝 Documentation
+
+- docs: nexus works with custody unlocking [#152](https://github.com/ckb-js/nexus/pull/152) ([@homura](https://github.com/homura))
+
+#### 🔩 Dependency Updates
+
+- chore(deps): update dependency @auto-it/upload-assets to v10.45.0 [#241](https://github.com/ckb-js/nexus/pull/241) ([@renovate[bot]](https://github.com/renovate[bot]))
+- fix(deps): update dependency zustand to v4.3.7 [#230](https://github.com/ckb-js/nexus/pull/230) ([@renovate[bot]](https://github.com/renovate[bot]))
+
+#### Authors: 2
+
+- [@renovate[bot]](https://github.com/renovate[bot])
+- Yonghui Lin ([@homura](https://github.com/homura))
+
+---
+
 # v0.0.13 (Fri Apr 14 2023)
 
 #### 🔨 Breaking Minor Change
