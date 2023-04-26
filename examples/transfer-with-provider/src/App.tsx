@@ -80,9 +80,7 @@ function Transfer() {
       txSkeleton = await provider.signTransaction(txSkeleton);
 
       setLastTxHash('');
-      // TODO: will refactor to `provider.sendTransaction`
-      const rpc = new RPC('https://testnet.ckb.dev');
-      const txHash = await rpc.sendTransaction(createTransactionFromSkeleton(txSkeleton));
+      const txHash = await provider.sendTransaction(txSkeleton);
       setLastTxHash(txHash);
     } catch (e) {
       if (!(e instanceof Error)) {

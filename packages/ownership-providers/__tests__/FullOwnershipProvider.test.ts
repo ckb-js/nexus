@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { BI, BIish, parseUnit } from '@ckb-lumos/bi';
-import { TransactionSkeleton, TransactionSkeletonType } from '@ckb-lumos/helpers';
+import { createTransactionFromSkeleton, TransactionSkeleton, TransactionSkeletonType } from '@ckb-lumos/helpers';
 import { common, secp256k1Blake160 } from '@ckb-lumos/common-scripts';
 import { Cell, Script } from '@nexus-wallet/protocol';
 import { predefined } from '@ckb-lumos/config-manager';
 import { FullOwnershipProvider } from '../src';
 import { WitnessArgs } from '@ckb-lumos/base/lib/blockchain';
 import { bytes } from '@ckb-lumos/codec';
-import { FullOwnershipProviderConfig } from '../src/FullOwnershipProvider';
+import { FullOwnershipProviderConfig, SECP256K1_BLAKE160_WITNESS_PLACEHOLDER } from '../src/FullOwnershipProvider';
 import { blockchain } from '@ckb-lumos/base';
 
 function getExpectedFee(txSkeleton: TransactionSkeletonType, feeRate = BI.from(1000)): BI {
@@ -517,6 +517,58 @@ describe('class FullOwnershipProvider', () => {
       params: {
         cursor: '0',
       },
+    });
+  });
+
+  describe('#sendTransaction', () => {
+    it('signed transaction', async () => {
+      const provider = new FullOwnershipProvider(mockProviderConfig);
+      const txSkeleton = TransactionSkeleton()
+        .update('inputs', (inputs) => inputs.push(createFakeCellWithCapacity(1000, onChainLocks1)))
+        .update('outputs', (outputs) => outputs.push(createFakeCellWithCapacity(100, onChainLocks2)))
+        .update('witnesses', (witnesses) => witnesses.push('0x258112'));
+
+      jest.spyOn(provider, 'payFee');
+
+      await provider.sendTransaction(txSkeleton);
+      expect(mockProviderConfig.ckb.request).toBeCalledWith({
+        method: 'ckb_sendTransaction',
+        params: { tx: createTransactionFromSkeleton(txSkeleton), outputsValidator: undefined },
+      });
+      expect(provider.payFee).toBeCalledWith(txSkeleton, { autoInject: true });
+    });
+
+    it('unsigned', async () => {
+      const signature =
+        '0x69000000100000006900000069000000550000005500000010000000550000005500000041000000d376d4bcb6539fe0e0b3d408556757183c75ccaf5c31b2486f9d0411217d41372828ed78e57d1cff7ffaeaf4870ebfdb338828175f8d197af203e7f4ac26924d00';
+      const provider = new FullOwnershipProvider(mockProviderConfig);
+      const txSkeleton = TransactionSkeleton()
+        .update('inputs', (inputs) => inputs.push(createFakeCellWithCapacity(1000, onChainLocks2)))
+        .update('outputs', (outputs) => outputs.push(createFakeCellWithCapacity(100, onChainLocks2)))
+        .update('witnesses', (witnesses) => witnesses.push(SECP256K1_BLAKE160_WITNESS_PLACEHOLDER));
+
+      (mockProviderConfig.ckb.request as jest.Mock).mockImplementation(
+        ({ method }: { method: string; params: any }) => {
+          if (method === 'wallet_fullOwnership_signTransaction') {
+            return [[onChainLocks2, signature]];
+          }
+        },
+      );
+
+      await provider.sendTransaction(txSkeleton, 'passthrough');
+
+      expect(
+        blockchain.WitnessArgs.unpack(
+          (mockProviderConfig.ckb.request as jest.Mock).mock.lastCall[0].params.tx.witnesses[0],
+        ).lock,
+      ).toBe(signature);
+
+      expect((mockProviderConfig.ckb.request as jest.Mock).mock.lastCall[0]).toMatchObject({
+        params: {
+          outputsValidator: 'passthrough',
+        },
+        method: 'ckb_sendTransaction',
+      });
     });
   });
 });
