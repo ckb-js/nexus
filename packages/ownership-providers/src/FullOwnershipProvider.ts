@@ -5,7 +5,6 @@ import { assert, errors } from '@nexus-wallet/utils';
 import {
   createTransactionFromSkeleton,
   minimalCellCapacityCompatible,
-  parseAddress,
   TransactionSkeletonType,
 } from '@ckb-lumos/helpers';
 import { Address, blockchain, Cell, CellDep, HexString, Script, Transaction } from '@ckb-lumos/base';
@@ -185,7 +184,20 @@ export class FullOwnershipProvider {
         return inputs.push(...injectedCells);
       })
       .update('witnesses', (witnesses) => {
-        const inputWitnesses = injectedCells.map(() => SECP256K1_BLAKE160_WITNESS_PLACEHOLDER);
+        const serializedCellLocks = new Set(
+          txSkeleton
+            .get('inputs')
+            .toArray()
+            .map((cell) => bytes.hexify(blockchain.Script.pack(cell.cellOutput.lock))),
+        );
+        const inputWitnesses = injectedCells.map((cell) => {
+          const serializedCellLock = bytes.hexify(blockchain.Script.pack(cell.cellOutput.lock));
+          if (serializedCellLocks.has(serializedCellLock)) {
+            return '0x';
+          }
+          serializedCellLocks.add(serializedCellLock);
+          return SECP256K1_BLAKE160_WITNESS_PLACEHOLDER;
+        });
         return witnesses.push(...inputWitnesses);
       })
       .update('outputs', (outputs) => {
@@ -374,14 +386,5 @@ export class FullOwnershipProvider {
   // TODO: wait for wallet provide a API to get genesis block hash
   private async getLumosConfig(): Promise<LumosConfig> {
     return getLumosConfig();
-  }
-
-  private async parseLockScriptLike(lock: LockScriptLike) {
-    if (typeof lock === 'object') {
-      return lock;
-    }
-
-    const config = await this.getLumosConfig();
-    return parseAddress(lock, { config });
   }
 }

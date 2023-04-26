@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { BI, BIish, parseUnit } from '@ckb-lumos/bi';
-import { parseAddress, TransactionSkeleton, TransactionSkeletonType } from '@ckb-lumos/helpers';
+import { TransactionSkeleton, TransactionSkeletonType } from '@ckb-lumos/helpers';
 import { common, secp256k1Blake160 } from '@ckb-lumos/common-scripts';
 import { Cell, Script } from '@nexus-wallet/protocol';
 import { predefined } from '@ckb-lumos/config-manager';
@@ -8,6 +8,7 @@ import { FullOwnershipProvider } from '../src';
 import { WitnessArgs } from '@ckb-lumos/base/lib/blockchain';
 import { bytes } from '@ckb-lumos/codec';
 import { FullOwnershipProviderConfig } from '../src/FullOwnershipProvider';
+import { blockchain } from '@ckb-lumos/base';
 
 function getExpectedFee(txSkeleton: TransactionSkeletonType, feeRate = BI.from(1000)): BI {
   return BI.from(
@@ -171,6 +172,30 @@ describe('class FullOwnershipProvider', () => {
       expect(skeleton.get('outputs').get(0)?.cellOutput.capacity).toBe(injectAmount.toHexString());
     });
 
+    it('Should insert witnesses when injectCapacity', async () => {
+      const cell1 = createFakeCellWithCapacity('100ckb', onChainLocks1, undefined, 0);
+      const cell2 = createFakeCellWithCapacity('300ckb', onChainLocks1, undefined, 1);
+      const cell3 = createFakeCellWithCapacity('100ckb', onChainLocks2, undefined, 2);
+      const cell4 = createFakeCellWithCapacity('300ckb', onChainLocks2, undefined, 3);
+
+      const provider = initProviderWithCells([cell1, cell2, cell3, cell4]);
+
+      const injectAmount = parseUnit('550', 'ckb');
+      const skeleton = await provider.injectCapacity(emptyTxSkeleton, { amount: injectAmount });
+      const SECP256K1_SIGNATURE_SIZE = 65;
+      const SECP256K1_BLAKE160_WITNESS_PLACEHOLDER = bytes.hexify(
+        blockchain.WitnessArgs.pack({
+          lock: new Uint8Array(SECP256K1_SIGNATURE_SIZE),
+        }),
+      );
+      expect(skeleton.get('witnesses').toArray()).toEqual([
+        SECP256K1_BLAKE160_WITNESS_PLACEHOLDER,
+        '0x',
+        SECP256K1_BLAKE160_WITNESS_PLACEHOLDER,
+        '0x',
+      ]);
+    });
+
     it('Should throw error when changeLock is not found', async () => {
       const provider = initProviderWithCells([], []);
       // @ts-expect-error
@@ -195,6 +220,7 @@ describe('class FullOwnershipProvider', () => {
 
       return provider;
     }
+
     function createFakeSkeleton(inputCells: Cell[], outputCells: Cell[]) {
       const txSkeleton = TransactionSkeleton();
       return txSkeleton
@@ -473,28 +499,6 @@ describe('class FullOwnershipProvider', () => {
   it('#getLumosConfig', async () => {
     const provider = new FullOwnershipProvider(mockProviderConfig);
     await expect(provider['getLumosConfig']()).resolves.toBe(predefined.LINA);
-  });
-
-  describe('#parseLockScriptLike', () => {
-    it('Should parse address', async () => {
-      const provider = new FullOwnershipProvider(mockProviderConfig);
-      provider['getLumosConfig'] = jest.fn().mockResolvedValue(predefined.AGGRON4);
-      await expect(
-        provider['parseLockScriptLike'](
-          'ckt1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsqgxvk9qlymu894vugvgflwa967zjvud07qq4x3kf',
-        ),
-      ).resolves.toEqual(
-        parseAddress(
-          'ckt1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsqgxvk9qlymu894vugvgflwa967zjvud07qq4x3kf',
-          { config: predefined.AGGRON4 },
-        ),
-      );
-    });
-
-    it('Should return origin lock when input is a lock script', async () => {
-      const provider = new FullOwnershipProvider(mockProviderConfig);
-      await expect(provider['parseLockScriptLike'](onChainLocks1)).resolves.toBe(onChainLocks1);
-    });
   });
 
   it('#getOffChainLocks and #getOnChainLocks', async () => {
