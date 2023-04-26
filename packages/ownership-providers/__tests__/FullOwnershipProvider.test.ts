@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { BI, BIish, parseUnit } from '@ckb-lumos/bi';
-import { parseAddress, TransactionSkeleton, TransactionSkeletonType } from '@ckb-lumos/helpers';
+import { TransactionSkeleton, TransactionSkeletonType } from '@ckb-lumos/helpers';
 import { common, secp256k1Blake160 } from '@ckb-lumos/common-scripts';
 import { Cell, Script } from '@nexus-wallet/protocol';
 import { predefined } from '@ckb-lumos/config-manager';
@@ -220,6 +220,7 @@ describe('class FullOwnershipProvider', () => {
 
       return provider;
     }
+
     function createFakeSkeleton(inputCells: Cell[], outputCells: Cell[]) {
       const txSkeleton = TransactionSkeleton();
       return txSkeleton
@@ -498,28 +499,6 @@ describe('class FullOwnershipProvider', () => {
   it('#getLumosConfig', async () => {
     const provider = new FullOwnershipProvider(mockProviderConfig);
     await expect(provider['getLumosConfig']()).resolves.toBe(predefined.LINA);
-  });
-
-  describe('#parseLockScriptLike', () => {
-    it('Should parse address', async () => {
-      const provider = new FullOwnershipProvider(mockProviderConfig);
-      provider['getLumosConfig'] = jest.fn().mockResolvedValue(predefined.AGGRON4);
-      await expect(
-        provider['parseLockScriptLike'](
-          'ckt1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsqgxvk9qlymu894vugvgflwa967zjvud07qq4x3kf',
-        ),
-      ).resolves.toEqual(
-        parseAddress(
-          'ckt1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsqgxvk9qlymu894vugvgflwa967zjvud07qq4x3kf',
-          { config: predefined.AGGRON4 },
-        ),
-      );
-    });
-
-    it('Should return origin lock when input is a lock script', async () => {
-      const provider = new FullOwnershipProvider(mockProviderConfig);
-      await expect(provider['parseLockScriptLike'](onChainLocks1)).resolves.toBe(onChainLocks1);
-    });
   });
 
   it('#getOffChainLocks and #getOnChainLocks', async () => {
