@@ -377,26 +377,12 @@ export class FullOwnershipProvider {
 
   /**
    * Send the transaction to CKB network
-   * @remarks
-   *
-   * This method will inject fee using the wallet if the transaction fee is not enough.
-   *
-   * If the transaction is not signed, the wallet will request user sign it first.
    *
    * @param txSkeleton - transaction skeleton
    * @param outputsValidator - Validates the transaction outputs before entering the tx-pool {@link https://github.com/nervosnetwork/ckb/blob/develop/rpc/README.md#type-outputsvalidator | OutputValidator}
    * @returns Transaction hash in CKB network
    */
   async sendTransaction(txSkeleton: TransactionSkeletonType, outputsValidator?: OutputValidator): Promise<HexString> {
-    const payFeeOptions: PayFeeOptions = { autoInject: true };
-
-    // if fee is enough, `payFee` will return directly. so no need calculate paid fee here
-    txSkeleton = await this.payFee(txSkeleton, payFeeOptions);
-
-    if (txSkeleton.witnesses.filter((value) => value !== SECP256K1_BLAKE160_WITNESS_PLACEHOLDER).size === 0) {
-      txSkeleton = await this.signTransaction(txSkeleton);
-    }
-
     return await this.ckb.request({
       method: 'ckb_sendTransaction',
       params: { tx: createTransactionFromSkeleton(txSkeleton), outputsValidator: outputsValidator },
