@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { Configuration, ProvidePlugin } from 'webpack';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import * as env from './env';
@@ -29,7 +30,7 @@ const configExcludeEntry: Configuration = {
           {
             loader: 'babel-loader',
             options: {
-              rootMode: 'upward',
+              presets: ['@babel/preset-env', '@babel/preset-react', '@babel/preset-typescript'],
               plugins: [__DEV__ && require.resolve('react-refresh/babel')].filter(Boolean),
             },
           },

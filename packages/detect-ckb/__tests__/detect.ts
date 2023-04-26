@@ -18,14 +18,14 @@ describe('detectCkb', () => {
   });
 
   it('should return ckb object if ckb object is injected to global', async () => {
-    const delayTime = 1000;
-    mockInjectCkb(delayTime);
-    await expect(detectCkb({})).resolves.not.toThrowError();
+    const delayTime = 400;
+    void mockInjectCkb(delayTime);
+    await expect(detectCkb({ timeout: 500 })).resolves.not.toThrowError();
   });
 
   it('should throw error if timeout', async () => {
-    const delayTime = 5000;
-    mockInjectCkb(delayTime);
-    await expect(detectCkb({})).rejects.toThrowError();
+    const delayTime = 600;
+    void mockInjectCkb(delayTime);
+    await expect(detectCkb({ timeout: 500 })).rejects.toThrowError();
   });
 });
