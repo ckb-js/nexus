@@ -5,7 +5,6 @@ import { assert, errors } from '@nexus-wallet/utils';
 import {
   createTransactionFromSkeleton,
   minimalCellCapacityCompatible,
-  parseAddress,
   TransactionSkeletonType,
 } from '@ckb-lumos/helpers';
 import { Address, blockchain, Cell, CellDep, HexString, Script, Transaction } from '@ckb-lumos/base';
@@ -387,14 +386,5 @@ export class FullOwnershipProvider {
   // TODO: wait for wallet provide a API to get genesis block hash
   private async getLumosConfig(): Promise<LumosConfig> {
     return getLumosConfig();
-  }
-
-  private async parseLockScriptLike(lock: LockScriptLike) {
-    if (typeof lock === 'object') {
-      return lock;
-    }
-
-    const config = await this.getLumosConfig();
-    return parseAddress(lock, { config });
   }
 }
