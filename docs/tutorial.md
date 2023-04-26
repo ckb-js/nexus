@@ -126,18 +126,23 @@ txSkeleton = await provider.injectCapacity(txSkeleton, { amount: _100Ckb });
 ### Step 6 - Pay For The Transaction Fee
 
 We'll pay for the transaction fee by using the cell we just injected, so we need to set `autoInject` to `false` and
-specify the output index of the cell we want to pay for the fee.
+specify the output index of the cell we want to pay for the fee, i.e. `outputs[1]`, the second output
 
 ```js
 // Pay for the transaction fee
-txSkeleton = await provider.payFee(txSkeleton, { autoInject: false, byOutputIndexes: [1] });
+txSkeleton = await provider.payFee(txSkeleton, {
+  autoInject: false,
+  // outputs[1], the second output, which is the cell we just injected
+  byOutputIndexes: [1],
+});
 ```
 
 ![tx-paid](tutorial-assets/tx-paid.png)
 
 ### Step 7 - Sign The Transaction
 
-If all goes well, Nexus will ask you to sign the transaction.
+If all goes well, Nexus will ask you to sign the transaction. Input your password and click `Approve` to sign the
+transaction.
 
 <img src="tutorial-assets/nexus-sign-tx.png" width="300" />
 
