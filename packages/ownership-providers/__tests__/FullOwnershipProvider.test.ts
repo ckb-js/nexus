@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { BI } from '@ckb-lumos/bi';
-import { parseAddress, TransactionSkeleton, TransactionSkeletonType } from '@ckb-lumos/helpers';
+import { BI, BIish, parseUnit } from '@ckb-lumos/bi';
+import { TransactionSkeleton, TransactionSkeletonType } from '@ckb-lumos/helpers';
 import { common, secp256k1Blake160 } from '@ckb-lumos/common-scripts';
 import { Cell, Script } from '@nexus-wallet/protocol';
 import { predefined } from '@ckb-lumos/config-manager';
@@ -8,6 +8,7 @@ import { FullOwnershipProvider } from '../src';
 import { WitnessArgs } from '@ckb-lumos/base/lib/blockchain';
 import { bytes } from '@ckb-lumos/codec';
 import { FullOwnershipProviderConfig } from '../src/FullOwnershipProvider';
+import { blockchain } from '@ckb-lumos/base';
 
 function getExpectedFee(txSkeleton: TransactionSkeletonType, feeRate = BI.from(1000)): BI {
   return BI.from(
@@ -37,17 +38,35 @@ function createOnchainLock(args: string): Script {
 }
 
 const onChainLocks1: Script = createOnchainLock('0x441509af');
-
 const onChainLocks2: Script = createOnchainLock('0x25061223');
 const onChainLocks3: Script = createOnchainLock('0x25061224');
 
+function parseCapacity(capacity: string): BI {
+  if (/&\d+$/.test(capacity)) {
+    return BI.from(capacity);
+  }
+  const matched = capacity.match(/^(\d+)(ckb|shannon)?$/);
+  if (!matched) {
+    throw new Error('Unknown capacity format');
+  }
+  const [, number, unit] = matched;
+  return parseUnit(number, unit as 'ckb' | 'shannon');
+}
+
 function createFakeCellWithCapacity(
-  capacity: number,
+  capacity: BIish,
   lock = offChainLock1,
   type: Script | undefined = undefined,
   outpointIndex = 0,
   data = '0x',
 ): Cell {
+  capacity = (() => {
+    if (typeof capacity === 'string') {
+      return parseCapacity(capacity);
+    }
+    return capacity;
+  })();
+
   return {
     cellOutput: {
       capacity: BI.from(capacity).toHexString(),
@@ -139,16 +158,42 @@ describe('class FullOwnershipProvider', () => {
     });
 
     it('Should pick multiple cells when single cell capacity is not enough', async () => {
-      const provider = initProviderWithCells([
-        createFakeCellWithCapacity(100 * 1e8, onChainLocks1, undefined, 0),
-        createFakeCellWithCapacity(100 * 1e8, onChainLocks1, undefined, 0),
-        createFakeCellWithCapacity(100 * 1e8, onChainLocks2, undefined, 1),
-        createFakeCellWithCapacity(300 * 1e8, onChainLocks1, undefined, 2),
-      ]);
-      const skeleton = await provider.injectCapacity(emptyTxSkeleton, { amount: 250 * 1e8 });
+      const cell1 = createFakeCellWithCapacity('100ckb', onChainLocks1, undefined, 0);
+      const cell2 = createFakeCellWithCapacity('100ckb', onChainLocks2, undefined, 1);
+      const cell3 = createFakeCellWithCapacity('300ckb', onChainLocks1, undefined, 2);
+
+      const provider = initProviderWithCells([cell1, cell2, cell3]);
+
+      const injectAmount = parseUnit('250', 'ckb');
+      const skeleton = await provider.injectCapacity(emptyTxSkeleton, { amount: injectAmount });
       expect(skeleton.get('inputs').size).toBe(3);
       expect(skeleton.get('outputs').size).toBe(1);
-      expect(skeleton.get('outputs').get(0)?.cellOutput.capacity).toBe(BI.from(500 * 1e8 - 250 * 1e8).toHexString());
+
+      expect(skeleton.get('outputs').get(0)?.cellOutput.capacity).toBe(injectAmount.toHexString());
+    });
+
+    it('Should insert witnesses when injectCapacity', async () => {
+      const cell1 = createFakeCellWithCapacity('100ckb', onChainLocks1, undefined, 0);
+      const cell2 = createFakeCellWithCapacity('300ckb', onChainLocks1, undefined, 1);
+      const cell3 = createFakeCellWithCapacity('100ckb', onChainLocks2, undefined, 2);
+      const cell4 = createFakeCellWithCapacity('300ckb', onChainLocks2, undefined, 3);
+
+      const provider = initProviderWithCells([cell1, cell2, cell3, cell4]);
+
+      const injectAmount = parseUnit('550', 'ckb');
+      const skeleton = await provider.injectCapacity(emptyTxSkeleton, { amount: injectAmount });
+      const SECP256K1_SIGNATURE_SIZE = 65;
+      const SECP256K1_BLAKE160_WITNESS_PLACEHOLDER = bytes.hexify(
+        blockchain.WitnessArgs.pack({
+          lock: new Uint8Array(SECP256K1_SIGNATURE_SIZE),
+        }),
+      );
+      expect(skeleton.get('witnesses').toArray()).toEqual([
+        SECP256K1_BLAKE160_WITNESS_PLACEHOLDER,
+        '0x',
+        SECP256K1_BLAKE160_WITNESS_PLACEHOLDER,
+        '0x',
+      ]);
     });
 
     it('Should throw error when changeLock is not found', async () => {
@@ -175,6 +220,7 @@ describe('class FullOwnershipProvider', () => {
 
       return provider;
     }
+
     function createFakeSkeleton(inputCells: Cell[], outputCells: Cell[]) {
       const txSkeleton = TransactionSkeleton();
       return txSkeleton
@@ -191,16 +237,19 @@ describe('class FullOwnershipProvider', () => {
         );
     }
 
-    it('Automatically inject capacity when `autoInject` is true', async () => {
-      const provider = buildProvider([createFakeCellWithCapacity(100 * 1e8), createFakeCellWithCapacity(200 * 1e8)]);
-      const txSkeleton = createFakeSkeleton(
-        [createFakeCellWithCapacity(200 * 1e8, offChainLock1)],
-        [createFakeCellWithCapacity(200 * 1e8, onChainLocks2)],
-      );
+    it('Should skip the cell which already in inputs', async () => {
+      // the collected1 is already in inputs
+      const txInputCell = createFakeCellWithCapacity(100 * 1e8, onChainLocks1, undefined, 0);
+      const collectedCell = createFakeCellWithCapacity(200 * 1e8, onChainLocks1, undefined, 1);
+
+      const txSkeleton = createFakeSkeleton([txInputCell], [createFakeCellWithCapacity(200 * 1e8, onChainLocks2)]);
+      const provider = buildProvider([txInputCell, collectedCell]);
 
       const withFee = await provider.payFee(txSkeleton, { autoInject: true });
 
       expect(withFee.get('inputs').size).toBe(2);
+      expect(withFee.get('inputs').get(0)).toEqual(txInputCell);
+      expect(withFee.get('inputs').get(1)).toEqual(collectedCell);
       expect(withFee.get('outputs').size).toBe(2);
       expect(getTxSkeletonFee(withFee)).toEqual(getExpectedFee(withFee));
     });
@@ -279,9 +328,11 @@ describe('class FullOwnershipProvider', () => {
     });
 
     it('Should use wallet cell when `byOutputIndexes` is not sufficient', async () => {
-      const provider = buildProvider([createFakeCellWithCapacity(100 * 1e8, onChainLocks1)]);
+      const txInputCell = createFakeCellWithCapacity(190 * 1e8 + 100, onChainLocks1, undefined, 0);
+      const collectedCell = createFakeCellWithCapacity(100 * 1e8, onChainLocks1, undefined, 1);
+      const provider = buildProvider([collectedCell]);
       const txSkeleton = createFakeSkeleton(
-        [createFakeCellWithCapacity(190 * 1e8 + 100, offChainLock1)],
+        [txInputCell],
         [
           createFakeCellWithCapacity(100 * 1e8, onChainLocks2),
           createFakeCellWithCapacity(45 * 1e8 + 50, onChainLocks3),
@@ -448,28 +499,6 @@ describe('class FullOwnershipProvider', () => {
   it('#getLumosConfig', async () => {
     const provider = new FullOwnershipProvider(mockProviderConfig);
     await expect(provider['getLumosConfig']()).resolves.toBe(predefined.LINA);
-  });
-
-  describe('#parseLockScriptLike', () => {
-    it('Should parse address', async () => {
-      const provider = new FullOwnershipProvider(mockProviderConfig);
-      provider['getLumosConfig'] = jest.fn().mockResolvedValue(predefined.AGGRON4);
-      await expect(
-        provider['parseLockScriptLike'](
-          'ckt1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsqgxvk9qlymu894vugvgflwa967zjvud07qq4x3kf',
-        ),
-      ).resolves.toEqual(
-        parseAddress(
-          'ckt1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsqgxvk9qlymu894vugvgflwa967zjvud07qq4x3kf',
-          { config: predefined.AGGRON4 },
-        ),
-      );
-    });
-
-    it('Should return origin lock when input is a lock script', async () => {
-      const provider = new FullOwnershipProvider(mockProviderConfig);
-      await expect(provider['parseLockScriptLike'](onChainLocks1)).resolves.toBe(onChainLocks1);
-    });
   });
 
   it('#getOffChainLocks and #getOnChainLocks', async () => {

@@ -3,8 +3,7 @@
   "compilerOptions": {
     "declaration": true,
     "declarationMap": true,
-    "outDir": "lib",
-    "lib": ["DOM"]
+    "outDir": "lib"
   },
   "include": ["src"],
   "exclude": ["__tests__"]
