@@ -14,7 +14,7 @@
   "devDependencies": {
     "@auto-it/core": "10.44.0",
     "@auto-it/magic-zero": "10.43.0",
-    "@auto-it/npm": "10.44.0",
+    "@auto-it/npm": "10.46.0",
     "@auto-it/protected-branch": "10.44.0",
     "@auto-it/released": "10.44.0",
     "@auto-it/upload-assets": "10.45.0",
