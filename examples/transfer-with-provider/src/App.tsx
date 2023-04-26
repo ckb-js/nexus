@@ -1,9 +1,10 @@
 import { useCells, useProvider } from './hooks/useProvider';
 import { useState } from 'react';
 import { BI, formatUnit, parseUnit } from '@ckb-lumos/bi';
-import { createTransactionFromSkeleton, parseAddress, TransactionSkeleton } from '@ckb-lumos/helpers';
+import { createTransactionFromSkeleton, parseAddress, encodeToAddress, TransactionSkeleton } from '@ckb-lumos/helpers';
 import { predefined } from '@ckb-lumos/config-manager';
 import { RPC, config } from '@ckb-lumos/lumos';
+import { useAsyncState } from './hooks/useAsyncState';
 
 config.initializeConfig(predefined.AGGRON4);
 
@@ -51,6 +52,12 @@ function Transfer() {
   const [receiverAddress, setReceiverAddress] = useState(
     'ckt1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsqt8jlmrqq3q0wpw3rd242w0e2c8rf6nxcgegx8sh',
   );
+  const [lastTxHash, setLastTxHash] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const receiveAddresses = useAsyncState(async () => {
+    const locks = await provider.getOffChainLocks({ change: 'external' });
+    return locks.map((lock) => encodeToAddress(lock));
+  }, [provider]);
 
   async function transfer() {
     let txSkeleton = TransactionSkeleton({});
@@ -67,19 +74,39 @@ function Transfer() {
     // put receiver cell into outputs of the transaction
     txSkeleton = txSkeleton.update('outputs', (outputs) => outputs.push(receiverCell));
 
-    txSkeleton = await provider.injectCapacity(txSkeleton, { amount: receiveShannon });
-    txSkeleton = await provider.payFee(txSkeleton, { autoInject: true });
-    txSkeleton = await provider.signTransaction(txSkeleton);
+    try {
+      txSkeleton = await provider.injectCapacity(txSkeleton, { amount: receiveShannon });
+      txSkeleton = await provider.payFee(txSkeleton, { autoInject: true });
+      txSkeleton = await provider.signTransaction(txSkeleton);
 
-    const rpc = new RPC('https://testnet.ckb.dev');
-    const txHash = await rpc.sendTransaction(createTransactionFromSkeleton(txSkeleton));
-
-    console.log(txHash);
+      setLastTxHash('');
+      // TODO: will refactor to `provider.sendTransaction`
+      const rpc = new RPC('https://testnet.ckb.dev');
+      const txHash = await rpc.sendTransaction(createTransactionFromSkeleton(txSkeleton));
+      setLastTxHash(txHash);
+    } catch (e) {
+      if (!(e instanceof Error)) {
+        return setErrorMessage('Unknown error');
+      }
+      setErrorMessage(e.message);
+    }
   }
 
   return (
     <div>
-      Transfer to:
+      {receiveAddresses && (
+        <details style={{ paddingBottom: '8px' }}>
+          <summary>Wallet info</summary>
+          Receive addresses:
+          <ul>
+            {receiveAddresses.map((addr) => (
+              <li key={addr}>{addr}</li>
+            ))}
+          </ul>
+        </details>
+      )}
+
+      <h2>Transfer</h2>
       <div>
         amount: <input placeholder="111 CKB" type="number" onChange={(e) => setAmount(e.target.value)} value={amount} />
       </div>
@@ -87,6 +114,12 @@ function Transfer() {
         to: <input placeholder="address" onChange={(e) => setReceiverAddress(e.target.value)} value={receiverAddress} />
       </div>
       <button onClick={transfer}>Transfer</button>
+      {lastTxHash && (
+        <div>
+          Transferred, view at <a href={`https://pudge.explorer.nervos.org/transaction/${lastTxHash}`}>explorer</a>
+        </div>
+      )}
+      {errorMessage && <div style={{ color: 'red' }}>{errorMessage}</div>}
     </div>
   );
 }
