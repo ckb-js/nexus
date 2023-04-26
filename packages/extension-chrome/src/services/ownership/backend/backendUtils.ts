@@ -1,4 +1,4 @@
-import { Cell, HexNumber, HexString, OutPoint, Script, utils } from '@ckb-lumos/lumos';
+import { Cell, HexNumber, HexString, Script, utils } from '@ckb-lumos/lumos';
 import { asserts } from '@nexus-wallet/utils';
 import { ScriptConfig } from '@ckb-lumos/config-manager';
 import { JSONRPCRequest, JSONRPCResponse } from 'json-rpc-2.0';
@@ -6,7 +6,7 @@ import { RPC as RpcType } from '@ckb-lumos/rpc/lib/types/rpc';
 import { NexusCommonErrors } from '../../../errors';
 import pTimeout from './thirdpartyLib/p-timeout';
 import pRetry from './thirdpartyLib/p-retry';
-
+import { ResultFormatter } from '@ckb-lumos/rpc';
 type Order = 'asc' | 'desc';
 type Limit = HexNumber;
 type CursorType = HexString | null;
@@ -41,25 +41,14 @@ const toQueryParam = (payload: {
   payload.cursor || null,
 ];
 
-const toScript = (rpcScript: RpcType.Script): Script => ({
-  codeHash: rpcScript.code_hash,
-  hashType: rpcScript.hash_type,
-  args: rpcScript.args,
-});
-
-const toOutPoint = (rpcOutPoint: RpcType.OutPoint): OutPoint => ({
-  txHash: rpcOutPoint.tx_hash,
-  index: rpcOutPoint.index,
-});
-
 const toCell = (rpcIndexerCell: RpcType.IndexerCell): Cell => ({
   cellOutput: {
     capacity: rpcIndexerCell.output.capacity,
-    lock: toScript(rpcIndexerCell.output.lock),
-    type: rpcIndexerCell.output.type ? toScript(rpcIndexerCell.output.type) : undefined,
+    lock: ResultFormatter.toScript(rpcIndexerCell.output.lock),
+    type: rpcIndexerCell.output.type ? ResultFormatter.toScript(rpcIndexerCell.output.type) : undefined,
   },
   data: rpcIndexerCell.output_data,
-  outPoint: toOutPoint(rpcIndexerCell.out_point),
+  outPoint: ResultFormatter.toOutPoint(rpcIndexerCell.out_point),
   blockNumber: rpcIndexerCell.block_number,
 });
 
@@ -161,4 +150,4 @@ function createRpcClient(url: string, options?: RpcClientOptions): RpcClient {
   return { request, batchRequest };
 }
 
-export { createRpcClient, loadSecp256k1ScriptDep, toCell, toScript, toQueryParam };
+export { createRpcClient, loadSecp256k1ScriptDep, toCell, toQueryParam };

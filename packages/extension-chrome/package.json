@@ -1,6 +1,6 @@
 {
   "name": "@nexus-wallet/extension-chrome",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "description": "Nexus Chrome extension",
   "homepage": "https://github.com/ckb-js/nexus/tree/main/extension-chrome#readme",
   "license": "MIT",
@@ -43,9 +43,9 @@
     "@ckb-lumos/helpers": "0.20.0-alpha.2",
     "@ckb-lumos/lumos": "0.20.0-alpha.2",
     "@ckb-lumos/rpc": "0.20.0-alpha.2",
-    "@nexus-wallet/protocol": "0.0.15",
-    "@nexus-wallet/types": "0.0.15",
-    "@nexus-wallet/utils": "0.0.15",
+    "@nexus-wallet/protocol": "0.0.16",
+    "@nexus-wallet/types": "0.0.16",
+    "@nexus-wallet/utils": "0.0.16",
     "@tanstack/react-query": "4.29.1",
     "awilix": "8.0.1",
     "eventemitter3": "5.0.0",
@@ -75,7 +75,7 @@
     "webextension-polyfill": "0.10.0",
     "zod": "3.21.4",
     "zod-validation-error": "1.0.1",
-    "zustand": "4.3.2"
+    "zustand": "4.3.7"
   },
   "devDependencies": {
     "@babel/preset-env": "7.21.4",

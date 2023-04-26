@@ -1,9 +1,9 @@
 import { assert, asyncSleep } from '@nexus-wallet/utils';
-import type { InjectedCkb } from '@nexus-wallet/protocol';
+import type { Events, InjectedCkb, RpcMethods } from '@nexus-wallet/protocol';
 
 declare global {
   interface Window {
-    ckb: InjectedCkb;
+    ckb: InjectedCkb<RpcMethods, Events>;
   }
 }
 
@@ -16,7 +16,9 @@ const DEFAULT_DETECT_INTERVAL = 50;
  *   const ckb = await detectCkb()
  *   ckb.request({ method: 'wallet_enable' })
  */
-export async function detectCkb(options: { detectScope?: object; timeout?: number } = {}): Promise<InjectedCkb> {
+export async function detectCkb<M = RpcMethods, E = Events>(
+  options: { detectScope?: object; timeout?: number } = {},
+): Promise<InjectedCkb<M, E>> {
   const detectScope: { ckb?: InjectedCkb } = (() => {
     if (options?.detectScope) return options.detectScope;
     if (typeof globalThis !== 'undefined') return globalThis;
