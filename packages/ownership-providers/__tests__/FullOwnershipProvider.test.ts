@@ -90,6 +90,23 @@ const mockProviderConfig: FullOwnershipProviderConfig = {
   } as any,
 };
 
+function initProviderWithCells(cells: Cell[], offChainLock = [offChainLock1], onChainLock = [onChainLocks1]) {
+  mockRpcRequest.mockImplementation(({ method, params }: { method: string; params: any }) => {
+    switch (method) {
+      case 'wallet_fullOwnership_getOffChainLocks':
+        return offChainLock;
+      case 'wallet_fullOwnership_getOnChainLocks':
+        return params.cursor ? [] : { objects: onChainLock, cursor: '25' };
+      case 'wallet_fullOwnership_getLiveCells':
+        const cursor = parseInt(params.cursor || 0);
+        return { objects: cells.slice(cursor, cursor + 1), cursor: cursor + 1 };
+    }
+  });
+  const provider = new FullOwnershipProvider(mockProviderConfig);
+
+  return provider;
+}
+
 describe('class FullOwnershipProvider', () => {
   beforeEach(() => {
     mockRpcRequest.mockReset();
@@ -107,21 +124,6 @@ describe('class FullOwnershipProvider', () => {
 
   describe('#injectCapacity', () => {
     const emptyTxSkeleton = TransactionSkeleton();
-
-    function initProviderWithCells(cells: Cell[], offChainLock = [offChainLock1]) {
-      mockRpcRequest.mockImplementation(({ method, params }: { method: string; params: any }) => {
-        switch (method) {
-          case 'wallet_fullOwnership_getOffChainLocks':
-            return offChainLock;
-          case 'wallet_fullOwnership_getLiveCells':
-            const cursor = parseInt(params.cursor || 0);
-            return { objects: cells.slice(cursor, cursor + 1), cursor: cursor + 1 };
-        }
-      });
-      const provider = new FullOwnershipProvider(mockProviderConfig);
-
-      return provider;
-    }
 
     it('Should throw error when all cells capacity is not enough', async () => {
       const provider = initProviderWithCells([createFakeCellWithCapacity(100 * 1e8), createFakeCellWithCapacity(200)]);
@@ -521,11 +523,13 @@ describe('class FullOwnershipProvider', () => {
   });
 
   describe('#sendTransaction', () => {
-    it('signed transaction', async () => {
+    it('signed transaction with fee paid and signed', async () => {
+      const signedWitness = '0xffffff';
       const provider = new FullOwnershipProvider(mockProviderConfig);
       const txSkeleton = TransactionSkeleton()
         .update('inputs', (inputs) => inputs.push(createFakeCellWithCapacity(1000, onChainLocks1)))
-        .update('outputs', (outputs) => outputs.push(createFakeCellWithCapacity(100, onChainLocks2)));
+        .update('outputs', (outputs) => outputs.push(createFakeCellWithCapacity(100, onChainLocks2)))
+        .update('witnesses', (witnesses) => witnesses.push(signedWitness));
 
       await provider.sendTransaction(txSkeleton);
       expect(mockProviderConfig.ckb.request).toBeCalledWith({

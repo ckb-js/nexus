@@ -13,10 +13,13 @@ import { secp256k1Blake160 } from '@ckb-lumos/common-scripts';
 import { Config as LumosConfig, getConfig as getLumosConfig, ScriptConfig } from '@ckb-lumos/config-manager';
 import { Uint8ArrayCodec } from '@ckb-lumos/codec/lib/base';
 import { OutputValidator, Paginate } from '@nexus-wallet/protocol/lib/base';
+import { createLogger } from '@nexus-wallet/utils';
 
 function equalPack<C extends Uint8ArrayCodec>(codec: C, a: PackParam<C>, b: PackParam<C>): boolean {
   return bytes.equal(codec.pack(a), codec.pack(b));
 }
+
+const logger = createLogger('FullOwnershipProvider');
 
 // util types for FullOwnership
 
@@ -141,6 +144,7 @@ export class FullOwnershipProvider {
     if (!changeLock) {
       errors.throwError('No change lock script found, it may be a internal bug');
     }
+    logger.info('offChainlocks', hexifyScript(changeLock));
 
     const changeCell: Cell = {
       cellOutput: {
@@ -260,6 +264,7 @@ export class FullOwnershipProvider {
       sumCapacity(txSkeleton.get('inputs')).sub(sumCapacity(txSkeleton.get('outputs'))),
     );
 
+    // if fee is enough, directly return origin txSkeleton
     if (requireFee.lte(0)) {
       return txSkeleton;
     }
@@ -381,7 +386,8 @@ export class FullOwnershipProvider {
 
   /**
    * Send the transaction to CKB network
-   *
+   * If the transaction fee is not paid, it will use wallet cell to pay the fee.
+   * Then if the transaction is not signed, it will request sign the transaction first
    * @param txSkeleton - transaction skeleton
    * @param outputsValidator - Validates the transaction outputs before entering the tx-pool {@link https://github.com/nervosnetwork/ckb/blob/develop/rpc/README.md#type-outputsvalidator | OutputValidator}
    * @returns Transaction hash in CKB network
@@ -397,17 +403,14 @@ export class FullOwnershipProvider {
     );
     txSkeleton = await this.payFee(txSkeleton, { byOutputIndexes: byOutputIndex, autoInject: true });
 
-    // sign
+    // if not signed, sign the transaction first
     const walletOwnedInputs = await this.isOwnedByWallet(
       txSkeleton.inputs.map((input) => input.cellOutput.lock).toArray(),
     );
-
-    if (walletOwnedInputs.size > txSkeleton.witnesses.size) {
-      throw new Error(
-        `Some witnesses are missing!, required: ${walletOwnedInputs.size} from inputs, got: ${txSkeleton.witnesses.size} from witnesses.`,
-      );
-    }
-
+    assert(
+      walletOwnedInputs.size <= txSkeleton.witnesses.size,
+      `Some witnesses are missing!, required: ${walletOwnedInputs.size} from inputs, got: ${txSkeleton.witnesses.size} from witnesses.`,
+    );
     const visitedLocks = new Set<string>();
     let requireSign = false;
     let witnessIndex = 0;
@@ -430,7 +433,7 @@ export class FullOwnershipProvider {
     }
 
     if (requireSign) {
-      await this.signTransaction(txSkeleton);
+      txSkeleton = await this.signTransaction(txSkeleton);
     }
 
     return await this.ckb.request({
@@ -446,8 +449,8 @@ export class FullOwnershipProvider {
     const offChainLockSet = new Set(
       (
         await Promise.all([
-          this.getOffChainLocks({ change: 'external' }),
           this.getOffChainLocks({ change: 'internal' }),
+          this.getOffChainLocks({ change: 'external' }),
         ])
       )
         .flat()
@@ -459,7 +462,7 @@ export class FullOwnershipProvider {
       result.set(key, result.get(key) || offChainLockSet.has(key));
     });
 
-    for (const change of ['external', 'external'] as const) {
+    for (const change of ['internal', 'external'] as const) {
       let cursor: string | undefined = undefined;
 
       let page: Paginate<Script>;

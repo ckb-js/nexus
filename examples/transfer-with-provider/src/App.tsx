@@ -5,6 +5,8 @@ import { createTransactionFromSkeleton, parseAddress, encodeToAddress, Transacti
 import { predefined } from '@ckb-lumos/config-manager';
 import { RPC, config } from '@ckb-lumos/lumos';
 import { useAsyncState } from './hooks/useAsyncState';
+import { blockchain } from '@ckb-lumos/base';
+import { bytes } from '@ckb-lumos/codec';
 
 config.initializeConfig(predefined.AGGRON4);
 
@@ -76,8 +78,6 @@ function Transfer() {
 
     try {
       txSkeleton = await provider.injectCapacity(txSkeleton, { amount: receiveShannon });
-      txSkeleton = await provider.payFee(txSkeleton, { autoInject: true });
-      txSkeleton = await provider.signTransaction(txSkeleton);
 
       setLastTxHash('');
       const txHash = await provider.sendTransaction(txSkeleton);
