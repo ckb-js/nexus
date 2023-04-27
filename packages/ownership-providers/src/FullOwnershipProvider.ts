@@ -12,14 +12,11 @@ import { bytes, PackParam } from '@ckb-lumos/codec';
 import { secp256k1Blake160 } from '@ckb-lumos/common-scripts';
 import { Config as LumosConfig, getConfig as getLumosConfig, ScriptConfig } from '@ckb-lumos/config-manager';
 import { Uint8ArrayCodec } from '@ckb-lumos/codec/lib/base';
-import { OutputValidator, Paginate } from '@nexus-wallet/protocol/lib/base';
-import { createLogger } from '@nexus-wallet/utils';
+import { OutputValidator } from '@nexus-wallet/protocol/lib/base';
 
 function equalPack<C extends Uint8ArrayCodec>(codec: C, a: PackParam<C>, b: PackParam<C>): boolean {
   return bytes.equal(codec.pack(a), codec.pack(b));
 }
-
-const logger = createLogger('FullOwnershipProvider');
 
 // util types for FullOwnership
 
@@ -144,7 +141,6 @@ export class FullOwnershipProvider {
     if (!changeLock) {
       errors.throwError('No change lock script found, it may be a internal bug');
     }
-    logger.info('offChainlocks', hexifyScript(changeLock));
 
     const changeCell: Cell = {
       cellOutput: {
@@ -250,6 +246,9 @@ export class FullOwnershipProvider {
    * ```
    */
   async payFee(txSkeleton: TransactionSkeletonType, options: PayFeeOptions): Promise<TransactionSkeletonType> {
+    // TODO: dynamic byOutputIndexes default value
+    // options.byOutputIndexes = options.byOutputIndexes ?? (await this.getByOutputIndexesFromOriginal(txSkeleton));
+
     if (options.byOutputIndexes?.length === 0 && !options.autoInject) {
       errors.throwError('no byOutputIndexes is provided, but autoInject is `false`');
     }
@@ -394,14 +393,8 @@ export class FullOwnershipProvider {
    */
   async sendTransaction(txSkeleton: TransactionSkeletonType, outputsValidator?: OutputValidator): Promise<HexString> {
     if (!this.isTransactionFeePaid(txSkeleton)) {
-      const walletOwnedOutputs = await this.isOwnedLocks(
-        txSkeleton.outputs.map((input) => input.cellOutput.lock).toArray(),
-      );
-      const byOutputIndex = [...walletOwnedOutputs.values()].reduce(
-        (prev: number[], cur, index) => (cur ? [...prev, index] : prev),
-        [],
-      );
-      txSkeleton = await this.payFee(txSkeleton, { byOutputIndexes: byOutputIndex, autoInject: true });
+      const byOutputIndexes = await this.getByOutputIndexesFromOriginal(txSkeleton);
+      txSkeleton = await this.payFee(txSkeleton, { byOutputIndexes, autoInject: true });
     }
 
     // if not signed, sign the transaction first
@@ -415,7 +408,7 @@ export class FullOwnershipProvider {
     });
   }
 
-  private async isOwnedLocks(locks: Script[]): Promise<Map<string, boolean>> {
+  private async isOwnedLocks(locks: Script[], noTypeScript = false): Promise<Map<string, boolean>> {
     const result: Map<string, boolean> = new Map();
     if (locks.length === 0) return result;
 
@@ -435,21 +428,16 @@ export class FullOwnershipProvider {
       result.set(key, result.get(key) || offChainLockSet.has(key));
     });
 
-    for (const change of ['internal', 'external'] as const) {
-      let cursor: string | undefined = undefined;
-
-      let page: Paginate<Script>;
-
-      do {
-        page = await this.getOnChainLocks({ change, cursor });
-        cursor = page.cursor;
-        const onChainLockSet = new Set(page.objects.map(hexifyScript));
-        locks.forEach((lock) => {
-          const key = bytes.hexify(blockchain.Script.pack(lock));
-          result.set(key, result.get(key) || onChainLockSet.has(key));
-        });
-      } while (page.objects.length > 0);
+    const onChainLockSet = new Set();
+    for await (const cell of this.collector()) {
+      if (cell.cellOutput.type && noTypeScript) continue;
+      onChainLockSet.add(bytes.hexify(blockchain.Script.pack(cell.cellOutput.lock)));
     }
+
+    locks.forEach((lock) => {
+      const key = bytes.hexify(blockchain.Script.pack(lock));
+      result.set(key, result.get(key) || onChainLockSet.has(key));
+    });
 
     return result;
   }
@@ -490,6 +478,18 @@ export class FullOwnershipProvider {
     return calculateFeeCompatible(getTransactionSizeByTx(createTransactionFromSkeleton(txSkeleton)), feeRate)
       .sub(sumCapacity(txSkeleton.get('inputs')).sub(sumCapacity(txSkeleton.get('outputs'))))
       .lte(0);
+  }
+
+  private async getByOutputIndexesFromOriginal(txSkeleton: TransactionSkeletonType): Promise<number[]> {
+    const walletOwnedOutputs = await this.isOwnedLocks(
+      txSkeleton.outputs.map((input) => input.cellOutput.lock).toArray(),
+      true,
+    );
+    const byOutputIndex = [...walletOwnedOutputs.values()].reduce(
+      (prev: number[], cur, index) => (cur ? [...prev, index] : prev),
+      [],
+    );
+    return byOutputIndex;
   }
 
   private async getSecp256k1Blake160CellDep(): Promise<CellDep> {
