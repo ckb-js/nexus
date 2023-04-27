@@ -11,7 +11,6 @@ import { Address, blockchain, Cell, CellDep, HexString, Script, Transaction } fr
 import { bytes, PackParam } from '@ckb-lumos/codec';
 import { secp256k1Blake160 } from '@ckb-lumos/common-scripts';
 import { Config as LumosConfig, getConfig as getLumosConfig, ScriptConfig } from '@ckb-lumos/config-manager';
-import times from 'lodash.times';
 import { Uint8ArrayCodec } from '@ckb-lumos/codec/lib/base';
 import { OutputValidator, Paginate } from '@nexus-wallet/protocol/lib/base';
 
@@ -80,6 +79,10 @@ function calculateFeeCompatible(size: number, feeRate: BIish): BI {
 
 function sumCapacity(cells: TransactionSkeletonType['inputs' | 'outputs']) {
   return cells.reduce((prev, cur) => prev.add(cur.cellOutput.capacity), BI.from(0));
+}
+
+function hexifyScript(script: Script) {
+  return bytes.hexify(blockchain.Script.pack(script));
 }
 
 export type FullOwnershipProviderConfig = {
@@ -384,17 +387,61 @@ export class FullOwnershipProvider {
    * @returns Transaction hash in CKB network
    */
   async sendTransaction(txSkeleton: TransactionSkeletonType, outputsValidator?: OutputValidator): Promise<HexString> {
+    // pay fee
+    const walletOwnedOutputs = await this.isOwnedByWallet(
+      txSkeleton.outputs.map((input) => input.cellOutput.lock).toArray(),
+    );
+    const byOutputIndex = [...walletOwnedOutputs.entries()].reduce(
+      (prev: number[], [, cur], index) => (cur ? [...prev, index] : prev),
+      [],
+    );
+    txSkeleton = await this.payFee(txSkeleton, { byOutputIndexes: byOutputIndex, autoInject: true });
+
+    // sign
+    const walletOwnedInputs = await this.isOwnedByWallet(
+      txSkeleton.inputs.map((input) => input.cellOutput.lock).toArray(),
+    );
+
+    if (walletOwnedInputs.size > txSkeleton.witnesses.size) {
+      throw new Error(
+        `Some witnesses are missing!, required: ${walletOwnedInputs.size} from inputs, got: ${txSkeleton.witnesses.size} from witnesses.`,
+      );
+    }
+
+    const visitedLocks = new Set<string>();
+    let requireSign = false;
+    let witnessIndex = 0;
+    for (const cell of txSkeleton.inputs) {
+      const lock = hexifyScript(cell.cellOutput.lock);
+      if (visitedLocks.has(lock)) {
+        continue;
+      } else {
+        visitedLocks.add(lock);
+      }
+      if (
+        walletOwnedInputs.get(lock) &&
+        txSkeleton.witnesses.get(witnessIndex) === SECP256K1_BLAKE160_WITNESS_PLACEHOLDER
+      ) {
+        requireSign = true;
+        break;
+      } else {
+        witnessIndex++;
+      }
+    }
+
+    if (requireSign) {
+      await this.signTransaction(txSkeleton);
+    }
+
     return await this.ckb.request({
       method: 'ckb_sendTransaction',
       params: { tx: createTransactionFromSkeleton(txSkeleton), outputsValidator: outputsValidator },
     });
   }
 
-  private async isOwnedByWallet(locks: Script[]): Promise<boolean[]> {
-    function stringifyLock(lock: Script) {
-      return bytes.hexify(blockchain.Script.pack(lock));
-    }
-    if (locks.length === 0) return [];
+  private async isOwnedByWallet(locks: Script[]): Promise<Map<string, boolean>> {
+    const result: Map<string, boolean> = new Map();
+    if (locks.length === 0) return result;
 
     const offChainLockSet = new Set(
       (
@@ -404,12 +451,12 @@ export class FullOwnershipProvider {
         ])
       )
         .flat()
-        .map(stringifyLock),
+        .map(hexifyScript),
     );
-    const result = times(locks.length, () => false);
 
-    locks.forEach((lock, index) => {
-      result[index] = offChainLockSet.has(bytes.hexify(blockchain.Script.pack(lock)));
+    locks.forEach((lock) => {
+      const key = bytes.hexify(blockchain.Script.pack(lock));
+      result.set(key, result.get(key) || offChainLockSet.has(key));
     });
 
     for (const change of ['external', 'external'] as const) {
@@ -420,9 +467,10 @@ export class FullOwnershipProvider {
       do {
         page = await this.getOnChainLocks({ change, cursor });
         cursor = page.cursor;
-        const onChainLockSet = new Set(page.objects.map(stringifyLock));
-        locks.forEach((lock, index) => {
-          result[index] = result[index] || onChainLockSet.has(bytes.hexify(blockchain.Script.pack(lock)));
+        const onChainLockSet = new Set(page.objects.map(hexifyScript));
+        locks.forEach((lock) => {
+          const key = bytes.hexify(blockchain.Script.pack(lock));
+          result.set(key, result.get(key) || onChainLockSet.has(key));
         });
       } while (page.objects.length > 0);
     }
