@@ -393,46 +393,19 @@ export class FullOwnershipProvider {
    * @returns Transaction hash in CKB network
    */
   async sendTransaction(txSkeleton: TransactionSkeletonType, outputsValidator?: OutputValidator): Promise<HexString> {
-    // pay fee
-    const walletOwnedOutputs = await this.isOwnedByWallet(
-      txSkeleton.outputs.map((input) => input.cellOutput.lock).toArray(),
-    );
-    const byOutputIndex = [...walletOwnedOutputs.entries()].reduce(
-      (prev: number[], [, cur], index) => (cur ? [...prev, index] : prev),
-      [],
-    );
-    txSkeleton = await this.payFee(txSkeleton, { byOutputIndexes: byOutputIndex, autoInject: true });
-
-    // if not signed, sign the transaction first
-    const walletOwnedInputs = await this.isOwnedByWallet(
-      txSkeleton.inputs.map((input) => input.cellOutput.lock).toArray(),
-    );
-    assert(
-      walletOwnedInputs.size <= txSkeleton.witnesses.size,
-      `Some witnesses are missing!, required: ${walletOwnedInputs.size} from inputs, got: ${txSkeleton.witnesses.size} from witnesses.`,
-    );
-    const visitedLocks = new Set<string>();
-    let requireSign = false;
-    let witnessIndex = 0;
-    for (const cell of txSkeleton.inputs) {
-      const lock = hexifyScript(cell.cellOutput.lock);
-      if (visitedLocks.has(lock)) {
-        continue;
-      } else {
-        visitedLocks.add(lock);
-      }
-      if (
-        walletOwnedInputs.get(lock) &&
-        txSkeleton.witnesses.get(witnessIndex) === SECP256K1_BLAKE160_WITNESS_PLACEHOLDER
-      ) {
-        requireSign = true;
-        break;
-      } else {
-        witnessIndex++;
-      }
+    if (!this.isTransactionFeePaid(txSkeleton)) {
+      const walletOwnedOutputs = await this.isOwnedLocks(
+        txSkeleton.outputs.map((input) => input.cellOutput.lock).toArray(),
+      );
+      const byOutputIndex = [...walletOwnedOutputs.values()].reduce(
+        (prev: number[], cur, index) => (cur ? [...prev, index] : prev),
+        [],
+      );
+      txSkeleton = await this.payFee(txSkeleton, { byOutputIndexes: byOutputIndex, autoInject: true });
     }
 
-    if (requireSign) {
+    // if not signed, sign the transaction first
+    if (!(await this.isSecp256k1Signed(txSkeleton))) {
       txSkeleton = await this.signTransaction(txSkeleton);
     }
 
@@ -442,7 +415,7 @@ export class FullOwnershipProvider {
     });
   }
 
-  private async isOwnedByWallet(locks: Script[]): Promise<Map<string, boolean>> {
+  private async isOwnedLocks(locks: Script[]): Promise<Map<string, boolean>> {
     const result: Map<string, boolean> = new Map();
     if (locks.length === 0) return result;
 
@@ -479,6 +452,44 @@ export class FullOwnershipProvider {
     }
 
     return result;
+  }
+
+  private async isSecp256k1Signed(txSkeleton: TransactionSkeletonType): Promise<boolean> {
+    const walletOwnedInputs = await this.isOwnedLocks(
+      txSkeleton.inputs.map((input) => input.cellOutput.lock).toArray(),
+    );
+    assert(
+      walletOwnedInputs.size <= txSkeleton.witnesses.size,
+      `Some witnesses are missing!, required: ${walletOwnedInputs.size} from inputs, got: ${txSkeleton.witnesses.size} from witnesses.`,
+    );
+    const visitedLocks = new Set<string>();
+    let requireSign = true;
+    let witnessIndex = 0;
+    for (const cell of txSkeleton.inputs) {
+      const lock = hexifyScript(cell.cellOutput.lock);
+      if (visitedLocks.has(lock)) {
+        continue;
+      } else {
+        visitedLocks.add(lock);
+      }
+      if (
+        walletOwnedInputs.get(lock) &&
+        txSkeleton.witnesses.get(witnessIndex) === SECP256K1_BLAKE160_WITNESS_PLACEHOLDER
+      ) {
+        requireSign = false;
+        break;
+      } else {
+        witnessIndex++;
+      }
+    }
+
+    return requireSign;
+  }
+
+  private isTransactionFeePaid(txSkeleton: TransactionSkeletonType, feeRate: BIish = 1000): boolean {
+    return calculateFeeCompatible(getTransactionSizeByTx(createTransactionFromSkeleton(txSkeleton)), feeRate)
+      .sub(sumCapacity(txSkeleton.get('inputs')).sub(sumCapacity(txSkeleton.get('outputs'))))
+      .lte(0);
   }
 
   private async getSecp256k1Blake160CellDep(): Promise<CellDep> {
