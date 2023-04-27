@@ -4,4 +4,11 @@ module.exports = {
   testEnvironment: 'node',
   projects: ['<rootDir>/packages/*'],
   coveragePathIgnorePatterns: ['lib'],
+  collectCoverageFrom: [
+    'src/**/*.ts',
+    // skip UI test
+    '!src/pages/**/*',
+    // skip type definition
+    '!**/*.d.ts',
+  ],
 };
