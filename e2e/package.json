@@ -1,6 +1,6 @@
 {
   "name": "@nexus-wallet/e2e",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "description": "E2E testing for Nexus",
   "private": true,
   "directories": {

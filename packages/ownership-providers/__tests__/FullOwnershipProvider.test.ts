@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { BI, BIish, parseUnit } from '@ckb-lumos/bi';
-import { TransactionSkeleton, TransactionSkeletonType } from '@ckb-lumos/helpers';
+import { createTransactionFromSkeleton, TransactionSkeleton, TransactionSkeletonType } from '@ckb-lumos/helpers';
 import { common, secp256k1Blake160 } from '@ckb-lumos/common-scripts';
 import { Cell, Script } from '@nexus-wallet/protocol';
 import { predefined } from '@ckb-lumos/config-manager';
@@ -517,6 +517,21 @@ describe('class FullOwnershipProvider', () => {
       params: {
         cursor: '0',
       },
+    });
+  });
+
+  describe('#sendTransaction', () => {
+    it('signed transaction', async () => {
+      const provider = new FullOwnershipProvider(mockProviderConfig);
+      const txSkeleton = TransactionSkeleton()
+        .update('inputs', (inputs) => inputs.push(createFakeCellWithCapacity(1000, onChainLocks1)))
+        .update('outputs', (outputs) => outputs.push(createFakeCellWithCapacity(100, onChainLocks2)));
+
+      await provider.sendTransaction(txSkeleton);
+      expect(mockProviderConfig.ckb.request).toBeCalledWith({
+        method: 'ckb_sendTransaction',
+        params: { tx: createTransactionFromSkeleton(txSkeleton), outputsValidator: undefined },
+      });
     });
   });
 });

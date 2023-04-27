@@ -20,7 +20,7 @@ You can download the latest wallet from the GitHub [release](https://github.com/
 - npm 7+
 
 ```sh
-git clone --recurse-submodules https://github.com/ckb-js/nexus.git
+git clone
 cd nexus
 npm install
 npm run build
@@ -34,9 +34,9 @@ npm start
 
 ## Documentation
 
-- [API Reference](https://github.com/ckb-js/nexus/blob/main/docs/rpc.md)
-- [Guide for End Users](https://github.com/ckb-js/nexus/blob/main/docs/user-guide.md)
-- [Guide for Developers](https://github.com/ckb-js/nexus/blob/main/docs/get-started.md)
-- [FAQs](https://github.com/ckb-js/nexus/blob/main/docs/faq.md)
+- [Developer Tutorial](docs/tutorial.md)
+- [Installation](docs/user-guide.md)
+- [API Reference](docs/rpc.md)
+- [FAQs](docs/faq.md)
 
-To read more about Nexus, you can also check out the [docs directory](https://github.com/ckb-js/nexus/blob/main/docs).
+You can check out the [docs](docs) for more details about the Nexus.

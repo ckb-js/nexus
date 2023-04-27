@@ -12,6 +12,7 @@ import { bytes, PackParam } from '@ckb-lumos/codec';
 import { secp256k1Blake160 } from '@ckb-lumos/common-scripts';
 import { Config as LumosConfig, getConfig as getLumosConfig, ScriptConfig } from '@ckb-lumos/config-manager';
 import { Uint8ArrayCodec } from '@ckb-lumos/codec/lib/base';
+import { OutputValidator } from '@nexus-wallet/protocol/lib/base';
 
 function equalPack<C extends Uint8ArrayCodec>(codec: C, a: PackParam<C>, b: PackParam<C>): boolean {
   return bytes.equal(codec.pack(a), codec.pack(b));
@@ -29,7 +30,11 @@ type ReturnOf<K extends OwnershipMethodNames> = ReturnType<FullOwnership[`${Full
 export type LockScriptLike = Address | Script;
 
 const SECP256K1_SIGNATURE_SIZE = 65;
-const SECP256K1_BLAKE160_WITNESS_PLACEHOLDER = bytes.hexify(
+
+/**
+ * @internal
+ */
+export const SECP256K1_BLAKE160_WITNESS_PLACEHOLDER = bytes.hexify(
   blockchain.WitnessArgs.pack({
     lock: new Uint8Array(SECP256K1_SIGNATURE_SIZE),
   }),
@@ -368,6 +373,20 @@ export class FullOwnershipProvider {
     txSkeleton = txSkeleton.update('signingEntries', (entries) => entries.clear());
 
     return txSkeleton;
+  }
+
+  /**
+   * Send the transaction to CKB network
+   *
+   * @param txSkeleton - transaction skeleton
+   * @param outputsValidator - Validates the transaction outputs before entering the tx-pool {@link https://github.com/nervosnetwork/ckb/blob/develop/rpc/README.md#type-outputsvalidator | OutputValidator}
+   * @returns Transaction hash in CKB network
+   */
+  async sendTransaction(txSkeleton: TransactionSkeletonType, outputsValidator?: OutputValidator): Promise<HexString> {
+    return await this.ckb.request({
+      method: 'ckb_sendTransaction',
+      params: { tx: createTransactionFromSkeleton(txSkeleton), outputsValidator: outputsValidator },
+    });
   }
 
   private async getSecp256k1Blake160CellDep(): Promise<CellDep> {
