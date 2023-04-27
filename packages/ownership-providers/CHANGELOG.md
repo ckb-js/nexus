@@ -1,3 +1,63 @@
+# v0.0.17 (Thu Apr 27 2023)
+
+### Release Notes
+
+#### feat(detect-ckb): a module for detecting injected ckb ([#249](https://github.com/ckb-js/nexus/pull/249))
+
+Added a module for detecting `ckb` object in `window`
+
+```ts
+import { detectCkb } from '@nexus-wallet/detect-ckb'
+
+// will detect if the `ckb` object is injected to window
+// an error will be thrown after more than 3s of detection
+const ckb = await detectCkb({ timeout: 3000 });
+```
+
+---
+
+#### 🔨 Breaking Minor Change
+
+- revert(ownership-provider): revert payFee and sign ([@IronLu233](https://github.com/IronLu233))
+- feat(ownership-provider): Ownership provider send transaction ([@IronLu233](https://github.com/IronLu233))
+- refactor(ownership-providers): merge with new provider ([@homura](https://github.com/homura))
+- test: rm unused cases ([@homura](https://github.com/homura))
+- refactor: rm unnecessary code ([@homura](https://github.com/homura))
+- feat: remove witness from existing input lock ([@zhangyouxin](https://github.com/zhangyouxin))
+- Merge remote-tracking branch 'origin/main' into detect-ckb ([@homura](https://github.com/homura))
+- test(ownership-providers): update failed test cases ([@homura](https://github.com/homura))
+- fix(ownership-providers): inject witness and cellDeps auto ([@homura](https://github.com/homura))
+- Merge remote-tracking branch 'ckb-js/main' into detect-ckb ([@homura](https://github.com/homura))
+
+#### 🚀 Enhancement
+
+- feat(ownership-provider): supported send transaction [#255](https://github.com/ckb-js/nexus/pull/255) ([@IronLu233](https://github.com/IronLu233))
+- feat(detect-ckb): a module for detecting injected ckb [#249](https://github.com/ckb-js/nexus/pull/249) ([@homura](https://github.com/homura) [@pygman](https://github.com/pygman))
+
+#### 🐛 Bug Fix
+
+- fix(ownership-providers): inject witness and cellDeps auto [#251](https://github.com/ckb-js/nexus/pull/251) ([@homura](https://github.com/homura) [@zhangyouxin](https://github.com/zhangyouxin))
+
+#### 📝 Documentation
+
+- docs: developer tutorial [#256](https://github.com/ckb-js/nexus/pull/256) ([@homura](https://github.com/homura))
+
+#### 🔩 Dependency Updates
+
+- chore(deps): update dependency @types/chrome to v0.0.233 [#245](https://github.com/ckb-js/nexus/pull/245) ([@renovate[bot]](https://github.com/renovate[bot]))
+- chore(deps): update dependency prettier to v2.8.8 [#257](https://github.com/ckb-js/nexus/pull/257) ([@renovate[bot]](https://github.com/renovate[bot]))
+- chore(deps): update jest monorepo [#71](https://github.com/ckb-js/nexus/pull/71) ([@renovate[bot]](https://github.com/renovate[bot]))
+
+#### Authors: 5
+
+- [@renovate[bot]](https://github.com/renovate[bot])
+- Iron Lu ([@IronLu233](https://github.com/IronLu233))
+- pygman ([@pygman](https://github.com/pygman))
+- Shinya ([@zhangyouxin](https://github.com/zhangyouxin))
+- Yonghui Lin ([@homura](https://github.com/homura))
+
+---
+
 # v0.0.16 (Tue Apr 25 2023)
 
 #### 🔨 Breaking Minor Change
