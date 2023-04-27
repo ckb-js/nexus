@@ -11,8 +11,9 @@ import { Address, blockchain, Cell, CellDep, HexString, Script, Transaction } fr
 import { bytes, PackParam } from '@ckb-lumos/codec';
 import { secp256k1Blake160 } from '@ckb-lumos/common-scripts';
 import { Config as LumosConfig, getConfig as getLumosConfig, ScriptConfig } from '@ckb-lumos/config-manager';
+import times from 'lodash.times';
 import { Uint8ArrayCodec } from '@ckb-lumos/codec/lib/base';
-import { OutputValidator } from '@nexus-wallet/protocol/lib/base';
+import { OutputValidator, Paginate } from '@nexus-wallet/protocol/lib/base';
 
 function equalPack<C extends Uint8ArrayCodec>(codec: C, a: PackParam<C>, b: PackParam<C>): boolean {
   return bytes.equal(codec.pack(a), codec.pack(b));
@@ -387,6 +388,46 @@ export class FullOwnershipProvider {
       method: 'ckb_sendTransaction',
       params: { tx: createTransactionFromSkeleton(txSkeleton), outputsValidator: outputsValidator },
     });
+  }
+
+  private async isOwnedByWallet(locks: Script[]): Promise<boolean[]> {
+    function stringifyLock(lock: Script) {
+      return bytes.hexify(blockchain.Script.pack(lock));
+    }
+    if (locks.length === 0) return [];
+
+    const offChainLockSet = new Set(
+      (
+        await Promise.all([
+          this.getOffChainLocks({ change: 'external' }),
+          this.getOffChainLocks({ change: 'internal' }),
+        ])
+      )
+        .flat()
+        .map(stringifyLock),
+    );
+    const result = times(locks.length, () => false);
+
+    locks.forEach((lock, index) => {
+      result[index] = offChainLockSet.has(bytes.hexify(blockchain.Script.pack(lock)));
+    });
+
+    for (const change of ['external', 'external'] as const) {
+      let cursor: string | undefined = undefined;
+
+      let page: Paginate<Script>;
+
+      do {
+        page = await this.getOnChainLocks({ change, cursor });
+        cursor = page.cursor;
+        const onChainLockSet = new Set(page.objects.map(stringifyLock));
+        locks.forEach((lock, index) => {
+          result[index] = result[index] || onChainLockSet.has(bytes.hexify(blockchain.Script.pack(lock)));
+        });
+      } while (page.objects.length > 0);
+    }
+
+    return result;
   }
 
   private async getSecp256k1Blake160CellDep(): Promise<CellDep> {
