@@ -1,6 +1,6 @@
 {
   "name": "@nexus-wallet/detect-ckb",
-  "version": "0.0.14",
+  "version": "0.0.17",
   "description": "Detect the global CKB object is injected or not",
   "homepage": "https://github.com/ckb-js/nexus/tree/main/detect-ckb#readme",
   "license": "MIT",
@@ -32,7 +32,7 @@
     "url": "https://github.com/ckb-js/nexus/issues"
   },
   "dependencies": {
-    "@nexus-wallet/protocol": "*",
-    "@nexus-wallet/utils": "*"
+    "@nexus-wallet/protocol": "0.0.17",
+    "@nexus-wallet/utils": "0.0.17"
   }
 }
