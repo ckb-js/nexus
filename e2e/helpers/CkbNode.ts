@@ -202,8 +202,6 @@ export class CkbNode {
       return this.rpcAddress;
     }
 
-    const portLockPath = path.resolve(CkbNode.paths.cache, 'port.lock');
-    await lock(portLockPath, { wait: 3000, stale: 12_000, retries: 5 });
     this.port = await detectPort(this.port);
     updateToml(this.configPaths['ckb.toml'], (ckb) => {
       ckb.rpc.listen_address = this.rpcAddress;
@@ -235,7 +233,6 @@ export class CkbNode {
         data = data.toString();
         this.logger.debug('Node: ', data);
         if (data.includes('Listen HTTP RPCServer on address 127.0.0.1')) {
-          unlock(portLockPath).catch(() => {});
           startMiner();
           resolve(this.rpcUrl);
         }
