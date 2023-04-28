@@ -7,38 +7,26 @@ import {
   minimalCellCapacityCompatible,
   TransactionSkeletonType,
 } from '@ckb-lumos/helpers';
-import { Address, blockchain, Cell, CellDep, HexString, Script, Transaction } from '@ckb-lumos/base';
-import { bytes, PackParam } from '@ckb-lumos/codec';
+import { blockchain, Cell, CellDep, HexString, Script } from '@ckb-lumos/base';
+import { bytes } from '@ckb-lumos/codec';
 import { secp256k1Blake160 } from '@ckb-lumos/common-scripts';
 import { Config as LumosConfig, getConfig as getLumosConfig, ScriptConfig } from '@ckb-lumos/config-manager';
-import { Uint8ArrayCodec } from '@ckb-lumos/codec/lib/base';
 import { OutputValidator } from '@nexus-wallet/protocol/lib/base';
-
-function equalPack<C extends Uint8ArrayCodec>(codec: C, a: PackParam<C>, b: PackParam<C>): boolean {
-  return bytes.equal(codec.pack(a), codec.pack(b));
-}
+import { Suffix } from './types';
+import {
+  calculateFeeCompatible,
+  equalPack,
+  getTransactionSizeByTx,
+  hexifyScript,
+  SECP256K1_BLAKE160_WITNESS_PLACEHOLDER,
+  sumCapacity,
+} from './utils';
 
 // util types for FullOwnership
-
-type Suffix<T extends string, P extends string> = T extends `${P}${infer S}` ? S : never;
 type FullOwnershipPrefix = 'wallet_fullOwnership_';
 type OwnershipMethodNames = Suffix<keyof FullOwnership, FullOwnershipPrefix>;
 type ParamOf<K extends OwnershipMethodNames> = Parameters<FullOwnership[`${FullOwnershipPrefix}${K}`]>[0];
 type ReturnOf<K extends OwnershipMethodNames> = ReturnType<FullOwnership[`${FullOwnershipPrefix}${K}`]>;
-
-/** Must be a full format address if it's an address */
-export type LockScriptLike = Address | Script;
-
-const SECP256K1_SIGNATURE_SIZE = 65;
-
-/**
- * @internal
- */
-export const SECP256K1_BLAKE160_WITNESS_PLACEHOLDER = bytes.hexify(
-  blockchain.WitnessArgs.pack({
-    lock: new Uint8Array(SECP256K1_SIGNATURE_SIZE),
-  }),
-);
 
 export type PayFeeOptions = {
   /**
@@ -56,34 +44,6 @@ export type PayFeeOptions = {
    */
   autoInject: boolean;
 };
-
-// TODO: let lumos export `getTransactionSizeByTx` and `calculateFeeCompatible` and `lockToScript`
-/* istanbul ignore next */
-function getTransactionSizeByTx(tx: Transaction): number {
-  const serializedTx = blockchain.Transaction.pack(tx);
-  // 4 is serialized offset bytesize
-  const size = serializedTx.byteLength + 4;
-  return size;
-}
-
-/* istanbul ignore next */
-function calculateFeeCompatible(size: number, feeRate: BIish): BI {
-  const ratio = BI.from(1000);
-  const base = BI.from(size).mul(feeRate);
-  const fee = base.div(ratio);
-  if (fee.mul(ratio).lt(base)) {
-    return fee.add(1);
-  }
-  return BI.from(fee);
-}
-
-function sumCapacity(cells: TransactionSkeletonType['inputs' | 'outputs']) {
-  return cells.reduce((prev, cur) => prev.add(cur.cellOutput.capacity), BI.from(0));
-}
-
-function hexifyScript(script: Script) {
-  return bytes.hexify(blockchain.Script.pack(script));
-}
 
 export type FullOwnershipProviderConfig = {
   ckb: InjectedCkb<RpcMethods, Events>;
@@ -166,8 +126,8 @@ export class FullOwnershipProvider {
         continue;
       }
 
-      // a cell with lock-only will be injected
-      if (cell.cellOutput.type || cell.data !== '0x') {
+      // lock-only will be injected
+      if (!this.isLockOnlyCell(cell)) {
         continue;
       }
 
@@ -364,7 +324,6 @@ export class FullOwnershipProvider {
         equalPack(blockchain.Script, input.cellOutput.lock, lock),
       );
 
-      /* istanbul ignore next */
       if (witnessIndex === -1) {
         continue;
       }
@@ -408,7 +367,7 @@ export class FullOwnershipProvider {
     });
   }
 
-  private async isOwnedLocks(locks: Script[], noTypeScript = false): Promise<Map<string, boolean>> {
+  private async isOwnedLocks(locks: Script[], onlyLockOnlyCell = false): Promise<Map<string, boolean>> {
     const result: Map<string, boolean> = new Map();
     if (locks.length === 0) return result;
 
@@ -430,7 +389,7 @@ export class FullOwnershipProvider {
 
     const onChainLockSet = new Set();
     for await (const cell of this.collector()) {
-      if (cell.cellOutput.type && noTypeScript) continue;
+      if (onlyLockOnlyCell && !this.isLockOnlyCell(cell)) continue;
       onChainLockSet.add(bytes.hexify(blockchain.Script.pack(cell.cellOutput.lock)));
     }
 
@@ -490,6 +449,10 @@ export class FullOwnershipProvider {
       [],
     );
     return byOutputIndex;
+  }
+
+  private isLockOnlyCell(cell: Cell): boolean {
+    return !cell.cellOutput.type && cell.data === '0x';
   }
 
   private async getSecp256k1Blake160CellDep(): Promise<CellDep> {

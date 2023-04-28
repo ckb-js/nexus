@@ -2,12 +2,13 @@
 import { BI, BIish, parseUnit } from '@ckb-lumos/bi';
 import { createTransactionFromSkeleton, TransactionSkeleton, TransactionSkeletonType } from '@ckb-lumos/helpers';
 import { common, secp256k1Blake160 } from '@ckb-lumos/common-scripts';
-import { Cell, Script } from '@nexus-wallet/protocol';
+import { Cell, GroupedSignature, Script } from '@nexus-wallet/protocol';
 import { predefined } from '@ckb-lumos/config-manager';
 import { FullOwnershipProvider } from '../src';
 import { WitnessArgs } from '@ckb-lumos/base/lib/blockchain';
 import { bytes } from '@ckb-lumos/codec';
 import { FullOwnershipProviderConfig } from '../src/FullOwnershipProvider';
+import { SECP256K1_BLAKE160_WITNESS_PLACEHOLDER, sumCapacity, WITNESS_LOCK_PLACEHOLDER } from '../src/utils';
 import { blockchain } from '@ckb-lumos/base';
 
 function getExpectedFee(txSkeleton: TransactionSkeletonType, feeRate = BI.from(1000)): BI {
@@ -17,8 +18,8 @@ function getExpectedFee(txSkeleton: TransactionSkeletonType, feeRate = BI.from(1
 }
 
 function getTxSkeletonFee(txSkeleton: TransactionSkeletonType): BI {
-  const inputsTotal = txSkeleton.get('inputs').reduce((acc, cur) => acc.add(cur.cellOutput.capacity), BI.from(0));
-  const outputsTotal = txSkeleton.get('outputs').reduce((acc, cur) => acc.add(cur.cellOutput.capacity), BI.from(0));
+  const inputsTotal = sumCapacity(txSkeleton.get('inputs'));
+  const outputsTotal = sumCapacity(txSkeleton.get('outputs'));
 
   return inputsTotal.sub(outputsTotal);
 }
@@ -29,7 +30,7 @@ const offChainLock1: Script = {
   args: '0x11223344',
 };
 
-function createOnchainLock(args: string): Script {
+function createScript(args: string): Script {
   return {
     codeHash: '0xe1e2dab12f5bff4b282f428876714be021155baee934312dd08d298e5bb09f97',
     hashType: 'type',
@@ -37,9 +38,9 @@ function createOnchainLock(args: string): Script {
   };
 }
 
-const onChainLocks1: Script = createOnchainLock('0x441509af');
-const onChainLocks2: Script = createOnchainLock('0x25061223');
-const onChainLocks3: Script = createOnchainLock('0x25061224');
+const onChainLocks1: Script = createScript('0x441509af');
+const onChainLocks2: Script = createScript('0x25061223');
+const onChainLocks3: Script = createScript('0x25061224');
 
 function parseCapacity(capacity: string): BI {
   if (/&\d+$/.test(capacity)) {
@@ -90,16 +91,28 @@ const mockProviderConfig: FullOwnershipProviderConfig = {
   } as any,
 };
 
-function initProviderWithCells(cells: Cell[], offChainLock = [offChainLock1], onChainLock = [onChainLocks1]) {
+function createFakeProvider({
+  cells,
+  offChainLocks = [offChainLock1],
+  onChainLocks = [onChainLocks1],
+  groupedSignature = [],
+}: {
+  cells: Cell[];
+  offChainLocks?: Script[];
+  onChainLocks?: Script[];
+  groupedSignature?: GroupedSignature;
+}) {
   mockRpcRequest.mockImplementation(({ method, params }: { method: string; params: any }) => {
     switch (method) {
       case 'wallet_fullOwnership_getOffChainLocks':
-        return offChainLock;
+        return offChainLocks;
       case 'wallet_fullOwnership_getOnChainLocks':
-        return params.cursor ? [] : { objects: onChainLock, cursor: '25' };
+        return params.cursor ? [] : { objects: onChainLocks, cursor: '25' };
       case 'wallet_fullOwnership_getLiveCells':
         const cursor = parseInt(params.cursor || 0);
         return { objects: cells.slice(cursor, cursor + 1), cursor: cursor + 1 };
+      case 'wallet_fullOwnership_signTransaction':
+        return groupedSignature;
     }
   });
   const provider = new FullOwnershipProvider(mockProviderConfig);
@@ -126,19 +139,23 @@ describe('class FullOwnershipProvider', () => {
     const emptyTxSkeleton = TransactionSkeleton();
 
     it('Should throw error when all cells capacity is not enough', async () => {
-      const provider = initProviderWithCells([createFakeCellWithCapacity(100 * 1e8), createFakeCellWithCapacity(200)]);
+      const provider = createFakeProvider({
+        cells: [createFakeCellWithCapacity(100 * 1e8), createFakeCellWithCapacity(200)],
+      });
 
       await expect(provider.injectCapacity(emptyTxSkeleton, { amount: 400 * 1e8 })).rejects.toThrowError(
         /No cell sufficient to inject/,
       );
     });
     it('Should pick lock-only cell', async () => {
-      const provider = initProviderWithCells([
-        createFakeCellWithCapacity(500000 * 1e8, offChainLock1, offChainLock1),
-        createFakeCellWithCapacity(500000 * 1e8, onChainLocks1, undefined, 0, '0x123321'),
-        createFakeCellWithCapacity(500 * 1e8, offChainLock1),
-        createFakeCellWithCapacity(200 * 1e8, onChainLocks2),
-      ]);
+      const provider = createFakeProvider({
+        cells: [
+          createFakeCellWithCapacity(500000 * 1e8, offChainLock1, offChainLock1),
+          createFakeCellWithCapacity(500000 * 1e8, onChainLocks1, undefined, 0, '0x123321'),
+          createFakeCellWithCapacity(500 * 1e8, offChainLock1),
+          createFakeCellWithCapacity(200 * 1e8, onChainLocks2),
+        ],
+      });
 
       const skeleton = await provider.injectCapacity(emptyTxSkeleton, { amount: 144 * 1e8 });
       expect(skeleton.get('inputs').size).toBe(1);
@@ -148,10 +165,9 @@ describe('class FullOwnershipProvider', () => {
     });
 
     it('Should pick one cell when capacity is enough', async () => {
-      const provider = initProviderWithCells([
-        createFakeCellWithCapacity(500 * 1e8),
-        createFakeCellWithCapacity(200 * 1e8),
-      ]);
+      const provider = createFakeProvider({
+        cells: [createFakeCellWithCapacity(500 * 1e8), createFakeCellWithCapacity(200 * 1e8)],
+      });
       const skeleton = await provider.injectCapacity(emptyTxSkeleton, { amount: 144 * 1e8 });
       expect(skeleton.get('inputs').size).toBe(1);
       expect(skeleton.get('inputs').get(0)?.cellOutput.capacity).toBe(BI.from(500 * 1e8).toHexString());
@@ -164,7 +180,7 @@ describe('class FullOwnershipProvider', () => {
       const cell2 = createFakeCellWithCapacity('100ckb', onChainLocks2, undefined, 1);
       const cell3 = createFakeCellWithCapacity('300ckb', onChainLocks1, undefined, 2);
 
-      const provider = initProviderWithCells([cell1, cell2, cell3]);
+      const provider = createFakeProvider({ cells: [cell1, cell2, cell3] });
 
       const injectAmount = parseUnit('250', 'ckb');
       const skeleton = await provider.injectCapacity(emptyTxSkeleton, { amount: injectAmount });
@@ -180,7 +196,7 @@ describe('class FullOwnershipProvider', () => {
       const cell3 = createFakeCellWithCapacity('100ckb', onChainLocks2, undefined, 2);
       const cell4 = createFakeCellWithCapacity('300ckb', onChainLocks2, undefined, 3);
 
-      const provider = initProviderWithCells([cell1, cell2, cell3, cell4]);
+      const provider = createFakeProvider({ cells: [cell1, cell2, cell3, cell4] });
 
       const injectAmount = parseUnit('550', 'ckb');
       const skeleton = await provider.injectCapacity(emptyTxSkeleton, { amount: injectAmount });
@@ -199,7 +215,7 @@ describe('class FullOwnershipProvider', () => {
     });
 
     it('Should throw error when changeLock is not found', async () => {
-      const provider = initProviderWithCells([], []);
+      const provider = createFakeProvider({ cells: [], offChainLocks: [] });
       // @ts-expect-error
       await expect(provider.injectCapacity()).rejects.toThrowError(
         'No change lock script found, it may be a internal bug',
@@ -524,18 +540,133 @@ describe('class FullOwnershipProvider', () => {
 
   describe('#sendTransaction', () => {
     it('signed transaction with fee paid and signed', async () => {
+      const provider = createFakeProvider({
+        cells: [createFakeCellWithCapacity(1000, onChainLocks1), createFakeCellWithCapacity(100, onChainLocks2)],
+      });
       const signedWitness = '0xffffff';
-      const provider = new FullOwnershipProvider(mockProviderConfig);
+
+      // input: 1000CKB
+      // output: 100CKB
+      // signedWitness: 0xffffff
       const txSkeleton = TransactionSkeleton()
         .update('inputs', (inputs) => inputs.push(createFakeCellWithCapacity(1000, onChainLocks1)))
         .update('outputs', (outputs) => outputs.push(createFakeCellWithCapacity(100, onChainLocks2)))
         .update('witnesses', (witnesses) => witnesses.push(signedWitness));
 
+      jest.spyOn(provider, 'payFee');
+      jest.spyOn(provider, 'signTransaction');
       await provider.sendTransaction(txSkeleton);
+      expect(provider.payFee).not.toHaveBeenCalled();
+      expect(provider.signTransaction).not.toHaveBeenCalled();
       expect(mockProviderConfig.ckb.request).toBeCalledWith({
         method: 'ckb_sendTransaction',
         params: { tx: createTransactionFromSkeleton(txSkeleton), outputsValidator: undefined },
       });
+    });
+
+    it('Should fee paid transaction be signed and sent', async () => {
+      const provider = createFakeProvider({
+        cells: [
+          createFakeCellWithCapacity(1000 * 1e8, onChainLocks1),
+          createFakeCellWithCapacity(100 * 1e8, onChainLocks1),
+        ],
+        offChainLocks: [offChainLock1],
+        groupedSignature: [[onChainLocks1, WITNESS_LOCK_PLACEHOLDER]],
+      });
+
+      // input: 1000CKB
+      // output: 100CKB
+      // unsigned
+      const txSkeleton = TransactionSkeleton()
+        .update('inputs', (inputs) => inputs.push(createFakeCellWithCapacity(1000 * 1e8, onChainLocks1)))
+        .update('outputs', (outputs) =>
+          outputs.push(createFakeCellWithCapacity(100 * 1e8, onChainLocks1, undefined, 2)),
+        )
+        .update('witnesses', (witnesses) => witnesses.push(SECP256K1_BLAKE160_WITNESS_PLACEHOLDER));
+
+      jest.spyOn(provider, 'payFee');
+
+      await provider.sendTransaction(txSkeleton);
+
+      expect(provider.payFee).not.toHaveBeenCalled();
+      expect(mockProviderConfig.ckb.request).toBeCalledWith({
+        method: 'wallet_fullOwnership_signTransaction',
+        params: {
+          tx: createTransactionFromSkeleton(txSkeleton),
+        },
+      });
+    });
+
+    it('Should fee unpaid transaction be pay fee, sign and sent', async () => {
+      const provider = createFakeProvider({
+        cells: [
+          createFakeCellWithCapacity(1000 * 1e8, onChainLocks1, createScript('0x255')),
+          createFakeCellWithCapacity(1000 * 1e8, onChainLocks2, undefined, 1),
+          createFakeCellWithCapacity(1000 * 1e8, onChainLocks2, undefined, 3),
+        ],
+        offChainLocks: [offChainLock1],
+        groupedSignature: [[onChainLocks1, WITNESS_LOCK_PLACEHOLDER]],
+      });
+
+      // input 2000 1e8 CKB
+      // output1: 1000 1e8 CKB, but this onchain lock has a type script
+      // output2: 1000 1e8 CKB, lock only
+      // expected: deduct output2 capacity for transaction fee
+      const txSkeleton = TransactionSkeleton()
+        .update('inputs', (inputs) => inputs.push(createFakeCellWithCapacity(2000 * 1e8, onChainLocks1)))
+        .update('outputs', (outputs) =>
+          outputs.push(
+            createFakeCellWithCapacity(1000 * 1e8, onChainLocks1),
+            createFakeCellWithCapacity(1000 * 1e8, onChainLocks2),
+          ),
+        )
+        .update('witnesses', (witnesses) =>
+          witnesses.push(SECP256K1_BLAKE160_WITNESS_PLACEHOLDER, SECP256K1_BLAKE160_WITNESS_PLACEHOLDER),
+        );
+
+      const payFee = jest.spyOn(provider, 'payFee');
+
+      const signTransaction = jest.spyOn(provider, 'signTransaction');
+
+      await provider.sendTransaction(txSkeleton);
+      expect(provider.payFee).toHaveBeenCalledWith(txSkeleton, { autoInject: true, byOutputIndexes: [1] });
+
+      const txWithPayFee: TransactionSkeletonType = await payFee.mock.results[0].value;
+      const deductedCapacity = txWithPayFee.outputs.get(1)?.cellOutput.capacity!;
+
+      expect(
+        BI.from(1000 * 1e8)
+          .sub(deductedCapacity)
+          .toBigInt(),
+      ).toBe(getExpectedFee(txSkeleton).toBigInt());
+
+      expect(provider.signTransaction).toHaveBeenCalledWith(txWithPayFee);
+      expect(mockProviderConfig.ckb.request).toBeCalledWith({
+        method: 'wallet_fullOwnership_signTransaction',
+        params: {
+          tx: createTransactionFromSkeleton(txWithPayFee),
+        },
+      });
+
+      const signedTransaction = await signTransaction.mock.results[0].value;
+      expect(mockProviderConfig.ckb.request).toBeCalledWith({
+        method: 'ckb_sendTransaction',
+        params: { tx: createTransactionFromSkeleton(signedTransaction) },
+      });
+    });
+    it('Should throw error when witnesses is not enough', async () => {
+      const provider = createFakeProvider({
+        cells: [],
+        offChainLocks: [offChainLock1],
+      });
+
+      const txSkeleton = TransactionSkeleton()
+        .update('inputs', (inputs) => inputs.push(createFakeCellWithCapacity(1000 * 1e8, onChainLocks1)))
+        .update('outputs', (outputs) => outputs.push(createFakeCellWithCapacity(500 * 1e8, onChainLocks1)));
+
+      await expect(() => provider.sendTransaction(txSkeleton)).rejects.toThrowError(
+        'Some witnesses are missing!, required: 1 from inputs, got: 0',
+      );
     });
   });
 });
