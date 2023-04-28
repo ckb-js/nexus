@@ -68,3 +68,38 @@ describe('Some scenario', () => {
   });
 });
 ```
+
+## Start a E2E Node
+
+The `CkbNode` is a class to help to launch CKB node(s) for e2e tests.
+
+```ts
+import { CkbNode } from '../helpers';
+
+const node = CkbNode.create();
+await node.start();
+
+const rpc = new Rpc(node.rpcUrl);
+await rpc.getTipBlockNumber();
+
+// don't forget to stop the node if you don't need it anymore
+await node.stop();
+```
+
+### Where Is the Node Data?
+
+```ts
+console.log(CkbNode.paths);
+```
+
+### Download CKB via Proxy
+
+```sh
+export https_proxy=https://127.0.0.1:1087
+```
+
+### Claim the Test Token
+
+```ts
+const privateKeys = node.issuedPrivateKey();
+```
