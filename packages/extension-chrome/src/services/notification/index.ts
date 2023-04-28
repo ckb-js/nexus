@@ -32,7 +32,7 @@ export function createBrowserExtensionPlatformService(): PlatformService<Endpoin
         });
       });
     },
-    async requestSignTransaction({ tx }) {
+    async requestSignTransaction({ tx, ownedLocks }) {
       const { messenger, window: notificationWindow } = await notificationManager.createNotificationWindow({
         path: 'sign-transaction',
         metadata: {},
@@ -42,8 +42,7 @@ export function createBrowserExtensionPlatformService(): PlatformService<Endpoin
         messenger.register('session_getUnsignedTransaction', () => {
           return {
             tx,
-            // TODO: get owned locks
-            ownedLocks: [],
+            ownedLocks,
           };
         });
         messenger.register('session_approveSignTransaction', ({ password }) => {
