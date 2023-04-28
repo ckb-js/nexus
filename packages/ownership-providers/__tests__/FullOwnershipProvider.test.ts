@@ -578,7 +578,12 @@ describe('class FullOwnershipProvider', () => {
       // output: 100CKB
       // unsigned
       const txSkeleton = TransactionSkeleton()
-        .update('inputs', (inputs) => inputs.push(createFakeCellWithCapacity(1000 * 1e8, onChainLocks1)))
+        .update('inputs', (inputs) =>
+          inputs.push(
+            createFakeCellWithCapacity(500 * 1e8, onChainLocks1),
+            createFakeCellWithCapacity(500 * 1e8, onChainLocks1),
+          ),
+        )
         .update('outputs', (outputs) =>
           outputs.push(createFakeCellWithCapacity(100 * 1e8, onChainLocks1, undefined, 2)),
         )
