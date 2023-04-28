@@ -10,7 +10,7 @@ import { lock as _lock, Options as LockOptions, unlock as _unlock } from 'lockfi
 import { HttpsProxyAgent } from 'hpagent';
 import envPaths, { Paths } from 'env-paths';
 import { createLogger } from '@nexus-wallet/utils';
-import { random } from 'lodash';
+import random from 'lodash.random';
 import { Logger } from '@nexus-wallet/utils/lib/logger';
 
 const ARCH_MAP: Record<string, string | undefined> = {
