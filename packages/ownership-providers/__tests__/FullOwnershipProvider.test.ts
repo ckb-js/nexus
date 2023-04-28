@@ -647,13 +647,11 @@ describe('class FullOwnershipProvider', () => {
       expect(provider.payFee).toHaveBeenCalledWith(txSkeleton, { autoInject: true, byOutputIndexes: [2] });
 
       const txWithPayFee: TransactionSkeletonType = await payFee.mock.results[0].value;
-      const deductedCapacity = txWithPayFee.outputs.get(2)?.cellOutput.capacity!;
 
-      expect(
-        BI.from(1000 * 1e8)
-          .sub(deductedCapacity)
-          .toBigInt(),
-      ).toBe(getExpectedFee(txSkeleton).toBigInt());
+      expect(getTxSkeletonFee(txWithPayFee)).toEqual(getExpectedFee(txSkeleton));
+
+      expect(txWithPayFee.inputs.size).toBe(txSkeleton.inputs.size);
+      expect(txWithPayFee.outputs.size).toBe(txSkeleton.outputs.size);
 
       expect(provider.signTransaction).toHaveBeenCalledWith(txWithPayFee);
       expect(mockProviderConfig.ckb.request).toBeCalledWith({
