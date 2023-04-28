@@ -7,14 +7,12 @@ import os from 'os';
 import fs from 'fs-extra';
 import detectPort from 'detect-port';
 import TOML from '@ltd/j-toml';
-import { lock as _lock, unlock as _unlock, Options as LockOptions } from 'lockfile';
+import { lock as _lock, Options as LockOptions, unlock as _unlock } from 'lockfile';
 import { HttpsProxyAgent } from 'hpagent';
-import envPaths from 'env-paths';
-import { createLogger } from '@nexus-wallet/utils/lib';
+import envPaths, { Paths } from 'env-paths';
+import { createLogger } from '@nexus-wallet/utils';
 import { random } from 'lodash';
-const logger = createLogger('CkbNode');
-
-const paths = envPaths('ckb');
+import { Logger } from '@nexus-wallet/utils/lib/logger';
 
 const ARCH_MAP: Record<string, string | undefined> = {
   x64: 'x86_64',
@@ -30,6 +28,7 @@ const PLATFORM_MAP: Record<string, string | undefined> = {
 interface DownloadOptions {
   version?: string;
   persistPath?: string;
+  logger?: Logger;
 }
 
 const DEFAULT_CKB_CONFIG_PATH = path.resolve(__dirname, '../misc/ckbNode');
@@ -46,7 +45,11 @@ function unlock(path: string): Promise<void> {
   });
 }
 
-async function downloadCkbBinary({ persistPath = paths.cache, version = 'v0.109.0' }: DownloadOptions) {
+async function downloadCkbBinary({
+  persistPath = CkbNode.paths.cache,
+  version = 'v0.109.0',
+  logger = createLogger('CkbNode'),
+}: DownloadOptions) {
   if (process.env.CKB_BIN_PATH) {
     return process.env.CKB_BIN_PATH;
   }
@@ -114,20 +117,26 @@ function updateToml(path: string, modifier: (toml: Record<string, any>) => void)
   fs.writeFileSync(path, TOML.stringify(toml, { newline: '\n' }));
 }
 
-type CkbNodeOptions = {
+type CkbNodeConfig = {
   /**
    * CKB version @default 'v0.109.0'
    */
-  version?: string;
-  dataPath?: string;
-  cleanAfterStop?: boolean;
+  version: string;
+  /**
+   * CKB block data path
+   * @default
+   */
+  blockDataPath: string;
+  cleanAfterStop: boolean;
   // minerDuration?: number;
   // assemblerArgs?: string;
 };
 
+export type Options = Partial<CkbNodeConfig> & { logger?: Logger };
+
 export class CkbNode {
-  private options: CkbNodeOptions;
-  private dataPath: string;
+  private readonly config: CkbNodeConfig;
+  private logger: Logger;
 
   private binaryDir?: string;
   private ckbProcess?: ChildProcess;
@@ -135,6 +144,16 @@ export class CkbNode {
   private running = false;
   private id = nanoid();
   private port = random(10000, 60000);
+
+  private constructor(options: Options) {
+    this.config = {
+      version: options.version ?? 'v0.109.0',
+      cleanAfterStop: options.cleanAfterStop ?? true,
+      blockDataPath: path.join(options.blockDataPath || CkbNode.paths.data, this.id),
+    };
+
+    this.logger = options.logger ?? createLogger('CkbNode');
+  }
 
   get issuedCellPrivateKeys(): string[] {
     return [
@@ -152,7 +171,7 @@ export class CkbNode {
     ];
   }
 
-  get rpcAddress(): string {
+  private get rpcAddress(): string {
     return `127.0.0.1:${this.port}`;
   }
 
@@ -162,22 +181,17 @@ export class CkbNode {
 
   private get configPaths() {
     return {
-      'ckb.toml': path.resolve(this.dataPath, 'ckb.toml'),
-      'ckb-miner.toml': path.resolve(this.dataPath, 'ckb-miner.toml'),
-      'dev.toml': path.resolve(this.dataPath, 'specs', 'dev.toml'),
+      'ckb.toml': path.resolve(this.config.blockDataPath, 'ckb.toml'),
+      'ckb-miner.toml': path.resolve(this.config.blockDataPath, 'ckb-miner.toml'),
+      'dev.toml': path.resolve(this.config.blockDataPath, 'specs', 'dev.toml'),
     };
   }
 
-  private constructor(options: CkbNodeOptions) {
-    this.options = options;
-    this.dataPath = path.join(this.options.dataPath || paths.data, this.id);
-  }
-
   private async init() {
-    const { version = 'v0.109.0' } = this.options;
+    const { version } = this.config;
     this.binaryDir = await downloadCkbBinary({ version });
-    execSync(`${this.binaryDir} init -C "${this.dataPath}" --chain dev --force`);
-    await fs.copy(DEFAULT_CKB_CONFIG_PATH, this.dataPath, { overwrite: true });
+    execSync(`${this.binaryDir} init -C "${this.config.blockDataPath}" --chain dev --force`);
+    await fs.copy(DEFAULT_CKB_CONFIG_PATH, this.config.blockDataPath, { overwrite: true });
   }
 
   /**
@@ -189,39 +203,38 @@ export class CkbNode {
       return this.rpcAddress;
     }
 
-    const portLockPath = path.resolve(paths.cache, 'port.lock');
+    const portLockPath = path.resolve(CkbNode.paths.cache, 'port.lock');
     await lock(portLockPath, { wait: 3000, stale: 12_000, retries: 5 });
     this.port = await detectPort(this.port);
-    console.log(this.id, 'use port ', this.port);
     updateToml(this.configPaths['ckb.toml'], (ckb) => {
       ckb.rpc.listen_address = this.rpcAddress;
-      ckb.data_dir = this.dataPath;
+      ckb.data_dir = this.config.blockDataPath;
     });
     updateToml(this.configPaths['ckb-miner.toml'], (ckbMiner) => {
       ckbMiner.miner.client.rpc_url = this.rpcUrl;
     });
 
     const startMiner = () => {
-      this.minerProcess = spawn(this.binaryDir!, ['miner', '-C', this.dataPath]);
+      this.minerProcess = spawn(this.binaryDir!, ['miner', '-C', this.config.blockDataPath]);
       this.minerProcess.stdout?.on('data', (data) => {
         data = data.toString();
-        logger.debug('Miner: ', data);
+        this.logger.debug('Miner: ', data);
       });
       this.minerProcess.stderr?.on('data', (data) => {
         data = data.toString();
-        logger.error('Miner: ', data);
+        this.logger.error('Miner: ', data);
       });
       this.minerProcess.on('exit', (code) => {
-        logger.info('Miner exit at:', code || 0);
+        this.logger.info('Miner exit at:', code || 0);
       });
     };
 
     return new Promise((resolve) => {
-      this.ckbProcess = spawn(this.binaryDir!, ['run', '-C', this.dataPath, '--indexer']);
+      this.ckbProcess = spawn(this.binaryDir!, ['run', '-C', this.config.blockDataPath, '--indexer']);
       this.running = true;
       this.ckbProcess.stdout?.on('data', (data) => {
         data = data.toString();
-        logger.info('Node: ', data);
+        this.logger.debug('Node: ', data);
         if (data.includes('Listen HTTP RPCServer on address 127.0.0.1')) {
           unlock(portLockPath).catch(() => {});
           startMiner();
@@ -229,10 +242,10 @@ export class CkbNode {
         }
       });
       this.ckbProcess.stderr?.on('data', (data) => {
-        logger.error('Node: ', data.toString());
+        this.logger.error('Node: ', data.toString());
       });
       this.ckbProcess.addListener('exit', (code) => {
-        logger.info('CKB node exited: ', code || 0);
+        this.logger.info('CKB node exited: ', code || 0);
         this.running = false;
       });
     });
@@ -251,7 +264,7 @@ export class CkbNode {
         this.minerProcess?.stderr?.removeAllListeners();
         this.minerProcess?.stdout?.removeAllListeners();
 
-        if (!keepData && this.options.cleanAfterStop) {
+        if (!keepData && this.config.cleanAfterStop) {
           this.clean();
         }
         resolve(code || 0);
@@ -264,12 +277,12 @@ export class CkbNode {
   }
 
   clean(): void {
-    rimrafSync(this.dataPath);
+    rimrafSync(this.config.blockDataPath);
   }
 
   private static instanceMap = new Map<string, CkbNode>();
 
-  static async create(options: CkbNodeOptions = {}): Promise<CkbNode> {
+  static async create(options: Options = {}): Promise<CkbNode> {
     const instance = new CkbNode(options);
     await instance.init();
     CkbNode.instanceMap.set(instance.id, instance);
@@ -281,4 +294,6 @@ export class CkbNode {
       await instance.stop();
     }
   }
+
+  static paths: Paths = envPaths('ckb');
 }
