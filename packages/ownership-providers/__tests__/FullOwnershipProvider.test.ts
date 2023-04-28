@@ -107,7 +107,7 @@ function createFakeProvider({
       case 'wallet_fullOwnership_getOffChainLocks':
         return offChainLocks;
       case 'wallet_fullOwnership_getOnChainLocks':
-        return params.cursor ? [] : { objects: onChainLocks, cursor: '25' };
+        return params.cursor ? { objects: [], cursor: '25' } : { objects: onChainLocks, cursor: '25' };
       case 'wallet_fullOwnership_getLiveCells':
         const cursor = parseInt(params.cursor || 0);
         return { objects: cells.slice(cursor, cursor + 1), cursor: cursor + 1 };
@@ -605,23 +605,33 @@ describe('class FullOwnershipProvider', () => {
     it('Should fee unpaid transaction be pay fee, sign and sent', async () => {
       const provider = createFakeProvider({
         cells: [
-          createFakeCellWithCapacity(1000 * 1e8, onChainLocks1, createScript('0x255')),
+          createFakeCellWithCapacity(1000 * 1e8, onChainLocks1),
           createFakeCellWithCapacity(1000 * 1e8, onChainLocks2, undefined, 1),
           createFakeCellWithCapacity(1000 * 1e8, onChainLocks2, undefined, 3),
         ],
         offChainLocks: [offChainLock1],
+        onChainLocks: [onChainLocks1, onChainLocks2, onChainLocks3],
         groupedSignature: [[onChainLocks1, WITNESS_LOCK_PLACEHOLDER]],
       });
 
-      // input 2000 1e8 CKB
+      // input1 1000 1e8 CKB
+      // input2 1000 1e8 CKB
       // output1: 1000 1e8 CKB, but this onchain lock has a type script
       // output2: 1000 1e8 CKB, lock only
       // expected: deduct output2 capacity for transaction fee
       const txSkeleton = TransactionSkeleton()
-        .update('inputs', (inputs) => inputs.push(createFakeCellWithCapacity(2000 * 1e8, onChainLocks1)))
+        .update('inputs', (inputs) =>
+          inputs.push(
+            createFakeCellWithCapacity(1000 * 1e8, onChainLocks1),
+            createFakeCellWithCapacity(1000 * 1e8, onChainLocks1, undefined, 2),
+          ),
+        )
         .update('outputs', (outputs) =>
           outputs.push(
-            createFakeCellWithCapacity(1000 * 1e8, onChainLocks1),
+            // output cell with type script
+            createFakeCellWithCapacity(500 * 1e8, onChainLocks1, createScript('0x22')),
+            // output cell with data
+            createFakeCellWithCapacity(500 * 1e8, onChainLocks1, undefined, 1, '0x1234'),
             createFakeCellWithCapacity(1000 * 1e8, onChainLocks2),
           ),
         )
@@ -634,10 +644,10 @@ describe('class FullOwnershipProvider', () => {
       const signTransaction = jest.spyOn(provider, 'signTransaction');
 
       await provider.sendTransaction(txSkeleton);
-      expect(provider.payFee).toHaveBeenCalledWith(txSkeleton, { autoInject: true, byOutputIndexes: [1] });
+      expect(provider.payFee).toHaveBeenCalledWith(txSkeleton, { autoInject: true, byOutputIndexes: [2] });
 
       const txWithPayFee: TransactionSkeletonType = await payFee.mock.results[0].value;
-      const deductedCapacity = txWithPayFee.outputs.get(1)?.cellOutput.capacity!;
+      const deductedCapacity = txWithPayFee.outputs.get(2)?.cellOutput.capacity!;
 
       expect(
         BI.from(1000 * 1e8)

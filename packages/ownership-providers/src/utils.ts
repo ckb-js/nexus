@@ -1,8 +1,8 @@
-import { Address, blockchain, HexString, Script, Transaction } from '@ckb-lumos/base';
+import { Address, blockchain, Cell, HexString, Script, Transaction } from '@ckb-lumos/base';
 import { BI, BIish } from '@ckb-lumos/bi';
 import { bytes } from '@ckb-lumos/codec';
 import { PackParam, Uint8ArrayCodec } from '@ckb-lumos/codec/lib/base';
-import { TransactionSkeletonType } from '@ckb-lumos/helpers';
+import { createTransactionFromSkeleton, TransactionSkeletonType } from '@ckb-lumos/helpers';
 
 export function equalPack<C extends Uint8ArrayCodec>(codec: C, a: PackParam<C>, b: PackParam<C>): boolean {
   return bytes.equal(codec.pack(a), codec.pack(b));
@@ -45,4 +45,17 @@ export function sumCapacity(cells: TransactionSkeletonType['inputs' | 'outputs']
 
 export function hexifyScript(script: Script): HexString {
   return bytes.hexify(blockchain.Script.pack(script));
+}
+
+export function isLockOnlyCell(cell: Cell): boolean {
+  return !cell.cellOutput.type && cell.data === '0x';
+}
+
+export function isTransactionFeePaid(txSkeleton: TransactionSkeletonType, feeRate: BIish = 1000): boolean {
+  // TODO: support DAO
+  const txSize = getTransactionSizeByTx(createTransactionFromSkeleton(txSkeleton));
+  const expectedFee = calculateFeeCompatible(txSize, feeRate);
+  const actualFee = sumCapacity(txSkeleton.get('inputs')).sub(sumCapacity(txSkeleton.get('outputs')));
+
+  return actualFee.gte(expectedFee);
 }
