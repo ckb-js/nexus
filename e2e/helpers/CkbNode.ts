@@ -1,7 +1,6 @@
 import { nanoid } from 'nanoid';
 import download from 'download';
 import { ChildProcess, execSync, spawn } from 'child_process';
-import { rimrafSync } from 'rimraf';
 import path from 'path';
 import os from 'os';
 import fs from 'fs-extra';
@@ -265,7 +264,7 @@ export class CkbNode {
         this.minerProcess?.stdout?.removeAllListeners();
 
         if (!keepData && this.config.cleanAfterStop) {
-          this.clean();
+          void this.clean();
         }
         resolve(code || 0);
       });
@@ -276,8 +275,8 @@ export class CkbNode {
     });
   }
 
-  clean(): void {
-    rimrafSync(this.config.blockDataPath);
+  clean(): Promise<void> {
+    return fs.rm(this.config.blockDataPath, { recursive: true });
   }
 
   private static instanceMap = new Map<string, CkbNode>();
