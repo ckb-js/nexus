@@ -46,6 +46,7 @@
     "@nexus-wallet/protocol": "0.0.17",
     "@nexus-wallet/types": "0.0.17",
     "@nexus-wallet/utils": "0.0.17",
+    "@nexus-wallet/testkit": "0.0.17",
     "@tanstack/react-query": "4.29.1",
     "awilix": "8.0.1",
     "eventemitter3": "5.0.0",

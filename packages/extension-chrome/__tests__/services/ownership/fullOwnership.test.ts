@@ -214,15 +214,6 @@ function createMockTxSkeleton(): TransactionSkeletonType {
       },
     );
   });
-  txSkeleton = txSkeleton.update('outputs', (outputs) => {
-    return outputs.push({
-      cellOutput: {
-        capacity: '0x100000000',
-        lock: createScriptInfo(1, '0x03', 'external', 'OnChain').lock,
-      },
-      data: '0x',
-    });
-  });
   txSkeleton = txSkeleton.update('signingEntries', (signingEntries) => {
     return signingEntries.push(
       {

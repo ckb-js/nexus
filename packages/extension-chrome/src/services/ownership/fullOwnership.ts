@@ -105,11 +105,12 @@ export function createFullOwnershipService({
       let txSkeleton = await backend.resolveTx(tx);
       txSkeleton = common.prepareSigningEntries(txSkeleton, { config: await getLumosConfig() });
 
-      const infos = await db.getAll();
-      const ownedLocks = [
+      const locksFromTx = [
         ...txSkeleton.inputs.map((input) => input.cellOutput.lock),
         ...txSkeleton.outputs.map((output) => output.cellOutput.lock),
-      ].filter((lock) => infos.find((info) => info.scriptHash === utils.computeScriptHash(lock)));
+      ];
+      const derivedLocksAre = await db.isDerivedLocks(locksFromTx);
+      const ownedLocks = locksFromTx.filter((lock, index) => derivedLocksAre[index]);
 
       const { password } = await platformService.requestSignTransaction({
         tx: transactionSkeletonToObject(txSkeleton),
