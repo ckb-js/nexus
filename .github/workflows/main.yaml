@@ -1,4 +1,4 @@
-name: Test
+name: Test & Release
 
 on:
   push:
@@ -43,8 +43,24 @@ jobs:
 
       - uses: codecov/codecov-action@v3
         with:
-          files: ./coverage/clover.xml
           verbose: true # optional (default = false)
+
+  e2e-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: ./.github/actions/install-deps
+
+      - name: Build extension
+        run: |
+          npm run build:libs
+          npm run build:extension-chrome
+
+      - name: E2E
+        run: |
+          npx playwright install
+          xvfb-run --auto-servernum npm run e2e -- --testTimeout=20000
 
   release:
     runs-on: ubuntu-latest
@@ -54,7 +70,9 @@ jobs:
         (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
         github.event_name == 'push'
       )
-    needs: unit-test
+    needs:
+      - unit-test
+      - e2e-test
     steps:
       - uses: actions/checkout@v3
         with:
