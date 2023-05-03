@@ -7,38 +7,29 @@ import {
   minimalCellCapacityCompatible,
   TransactionSkeletonType,
 } from '@ckb-lumos/helpers';
-import { Address, blockchain, Cell, CellDep, HexString, Script, Transaction } from '@ckb-lumos/base';
-import { bytes, PackParam } from '@ckb-lumos/codec';
+import { blockchain, Cell, CellDep, HexString, Script } from '@ckb-lumos/base';
+import { bytes } from '@ckb-lumos/codec';
 import { secp256k1Blake160 } from '@ckb-lumos/common-scripts';
 import { Config as LumosConfig, getConfig as getLumosConfig, ScriptConfig } from '@ckb-lumos/config-manager';
-import { Uint8ArrayCodec } from '@ckb-lumos/codec/lib/base';
-import { OutputValidator } from '@nexus-wallet/protocol/lib/base';
-
-function equalPack<C extends Uint8ArrayCodec>(codec: C, a: PackParam<C>, b: PackParam<C>): boolean {
-  return bytes.equal(codec.pack(a), codec.pack(b));
-}
+import { OutputValidator, Paginate } from '@nexus-wallet/protocol/lib/base';
+import { Suffix } from './types';
+import {
+  calculateFeeCompatible,
+  equalPack,
+  getTransactionSizeByTx,
+  isLockOnlyCell,
+  isTransactionFeePaid,
+  ScriptSerializedMap,
+  ScriptSerializedSet,
+  SECP256K1_BLAKE160_WITNESS_PLACEHOLDER,
+  sumCapacity,
+} from './utils';
 
 // util types for FullOwnership
-
-type Suffix<T extends string, P extends string> = T extends `${P}${infer S}` ? S : never;
 type FullOwnershipPrefix = 'wallet_fullOwnership_';
 type OwnershipMethodNames = Suffix<keyof FullOwnership, FullOwnershipPrefix>;
 type ParamOf<K extends OwnershipMethodNames> = Parameters<FullOwnership[`${FullOwnershipPrefix}${K}`]>[0];
 type ReturnOf<K extends OwnershipMethodNames> = ReturnType<FullOwnership[`${FullOwnershipPrefix}${K}`]>;
-
-/** Must be a full format address if it's an address */
-export type LockScriptLike = Address | Script;
-
-const SECP256K1_SIGNATURE_SIZE = 65;
-
-/**
- * @internal
- */
-export const SECP256K1_BLAKE160_WITNESS_PLACEHOLDER = bytes.hexify(
-  blockchain.WitnessArgs.pack({
-    lock: new Uint8Array(SECP256K1_SIGNATURE_SIZE),
-  }),
-);
 
 export type PayFeeOptions = {
   /**
@@ -56,30 +47,6 @@ export type PayFeeOptions = {
    */
   autoInject: boolean;
 };
-
-// TODO: let lumos export `getTransactionSizeByTx` and `calculateFeeCompatible` and `lockToScript`
-/* istanbul ignore next */
-function getTransactionSizeByTx(tx: Transaction): number {
-  const serializedTx = blockchain.Transaction.pack(tx);
-  // 4 is serialized offset bytesize
-  const size = serializedTx.byteLength + 4;
-  return size;
-}
-
-/* istanbul ignore next */
-function calculateFeeCompatible(size: number, feeRate: BIish): BI {
-  const ratio = BI.from(1000);
-  const base = BI.from(size).mul(feeRate);
-  const fee = base.div(ratio);
-  if (fee.mul(ratio).lt(base)) {
-    return fee.add(1);
-  }
-  return BI.from(fee);
-}
-
-function sumCapacity(cells: TransactionSkeletonType['inputs' | 'outputs']) {
-  return cells.reduce((prev, cur) => prev.add(cur.cellOutput.capacity), BI.from(0));
-}
 
 export type FullOwnershipProviderConfig = {
   ckb: InjectedCkb<RpcMethods, Events>;
@@ -162,8 +129,8 @@ export class FullOwnershipProvider {
         continue;
       }
 
-      // a cell with lock-only will be injected
-      if (cell.cellOutput.type || cell.data !== '0x') {
+      // lock-only will be injected
+      if (!isLockOnlyCell(cell)) {
         continue;
       }
 
@@ -242,6 +209,9 @@ export class FullOwnershipProvider {
    * ```
    */
   async payFee(txSkeleton: TransactionSkeletonType, options: PayFeeOptions): Promise<TransactionSkeletonType> {
+    // TODO: dynamic byOutputIndexes default value
+    // options.byOutputIndexes = options.byOutputIndexes ?? (await this.getByOutputIndexesFromOriginal(txSkeleton));
+
     if (options.byOutputIndexes?.length === 0 && !options.autoInject) {
       errors.throwError('no byOutputIndexes is provided, but autoInject is `false`');
     }
@@ -256,6 +226,7 @@ export class FullOwnershipProvider {
       sumCapacity(txSkeleton.get('inputs')).sub(sumCapacity(txSkeleton.get('outputs'))),
     );
 
+    // if fee is enough, directly return origin txSkeleton
     if (requireFee.lte(0)) {
       return txSkeleton;
     }
@@ -356,7 +327,6 @@ export class FullOwnershipProvider {
         equalPack(blockchain.Script, input.cellOutput.lock, lock),
       );
 
-      /* istanbul ignore next */
       if (witnessIndex === -1) {
         continue;
       }
@@ -377,16 +347,105 @@ export class FullOwnershipProvider {
 
   /**
    * Send the transaction to CKB network
-   *
+   * If the transaction fee is not paid, it will use wallet cell to pay the fee.
+   * Then if the transaction is not signed, it will request sign the transaction first
    * @param txSkeleton - transaction skeleton
    * @param outputsValidator - Validates the transaction outputs before entering the tx-pool {@link https://github.com/nervosnetwork/ckb/blob/develop/rpc/README.md#type-outputsvalidator | OutputValidator}
    * @returns Transaction hash in CKB network
    */
   async sendTransaction(txSkeleton: TransactionSkeletonType, outputsValidator?: OutputValidator): Promise<HexString> {
+    if (!isTransactionFeePaid(txSkeleton)) {
+      const byOutputIndexes = await this.getOwnedOutputIndexes(txSkeleton);
+      txSkeleton = await this.payFee(txSkeleton, { byOutputIndexes, autoInject: true });
+    }
+
+    // if not signed, sign the transaction first
+    if (!(await this.isSecp256k1Signed(txSkeleton))) {
+      txSkeleton = await this.signTransaction(txSkeleton);
+    }
+
     return await this.ckb.request({
       method: 'ckb_sendTransaction',
       params: { tx: createTransactionFromSkeleton(txSkeleton), outputsValidator: outputsValidator },
     });
+  }
+
+  private async isOwnedLocks(locks: Script[]): Promise<ScriptSerializedMap<boolean>> {
+    const result = new ScriptSerializedMap<boolean>();
+    if (locks.length === 0) return result;
+
+    const offChainLockSet = new ScriptSerializedSet(
+      (
+        await Promise.all([
+          this.getOffChainLocks({ change: 'internal' }),
+          this.getOffChainLocks({ change: 'external' }),
+        ])
+      ).flat(),
+    );
+
+    locks.forEach((lock) => {
+      result.set(lock, result.get(lock) || offChainLockSet.has(lock));
+    });
+
+    for (const change of ['internal', 'external'] as const) {
+      let cursor: string | undefined = undefined;
+      let page: Paginate<Script>;
+      do {
+        page = await this.getOnChainLocks({ change, cursor });
+        cursor = page.cursor;
+        const onChainLockSet = new ScriptSerializedSet(page.objects);
+        locks.forEach((lock) => {
+          result.set(lock, result.get(lock) || onChainLockSet.has(lock));
+        });
+      } while (page.objects.length > 0);
+    }
+
+    return result;
+  }
+
+  private async isSecp256k1Signed(txSkeleton: TransactionSkeletonType): Promise<boolean> {
+    const walletOwnedInputs = await this.isOwnedLocks(
+      txSkeleton.inputs.map((input) => input.cellOutput.lock).toArray(),
+    );
+    assert(
+      walletOwnedInputs.size <= txSkeleton.witnesses.size,
+      `Some witnesses are missing!, required: ${walletOwnedInputs.size} from inputs, got: ${txSkeleton.witnesses.size} from witnesses.`,
+    );
+    const visitedLocks = new ScriptSerializedSet();
+    let isSigned = true;
+    let witnessIndex = 0;
+    for (const cell of txSkeleton.inputs) {
+      const { lock } = cell.cellOutput;
+      if (visitedLocks.has(lock)) {
+        continue;
+      } else {
+        visitedLocks.add(lock);
+      }
+      if (
+        walletOwnedInputs.get(lock) &&
+        txSkeleton.witnesses.get(witnessIndex) === SECP256K1_BLAKE160_WITNESS_PLACEHOLDER
+      ) {
+        return false;
+      } else {
+        witnessIndex++;
+      }
+    }
+
+    return isSigned;
+  }
+
+  private async getOwnedOutputIndexes(txSkeleton: TransactionSkeletonType): Promise<number[]> {
+    const walletOwnedOutputs = await this.isOwnedLocks(
+      txSkeleton.outputs.map((input) => input.cellOutput.lock).toArray(),
+    );
+
+    // pick lock only and wallet owned cells
+    const byOutputIndex = txSkeleton.outputs.reduce<number[]>(
+      (prev, cell, index) =>
+        isLockOnlyCell(cell) && walletOwnedOutputs.has(cell.cellOutput.lock) ? [...prev, index] : prev,
+      [],
+    );
+    return byOutputIndex;
   }
 
   private async getSecp256k1Blake160CellDep(): Promise<CellDep> {
