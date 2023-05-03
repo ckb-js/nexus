@@ -60,49 +60,65 @@ export function isTransactionFeePaid(txSkeleton: TransactionSkeletonType, feeRat
   return actualFee.gte(expectedFee);
 }
 
-export class ScriptSerializedMap<V> extends Map<string, V> {
-  constructor(values: [Script, V][] = []) {
-    super(values.map(([key, value]) => [hexifyScript(key), value]));
-  }
-  private hashKey(key: Script | string): string {
-    return typeof key === 'string' ? key : hexifyScript(key);
+export class HashMap<K, V> {
+  private internal = new Map<string, V>();
+
+  constructor(public readonly hasher: (k: K) => string, values: [K, V][] = []) {
+    this.internal = new Map(values.map(([k, v]) => [hasher(k), v] as [string, V]));
   }
 
-  get(key: Script | string): V | undefined {
-    return super.get(this.hashKey(key));
+  public get(key: K): V | undefined {
+    return this.internal.get(this.hasher(key));
   }
 
-  set(key: Script | string, value: V): this {
-    return super.set(this.hashKey(key), value);
+  set(key: K, value: V): void {
+    this.internal.set(this.hasher(key), value);
   }
 
-  has(key: Script | string): boolean {
-    return super.has(this.hashKey(key));
+  has(key: K): boolean {
+    return this.internal.has(this.hasher(key));
   }
 
-  delete(key: string | Script): boolean {
-    return super.delete(this.hashKey(key));
+  delete(key: K): boolean {
+    return this.internal.delete(this.hasher(key));
+  }
+
+  get size(): number {
+    return this.internal.size;
   }
 }
 
-export class ScriptSerializedSet extends Set<string> {
+export class ScriptSerializedMap<V> extends HashMap<Script, V> {
+  constructor(values: [Script, V][] = []) {
+    super(hexifyScript, values);
+  }
+}
+
+export class HashSet<V> {
+  private internal = new Set<string>();
+  constructor(public readonly hasher: (v: V) => string, values: V[] = []) {
+    this.internal = new Set(values.map(hasher));
+  }
+
+  add(value: V): void {
+    this.internal.add(this.hasher(value));
+  }
+
+  has(value: V): boolean {
+    return this.internal.has(this.hasher(value));
+  }
+
+  delete(value: V): boolean {
+    return this.internal.delete(this.hasher(value));
+  }
+
+  get size(): number {
+    return this.internal.size;
+  }
+}
+
+export class ScriptSerializedSet extends HashSet<Script> {
   constructor(values: Script[] = []) {
-    super(values.map(hexifyScript));
-  }
-
-  private hashKey(key: Script | string): string {
-    return typeof key === 'string' ? key : hexifyScript(key);
-  }
-
-  add(key: Script | string): this {
-    return super.add(this.hashKey(key));
-  }
-
-  has(key: Script | string): boolean {
-    return super.has(this.hashKey(key));
-  }
-
-  delete(key: Script | string): boolean {
-    return super.delete(this.hashKey(key));
+    super(hexifyScript, values);
   }
 }
