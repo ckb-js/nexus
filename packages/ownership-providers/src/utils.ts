@@ -43,8 +43,8 @@ export function sumCapacity(cells: TransactionSkeletonType['inputs' | 'outputs']
   return cells.reduce((prev, cur) => prev.add(cur.cellOutput.capacity), BI.from(0));
 }
 
-export function hexifyScript(script: Script): HexString {
-  return bytes.hexify(blockchain.Script.pack(script));
+export function hexifyScript<C extends Uint8ArrayCodec>(value: PackParam<C>): HexString {
+  return bytes.hexify(blockchain.Script.pack(value));
 }
 
 export function isLockOnlyCell(cell: Cell): boolean {
@@ -58,4 +58,51 @@ export function isTransactionFeePaid(txSkeleton: TransactionSkeletonType, feeRat
   const actualFee = sumCapacity(txSkeleton.get('inputs')).sub(sumCapacity(txSkeleton.get('outputs')));
 
   return actualFee.gte(expectedFee);
+}
+
+export class ScriptSerializedMap<V> extends Map<string, V> {
+  constructor(values: [Script, V][] = []) {
+    super(values.map(([key, value]) => [hexifyScript(key), value]));
+  }
+  private hashKey(key: Script | string): string {
+    return typeof key === 'string' ? key : hexifyScript(key);
+  }
+
+  get(key: Script | string): V | undefined {
+    return super.get(this.hashKey(key));
+  }
+
+  set(key: Script | string, value: V): this {
+    return super.set(this.hashKey(key), value);
+  }
+
+  has(key: Script | string): boolean {
+    return super.has(this.hashKey(key));
+  }
+
+  delete(key: string | Script): boolean {
+    return super.delete(this.hashKey(key));
+  }
+}
+
+export class ScriptSerializedSet extends Set<string> {
+  constructor(values: Script[] = []) {
+    super(values.map(hexifyScript));
+  }
+
+  private hashKey(key: Script | string): string {
+    return typeof key === 'string' ? key : hexifyScript(key);
+  }
+
+  add(key: Script | string): this {
+    return super.add(this.hashKey(key));
+  }
+
+  has(key: Script | string): boolean {
+    return super.has(this.hashKey(key));
+  }
+
+  delete(key: Script | string): boolean {
+    return super.delete(this.hashKey(key));
+  }
 }

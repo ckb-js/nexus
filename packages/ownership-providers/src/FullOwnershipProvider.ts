@@ -17,9 +17,10 @@ import {
   calculateFeeCompatible,
   equalPack,
   getTransactionSizeByTx,
-  hexifyScript,
   isLockOnlyCell,
   isTransactionFeePaid,
+  ScriptSerializedMap,
+  ScriptSerializedSet,
   SECP256K1_BLAKE160_WITNESS_PLACEHOLDER,
   sumCapacity,
 } from './utils';
@@ -369,24 +370,21 @@ export class FullOwnershipProvider {
     });
   }
 
-  private async isOwnedLocks(locks: Script[]): Promise<Map<string, boolean>> {
-    const result: Map<string, boolean> = new Map();
+  private async isOwnedLocks(locks: Script[]): Promise<ScriptSerializedMap<boolean>> {
+    const result = new ScriptSerializedMap<boolean>();
     if (locks.length === 0) return result;
 
-    const offChainLockSet = new Set(
+    const offChainLockSet = new ScriptSerializedSet(
       (
         await Promise.all([
           this.getOffChainLocks({ change: 'internal' }),
           this.getOffChainLocks({ change: 'external' }),
         ])
-      )
-        .flat()
-        .map(hexifyScript),
+      ).flat(),
     );
 
     locks.forEach((lock) => {
-      const key = bytes.hexify(blockchain.Script.pack(lock));
-      result.set(key, result.get(key) || offChainLockSet.has(key));
+      result.set(lock, result.get(lock) || offChainLockSet.has(lock));
     });
 
     for (const change of ['internal', 'external'] as const) {
@@ -395,10 +393,9 @@ export class FullOwnershipProvider {
       do {
         page = await this.getOnChainLocks({ change, cursor });
         cursor = page.cursor;
-        const onChainLockSet = new Set(page.objects.map(hexifyScript));
+        const onChainLockSet = new ScriptSerializedSet(page.objects);
         locks.forEach((lock) => {
-          const key = bytes.hexify(blockchain.Script.pack(lock));
-          result.set(key, result.get(key) || onChainLockSet.has(key));
+          result.set(lock, result.get(lock) || onChainLockSet.has(lock));
         });
       } while (page.objects.length > 0);
     }
@@ -414,11 +411,11 @@ export class FullOwnershipProvider {
       walletOwnedInputs.size <= txSkeleton.witnesses.size,
       `Some witnesses are missing!, required: ${walletOwnedInputs.size} from inputs, got: ${txSkeleton.witnesses.size} from witnesses.`,
     );
-    const visitedLocks = new Set<string>();
+    const visitedLocks = new ScriptSerializedSet();
     let isSigned = true;
     let witnessIndex = 0;
     for (const cell of txSkeleton.inputs) {
-      const lock = hexifyScript(cell.cellOutput.lock);
+      const { lock } = cell.cellOutput;
       if (visitedLocks.has(lock)) {
         continue;
       } else {
@@ -428,8 +425,7 @@ export class FullOwnershipProvider {
         walletOwnedInputs.get(lock) &&
         txSkeleton.witnesses.get(witnessIndex) === SECP256K1_BLAKE160_WITNESS_PLACEHOLDER
       ) {
-        isSigned = false;
-        break;
+        return false;
       } else {
         witnessIndex++;
       }
@@ -446,7 +442,7 @@ export class FullOwnershipProvider {
     // pick lock only and wallet owned cells
     const byOutputIndex = txSkeleton.outputs.reduce<number[]>(
       (prev, cell, index) =>
-        isLockOnlyCell(cell) && walletOwnedOutputs.get(hexifyScript(cell.cellOutput.lock)) ? [...prev, index] : prev,
+        isLockOnlyCell(cell) && walletOwnedOutputs.has(cell.cellOutput.lock) ? [...prev, index] : prev,
       [],
     );
     return byOutputIndex;
