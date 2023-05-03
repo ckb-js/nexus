@@ -31,8 +31,8 @@
   },
   "dependencies": {
     "@chakra-ui/anatomy": "2.1.2",
-    "@chakra-ui/icons": "2.0.17",
-    "@chakra-ui/react": "2.4.9",
+    "@chakra-ui/icons": "2.0.19",
+    "@chakra-ui/react": "2.6.1",
     "@chakra-ui/theme-tools": "2.0.17",
     "@ckb-lumos/base": "0.20.0-alpha.2",
     "@ckb-lumos/bi": "0.20.0-alpha.2",
