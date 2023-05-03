@@ -7,7 +7,7 @@
 Added a module for detecting `ckb` object in `window`
 
 ```ts
-import { detectCkb } from '@nexus-wallet/detect-ckb'
+import { detectCkb } from '@nexus-wallet/detect-ckb';
 
 // will detect if the `ckb` object is injected to window
 // an error will be thrown after more than 3s of detection

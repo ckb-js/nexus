@@ -1,3 +1,19 @@
+# v0.0.18 (Fri Apr 28 2023)
+
+#### 🐛 Bug Fix
+
+- feat: find out ownedLocks when signTransaction [#270](https://github.com/ckb-js/nexus/pull/270) ([@pygman](https://github.com/pygman))
+
+#### 🏠 Internal
+
+- chore: move testkit to devDependencies [#274](https://github.com/ckb-js/nexus/pull/274) ([@pygman](https://github.com/pygman))
+
+#### Authors: 1
+
+- pygman ([@pygman](https://github.com/pygman))
+
+---
+
 # v0.0.17 (Thu Apr 27 2023)
 
 ### Release Notes
@@ -7,7 +23,7 @@
 Added a module for detecting `ckb` object in `window`
 
 ```ts
-import { detectCkb } from '@nexus-wallet/detect-ckb'
+import { detectCkb } from '@nexus-wallet/detect-ckb';
 
 // will detect if the `ckb` object is injected to window
 // an error will be thrown after more than 3s of detection
