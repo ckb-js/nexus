@@ -75,7 +75,6 @@
       "prettier --write --ignore-unknown"
     ],
     "**/*.{js,jsx,ts,tsx}": [
-      "npm run build:libs",
       "npx eslint"
     ],
     "packages/protocol/**/*": [
