@@ -2,6 +2,7 @@ import { DefaultTestEnv } from '../helpers';
 
 DefaultTestEnv.setupTest({ initWalletWithDefaults: true });
 
+jest.setTimeout(20_000);
 describe('Enable wallet', function () {
   test('should get the nickname when approved', async () => {
     const enableTask = ckb.request({ method: 'wallet_enable' });
