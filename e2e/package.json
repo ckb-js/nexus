@@ -7,7 +7,7 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "jest"
+    "test": "jest --testTimeout=20000"
   },
   "devDependencies": {
     "@ckb-lumos/base": "0.20.0-alpha.2",

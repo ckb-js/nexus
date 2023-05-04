@@ -81,7 +81,7 @@ export class DefaultTestEnv implements TestEnv {
 
   defaultE2eData: TestEnv['defaultE2eData'] = {
     // TODO: this should be a local server
-    localServerUrl: 'https://github.com',
+    localServerUrl: 'https://www.bing.com',
     nickname: 'Nexus Dev',
     mnemonic: 'abandon abandon able about above absent absorb abstract absurd abuse access accident',
     password: '12345678',
@@ -122,6 +122,7 @@ export class DefaultTestEnv implements TestEnv {
     this._context = await chromium.launchPersistentContext(persistentPath, {
       headless: this.options.headless,
       slowMo: 10,
+      bypassCSP: true,
       args: [
         ...(this.options.headless ? ['--headless=new'] : []),
         `--disable-extensions-except=${this.options.extensionDirPath}`,
