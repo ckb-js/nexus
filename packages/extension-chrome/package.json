@@ -46,7 +46,7 @@
     "@nexus-wallet/protocol": "0.0.19",
     "@nexus-wallet/types": "0.0.19",
     "@nexus-wallet/utils": "0.0.19",
-    "@tanstack/react-query": "4.29.1",
+    "@tanstack/react-query": "4.29.5",
     "awilix": "8.0.1",
     "eventemitter3": "5.0.0",
     "immer": "9.0.21",
