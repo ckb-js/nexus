@@ -1,6 +1,6 @@
 {
   "name": "@nexus-wallet/testkit",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "description": "",
   "homepage": "https://github.com/ckb-js/nexus/tree/main/extension-chrome#readme",
   "license": "MIT",
@@ -22,8 +22,8 @@
     "@ckb-lumos/bi": "0.20.0-alpha.2",
     "@ckb-lumos/codec": "0.20.0-alpha.2",
     "@ckb-lumos/helpers": "0.20.0-alpha.2",
-    "@nexus-wallet/protocol": "0.0.18",
-    "@nexus-wallet/utils": "0.0.18",
+    "@nexus-wallet/protocol": "0.0.19",
+    "@nexus-wallet/utils": "0.0.19",
     "eventemitter3": "5.0.0"
   },
   "scripts": {
