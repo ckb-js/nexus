@@ -1,3 +1,28 @@
+# v0.0.19 (Thu May 04 2023)
+
+#### 🚀 Enhancement
+
+- `@nexus-wallet/ownership-providers`
+  - feat(ownership-provider): support `payFee` and `signTransaction` in `sendTransaction` [#272](https://github.com/ckb-js/nexus/pull/272) ([@IronLu233](https://github.com/IronLu233))
+
+#### 🏠 Internal
+
+- chore: fix release error in pipeline [#276](https://github.com/ckb-js/nexus/pull/276) ([@IronLu233](https://github.com/IronLu233))
+
+#### 🧪 Tests
+
+- feat: a ckb node wrapper in js [#239](https://github.com/ckb-js/nexus/pull/239) ([@IronLu233](https://github.com/IronLu233) [@homura](https://github.com/homura))
+- refactor(e2e): make the config more clear [#273](https://github.com/ckb-js/nexus/pull/273) ([@homura](https://github.com/homura))
+- `@nexus-wallet/detect-ckb`, `@nexus-wallet/ownership-providers`
+  - chore: fix incorrect coverage in code cov [#269](https://github.com/ckb-js/nexus/pull/269) ([@homura](https://github.com/homura))
+
+#### Authors: 2
+
+- Iron Lu ([@IronLu233](https://github.com/IronLu233))
+- Yonghui Lin ([@homura](https://github.com/homura))
+
+---
+
 # v0.0.18 (Fri Apr 28 2023)
 
 #### 🐛 Bug Fix

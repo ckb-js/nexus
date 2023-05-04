@@ -1,3 +1,37 @@
+# v0.0.19 (Thu May 04 2023)
+
+#### 🔨 Breaking Minor Change
+
+- Merge remote-tracking branch 'upstream/main' into ownershipProvider-sendTransaction-with-payFee ([@IronLu233](https://github.com/IronLu233))
+- refactor: optimize Map structures ([@IronLu233](https://github.com/IronLu233))
+- refactor: use extended map for clearify code ([@IronLu233](https://github.com/IronLu233))
+- test: make txWithFee calculation more clear ([@IronLu233](https://github.com/IronLu233))
+- fix: logic bug ([@IronLu233](https://github.com/IronLu233))
+- Merge remote-tracking branch 'upstream/main' into e2e-node-interaction ([@IronLu233](https://github.com/IronLu233))
+- test: modify code for coverage ([@IronLu233](https://github.com/IronLu233))
+- test: add unit test for send transaction ([@IronLu233](https://github.com/IronLu233))
+- fix: filter type script cell when pay fee ([@IronLu233](https://github.com/IronLu233))
+- refactor: Top-to-bottom implementation ([@IronLu233](https://github.com/IronLu233))
+- feat(ownership-providers): support payFee and signTransaction in send transaction ([@IronLu233](https://github.com/IronLu233))
+- fix(ownership-provider): support unsigned transaction ([@IronLu233](https://github.com/IronLu233))
+- fix(ownership-provider): add method `isOwnedByWallet` ([@IronLu233](https://github.com/IronLu233))
+
+#### 🚀 Enhancement
+
+- feat(ownership-provider): support `payFee` and `signTransaction` in `sendTransaction` [#272](https://github.com/ckb-js/nexus/pull/272) ([@IronLu233](https://github.com/IronLu233))
+
+#### 🧪 Tests
+
+- feat: a ckb node wrapper in js [#239](https://github.com/ckb-js/nexus/pull/239) ([@IronLu233](https://github.com/IronLu233) [@homura](https://github.com/homura))
+- chore: fix incorrect coverage in code cov [#269](https://github.com/ckb-js/nexus/pull/269) ([@homura](https://github.com/homura))
+
+#### Authors: 2
+
+- Iron Lu ([@IronLu233](https://github.com/IronLu233))
+- Yonghui Lin ([@homura](https://github.com/homura))
+
+---
+
 # v0.0.17 (Thu Apr 27 2023)
 
 ### Release Notes
