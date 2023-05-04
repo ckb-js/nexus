@@ -2,28 +2,28 @@ import { DefaultTestEnv } from '../helpers';
 
 DefaultTestEnv.setupTest({ initWalletWithDefaults: true });
 
-describe('Show account details', function () {
-  it('should show nick name for account', async () => {
+describe('Show wallet details', function () {
+  it('should show nick name for wallet', async () => {
     const page = await testEnv.context.newPage();
     const extensionId = testEnv.extensionId;
     await page.goto(`chrome-extension://${extensionId}/popup.html`);
     await page.getByText(testEnv.defaultE2eData.nickname).waitFor();
   });
 
-  it('should show disconnected for the account', async () => {
+  it('should show disconnected for the wallet', async () => {
     const page = await testEnv.context.newPage();
     const extensionId = testEnv.extensionId;
     await page.goto(`chrome-extension://${extensionId}/popup.html`);
     await page.getByText('Disconnected').waitFor();
   });
-  it('should show whitelist sites for the account', async () => {
+  it('should show whitelist sites for the wallet', async () => {
     const page = await testEnv.context.newPage();
     const extensionId = testEnv.extensionId;
     await page.goto(`chrome-extension://${extensionId}/popup.html`);
     await page.getByRole('button', { name: 'Whitelist Sites' }).click();
     await page.getByText('No whitelist sites found.').waitFor();
   });
-  it('should show networks list for the account', async () => {
+  it('should show networks list for the wallet', async () => {
     const page = await testEnv.context.newPage();
     const extensionId = testEnv.extensionId;
     await page.goto(`chrome-extension://${extensionId}/popup.html`);
@@ -32,7 +32,7 @@ describe('Show account details', function () {
     await page.getByText('Testnet').waitFor();
   });
 
-  it('should show feedback for the account', async () => {
+  it('should show feedback for the wallet', async () => {
     const page = await testEnv.context.newPage();
     const extensionId = testEnv.extensionId;
     await page.goto(`chrome-extension://${extensionId}/popup.html`);

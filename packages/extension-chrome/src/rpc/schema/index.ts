@@ -1,5 +1,5 @@
 import { z, ZodType } from 'zod';
-import { ZScript, ZTransaction } from './blockchain';
+import { ZOutputsValidator, ZScript, ZTransaction } from './blockchain';
 import { RpcMethods } from '@nexus-wallet/types';
 import { ZHexString } from './primitives';
 
@@ -24,3 +24,5 @@ export const ZGetOnChainLocksPayload = ZGetPaginateItemsPayload.merge(ZFilterPay
 export const ZSignDataPayload = z.object({ data: ZHexString, lock: ZScript });
 
 export const ZSignTransactionPayload = z.object({ tx: ZTransaction });
+
+export const ZSendTransactionPayload = z.object({ tx: ZTransaction, outputsValidator: z.optional(ZOutputsValidator) });

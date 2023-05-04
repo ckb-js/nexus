@@ -5,6 +5,9 @@ const config: JestConfigWithTsJest = {
   transform: {
     '^.+\\.ts$': 'ts-jest',
   },
+  preset: 'ts-jest',
+  testEnvironment: 'node',
+  transformIgnorePatterns: ['/node_modules/(?!(env-paths|nanoid)/)'],
   testTimeout: 15000,
 };
 

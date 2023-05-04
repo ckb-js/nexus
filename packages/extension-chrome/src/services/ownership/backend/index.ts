@@ -1,6 +1,7 @@
 import { Cell, Script, Transaction } from '@ckb-lumos/lumos';
 import type { ConfigService, Paginate, Promisable } from '@nexus-wallet/types';
 import { asserts } from '@nexus-wallet/utils';
+import { OutputValidator } from '@nexus-wallet/protocol/lib/base';
 import { NetworkId } from '../storage';
 import { createTransactionSkeleton, LiveCellFetcher, TransactionSkeletonType } from '@ckb-lumos/helpers';
 import { ScriptConfig } from '@ckb-lumos/config-manager';
@@ -8,10 +9,9 @@ import chunk from 'lodash.chunk';
 import isEqual from 'lodash.isequal';
 import { RPC as RpcType } from '@ckb-lumos/rpc/lib/types/rpc';
 import { NexusCommonErrors } from '../../../errors';
-import { createRpcClient, loadSecp256k1ScriptDep, toCell, toQueryParam, toScript } from './backendUtils';
-import { ChainInfo } from '@ckb-lumos/base';
-import { ResultFormatter } from '@ckb-lumos/rpc';
-
+import { createRpcClient, loadSecp256k1ScriptDep, toCell, toQueryParam } from './backendUtils';
+import { ChainInfo, Hash } from '@ckb-lumos/base';
+import { ParamsFormatter, ResultFormatter } from '@ckb-lumos/rpc';
 type GetLiveCellsResult = Paginate<Cell> & { lastLock?: Script };
 
 export interface Backend {
@@ -31,6 +31,8 @@ export interface Backend {
   resolveTx(tx: Transaction): Promise<TransactionSkeletonType>;
 
   getBlockchainInfo(): Promise<ChainInfo>;
+
+  sendTransaction(tx: Transaction, outputsValidator?: OutputValidator): Promise<string>;
 }
 
 // TODO better make it persisted in localstorage/db
@@ -89,7 +91,7 @@ export function createBackend(_payload: { nodeUrl: string }): Backend {
         return emptyReturnValue;
       }
 
-      const requetParams = locks.map((lock, i) => {
+      const requestParams = locks.map((lock, i) => {
         if (i === 0) {
           // only first lock could use the cursor
           return toQueryParam({ lock, cursor });
@@ -97,7 +99,7 @@ export function createBackend(_payload: { nodeUrl: string }): Backend {
         return toQueryParam({ lock });
       });
       // TODO make chunk size configurable, default to 10
-      const chunkedRequestParams = chunk(requetParams, 10);
+      const chunkedRequestParams = chunk(requestParams, 10);
       const chunkedLocks = chunk(locks, 10);
 
       const responsePromises = chunkedRequestParams.map((chunkedRequestParam) =>
@@ -157,8 +159,8 @@ export function createBackend(_payload: { nodeUrl: string }): Backend {
           outPoint,
           cellOutput: {
             capacity: rpcCell.output.capacity,
-            lock: toScript(rpcCell.output.lock),
-            type: rpcCell.output.type ? toScript(rpcCell.output.type) : undefined,
+            lock: ResultFormatter.toScript(rpcCell.output.lock),
+            type: rpcCell.output.type ? ResultFormatter.toScript(rpcCell.output.type) : undefined,
           },
           data: rpcCell.data.content,
         };
@@ -169,6 +171,12 @@ export function createBackend(_payload: { nodeUrl: string }): Backend {
     getBlockchainInfo: async () => {
       const res = await client.request<RpcType.BlockchainInfo>('get_blockchain_info', null);
       return ResultFormatter.toBlockchainInfo(res);
+    },
+    sendTransaction(tx: Transaction, outputsValidator = 'well_known_scripts_only') {
+      return client.request<Hash, [RpcType.RawTransaction, OutputValidator]>('send_transaction', [
+        ParamsFormatter.toRawTransaction(tx),
+        outputsValidator,
+      ]);
     },
   };
 }

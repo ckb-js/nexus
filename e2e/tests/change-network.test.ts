@@ -5,10 +5,8 @@ DefaultTestEnv.setupTest({ initWalletWithDefaults: true });
 describe('Change network', function () {
   it('should get networkChanged when network change', async () => {
     await page.evaluate(() => {
-      // @ts-ignore
       window.ckbNetworkName = '';
       window.ckb.on('networkChanged', (networkName: string) => {
-        // @ts-ignore
         window.ckbNetworkName = networkName;
       });
     });
@@ -18,13 +16,11 @@ describe('Change network', function () {
     await extensionIdPage.getByRole('button', { name: 'Network' }).click();
     await extensionIdPage.getByText('Mainnet').click();
     let ckbNetworkName = await page.evaluate(() => {
-      // @ts-ignore
       return window.ckbNetworkName;
     });
     expect(ckbNetworkName).toBe('ckb');
     await extensionIdPage.getByText('Testnet').click();
     ckbNetworkName = await page.evaluate(() => {
-      // @ts-ignore
       return window.ckbNetworkName;
     });
     expect(ckbNetworkName).toBe('ckb_testnet');
@@ -49,16 +45,13 @@ describe('Change network', function () {
     await extensionIdPage.getByRole('button', { name: 'Add' }).click();
     await extensionIdPage.getByText(notCkbName).allInnerTexts();
     await page.evaluate(() => {
-      // @ts-ignore
       window.ckbNetworkName = '';
       window.ckb.on('networkChanged', (networkName: string) => {
-        // @ts-ignore
         window.ckbNetworkName = networkName;
       });
     });
     await extensionIdPage.getByText(randName).click();
     let ckbNetworkName = await page.evaluate(() => {
-      // @ts-ignore
       return window.ckbNetworkName;
     });
     expect(ckbNetworkName).toBe(randName);
@@ -66,7 +59,6 @@ describe('Change network', function () {
     await extensionIdPage.getByText(notCkbName).click();
 
     ckbNetworkName = await page.evaluate(() => {
-      // @ts-ignore
       return window.ckbNetworkName;
     });
 

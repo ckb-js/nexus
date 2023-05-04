@@ -30,7 +30,7 @@ describe('Import a wallet', () => {
     await page.getByRole('button', { name: 'Next' }).click();
   });
 
-  it('should warn when the input password is too short', async () => {
+  it('should show error message when the input password is too short', async () => {
     const page = await testEnv.context.newPage();
     const extensionId = testEnv.extensionId;
     await page.goto(`chrome-extension://${extensionId}/walletManager.html`);
@@ -48,7 +48,7 @@ describe('Import a wallet', () => {
     await page.getByRole('button', { name: 'Next' }).isDisabled();
   });
 
-  it('should warn when the confirm password is do not match', async () => {
+  it('should show error message when the confirm password is do not match', async () => {
     const page = await testEnv.context.newPage();
     const extensionId = testEnv.extensionId;
     await page.goto(`chrome-extension://${extensionId}/walletManager.html`);
@@ -66,7 +66,7 @@ describe('Import a wallet', () => {
     await page.getByRole('button', { name: 'Next' }).isDisabled();
   });
 
-  it('should warn when the nick name is too long', async () => {
+  it('should show error text when the nick name is too long', async () => {
     const page = await testEnv.context.newPage();
     const extensionId = testEnv.extensionId;
     await page.goto(`chrome-extension://${extensionId}/walletManager.html`);

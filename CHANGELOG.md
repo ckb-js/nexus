@@ -1,3 +1,136 @@
+# v0.0.19 (Thu May 04 2023)
+
+#### 🚀 Enhancement
+
+- `@nexus-wallet/ownership-providers`
+  - feat(ownership-provider): support `payFee` and `signTransaction` in `sendTransaction` [#272](https://github.com/ckb-js/nexus/pull/272) ([@IronLu233](https://github.com/IronLu233))
+
+#### 🏠 Internal
+
+- chore: fix release error in pipeline [#276](https://github.com/ckb-js/nexus/pull/276) ([@IronLu233](https://github.com/IronLu233))
+
+#### 🧪 Tests
+
+- feat: a ckb node wrapper in js [#239](https://github.com/ckb-js/nexus/pull/239) ([@IronLu233](https://github.com/IronLu233) [@homura](https://github.com/homura))
+- refactor(e2e): make the config more clear [#273](https://github.com/ckb-js/nexus/pull/273) ([@homura](https://github.com/homura))
+- `@nexus-wallet/detect-ckb`, `@nexus-wallet/ownership-providers`
+  - chore: fix incorrect coverage in code cov [#269](https://github.com/ckb-js/nexus/pull/269) ([@homura](https://github.com/homura))
+
+#### Authors: 2
+
+- Iron Lu ([@IronLu233](https://github.com/IronLu233))
+- Yonghui Lin ([@homura](https://github.com/homura))
+
+---
+
+# v0.0.18 (Fri Apr 28 2023)
+
+#### 🐛 Bug Fix
+
+- feat: find out ownedLocks when signTransaction [#270](https://github.com/ckb-js/nexus/pull/270) ([@pygman](https://github.com/pygman))
+
+#### 🏠 Internal
+
+- chore: move testkit to devDependencies [#274](https://github.com/ckb-js/nexus/pull/274) ([@pygman](https://github.com/pygman))
+
+#### Authors: 1
+
+- pygman ([@pygman](https://github.com/pygman))
+
+---
+
+# v0.0.17 (Thu Apr 27 2023)
+
+### Release Notes
+
+#### feat(detect-ckb): a module for detecting injected ckb ([#249](https://github.com/ckb-js/nexus/pull/249))
+
+Added a module for detecting `ckb` object in `window`
+
+```ts
+import { detectCkb } from '@nexus-wallet/detect-ckb';
+
+// will detect if the `ckb` object is injected to window
+// an error will be thrown after more than 3s of detection
+const ckb = await detectCkb({ timeout: 3000 });
+```
+
+---
+
+#### 🔨 Breaking Minor Change
+
+- `@nexus-wallet/detect-ckb`
+  - feat(detect-ckb): detecting injected ckb test cases [#250](https://github.com/ckb-js/nexus/pull/250) ([@pygman](https://github.com/pygman))
+
+#### 🚀 Enhancement
+
+- `@nexus-wallet/ownership-providers`
+  - feat(ownership-provider): supported send transaction [#255](https://github.com/ckb-js/nexus/pull/255) ([@IronLu233](https://github.com/IronLu233))
+- `@nexus-wallet/detect-ckb`
+  - feat(detect-ckb): a module for detecting injected ckb [#249](https://github.com/ckb-js/nexus/pull/249) ([@homura](https://github.com/homura) [@pygman](https://github.com/pygman))
+
+#### 🐛 Bug Fix
+
+- `@nexus-wallet/ownership-providers`
+  - fix(ownership-providers): inject witness and cellDeps auto [#251](https://github.com/ckb-js/nexus/pull/251) ([@homura](https://github.com/homura) [@zhangyouxin](https://github.com/zhangyouxin))
+
+#### 🏠 Internal
+
+- `@nexus-wallet/detect-ckb`
+  - chore: example for using ownership provider in a dapp [#252](https://github.com/ckb-js/nexus/pull/252) ([@homura](https://github.com/homura))
+
+#### 📝 Documentation
+
+- docs: developer tutorial [#256](https://github.com/ckb-js/nexus/pull/256) ([@homura](https://github.com/homura))
+
+#### 🔩 Dependency Updates
+
+- chore(deps): update dependency @types/chrome to v0.0.233 [#245](https://github.com/ckb-js/nexus/pull/245) ([@renovate[bot]](https://github.com/renovate[bot]))
+- chore(deps): update dependency prettier to v2.8.8 [#257](https://github.com/ckb-js/nexus/pull/257) ([@renovate[bot]](https://github.com/renovate[bot]))
+- chore(deps): update jest monorepo [#71](https://github.com/ckb-js/nexus/pull/71) ([@renovate[bot]](https://github.com/renovate[bot]))
+
+#### Authors: 5
+
+- [@renovate[bot]](https://github.com/renovate[bot])
+- Iron Lu ([@IronLu233](https://github.com/IronLu233))
+- pygman ([@pygman](https://github.com/pygman))
+- Shinya ([@zhangyouxin](https://github.com/zhangyouxin))
+- Yonghui Lin ([@homura](https://github.com/homura))
+
+---
+
+# v0.0.16 (Tue Apr 25 2023)
+
+#### 🚀 Enhancement
+
+- `@nexus-wallet/protocol`
+  - feat(extension-chrome): support send transaction [#227](https://github.com/ckb-js/nexus/pull/227) ([@IronLu233](https://github.com/IronLu233))
+
+#### 🐛 Bug Fix
+
+- fix(extension-chrome): receiving end does not exist [#253](https://github.com/ckb-js/nexus/pull/253) ([@homura](https://github.com/homura))
+
+#### 📝 Documentation
+
+- docs: nexus works with custody unlocking [#152](https://github.com/ckb-js/nexus/pull/152) ([@homura](https://github.com/homura))
+
+#### 🧪 Tests
+
+- feat(testkit): a testkit pkg for unit test [#161](https://github.com/ckb-js/nexus/pull/161) ([@homura](https://github.com/homura))
+
+#### 🔩 Dependency Updates
+
+- chore(deps): update dependency @auto-it/upload-assets to v10.45.0 [#241](https://github.com/ckb-js/nexus/pull/241) ([@renovate[bot]](https://github.com/renovate[bot]))
+- fix(deps): update dependency zustand to v4.3.7 [#230](https://github.com/ckb-js/nexus/pull/230) ([@renovate[bot]](https://github.com/renovate[bot]))
+
+#### Authors: 3
+
+- [@renovate[bot]](https://github.com/renovate[bot])
+- Iron Lu ([@IronLu233](https://github.com/IronLu233))
+- Yonghui Lin ([@homura](https://github.com/homura))
+
+---
+
 # v0.0.15 (Thu Apr 20 2023)
 
 #### 🐛 Bug Fix

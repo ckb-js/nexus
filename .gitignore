@@ -41,3 +41,5 @@ lib
 
 # Vscode
 .vscode
+
+.parcel-cache

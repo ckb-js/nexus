@@ -1,6 +1,6 @@
 {
   "name": "@nexus-wallet/types",
-  "version": "0.0.15",
+  "version": "0.0.19",
   "description": "",
   "homepage": "https://github.com/ckb-js/nexus/tree/main/extension-chrome#readme",
   "license": "MIT",
@@ -18,7 +18,7 @@
     "url": "git+https://github.com/ckb-js/nexus.git"
   },
   "dependencies": {
-    "@nexus-wallet/protocol": "0.0.15"
+    "@nexus-wallet/protocol": "0.0.19"
   },
   "devDependencies": {
     "@ckb-lumos/codec": "0.20.0-alpha.2",

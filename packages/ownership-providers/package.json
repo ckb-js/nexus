@@ -1,6 +1,6 @@
 {
   "name": "@nexus-wallet/ownership-providers",
-  "version": "0.0.15",
+  "version": "0.0.19",
   "description": "Simple wrapper to work with Nexus",
   "homepage": "https://github.com/ckb-js/nexus/tree/main/extension-chrome#readme",
   "license": "MIT",
@@ -31,8 +31,8 @@
     "url": "https://github.com/ckb-js/nexus/issues"
   },
   "dependencies": {
-    "@nexus-wallet/protocol": "0.0.15",
-    "@nexus-wallet/utils": "0.0.15",
+    "@nexus-wallet/protocol": "0.0.19",
+    "@nexus-wallet/utils": "0.0.19",
     "lodash.range": "3.2.0"
   },
   "devDependencies": {

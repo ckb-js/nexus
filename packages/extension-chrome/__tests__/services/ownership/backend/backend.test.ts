@@ -3,6 +3,7 @@ import { createBackend } from '../../../../src/services/ownership/backend';
 import fetchMock from 'jest-fetch-mock';
 import { ScriptConfig, predefined } from '@ckb-lumos/config-manager/lib';
 import { toQueryParam } from '../../../../src/services/ownership/backend/backendUtils';
+import { createTransactionFromSkeleton, TransactionSkeleton } from '@ckb-lumos/helpers';
 
 describe('Query Param', () => {
   beforeEach(() => {
@@ -63,6 +64,42 @@ describe('getBlockchainInfo', () => {
 
     expect(res.chain).toBe('ckb_testnet');
   }, 5000);
+});
+
+describe('sendTransaction', () => {
+  beforeAll(() => {
+    fetchMock.enableMocks();
+  });
+  it('should send transaction', async () => {
+    const txHash = '';
+    fetchMock.mockResponse(
+      JSON.stringify({
+        jsonrpc: '2.0',
+        result: txHash,
+        id: 0,
+      }),
+    );
+    const tx = createTransactionFromSkeleton(TransactionSkeleton());
+    const backend = createBackend({ nodeUrl: '' });
+    const result = await backend.sendTransaction(tx, 'passthrough');
+    expect(result).toBe(txHash);
+    const params = JSON.parse(fetchMock.mock.calls?.[0][1]?.body as any).params;
+    expect(params[1]).toBe('passthrough');
+  });
+  it('default second parameter', async () => {
+    fetchMock.mockResponse(
+      JSON.stringify({
+        jsonrpc: '2.0',
+        result: '',
+        id: 0,
+      }),
+    );
+    const tx = createTransactionFromSkeleton(TransactionSkeleton());
+    const backend = createBackend({ nodeUrl: '' });
+    await backend.sendTransaction(tx);
+    const params = JSON.parse(fetchMock.mock.calls?.[0][1]?.body as any).params;
+    expect(params[1]).toBe('passthrough');
+  });
 });
 
 describe('hasHistory', () => {

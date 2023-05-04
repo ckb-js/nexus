@@ -1,0 +1,38 @@
+{
+  "name": "@nexus-wallet/detect-ckb",
+  "version": "0.0.19",
+  "description": "Detect the global CKB object is injected or not",
+  "homepage": "https://github.com/ckb-js/nexus/tree/main/detect-ckb#readme",
+  "license": "MIT",
+  "main": "lib",
+  "publishConfig": {
+    "access": "public"
+  },
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib",
+    "src",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ckb-js/nexus.git"
+  },
+  "scripts": {
+    "start": "cross-env NODE_ENV=development npm run start:webpack",
+    "build": "tsc",
+    "clean": "rimraf build/*",
+    "check": "npm run check:types",
+    "check:types": "tsc --noEmit"
+  },
+  "bugs": {
+    "url": "https://github.com/ckb-js/nexus/issues"
+  },
+  "dependencies": {
+    "@nexus-wallet/protocol": "0.0.19",
+    "@nexus-wallet/utils": "0.0.19"
+  }
+}

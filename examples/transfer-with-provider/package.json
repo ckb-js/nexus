@@ -1,0 +1,27 @@
+{
+  "name": "transfer-with-provider",
+  "private": true,
+  "version": "0.0.19",
+  "type": "module",
+  "scripts": {
+    "start": "parcel index.html"
+  },
+  "dependencies": {
+    "@ckb-lumos/base": "0.20.0-alpha.2",
+    "@ckb-lumos/bi": "0.20.0-alpha.2",
+    "@ckb-lumos/codec": "0.20.0-alpha.2",
+    "@ckb-lumos/common-scripts": "0.20.0-alpha.2",
+    "@ckb-lumos/config-manager": "0.20.0-alpha.2",
+    "@ckb-lumos/helpers": "0.20.0-alpha.2",
+    "@nexus-wallet/detect-ckb": "0.0.19",
+    "@nexus-wallet/ownership-providers": "0.0.19",
+    "buffer": "^5.7.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.28",
+    "@types/react-dom": "^18.0.11",
+    "parcel": "^2.8.3"
+  }
+}

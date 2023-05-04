@@ -1,10 +1,11 @@
 import { Storage } from '@nexus-wallet/types';
-import { HexString, Script } from '@ckb-lumos/lumos';
+import { HexString, Script, utils } from '@ckb-lumos/lumos';
 
 export interface ScriptInfoDb {
   getAll(): Promise<ScriptInfo[]>;
   setAll(infos: ScriptInfo[]): Promise<void>;
   filterByMatch(filter: Partial<ScriptInfo>): Promise<ScriptInfo[]>;
+  isDerivedLocks(scripts: Script[]): Promise<boolean[]>;
 }
 
 export type OwnershipStorage = Storage<Record<NetworkId, ScriptInfo[]>>;
@@ -53,6 +54,10 @@ export function createScriptInfoDb(payload: { networkId: string; storage: Owners
           return info[k] === match[k];
         });
       });
+    },
+    isDerivedLocks: async (scripts: []): Promise<boolean[]> => {
+      const infos = await getAll();
+      return scripts.map((script) => !!infos.find((info) => info.scriptHash === utils.computeScriptHash(script)));
     },
   };
 }
