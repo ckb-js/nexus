@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Mock E2E Phishing Page</title>
+  </head>
+  <body>
+    <label for="url">link:</label>
+    <input type="text" id="url" placeholder="https://demo-nexus.vercel.app/" />
+    <button onclick="loadPage()">show</button>
+    <br /><br />
+    <iframe id="page" style="width: 100%; height: 80vh"></iframe>
+    <script>
+      function loadPage() {
+        document.getElementById('page').src = document.getElementById('url').value;
+      }
+    </script>
+  </body>
+</html>

@@ -128,7 +128,9 @@ export class DefaultTestEnv implements TestEnv {
         `--disable-extensions-except=${this.options.extensionDirPath}`,
         `--load-extension=${this.options.extensionDirPath}`,
       ],
+      permissions: ['clipboard-read'],
     });
+    this._context.setDefaultTimeout(5000);
 
     let [background] = this.context.serviceWorkers();
     if (!background) background = await this.context.waitForEvent('serviceworker');
@@ -139,8 +141,7 @@ export class DefaultTestEnv implements TestEnv {
       await asyncSleep(200);
 
       await background.evaluate(async (data) => {
-        // @ts-ignore
-        await chrome.storage.local.set(data);
+        await chrome.storage.local.set(data as Record<string, any>);
       }, getDefaultStorageData());
     }
   }
@@ -185,8 +186,7 @@ export class DefaultTestEnv implements TestEnv {
       request: async (payload) => {
         const res = thePage.evaluate(async (payload) => {
           await new Promise((resolve) => setTimeout(resolve, 10));
-          // @ts-ignore
-          return window.ckb.request(payload);
+          return window.ckb.request(payload as never);
         }, payload);
 
         if (this.options.autoApproveEnable && payload.method === 'wallet_enable') {
