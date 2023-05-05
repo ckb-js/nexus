@@ -67,10 +67,15 @@ export const Home: FC = () => {
     <Flex flexDir="column" h="100%">
       <ConnectStatusCard name={config?.nickname!} connected={connectedStatus} />
 
-      <WhiteAlphaBox direction="column" mt="20px">
+      <WhiteAlphaBox direction="column" mt="20px" overflow="hidden">
         {entries.map(({ title, icon, onClick, testId }) => (
           <Flex
             key={testId}
+            _hover={{
+              background: 'white.200',
+            }}
+            transitionProperty="common"
+            transitionDuration="normal"
             data-test-id={testId}
             as="button"
             alignItems="center"
@@ -79,7 +84,7 @@ export const Home: FC = () => {
             onClick={onClick}
             type="button"
           >
-            <Center mr="20px" w="48px" backgroundColor="whiteAlpha.300" h="48px" borderRadius="50%">
+            <Center mr="20px" w="48px" backgroundColor="white.300" h="48px" borderRadius="50%">
               {icon}
             </Center>
             <Box fontSize="md" fontWeight="semibold">

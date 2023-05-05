@@ -1,4 +1,5 @@
 import { extendTheme, withDefaultColorScheme, withDefaultVariant } from '@chakra-ui/react';
+import { Alert } from './Alert';
 import { Button } from './Button';
 import { FormLabel } from './FormLabel';
 import { Input } from './Input';
@@ -20,7 +21,7 @@ export const theme = extendTheme(
       'primary.lighter': '#B794F4',
       'primary.darker': '#553C9A',
 
-      'info.darker': '#718096',
+      'info.darker': '#3182CE',
       'info.lighter': '#63B3ED',
       'info.bg': '#BEE3F8',
 
@@ -35,6 +36,28 @@ export const theme = extendTheme(
       'success.darker': '#38A169',
       'success.lighter': '#68D391',
       'success.bg': '#C6F6D5',
+
+      white: 'rgba(255, 255, 255, 1)',
+      'white.900': 'rgba(255, 255, 255, 0.92)',
+      'white.800': 'rgba(255, 255, 255, 0.80)',
+      'white.700': 'rgba(255, 255, 255, 0.64)',
+      'white.600': 'rgba(255, 255, 255, 0.48)',
+      'white.500': 'rgba(255, 255, 255, 0.36)',
+      'white.400': 'rgba(255, 255, 255, 0.24)',
+      'white.300': 'rgba(255, 255, 255, 0.16)',
+      'white.200': 'rgba(255, 255, 255, 0.08)',
+      'white.100': 'rgba(255, 255, 255, 0.06)',
+
+      'gray.900': '#171923',
+      'gray.800': '#1A202C',
+      'gray.700': '#2D3748',
+      'gray.600': '#4A5568',
+      'gray.500': '#718096',
+      'gray.400': '#A0AEC0',
+      'gray.300': '#CBD5E0',
+      'gray.200': '#E2E8F0',
+      'gray.100': '#EDF2F7',
+      'gray.50': '#F7FAFC',
     },
   },
   {
@@ -43,6 +66,7 @@ export const theme = extendTheme(
       Radio: Radio,
       FormLabel: FormLabel,
       Input: Input,
+      Alert: Alert,
     },
   },
   withDefaultColorScheme({

@@ -47,7 +47,7 @@ const CellCapacity: FC<{ capacity: string }> = ({ capacity }) => {
   return (
     <>
       {decimalPart ? (
-        <Tooltip hasArrow label={`${amount} CKB`}>
+        <Tooltip hasArrow placement="top" label={`${amount} CKB`}>
           <Box>
             ≈{integerPart}
             {' CKB'}
@@ -124,7 +124,7 @@ const TransactionIOList: FC<TransactionIOListProps> = ({ type, networkName, tx, 
                   <Box w="60px" p="16px">
                     #{index + 1}
                   </Box>
-                  <Tooltip hasArrow label={addr}>
+                  <Tooltip hasArrow placement="top" label={addr}>
                     <Box p="16px">
                       {addr.slice(0, 5)}...{addr.slice(-4)}
                     </Box>
@@ -199,6 +199,7 @@ export const SignTransaction: FC = () => {
           mx="-4px"
           px="4px"
           overflow="auto"
+          maxH="420px"
         >
           <TransactionIOList networkName={networkName} type="inputs" tx={transactionQuery.data.tx} />
           <TransactionIOList networkName={networkName} type="outputs" tx={transactionQuery.data.tx} mt="12px" />

@@ -140,16 +140,16 @@ export const RecoveryWallet: FC = () => {
   });
 
   return (
-    <>
+    <Box w="672px">
       <Heading fontWeight="semibold" lineHeight="111%" mb="48px">
         Access Wallet With Your Seed
       </Heading>
-      <Text lineHeight="6" fontSize="md" mb="16px" w="672px">
+      <Text lineHeight="6" fontSize="md" mb="16px">
         Nexus cannot recover your password. We will use your Seed to validate your ownership, restore your wallet and
         set up a new password. First, enter the Seed that you were given when you created your wallet.
       </Text>
 
-      <Text fontSize="md" mb="16px" fontWeight="extrabold" w="672px" as={Box}>
+      <Text w="100%" fontSize="md" mb="16px" fontWeight="extrabold" as={Box}>
         Type your Seed here
       </Text>
       <Alert mb="16px" status="info">
@@ -157,7 +157,7 @@ export const RecoveryWallet: FC = () => {
         <AlertDescription fontSize="md">You can paste your entire Seed into any field</AlertDescription>
       </Alert>
       <Box display="grid">
-        <Grid w="672px" templateColumns="repeat(3, 1fr)" column={3} gap="12px">
+        <Grid gridTemplate="repeat(4, 1fr) / repeat(3, 1fr)" column={3} gap="12px">
           {inputs}
         </Grid>
       </Box>
@@ -173,17 +173,13 @@ export const RecoveryWallet: FC = () => {
             );
 
           return (
-            <>
-              {hasInvalidWord && (
-                <Alert mt="16px" status="error">
-                  <AlertIcon />
-                  <AlertDescription fontSize="md">Please check your Seed</AlertDescription>
-                </Alert>
-              )}
-            </>
+            <Alert visibility={hasInvalidWord ? 'visible' : 'hidden'} mt="16px" status="error">
+              <AlertIcon />
+              <AlertDescription fontSize="md">Please check your seed phrase</AlertDescription>
+            </Alert>
           );
         }}
       />
-    </>
+    </Box>
   );
 };

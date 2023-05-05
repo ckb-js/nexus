@@ -42,7 +42,7 @@ export const SetPassword: FC<SetPasswordProps> = ({ isImportSeed }) => {
   }, [setNextAvailable, formState]);
 
   return (
-    <>
+    <Box>
       <Heading mb="48px" lineHeight="111%" fontWeight="semibold">
         Create password
       </Heading>
@@ -121,6 +121,6 @@ export const SetPassword: FC<SetPasswordProps> = ({ isImportSeed }) => {
             </Checkbox>
           </FormControl> */}
       </VStack>
-    </>
+    </Box>
   );
 };

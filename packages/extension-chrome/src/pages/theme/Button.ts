@@ -39,6 +39,10 @@ const outline = defineStyle(({ colorScheme, theme }) => {
       bg: transparentize(colorScheme, 0.24)(theme),
       _disabled: { bg: 'transparent' },
     },
+    _selected: {
+      bg: transparentize(colorScheme, 0.24)(theme),
+      _disabled: { bg: 'transparent' },
+    },
   };
 });
 

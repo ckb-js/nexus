@@ -1,28 +1,26 @@
 import { inputAnatomy } from '@chakra-ui/anatomy';
 import { createMultiStyleConfigHelpers } from '@chakra-ui/react';
-import { getColor } from '@chakra-ui/theme-tools';
+import { getColor } from './utils';
 
 const { defineMultiStyleConfig, definePartsStyle } = createMultiStyleConfigHelpers(inputAnatomy.keys);
 
 const primary = definePartsStyle(({ theme }) => ({
   field: {
     color: 'black',
-    borderWidth: '2px',
+    borderWidth: '1px',
+    borderColor: 'gray.100',
+
+    _hover: {
+      borderColor: 'gray.300',
+    },
+
     _invalid: {
-      borderColor: 'error.darker',
+      borderWidth: '2px',
+      borderColor: `${getColor(theme, 'error.darker')} !important`,
     },
     _focusVisible: {
       borderWidth: '2px',
       borderColor: 'primary',
-      boxShadow: `0 0 0 1px ${getColor(theme, 'primary')}`,
-      _invalid: {
-        borderColor: 'error.darker',
-      },
-    },
-  },
-  element: {
-    _invalid: {
-      color: 'error.darker',
     },
   },
 }));
@@ -30,21 +28,18 @@ const primary = definePartsStyle(({ theme }) => ({
 const accent = definePartsStyle(({ theme }) => ({
   field: {
     color: 'black',
-    borderWidth: '2px',
+    borderWidth: '1px',
+    borderColor: 'white.300',
+    _hover: {
+      borderColor: 'white.700',
+    },
     _invalid: {
-      borderColor: 'error.lighter',
-      _focus: {
-        borderColor: 'error.lighter',
-      },
+      borderWidth: '2px',
+      borderColor: `${getColor(theme, 'error.lighter')} !important`,
     },
     _focusVisible: {
       borderWidth: '2px',
       borderColor: 'accent',
-      boxShadow: `0 0 0 1px ${getColor(theme, 'accent')}`,
-
-      _invalid: {
-        borderColor: 'error.lighter',
-      },
     },
   },
   element: {
@@ -55,5 +50,13 @@ const accent = definePartsStyle(({ theme }) => ({
 }));
 
 export const Input = defineMultiStyleConfig({
+  baseStyle: {
+    field: {
+      _placeholder: {
+        color: 'gray.400',
+      },
+      color: 'gray.900',
+    },
+  },
   variants: { primary, accent },
 });

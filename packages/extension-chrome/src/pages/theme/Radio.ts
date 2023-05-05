@@ -8,8 +8,9 @@ export const Radio = defineMultiStyleConfig({
     return {
       control: {
         color: colorScheme,
-        transition: 'border var(--chakra-transition-duration-normal)',
-        boxShadow: 'none !important',
+        transitionProperty: 'border',
+        transitionDuration: 'normal',
+
         _checked: {
           borderColor: colorScheme,
           borderWidth,
@@ -27,6 +28,11 @@ export const Radio = defineMultiStyleConfig({
               height: '100%',
             },
           },
+        },
+      },
+      container: {
+        _disabled: {
+          opacity: 0.5,
         },
       },
     };

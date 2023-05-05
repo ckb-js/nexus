@@ -11,9 +11,13 @@ import {
   Flex,
   Text,
   useToast,
+  List,
+  ListItem,
+  ListIcon,
 } from '@chakra-ui/react';
 import React, { useEffect, useState, FC } from 'react';
 import { hd } from '@ckb-lumos/lumos';
+import { CircleMarker } from '../../Components/CircleMarker';
 import FileCopyIcon from '../../Components/icons/FileCopy.svg';
 
 import { useWalletCreationStore } from '../store';
@@ -41,11 +45,11 @@ export const CreateMnemonic: FC = () => {
   }, [mnemonic, clipboard, setWalletStore]);
 
   return (
-    <>
+    <Box w="532px">
       <Heading mb="48px" lineHeight="111%" fontWeight="semibold">
         Generate Wallet Seed
       </Heading>
-      <Alert variant="left-accent" status="warning" mb="12px">
+      <Alert status="warning" mb="12px">
         <AlertIcon />
         <Box>
           <AlertTitle fontSize="md">Warning</AlertTitle>
@@ -74,16 +78,18 @@ export const CreateMnemonic: FC = () => {
         </Box>
       </Flex>
 
-      <Flex>
-        <Box mr="8px" w="20px" h="20px" backgroundColor="purple.500" borderRadius="50%" />
-        <Text w="596px" fontSize="md" mt="-2px">
-          Store this Seed in a password manager like 1Password.
-          <br />
-          <br />
-          Please write this Seed on a piece of paper and store in a secure location. If you want even stronger security,
-          write it down on multiple pieces of paper and store them in at least 2-3 different locations.
-        </Text>
-      </Flex>
-    </>
+      <List>
+        <ListItem display="flex">
+          <ListIcon as={CircleMarker} w="20px" h="20px" />
+          <Box w="100%" fontSize="16px" lineHeight="24px">
+            <Text>Store this Seed in a password manager like 1Password.</Text>
+            <Text mt="16px">
+              Please write this Seed on a piece of paper and store in a secure location. If you want even stronger
+              security, write it down on multiple pieces of paper and store them in at least 2-3 different locations.
+            </Text>
+          </Box>
+        </ListItem>
+      </List>
+    </Box>
   );
 };
